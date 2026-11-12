@@ -27,6 +27,12 @@
 - **Auditoría contra el Word:** Cotejamos el documento oficial del reto de Roams, donde se especifica literalmente: *"Un buscador por nombre de empresa o identificador fiscal"*.
 - **Solución aplicada:** Decidimos respetar estrictamente el Word para evitar introducir requisitos inventados o campos no solicitados.
 
+### 1.5. Alineación de Errores RFC 7807: Ejemplos en Inglés y Formato URI de `type`
+- **Situación inicial:** En `functional-specs.md` y `openapi.yaml`, el JSON de ejemplo para el estándar RFC 7807 contenía mensajes en español (`"detail": "El identificador fiscal..."`) y una URI ficticia (`"type": ".../validation-error"`).
+- **Tu corrección:** Me señalaste la incoherencia: *"Código y payloads de la API en inglés, documentación en español. La API real devuelve `detail` en inglés. Además, en tu filtro pones `type: .../${status}` (ej. `.../400`). Alinea el contrato en ambos ficheros para no tener contradicciones en la defensa"*.
+- **Solución aplicada:** Se actualizaron `functional-specs.md` y `openapi.yaml` con `"type": "https://errors.saas-o-matic.com/400"`, `"detail": "Invalid tax identifier 'B1234567X' for country 'ES'."` y razones en inglés para `invalidParams`, logrando una coherencia del 100% entre especificación, contrato y filtro de excepciones.
+
+
 ---
 
 ## Sección 2: Directrices de Arquitectura y Scaffolding (`02-architecture/`)

@@ -165,15 +165,15 @@ Todas las respuestas con código de estado HTTP $\ge 400$ deben seguir estrictam
 ### Formato Estándar de Error
 ```json
 {
-  "type": "https://errors.saas-o-matic.com/validation-error",
+  "type": "https://errors.saas-o-matic.com/400",
   "title": "Bad Request",
   "status": 400,
-  "detail": "El identificador fiscal 'B1234567X' no es válido para España (ES).",
+  "detail": "Invalid tax identifier 'B1234567X' for country 'ES'.",
   "instance": "/customers",
   "invalidParams": [
     {
       "name": "taxId",
-      "reason": "El carácter de control no coincide con el algoritmo de CIF."
+      "reason": "taxId must be a valid Spanish fiscal identifier (DNI/NIE/CIF)."
     }
   ],
   "timestamp": "2026-11-12T10:15:30.000Z"

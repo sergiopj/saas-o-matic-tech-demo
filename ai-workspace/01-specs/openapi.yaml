@@ -252,7 +252,7 @@ components:
       properties:
         type:
           type: string
-          example: "https://errors.saas-o-matic.com/validation-error"
+          example: "https://errors.saas-o-matic.com/400"
         title:
           type: string
           example: "Bad Request"
@@ -261,7 +261,7 @@ components:
           example: 400
         detail:
           type: string
-          example: "El identificador fiscal 'B1234567X' no es válido para España (ES)."
+          example: "Invalid tax identifier 'B1234567X' for country 'ES'."
         instance:
           type: string
           example: "/customers"
@@ -284,7 +284,7 @@ components:
           example: "taxId"
         reason:
           type: string
-          example: "El carácter de control no coincide con el algoritmo de CIF."
+          example: "taxId must be a valid Spanish fiscal identifier (DNI/NIE/CIF)."
 
   responses:
     BadRequest:
