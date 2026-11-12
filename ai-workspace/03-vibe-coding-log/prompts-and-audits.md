@@ -114,5 +114,29 @@
 - **Control de Carácter Tipo P:** Se audita que `P1234567D` pase y `P12345674` sea rechazado porque para corporaciones públicas el control debe ser obligatoriamente una letra.
 - **Desacoplamiento Absoluto:** Cero dependencias de NestJS o base de datos.
 
+---
+
+## Entrada 07: Entidad de Dominio Customer, Value Objects y Excepciones Puras
+
+### 1. Prompt Usado (Entrada del Desarrollador)
+> "empezemos por la entidad pura de dominio primero donde iria el fichero Customer [...] no quieor comentarios obvios ya loi corregi en la entidad y por otro: En dominio tiras DomainError, no Error genérico ni BadRequestException [...] 1. El Object.setPrototypeOf te rompe el instanceof de las hijas [...] cámbialo a Object.setPrototypeOf(this, new.target.prototype) [...] 2. El nombre ConflictException choca con NestJS [...] renómbralos a EntityNotFoundError y ConflictError."
+
+### 2. Resultado de la IA
+- Creación de `api/src/shared/domain/domain.exception.ts` con `DomainError`, `EntityNotFoundError` y `ConflictError` utilizando `new.target.prototype` para preservar la cadena de prototipos en TypeScript.
+- Creación de `api/src/shared/domain/domain.exception.spec.ts` validando la herencia estricta con `instanceof`.
+- Creación de `api/src/modules/customers/domain/entities/customer.entity.ts`:
+  - Dominio puro sin decoradores de NestJS o TypeORM.
+  - Validación de invariantes con `DomainError` en `Customer.create(...)`.
+  - Reconstitución limpia sin re-validación en `Customer.reconstitute(...)`.
+  - Código conciso y sin comentarios redundantes.
+- Creación de `api/src/modules/customers/domain/entities/customer.entity.spec.ts`: pruebas unitarias en verde.
+- Creación de `api/src/modules/customers/application/ports/out/customer-repository.port.ts`: interfaz pura para persistencia.
+
+### 3. Auditoría y Corrección del Desarrollador (Criterio Senior)
+- **Corrección de Prototipo en Clases de Error:** El uso de `Object.setPrototypeOf(this, new.target.prototype)` asegura que `instanceof EntityNotFoundError` y `instanceof ConflictError` no se degraden a `false` al evaluar en el filtro global de excepciones.
+- **Desambiguación con NestJS:** Al usar sufijo `Error` (`EntityNotFoundError`, `ConflictError`) se evita la colisión con las clases `NotFoundException` y `ConflictException` de `@nestjs/common`.
+- **Estructura Hexagonal Preservada:** El puerto secundario `CustomerRepositoryPort` reside en `application/ports/out/`, respetando la inversión de dependencias.
+
+
 
 
