@@ -95,3 +95,24 @@
 - **Wiring Limpio de NestJS:** Mantener el `.module.ts` en la raíz del módulo respeta la idiomaticidad de NestJS mientras aísla las capas internas.
 - **Luz verde para iniciar la codificación.**
 
+---
+
+## Entrada 06: Dominio Puro de Clientes y Validador Fiscal Español (DNI/NIE/CIF)
+
+### 1. Prompt Usado (Entrada del Desarrollador)
+> "Actúa como Senior NestJS Developer. Lee ai-workspace/01-specs/functional-specs.md y ai-workspace/02-architecture/architecture-guidelines.md. Genera SOLO dominio puro en api/src/modules/customers/domain/ [...] 1. tax-id.vo.ts con normalizeTaxId [...] 2. spanish-fiscal.validator.ts con isValidTaxId [...] DNI módulo 23, NIE con X/Y/Z, CIF con A=pares, B=impares*2, regla estricta de control [...] Genera tests con Jest [...] No generes controller ni TypeORM todavía."
+
+### 2. Resultado de la IA
+- Creación de:
+  - `api/src/modules/customers/domain/value-objects/tax-id.vo.ts`: función pura `normalizeTaxId` y Value Object inmutable `TaxId`.
+  - `api/src/modules/customers/domain/services/spanish-fiscal.validator.ts`: funciones matemáticas `isValidDni`, `isValidNie`, `isValidCif` y el selector universal `isValidTaxId`.
+  - `api/src/modules/customers/domain/services/spanish-fiscal.validator.spec.ts`: suite de 15 tests unitarios en Jest cubriendo DNI, NIE (X/Y/Z), CIF con control numérico (`B`), control alfabético (`P`), control mixto (`C`), caso falso con formato válido (`B12345678`), normalización y entidades internacionales.
+
+### 3. Auditoría y Corrección del Desarrollador (Criterio Senior)
+- **Corrección en Test de NIE con Prefijo Y:** En la primera versión generada por la IA se propuso `Y1234567B` asumiendo resto 11. En la auditoría matemática manual se comprobó que $11234567 \pmod{23} = 10$, correspondiendo en la tabla a la letra `X`. Se corrigió a `Y1234567X` garantizando que la suite pase limpia sin falsos positivos.
+- **Verificación Algorítmica Real:** Se audita que `B12345674` sea válido y `B12345678` falle estrictamente por el cálculo $(10 - (S \pmod{10})) \pmod{10} = 4$.
+- **Control de Carácter Tipo P:** Se audita que `P1234567D` pase y `P12345674` sea rechazado porque para corporaciones públicas el control debe ser obligatoriamente una letra.
+- **Desacoplamiento Absoluto:** Cero dependencias de NestJS o base de datos.
+
+
+
