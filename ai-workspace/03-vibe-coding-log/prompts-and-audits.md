@@ -90,6 +90,12 @@
 - **Tu corrección:** Me corregiste: *"No filtres el mensaje del 500, expone errores internos de SQLite al cliente. Pon 'An unexpected error occurred' y console.error. Y si HttpException es string, pon `title = exception.name`"*.
 - **Solución aplicada:** Se blindó el filtro para no fugar información interna en errores 500 hacia el cliente HTTP, registrando en los logs del servidor con `console.error`, y se corrigió el mapeo de `title`.
 
+### 3.8. Inmutabilidad de Fechas en Persistencia: Descarte de `@CreateDateColumn` en `CustomerTypeOrmEntity`
+- **El error de la IA:** La entidad TypeORM de clientes se definió inicialmente con `@CreateDateColumn({ type: 'datetime' })`.
+- **Tu corrección:** Me señalaste: *"En DDD el dominio gobierna sus invariantes y genera su propio `createdAt = new Date()`. `@CreateDateColumn` hace que TypeORM intercepte el `INSERT` y ponga su propio `NOW()`, generando dos fechas distintas entre memoria y base de datos con unos milisegundos de discrepancia. Usa `@Column('datetime')` para respetar fielmente el valor del dominio y limpia el import no utilizado"*.
+- **Solución aplicada:** Se sustituyó por `@Column('datetime')` tanto en `CustomerTypeOrmEntity` como en `SimulationTypeOrmEntity`, unificando el principio de inmutabilidad de fechas entre capas en todo el backend.
+
+
 ---
 
 ## Sección 4: Módulo de Simulaciones (`Simulations`) y Estabilización de Tests ESM
@@ -130,4 +136,40 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
 - **Situación inicial:** La primera versión de `tax-calculator.service.spec.ts` se redactó con descripciones en español (`debería devolver...`) y comentarios explicativos inline dentro del cuerpo del test.
 - **Tu intervención y auditoría:** Detectaste la incoherencia con el resto del proyecto: violaba la regla fundacional *"Código y tests en inglés, documentación en español"* acordada en la Sección 1.1, además de contener comentarios redundantes contrarios a la política de código limpio de la Sección 3.4.
 - **Solución aplicada:** Se reescribió íntegramente en inglés (`describe('TaxCalculatorService')`, `it('should...')`), se limpiaron los comentarios que duplicaban el código y se añadieron aserciones para casos límite (códigos vacíos, desconocidos, espacios en blanco y lanzamiento de `DomainError` ante valores negativos).
+
+### 4.6. Auditoría de Persistencia en `SimulationTypeOrmEntity`: Precisión Decimal, Inmutabilidad de Fechas y Supresión de `currency`
+- **Los errores de la IA en la entidad de base de datos:**
+  1. *Desnormalización artificial con `currency`:* Se incluyó una columna `@Column('varchar', { length: 3, default: 'EUR' }) currency` en SQLite.
+  2. *Tipo de dato flotante para importes monetarios:* Se definieron `monthlyBaseCost`, `taxAmount` y `totalCost` como `@Column('float')`.
+  3. *Mutación de fechas en infraestructura:* Se utilizó `@CreateDateColumn({ type: 'datetime' })` para `createdAt`.
+- **Tu corrección y dirección técnica:**
+  - *"El Word no te pide guardar la divisa, te pide guardar el cálculo en euros. Guardar 'EUR' en cada fila es guardar una constante 1000 veces sin aportar nada. Quita la columna de TypeORM y deja `currency: 'EUR'` en dominio y DTO"*.
+  - *"Usar `float` para dinero está mal: en SQLite te puede transformar 29.40 en 29.3999999... Usa `decimal` con escala y precisión fija"*.
+  - *"En DDD el dominio manda: `@CreateDateColumn` de TypeORM te pisa el `createdAt` que generó la entidad en su fábrica con su propio `NOW()`. Usa `@Column('datetime')` para respetar la fecha exacta del dominio"*.
+- **Solución aplicada:**
+  - Se eliminó la columna `currency` de la tabla SQLite; la divisa se mantiene como invariante en el Dominio y contrato en el DTO HTTP.
+  - Se refactorizaron los campos monetarios a `@Column('decimal', { precision: 10, scale: 2 })` y la tasa a `@Column('decimal', { precision: 5, scale: 4 })` (dejando `storageGb` como `float`, ya que admite métricas como 10.5 GB).
+  - Se cambió `createdAt` a `@Column('datetime')`, garantizando que la infraestructura persista con exactitud el timestamp originado en el dominio.
+
+### 4.7. Auditoría del Mapeador de Persistencia: `Simulation.reconstitute` y Síntesis de `currency`
+- **Los fallos iniciales en el Mapper:**
+  1. *Uso de `Reflect.construct` con argumentos posicionales:* Se intentó instanciar `Simulation` mediante `Reflect.construct(Simulation, [entity.id, entity.customerId, ...])`.
+  2. *Omisión de `currency` en la reconstitución:* Tras eliminar la columna `currency` de SQLite en el paso anterior, se omitió `currency` en `toDomain()`, provocando un fallo de compilación con la interfaz `SimulationProperties` (donde `currency` es un campo obligatorio).
+- **Tu corrección y dirección técnica:**
+  - *"En `Simulation`, el constructor no recibe 10 argumentos sueltos; recibe un único objeto `props: SimulationProperties`. Con `Reflect.construct` el id se pasaba como primer argumento y el resto quedaba en `undefined`. Usa el método canónico de fábrica `Simulation.reconstitute({ ... })`"*.
+  - *"Como quitamos la columna de la BD, en `toDomain` no puedes dejar `currency` vacío porque en el dominio es obligatorio. Es aquí en el mapper donde debes inyectar la constante `'EUR'` al reconstituir, manteniendo el contrato tipado estricto sin ensuciar la base de datos"*.
+  - *"El casteo `Number(...)` para los campos `decimal` es indispensable para blindar el dominio contra strings numéricos devueltos por el driver de TypeORM/SQLite"*.
+- **Solución aplicada:** Se implementó `SimulationPersistenceMapper.toDomain` llamando a `Simulation.reconstitute({ ... })` con `currency: 'EUR'` explícito y con conversión numérica defensiva `Number(...)` en todos los importes decimales.
+
+### 4.8. Driver de Persistencia SQLite y Carga Modular de Entidades (`better-sqlite3` vs `sqlite3` y `autoLoadEntities`)
+- **Los fallos de configuración de la IA:** 
+  1. *Tipo de driver inexistente en el ORM:* La IA intentó configurar TypeORM con `type: 'sqlite'`, provocando el error de compilación de TypeScript `ts(2322)`: `Type '"sqlite"' is not assignable to type 'DatabaseType'`.
+  2. *Glob de rutas frágil:* Inicialmente se configuró la carga de entidades con una ruta relativa calculada con `__dirname` (`entities: [__dirname + '/../../../../modules/**/*.typeorm-entity{.ts,.js}']`), altamente propensa a romperse al transpilar a JavaScript en `dist/`.
+- **Tu detección y corrección técnica:**
+  - Me reportaste el error en caliente en `typeorm.config.ts`. Auditamos los tipos internos de TypeORM 1.1 (`DatabaseType`) y comprobamos que TypeORM eliminó el driver legacy `'sqlite'` (paquete `sqlite3` asíncrono de callbacks) en favor de `'better-sqlite3'` (driver síncrono nativo, mucho más rápido y sin fugas de memoria).
+  - Se corrigió el tipo a `type: 'better-sqlite3'` instalando `better-sqlite3` y sus tipos.
+  - Se sustituyó el glob frágil por `autoLoadEntities: true`, haciendo que cada módulo (`CustomersModule`, `SimulationsModule`) registre sus entidades de forma verdaderamente modular mediante `TypeOrmModule.forFeature()`.
+
+
+
 

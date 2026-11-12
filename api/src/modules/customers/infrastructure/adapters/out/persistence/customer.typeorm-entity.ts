@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn, Index } from 'typeorm';
+import { Entity, Column, PrimaryColumn, Index } from 'typeorm';
 
 @Entity('customers')
 export class CustomerTypeOrmEntity {
@@ -21,7 +21,7 @@ export class CustomerTypeOrmEntity {
   @Column('varchar', { length: 50 })
   selectedPlan: string;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @Column('datetime')
   createdAt: Date;
 }
 

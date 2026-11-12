@@ -3,7 +3,7 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 export const typeOrmSqliteConfig: TypeOrmModuleOptions = {
   type: 'better-sqlite3',
   database: 'saas_o_matic.sqlite',
-  entities: [__dirname + '/../../../../modules/**/*.typeorm-entity{.ts,.js}'],
+  autoLoadEntities: true,
   synchronize: true,
   logging: false,
 };
