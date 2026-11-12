@@ -162,6 +162,30 @@
 - **Contrato OpenAPI Fiel en Detalle:** Se incorporó el DTO `CustomerDetailResponseDto` asegurando que `GET /customers/:id` devuelva el array `simulations` según la especificación del reto.
 - **Slice 1 Completado y Listo para Commit.**
 
+---
+
+## Entrada 09: Filtro Global de Excepciones IETF RFC 7807 Problem Details
+
+### 1. Prompt Usado (Entrada del Desarrollador)
+> "crea filttro de excepciones"
+
+### 2. Resultado de la IA
+- Creación de `api/src/shared/infrastructure/filters/problem-detail-exception.filter.ts`:
+  - Intercepta excepciones de dominio (`EntityNotFoundError`, `ConflictError`, `DomainError`) y HTTP (`BadRequestException`, `HttpException`).
+  - Asigna status HTTP canónico: `404 Not Found`, `409 Conflict`, `400 Bad Request`, `500 Internal Server Error`.
+  - Envía la cabecera `Content-Type: application/problem+json`.
+  - Construye el cuerpo estandarizado: `type`, `title`, `status`, `detail`, `instance`, `invalidParams` (mapeado de los errores de class-validator) y `timestamp`.
+- Registro global en `api/src/main.ts`: `app.useGlobalFilters(new ProblemDetailExceptionFilter())`.
+- Creación de `api/src/shared/infrastructure/filters/problem-detail-exception.filter.spec.ts`: pruebas unitarias de transformación de excepciones.
+
+### 3. Auditoría y Corrección del Desarrollador (Criterio Senior)
+- **Orden de Evaluación:** Se audita la jerarquía `if / else if`: primero las excepciones específicas de dominio (`EntityNotFoundError` y `ConflictError`), luego la base (`DomainError`), y finalmente las excepciones HTTP y no controladas.
+- **Seguridad en Errores 500:** Se audita que los errores no controlados no expongan detalles internos de SQLite o del runtime hacia el cliente; el filtro emite `detail: "An unexpected error occurred."` y realiza `console.error` para observabilidad interna.
+- **Consistencia en HttpException:** Cuando la respuesta de NestJS es un string simple, se asigna `title = exception.name` en lugar de dejar el título genérico.
+- **Soporte de `invalidParams`:** Se verifica que ante errores del `ValidationPipe`, el filtro desglose los campos erróneos en una lista de objetos `{ name, reason }` cumpliendo la especificación RFC 7807 y OpenAPI.
+
+
+
 
 
 
