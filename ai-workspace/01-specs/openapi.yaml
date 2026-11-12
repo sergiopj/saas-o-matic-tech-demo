@@ -1,0 +1,307 @@
+openapi: 3.0.3
+info:
+  title: SaaS-O-Matic API
+  description: API REST para simulación y presupuestado dinámico de suscripciones B2B. Contrato API-First de la prueba técnica Roams.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Servidor de Desarrollo Local
+
+paths:
+  /customers:
+    post:
+      summary: Registra un nuevo cliente corporativo
+      operationId: createCustomer
+      tags:
+        - Customers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerCreate'
+      responses:
+        '201':
+          description: Cliente creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+    get:
+      summary: Busca clientes por empresa o identificador fiscal
+      operationId: searchCustomers
+      tags:
+        - Customers
+      parameters:
+        - name: search
+          in: query
+          required: false
+          description: Término de búsqueda parcial, case-insensitive, por companyName o taxId
+          schema:
+            type: string
+            example: "Roams"
+      responses:
+        '200':
+          description: Lista de clientes encontrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Customer'
+
+  /customers/{id}:
+    get:
+      summary: Obtiene el detalle de un cliente incluyendo su historial de simulaciones
+      operationId: getCustomerById
+      tags:
+        - Customers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID del cliente
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Detalle del cliente y simulaciones ordenadas por createdAt desc
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerWithSimulations'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /simulations:
+    post:
+      summary: Calcula y registra una simulación de costes
+      operationId: createSimulation
+      tags:
+        - Simulations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationCreate'
+      responses:
+        '201':
+          description: Simulación calculada y registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Simulation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    CustomerCreate:
+      type: object
+      required:
+        - companyName
+        - taxId
+        - email
+        - country
+        - selectedPlan
+      properties:
+        companyName:
+          type: string
+          minLength: 2
+          maxLength: 120
+          example: "Roams Telecom S.L."
+        taxId:
+          type: string
+          description: "Se normaliza con trim + mayúsculas + quitar espacios y guiones antes de validar. Si country es ES se valida con algoritmo oficial DNI/NIE/CIF."
+          example: "B12345678"
+        email:
+          type: string
+          format: email
+          example: "facturacion@roams.es"
+        country:
+          type: string
+          minLength: 2
+          maxLength: 2
+          pattern: "^[A-Z]{2}$"
+          description: "Código ISO 3166-1 alpha-2, en mayúsculas. Determina las reglas fiscales."
+          example: "ES"
+        selectedPlan:
+          type: string
+          minLength: 2
+          maxLength: 50
+          description: "Texto libre. No es enum. El enunciado solo dice Plan Elegido."
+          example: "Pro"
+
+    Customer:
+      allOf:
+        - $ref: '#/components/schemas/CustomerCreate'
+        - type: object
+          required:
+            - id
+            - createdAt
+          properties:
+            id:
+              type: string
+              format: uuid
+            createdAt:
+              type: string
+              format: date-time
+
+    SimulationCreate:
+      type: object
+      required:
+        - customerId
+        - activeUsers
+        - storageGb
+        - apiCalls
+      properties:
+        customerId:
+          type: string
+          format: uuid
+        activeUsers:
+          type: integer
+          minimum: 0
+          description: "Número de usuarios activos. Tramo 1 es de 0 a 10, por eso 0 es válido."
+          example: 15
+        storageGb:
+          type: number
+          minimum: 0
+          description: "Almacenamiento en GB. Métrica histórica, coste 0 €."
+          example: 100
+        apiCalls:
+          type: integer
+          minimum: 0
+          description: "Llamadas a API estimadas. Métrica histórica, coste 0 €."
+          example: 50000
+
+    Simulation:
+      allOf:
+        - $ref: '#/components/schemas/SimulationCreate'
+        - type: object
+          required:
+            - id
+            - monthlyBaseCost
+            - taxRate
+            - taxAmount
+            - totalCost
+            - currency
+            - createdAt
+          properties:
+            id:
+              type: string
+              format: uuid
+            monthlyBaseCost:
+              type: number
+              format: float
+              description: "Coste base calculado por tramos, en EUR. Ejemplo 15 usuarios = 140.00"
+              example: 140.00
+            taxRate:
+              type: number
+              format: float
+              description: "Tipo impositivo en decimal. Ejemplo ES 0.21 para 21%."
+              example: 0.21
+            taxAmount:
+              type: number
+              format: float
+              description: "monthlyBaseCost * taxRate"
+              example: 29.40
+            totalCost:
+              type: number
+              format: float
+              description: "monthlyBaseCost + taxAmount"
+              example: 169.40
+            currency:
+              type: string
+              enum: [EUR]
+              description: "Backend siempre devuelve EUR. La conversión la hace el Frontend."
+              example: "EUR"
+            createdAt:
+              type: string
+              format: date-time
+
+    CustomerWithSimulations:
+      allOf:
+        - $ref: '#/components/schemas/Customer'
+        - type: object
+          required:
+            - simulations
+          properties:
+            simulations:
+              type: array
+              items:
+                $ref: '#/components/schemas/Simulation'
+
+    ProblemDetail:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+        - instance
+        - timestamp
+      properties:
+        type:
+          type: string
+          example: "https://errors.saas-o-matic.com/validation-error"
+        title:
+          type: string
+          example: "Bad Request"
+        status:
+          type: integer
+          example: 400
+        detail:
+          type: string
+          example: "El identificador fiscal 'B1234567X' no es válido para España (ES)."
+        instance:
+          type: string
+          example: "/customers"
+        invalidParams:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvalidParam'
+        timestamp:
+          type: string
+          format: date-time
+
+    InvalidParam:
+      type: object
+      required:
+        - name
+        - reason
+      properties:
+        name:
+          type: string
+          example: "taxId"
+        reason:
+          type: string
+          example: "El carácter de control no coincide con el algoritmo de CIF."
+
+  responses:
+    BadRequest:
+      description: Error de validación o formato (ej. CIF inválido)
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    NotFound:
+      description: Recurso no encontrado (ej. customerId no existe)
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    Conflict:
+      description: Conflicto, taxId ya existente
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
