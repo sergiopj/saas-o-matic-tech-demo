@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
-import { CustomerRepositoryPort } from '../../../../application/ports/out/customer-repository.port';
+import type { CustomerRepositoryPort } from '../../../../application/ports/out/customer-repository.port';
 import { Customer } from '../../../../domain/entities/customer.entity';
 import { normalizeTaxId } from '../../../../domain/value-objects/tax-id.vo';
 import { CustomerTypeOrmEntity } from './customer.typeorm-entity';

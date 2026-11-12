@@ -1,5 +1,5 @@
 import { GetCustomerDetailUseCase } from './get-customer-detail.use-case';
-import { CustomerRepositoryPort } from '../ports/out/customer-repository.port';
+import type { CustomerRepositoryPort } from '../ports/out/customer-repository.port';
 import { Customer } from '../../domain/entities/customer.entity';
 import { EntityNotFoundError } from '../../../../shared/domain/domain.exception';
 

@@ -1,8 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  CUSTOMER_REPOSITORY_PORT,
-  CustomerRepositoryPort,
-} from '../ports/out/customer-repository.port';
+import { CUSTOMER_REPOSITORY_PORT } from '../ports/out/customer-repository.port';
+import type { CustomerRepositoryPort } from '../ports/out/customer-repository.port';
 import { Customer } from '../../domain/entities/customer.entity';
 import { EntityNotFoundError } from '../../../../shared/domain/domain.exception';
 

@@ -1,5 +1,5 @@
 import { ListCustomersUseCase } from './list-customers.use-case';
-import { CustomerRepositoryPort } from '../ports/out/customer-repository.port';
+import type { CustomerRepositoryPort } from '../ports/out/customer-repository.port';
 import { Customer } from '../../domain/entities/customer.entity';
 
 describe('ListCustomersUseCase', () => {

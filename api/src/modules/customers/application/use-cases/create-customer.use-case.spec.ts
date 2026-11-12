@@ -1,5 +1,5 @@
 import { CreateCustomerUseCase } from './create-customer.use-case';
-import { CustomerRepositoryPort } from '../ports/out/customer-repository.port';
+import type { CustomerRepositoryPort } from '../ports/out/customer-repository.port';
 import { Customer } from '../../domain/entities/customer.entity';
 import { ConflictError, DomainError } from '../../../../shared/domain/domain.exception';
 
