@@ -137,6 +137,32 @@
 - **Desambiguación con NestJS:** Al usar sufijo `Error` (`EntityNotFoundError`, `ConflictError`) se evita la colisión con las clases `NotFoundException` y `ConflictException` de `@nestjs/common`.
 - **Estructura Hexagonal Preservada:** El puerto secundario `CustomerRepositoryPort` reside en `application/ports/out/`, respetando la inversión de dependencias.
 
+---
+
+## Entrada 08: Persistencia TypeORM + SQLite, Casos de Uso y Controladores de Customers
+
+### 1. Prompt Usado (Entrada del Desarrollador)
+> "Sí, me gusta y sí respeta SOLID y hexagonal [...] 1. No llames Service a los dos: Llámalo use-cases/create-customer.use-case.ts con clase CreateCustomerUseCase. 2. El puerto de repositorio tiene que devolver entidades de dominio Customer [...] Y sí, siguiente paso es TypeORM + SQLite, pero solo de Customers [...] Haz POST /customers entero, pruébalo con Postman, commit, y luego pasas a Simulations."
+
+### 2. Resultado de la IA
+- Creación de la capa de aplicación con casos de uso desacoplados:
+  - `create-customer.use-case.ts`
+  - `list-customers.use-case.ts`
+  - `get-customer-detail.use-case.ts`
+- Creación de la capa de infraestructura:
+  - Entidad `customer.typeorm-entity.ts` con índice único en `taxId`.
+  - Mapper `customer-persistence.mapper.ts`.
+  - Adaptador `customer-persistence.adapter.ts` implementando `CustomerRepositoryPort`.
+  - DTOs `create-customer.dto.ts`, `customer-response.dto.ts` y `customer-detail-response.dto.ts`.
+  - Controlador `customer.controller.ts` con endpoints `POST /customers`, `GET /customers?search=` y `GET /customers/:id`.
+  - Ensamblaje en `customers.module.ts` y registro en `app.module.ts`.
+
+### 3. Auditoría y Corrección del Desarrollador (Criterio Senior)
+- **Normalización en Búsqueda:** Se ajustó la búsqueda en el adaptador para que búsquedas como `b - 1234` normalicen el término a `B1234` en el `taxId` sin romper la coincidencia parcial.
+- **Contrato OpenAPI Fiel en Detalle:** Se incorporó el DTO `CustomerDetailResponseDto` asegurando que `GET /customers/:id` devuelva el array `simulations` según la especificación del reto.
+- **Slice 1 Completado y Listo para Commit.**
+
+
 
 
 
