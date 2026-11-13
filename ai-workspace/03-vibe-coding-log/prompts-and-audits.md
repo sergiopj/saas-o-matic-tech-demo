@@ -272,6 +272,14 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   2. *Concurrencia en Base de Datos (SQLite WAL Mode):* **APLICADA.** Se activó `enableWAL: true` en `typeOrmSqliteConfig` (`better-sqlite3`). SQLite opera por defecto con *Rollback Journal* (las escrituras bloquean a los lectores). Con el modo WAL (*Write-Ahead Logging*), las lecturas y las escrituras se desacoplan por completo, permitiendo que múltiples comerciales consulten clientes mientras se persisten simulaciones simultáneamente.
   3. *Multi-proceso / Clustering:* **Descartada conscientemente.** En arquitecturas con SQLite embebido, levantar un clúster de múltiples procesos Node.js compitiendo por el bloqueo del archivo local en disco es contraproducente. La arquitectura canónica recomendada es un único proceso Node.js optimizado con el driver C++ nativo de `better-sqlite3`.
 
+### 5.6. Swagger UI y Spec-Driven Development: Documentación Viva sin Deuda Técnica
+
+- **Dilema de diseño habitual:** En NestJS, la práctica común (*Code-First*) consiste en decorar controladores y DTOs con docenas de anotaciones (`@ApiProperty()`, `@ApiOperation()`, `@ApiResponse()`). Esto llena la infraestructura de ruido visual y tiende a divergir de los contratos iniciales.
+- **Enfoque Spec-Driven Development (API-First):** Nuestro contrato oficial ya fue diseñado exhaustivamente en `ai-workspace/01-specs/openapi.yaml` como **Fuente Única de Verdad** antes de escribir código.
+- **Solución implementada:** Se integró `@nestjs/swagger` y `yaml` en `mic-saas-omatic/src/main.ts` cargando dinámicamente el documento `openapi.yaml` para servir la interfaz gráfica interactiva de Swagger en **`http://localhost:3000/docs`**.
+- **Beneficio para la evaluación:** El evaluador puede interactuar con la API directamente desde su navegador con el botón *"Try it out"* sin necesidad de Postman, manteniendo el código fuente libre de decoradores de documentación.
+
+
 
 
 

@@ -192,7 +192,8 @@ Todas las respuestas con código de estado HTTP $\ge 400$ deben seguir estrictam
 
 ## 5. Endpoints de la API REST
 
-Base URL: `http://localhost:3000` (sin prefijo `/api/v1` según especificación del reto).
+Base URL: `http://localhost:3000` (sin prefijo `/api/v1` según especificación del reto).  
+Documentación interactiva (Swagger UI): `http://localhost:3000/docs`.
 
 | Método | Ruta | Descripción |
 | :--- | :--- | :--- |

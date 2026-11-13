@@ -44,3 +44,13 @@ npm run test:e2e
 # Toda la suite (Unitarios + E2E secuencial)
 npm run test:all
 ```
+
+---
+
+## 📖 Documentación Interactiva (Swagger UI)
+
+Con el servidor levantado, la interfaz gráfica interactiva de Swagger UI se encuentra disponible en:
+👉 **`http://localhost:3000/docs`**
+
+Renderiza dinámicamente el contrato API-First [`../ai-workspace/01-specs/openapi.yaml`](../ai-workspace/01-specs/openapi.yaml) manteniendo el código limpio de decoradores de documentación.
+

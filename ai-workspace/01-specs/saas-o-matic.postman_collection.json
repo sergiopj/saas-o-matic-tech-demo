@@ -1,0 +1,411 @@
+{
+  "info": {
+    "_postman_id": "a9b2c3d4-e5f6-4a1b-8c2d-3e4f5a6b7c8d",
+    "name": "SaaS-O-Matic API",
+    "description": "Colección completa de pruebas para la API REST de SaaS-O-Matic (Reto Técnico Roams).\nIncluye casos de éxito, validaciones algorítmicas, reglas fiscales (tramos + IVA) y errores estándar RFC 7807 (Problem Details).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "customerId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Customers",
+      "item": [
+        {
+          "name": "POST Create Customer (ES - Valid CIF)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set(\"customerId\", json.id);",
+                  "    pm.test(\"Status code is 201 Created\", function () {",
+                  "        pm.response.to.have.status(201);",
+                  "    });",
+                  "    pm.test(\"TaxId is normalized\", function () {",
+                  "        pm.expect(json.taxId).to.eql(\"B12345674\");",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Roams Telecom S.L.\",\n  \"taxId\": \"B-12345674\",\n  \"email\": \"billing@roams.es\",\n  \"country\": \"ES\",\n  \"selectedPlan\": \"Enterprise Scale\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers"
+              ]
+            },
+            "description": "Crea un cliente español con CIF válido (B12345674). Guarda automáticamente el ID en la variable `customerId`."
+          }
+        },
+        {
+          "name": "POST Create Customer (DE - Germany MwSt)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Berlin Cloud GmbH\",\n  \"taxId\": \"DE999888777\",\n  \"email\": \"finance@berlincloud.de\",\n  \"country\": \"DE\",\n  \"selectedPlan\": \"Growth Plan\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers"
+              ]
+            },
+            "description": "Crea un cliente corporativo alemán para probar el tipo impositivo del 19%."
+          }
+        },
+        {
+          "name": "POST Create Customer (US - No Tax)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Silicon Valley AI Inc\",\n  \"taxId\": \"12-3456789\",\n  \"email\": \"admin@sv-ai.com\",\n  \"country\": \"US\",\n  \"selectedPlan\": \"Pro Plan\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers"
+              ]
+            },
+            "description": "Crea un cliente estadounidense para probar el tipo impositivo del 0%."
+          }
+        },
+        {
+          "name": "POST Create Customer (400 - Invalid Spanish CIF)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Fraude S.L.\",\n  \"taxId\": \"B1234567X\",\n  \"email\": \"fake@fraud.es\",\n  \"country\": \"ES\",\n  \"selectedPlan\": \"Starter\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers"
+              ]
+            },
+            "description": "Verifica el rechazo estricto por algoritmo fiscal AEAT devolviendo 400 Bad Request en formato RFC 7807."
+          }
+        },
+        {
+          "name": "POST Create Customer (409 - Conflict Duplicate TaxId)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Roams Duplicado\",\n  \"taxId\": \"B 12345674\",\n  \"email\": \"dup@roams.es\",\n  \"country\": \"ES\",\n  \"selectedPlan\": \"Starter\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers"
+              ]
+            },
+            "description": "Verifica que registrar un CIF ya existente devuelve 409 Conflict en formato RFC 7807 tras normalizar."
+          }
+        },
+        {
+          "name": "GET List All Customers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/customers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers"
+              ]
+            },
+            "description": "Lista todos los clientes ordenados por fecha de creación desc."
+          }
+        },
+        {
+          "name": "GET Search Customers by Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/customers?search=roams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "roams",
+                  "description": "Búsqueda insensible a mayúsculas por empresa"
+                }
+              ]
+            },
+            "description": "Busca clientes con coincidencia parcial en nombre de empresa."
+          }
+        },
+        {
+          "name": "GET Search Customers by TaxId (with hyphens)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/customers?search=b-1234",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "b-1234",
+                  "description": "Búsqueda normalizada por CIF"
+                }
+              ]
+            },
+            "description": "Comprueba que buscar con guiones ('b-1234') encuentra el cliente guardado como 'B12345674'."
+          }
+        },
+        {
+          "name": "GET Customer by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/customers/{{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers",
+                "{{customerId}}"
+              ]
+            },
+            "description": "Obtiene la ficha del cliente creado previamente."
+          }
+        },
+        {
+          "name": "GET Customer by ID (404 - Not Found)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/customers/00000000-0000-4000-8000-000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers",
+                "00000000-0000-4000-8000-000000000000"
+              ]
+            },
+            "description": "Verifica que consultar un UUID inexistente devuelve 404 Not Found bajo el estándar RFC 7807."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Simulations",
+      "item": [
+        {
+          "name": "POST Create Simulation (ES - 15 Users - 140€ + 21% IVA)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"activeUsers\": 15,\n  \"storageGb\": 100,\n  \"apiCalls\": 50000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/simulations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulations"
+              ]
+            },
+            "description": "Caso canónico del enunciado oficial:\n15 usuarios = 10*10 + 5*8 = 140.00 € base.\nImpuesto ES (21%) = 29.40 €.\nTotal = 169.40 €."
+          }
+        },
+        {
+          "name": "POST Create Simulation (ES - 50 Users - 420€ + 21% IVA)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"activeUsers\": 50,\n  \"storageGb\": 200,\n  \"apiCalls\": 75000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/simulations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulations"
+              ]
+            },
+            "description": "50 usuarios = 10*10 + 40*8 = 420.00 € base.\nImpuesto ES (21%) = 88.20 €.\nTotal = 508.20 €."
+          }
+        },
+        {
+          "name": "POST Create Simulation (400 - Negative Users)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"activeUsers\": -5,\n  \"storageGb\": 50,\n  \"apiCalls\": 1000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/simulations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulations"
+              ]
+            },
+            "description": "Verifica que el ValidationPipe intercepta el valor negativo con 400 Bad Request y detalla el campo 'activeUsers' en invalidParams."
+          }
+        },
+        {
+          "name": "POST Create Simulation (404 - Missing Customer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"b0000000-0000-4000-8000-000000000000\",\n  \"activeUsers\": 10,\n  \"storageGb\": 20,\n  \"apiCalls\": 5000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/simulations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulations"
+              ]
+            },
+            "description": "Verifica que intentar crear una simulación para un cliente inexistente devuelve 404 Not Found RFC 7807."
+          }
+        },
+        {
+          "name": "GET Customer Simulation History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/simulations?customerId={{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulations"
+              ],
+              "query": [
+                {
+                  "key": "customerId",
+                  "value": "{{customerId}}",
+                  "description": "UUID del cliente"
+                }
+              ]
+            },
+            "description": "Recupera todas las simulaciones asociadas al cliente ordenadas cronológicamente por createdAt desc."
+          }
+        }
+      ]
+    }
+  ]
+}
