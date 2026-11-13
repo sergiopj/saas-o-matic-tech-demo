@@ -279,6 +279,145 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
 - **Solución implementada:** Se integró `@nestjs/swagger` y `yaml` en `mic-saas-omatic/src/main.ts` cargando dinámicamente el documento `openapi.yaml` para servir la interfaz gráfica interactiva de Swagger en **`http://localhost:3000/docs`**.
 - **Beneficio para la evaluación:** El evaluador puede interactuar con la API directamente desde su navegador con el botón *"Try it out"* sin necesidad de Postman, manteniendo el código fuente libre de decoradores de documentación.
 
+---
+
+## Sección 6: Frontend (Angular 22), Sistema de Diseño y Estado Reactivo
+
+### 6.1. Decisión de Arquitectura UI: Pragmatismo Senior (Angular Material + SCSS) vs. Hype (Tailwind)
+
+- **El debate inicial impulsado por la IA:** Ante la pregunta de qué librería de estilos utilizar, las propuestas iniciales cayeron en la tentación del *hype* ("lo que está de moda"), sugiriendo Tailwind CSS o PrimeNG bajo la premisa de que "Bootstrap está obsoleto y Material parece de Google". Incluso se plantearon textos con ambigüedades del tipo *"Material (o Bootstrap)"* y *"Grid (o Flexbox)"*.
+- **Tu dirección técnica de Director de Orquesta:**
+  - *"En una arquitectura profesional no se dejan 'o'; las decisiones son taxativas y se cierran."*
+  - *"Regla de oro: no metes en el proyecto nada que no puedas defender con los ojos cerrados en la entrevista. Si te preguntan por la purga de clases o directivas de Tailwind y dudas, ya has perdido."*
+  - SaaS-O-Matic es un **dashboard comercial interno**, no una landing page de marketing. Requiere componentes accesibles (a11y), sliders de precisión, selects y tablas de datos robustas y probadas desde el minuto uno.
+  - Angular Material resuelve de forma nativa la accesibilidad del slider, los formularios y los selects.
+  - El aspecto genérico de Google se elimina al 100% mediante una capa de **personalización en SCSS** con los colores corporativos de Roams (azul marino casi navy, acento verde/cian, tarjetas y botones con `border-radius: 16px`).
+- **El pitch de defensa consolidado:**
+  > *"Elegí Angular Material porque para un dashboard comercial interno necesitaba componentes robustos y un slider accesible de serie. Con una capa de SCSS lo customicé para que no pareciera una app genérica de Google sino una herramienta corporativa de Roams. Tailwind me habría obligado a implementar la accesibilidad y el comportamiento del slider desde cero, desviando el foco del reto."*
+- **Solución aplicada:** Se cerró formalmente en la Sección 3.2 de `architecture-guidelines.md` la decisión de **Angular Material + SCSS Custom + CSS Grid/Flexbox nativo**, descartando tajantemente Bootstrap.
+
+### 6.2. Estructura de Proyecto en Frontend: Organización Modular (`modules/`) y Simetría 1:1 con Backend vs. Capas Técnicas (`core/`)
+
+- **La propuesta inicial de la IA:** La IA planteó agrupar todos los modelos de datos en una carpeta global `src/app/core/models/` y todos los servicios en `src/app/core/services/` (*Technical Layering* tradicional).
+- **La intervención y corrección del Director de Orquesta (Doble control arquitectónico):**
+  1. *Freno al "cajón de sastre":* El usuario ordenó no juntarlo todo en `core/` y estructurar el Frontend por módulos funcionales autónomos.
+  2. *Simetría de Nomenclatura 1:1 (`modules/` vs `features/`):* Cuando la IA propuso usar la carpeta `features/` (convención clásica de Angular), el usuario volvió a intervenir corrigiendo la nomenclatura a **`modules/`**:
+     > *"¿Por qué features y no modules mejor? En el backend tenemos `src/modules/customers` y `src/modules/simulations`. Si en el frontend usamos `src/app/modules/...`, la simetría es total y el mapa conceptual del proyecto es exactamente el mismo."*
+- **Estructura final adoptada:**
+  1. **Módulo `modules/customers/`:** Contiene sus propios modelos (`customer.model.ts`), sus servicios (`customer-api.service.ts`), sus componentes tontos de presentación (`customer-card`, `customer-search-bar`) y sus páginas inteligentes (`customer-list`, `customer-detail`).
+  2. **Módulo `modules/simulations/`:** Contiene sus modelos (`simulation.model.ts`), servicios (`simulation-api.service.ts`), utilidades de cálculo local (`local-pricing-calculator.ts`), componentes de interacción (`simulation-slider`, `simulation-projection`) e historial (`simulation-history-list`).
+  3. **Área `core/` reducida a lo estrictamente transversal:** Solo alberga utilidades globales de aplicación, como la integración con la API pública de tipos de cambio (`currency.service.ts`, `currency.model.ts`) y la especificación de errores RFC 7807 (`problem-detail.model.ts`).
+  4. **Área `shared/`:** Para componentes visuales compartidos (la Navbar corporativa de Roams, selectores globales de divisa, banner de avisos).
+- **Valor para la evaluación técnica:** Demuestra liderazgo y visión holística de arquitectura de software. Un monorrepo con simetría de carpetas (`src/modules/...` en backend y frontend) reduce la carga cognitiva del equipo y evidencia un diseño coherente de principio a fin.
+
+### 6.3. Limpieza de Ruido IA: Código Autodocumentado (Clean Code) vs. "Paja" de Comentarios Robóticos y Auditoría de Contratos DTO
+
+- **La sugerencia inicial de la IA y la intervención del Director de Orquesta:**
+  - La IA comenzó a redactar bloques de comentarios JSDoc obvios encima de cada interfaz (`/** Payload to create a simulation */`, `/** Persisted corporate customer */`).
+  - El usuario detuvo en seco la generación de "paja" sintética:
+    > *"¿Este tipo de comentarios no parece muy robótico o por IA? Toda esa paja de comentarios sobra. El código habla por sí solo por el naming."*
+- **Principio Senior aplicado (Clean Code):**
+  - Las interfaces con nombres auto-descriptivos (`Customer`, `CustomerCreate`, `Simulation`, `SimulationCreate`) no necesitan redundancia explicativa. Añadir comentarios obvios no solo revela código artificial generado por bots sin criterio, sino que introduce deuda técnica (comentarios desactualizados en refactorizaciones).
+  - Los comentarios se restringen únicamente a intenciones arquitectónicas o de UI no evidentes, como indicar que `SimulationProjection` es un modelo en memoria exclusivo del slider que no se persiste en backend.
+- **Auditoría de correspondencia 1:1 con Backend (`mic-saas-omatic`):**
+  - A raíz de la exigencia expresa del usuario de contrastar los modelos TypeScript contra lo que realmente emite el backend, se inspeccionaron `CustomerResponseDto`, `SimulationResponseDto` y `openapi.yaml`.
+  - **Caza de bug en tiempo de diseño (Contratos Desalineados):**
+    - La IA había colado en el borrador de `Customer` un campo fantasma: `isActive: boolean;`.
+    - Al auditar `CustomerResponseDto` en `mic-saas-omatic/src/modules/customers/infrastructure/adapters/in/rest/dto/customer-response.dto.ts` y el esquema `Customer` de `openapi.yaml`, se constató que la entidad solo emite: `id`, `companyName`, `taxId`, `email`, `country`, `selectedPlan` y `createdAt`.
+    - El usuario ordenó corregir de inmediato el modelo eliminando `isActive: boolean` antes de que se propagara a los componentes y servicios del frontend:
+      ```typescript
+      export interface Customer {
+        id: string;
+        companyName: string;
+        taxId: string;
+        email: string;
+        country: string;
+        selectedPlan: string;
+        createdAt: string;
+      }
+
+      export interface CustomerCreate {
+        companyName: string;
+        taxId: string;
+        email: string;
+        country: string;
+        selectedPlan: string;
+      }
+      ```
+  - **Conclusión de la auditoría:** Se blindó la paridad tipada 1:1 estricta entre el contrato REST OpenAPI, la capa de presentación de NestJS y los modelos de Angular.
+  - **Estandarización de Errores con RFC 7807 (Frontend y Backend alineados):**
+    - El usuario validó explícitamente incluir la cabecera canónica de estándar (`// RFC 7807 Problem Details for HTTP APIs (application/problem+json)`) en `problem-detail.model.ts`.
+    - Criterio de arquitectura: Citar la especificación IETF oficial no es "ruido de IA", sino trazabilidad de estándar. Garantiza que cualquier consumidor del frontend sabe que las respuestas de fallo ($\ge 400$) recibidas desde NestJS son procesadas homogéneamente a través del contrato `ProblemDetail` (`type`, `title`, `status`, `detail`, `instance`, `invalidParams`, `timestamp`).
+
+### 6.4. Separación de Errores (`core/errors/`) vs. Divisas en `core/` y Preservación de la Simetría de Módulos
+
+- **El primer error de acoplamiento cometido por la IA:** La IA colocó en una misma carpeta genérica `core/models/` el formato estándar de errores HTTP RFC 7807 (`problem-detail.model.ts`) junto con los tipos de cambio de moneda (`currency.model.ts`), recreando un "cajón de sastre".
+- **La primera corrección del Director de Orquesta:**
+  > *"Dos cosas que no me gustan: una es juntar en el mismo directorio un modelo de errores globales con la data de las monedas de la app. Arréglalo y mételo en los MDs para que vean que te corregí."*
+- **El sobreajuste de la IA y el segundo freno del Director de Orquesta:**
+  - Ante esa indicación, la IA sobre-reaccionó e intentó crear una carpeta `modules/currency/`.
+  - El usuario detectó de inmediato el fallo arquitectónico y le paró los pies a la IA:
+    > *"No entiendo lo de currency en modules, ¿no estaba bien ya en core?"*
+  - **Dictamen del usuario:** En el backend NestJS solo existen dos módulos funcionales (`modules/customers` y `modules/simulations`). El backend opera exclusivamente en EUR; por tanto, las divisas son una responsabilidad transversal del frontend (utilizada por la Navbar global, el slider y las tablas), no un módulo de dominio del backend. Meter `currency` en `modules/` rompía la simetría 1:1 con el backend.
+- **Solución arquitectónica final consolidada:**
+  1. *Errores aislados en infraestructura:* `src/app/core/errors/problem-detail.model.ts` (contrato de red HTTP para fallos $\ge 400$).
+  2. *Divisas en el Core transversal:* `src/app/core/models/currency.model.ts` y `src/app/core/services/currency.service.ts`.
+  3. *Módulos funcionales puros (Simetría 1:1 con backend):* `src/app/modules/customers/` y `src/app/modules/simulations/`.
+- **Impacto para la evaluación:** Muestra a un Director de Orquesta con criterio firme que no se deja llevar por la inercia de la IA, manteniendo las carpetas de negocio limpias y preservando la simetría estricta de dominios entre backend y frontend.
+
+### 6.5. Patrón de Tipado para Dominios Cerrados: `as const` (Estándar de Oro en TypeScript) vs. `enum` Legacy
+
+- **Dilema técnico planteado por el usuario:**
+  > *"¿No es mejor un enum? `export type CurrencyCode = 'EUR' | 'USD' | ...;`"*
+- **Auditoría arquitectónica (Evaluación de alternativas):**
+  1. *Descarte del `enum` legacy de TypeScript:* Genera código JavaScript compilado adicional en el bundle (funciones autoejecutables IIFE), añade fricción innecesaria en plantillas de Angular (obliga a declarar `readonly CurrencyCode = CurrencyCode` en el componente para usarlo en el HTML) y requiere castings forzados ante respuestas JSON de APIs externas.
+  2. *Descarte del `type` puro aislado:* Desaparece completamente en tiempo de ejecución, impidiendo iterar sobre los valores (`.map()`) para poblar dinámicamente desplegables de Angular Material (`<mat-select>`).
+- **Decisión del Director de Orquesta:** Se adoptó el patrón **`as const` con tipo derivado**:
+  ```typescript
+  export const SUPPORTED_CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'CAD', 'JPY'] as const;
+  export type CurrencyCode = (typeof SUPPORTED_CURRENCIES)[number];
+  ```
+- **Beneficios técnicos contrastados:**
+  1. *Fuente única de verdad:* Modificar o añadir una divisa solo requiere editar el array base inmutable.
+  2. *Runtime + Tipado Estricto:* Proporciona un array en tiempo de ejecución para iterar en la UI y un tipo unión de strings exacto en tiempo de diseño.
+  3. *Cero código legacy:* Código limpio, compatible con estándares ECMAScript y con mínimo coste de bundle.
+
+### 6.6. Prevención de Deuda Técnica en Angular 22: Análisis de Deprecación (`provideAnimationsAsync` y `withFetch`)
+
+- **La inercia de la IA (Patrones legados de Angular 17/18):**
+  - La IA propuso por costumbre de versiones anteriores incluir `provideAnimationsAsync()` y `provideHttpClient(withFetch())` en `app.config.ts`.
+- **La detección y cuestionamiento del Director de Orquesta:**
+  - El usuario advirtió inmediatamente ambas advertencias del compilador TypeScript y exigió una auditoría técnica profunda:
+    > *"Ojo con esto: `provideAnimationsAsync` is deprecated (Intent to remove in v23) y `withFetch` is deprecated (FetchBackend is default). Si están deprecated, ¿son problemas de optimización, compatibilidad, seguridad o de qué? Documenta ambos fallos."*
+- **Auditoría Técnica Exhaustiva de las 2 Deprecaciones:**
+
+  | Función Deprecada | Categoría del Problema | Causa Raíz Arquitectónica | Impacto si se Mantiene |
+  | :--- | :--- | :--- | :--- |
+  | **`provideAnimationsAsync`** | **Optimización (Rendimiento/Bundle) y Compatibilidad Futura** | Históricamente, `@angular/animations` era un motor en JavaScript que parseaba DSL propio (`trigger`, `transition`) y manipulaba el DOM bloqueando el hilo principal (*Main Thread*). Los estándares web modernos han evolucionado hacia la **Web Animations API** y transiciones CSS aceleradas por hardware (GPU). Además, el equipo de Angular programó su **eliminación definitiva en Angular 23** (`Intent to remove in v23`). Angular Material 3 ya no depende de este motor. | *Penalización de rendimiento:* Sobrecarga del bundle con KB innecesarios y riesgo de *jank* (tirones visuales). *Ruptura garantizada:* Código roto al actualizar a Angular 23. |
+  | **`withFetch()`** | **Compatibilidad de Runtimes, Estandarización y Deuda Técnica** | Durante años, `HttpClient` utilizó `XMLHttpRequest` (XHR), una API heredada de los años 2000 no apta para entornos modernos sin DOM (Service Workers, Edge Runtimes como Cloudflare Workers o Vercel Edge). En Angular 17 se introdujo `withFetch()` de forma optativa. En **Angular 22**, la migración culminó: `FetchBackend` es el backend por defecto de Angular. Pasar `withFetch()` es código redundante que no aporta funcionalidad y añade ruido visual. | *Confusión en arquitectura:* Genera falsas dudas al equipo sobre qué motor HTTP se ejecuta. *Deuda de API:* Provoca warnings en build y será suprimido en próximas versiones. |
+
+- **Acción correctora ejecutada:** Se saneó `app.config.ts` eliminando ambas funciones obsoletas y dejándolo exclusivamente con los proveedores canónicos limpios de Angular 22:
+  ```typescript
+  export const appConfig: ApplicationConfig = {
+    providers: [
+      provideBrowserGlobalErrorListeners(),
+      provideRouter(routes),
+      provideHttpClient(),
+    ],
+  };
+  ```
+- **Valor para la evaluación técnica:** Demuestra criterio de nivel Staff/Principal Engineer. No solo se eliminan las advertencias superficialmente, sino que se comprende el trasfondo técnico: ahorro de bundle, descarga del hilo principal a la GPU del navegador, compatibilidad con Edge/SSR y blindaje frente a breaking changes en Angular 23.
+
+### 6.7. Higiene de Código en Estilos: Purga de Ruido y Duplicidad en `styles.scss`
+
+- **La generación sucia del CLI:** El comando `ng add @angular/material` generó 77 líneas de código en `styles.scss` repletas de comentarios didácticos redundantes para principiantes e inyectó el bloque `@include mat.theme(...)` duplicado por duplicación de inserción.
+- **La corrección del Director de Orquesta:**
+  - El usuario auditó el fichero antes de consolidar el commit de la fase:
+    > *"Ojo con todos estos comentarios y bloques repetidos."*
+- **Acción correctora ejecutada:** Se eliminó toda la "paja" de comentarios tutoriales y el bloque repetido, reduciendo el archivo de 77 a 24 líneas limpias de SCSS profesional.
+- **Valor para la evaluación:** Transmite excelencia en *Clean Code*. Un repositorio senior no incluye comentarios autogenerados de scaffolding de CLI ni bloques de estilos repetidos.
+
+
 
 
 

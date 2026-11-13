@@ -179,49 +179,62 @@ Frente a modelos como Java/Spring Boot (que requieren habilitar Virtual Threads 
 spa-saas-omatic/
 ├── src/
 │   ├── app/
-│   │   ├── core/                                            # Core transversal
+│   │   ├── core/                                            # Infraestructura transversal de la aplicación
+│   │   │   ├── errors/
+│   │   │   │   └── problem-detail.model.ts                  # Formato estándar de error RFC 7807 (application/problem+json)
 │   │   │   ├── models/
-│   │   │   │   ├── customer.model.ts
-│   │   │   │   ├── simulation.model.ts
-│   │   │   │   └── problem-detail.model.ts
-│   │   │   ├── services/
-│   │   │   │   ├── customer-api.service.ts
-│   │   │   │   ├── simulation-api.service.ts
-│   │   │   │   └── currency.service.ts                      # Integración tipo de cambio, caché y fallback
-│   │   │   └── utils/
-│   │   │       └── local-pricing-calculator.ts              # Proyección local inmediata en slider
+│   │   │   │   └── currency.model.ts                        # CurrencyCode (as const), CurrencyOption y ExchangeRateApiResponse
+│   │   │   └── services/
+│   │   │       └── currency.service.ts                      # Integración open.er-api.com, caché en memoria y Signals
 │   │   │
-│   │   ├── features/
-│   │   │   ├── customers/
+│   │   ├── modules/                                         # Módulos de dominio funcionales (Simetría 1:1 con backend)
+│   │   │   ├── customers/                                   # Bounded Context de Clientes (modules/customers)
+│   │   │   │   ├── models/
+│   │   │   │   │   └── customer.model.ts                    # Customer y CustomerCreate
+│   │   │   │   ├── services/
+│   │   │   │   │   └── customer-api.service.ts              # GET /customers, GET /customers/:id
 │   │   │   │   ├── components/
 │   │   │   │   │   ├── customer-card/                       # Dumb Component: tarjeta responsive
 │   │   │   │   │   └── customer-search-bar/                 # Dumb Component: input con debounce
 │   │   │   │   └── pages/
-│   │   │   │       ├── customer-list/                       # Smart Page: buscador y listado
+│   │   │   │       ├── customer-list/                       # Smart Page: buscador y grid de clientes
 │   │   │   │       └── customer-detail/                     # Smart Page: ficha + historial + simulación
 │   │   │   │
-│   │   │   └── simulations/
+│   │   │   └── simulations/                                 # Bounded Context de Simulaciones (modules/simulations)
+│   │   │       ├── models/
+│   │   │       │   └── simulation.model.ts                  # Simulation, SimulationCreate y SimulationProjection
+│   │   │       ├── services/
+│   │   │       │   └── simulation-api.service.ts            # POST /simulations, GET /simulations?customerId=
+│   │   │       ├── utils/
+│   │   │       │   └── local-pricing-calculator.ts          # Proyección local inmediata de tramos en slider
 │   │   │       └── components/
-│   │   │           ├── simulation-slider/                   # Dumb Component: control interactivo
+│   │   │           ├── simulation-slider/                   # Dumb Component: control interactivo accesible
 │   │   │           ├── simulation-projection/               # Dumb Component: desglose de costes en vivo
 │   │   │           └── simulation-history-list/             # Dumb Component: tabla/cards de simulaciones
 │   │   │
 │   │   ├── shared/                                          # Componentes UI reutilizables
 │   │   │   ├── components/
-│   │   │   │   ├── currency-selector/                       # Selector EUR, USD, GBP con Signal
-│   │   │   │   └── error-banner/                            # Banner renderizador de RFC 7807
+│   │   │   │   ├── navbar/                                  # Navbar corporativa estilo Roams
+│   │   │   │   ├── currency-selector/                       # Selector EUR, USD, GBP con Signal reactivo
+│   │   │   │   └── error-banner/                            # Banner visual renderizador de RFC 7807
 │   │   │   └── pipes/
-│   │   │       └── localized-currency.pipe.ts
+│   │   │       └── localized-currency.pipe.ts               # Pipe para formatear importes en divisa seleccionada
 │   │   │
-│   │   ├── app.component.ts
-│   │   ├── app.config.ts
-│   │   └── app.routes.ts
+│   │   ├── app.ts                                           # Shell de aplicación con Standalone Components
+│   │   ├── app.html                                         # Layout con Navbar + <router-outlet />
+│   │   ├── app.config.ts                                    # Configuración global (provideHttpClient, Router)
+│   │   └── app.routes.ts                                    # Configuración de rutas con Lazy Loading
 │   ├── index.html
-│   └── styles.scss                                          # CSS Grid / Flexbox responsive
+│   └── styles.scss                                          # CSS Grid / Flexbox + Custom Roams SCSS Theme
 ├── angular.json
 ├── package.json
 └── tsconfig.json
 ```
+
+### 3.2 Sistema de Diseño y UI (Angular Material + SCSS)
+- **UI Framework:** Angular Material. Se elige porque el Dashboard necesita slider, formularios, select de divisa y tarjetas con accesibilidad nativa (a11y) y componentes probados desde el minuto uno, sin tener que construir el slider desde cero.
+- **Tematización con Sass (SCSS):** Se evita el look genérico de Material con una capa de personalización en SCSS: variables de color, tipografía, bordes redondeados y sombras suaves para replicar el diseño limpio y corporativo de Roams.
+- **Layout y Responsive:** Flexbox y CSS Grid nativo + clases de Material, sin Bootstrap, para no mezclar dos sistemas de layout.
 
 ---
 
