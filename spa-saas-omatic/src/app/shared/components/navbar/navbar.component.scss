@@ -1,0 +1,121 @@
+.navbar-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+}
+
+.navbar-toolbar {
+  background-color: var(--roams-primary);
+  border-bottom: 1px solid var(--roams-border-inverse);
+  padding: 0;
+  height: 64px;
+}
+
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.brand-badge {
+  background: linear-gradient(135deg, var(--roams-accent-blue), var(--roams-accent-cyan));
+  color: var(--roams-text-inverse);
+  font-weight: 800;
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: var(--roams-radius-sm);
+  box-shadow: 0 2px 4px rgba(14, 165, 233, 0.25);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.app-title {
+  color: var(--roams-text-inverse);
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.app-subtitle {
+  color: var(--roams-text-inverse-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.lang-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--roams-bg-input-dark);
+  color: var(--roams-text-inverse);
+  border: 1px solid var(--roams-border-inverse);
+  border-radius: var(--roams-radius-sm);
+  padding: 0 12px;
+  height: 38px;
+  min-width: auto;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+
+  .lang-label {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .lang-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--roams-text-inverse-muted);
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar-container {
+    padding: 0 16px;
+  }
+
+  .app-subtitle {
+    display: none;
+  }
+
+  .navbar-actions {
+    gap: 8px;
+  }
+}

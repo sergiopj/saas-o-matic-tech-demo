@@ -1,0 +1,34 @@
+<header class="navbar-header">
+  <mat-toolbar class="navbar-toolbar">
+    <div class="navbar-container">
+      <!-- Brand & Title -->
+      <a
+        routerLink="/"
+        class="brand-link"
+        [attr.aria-label]="i18n.t('navbar.home.aria')"
+      >
+        <div class="brand-badge">ROAMS</div>
+        <div class="brand-text">
+          <span class="app-title">{{ i18n.t('navbar.title') }}</span>
+          <span class="app-subtitle">{{ i18n.t('navbar.subtitle') }}</span>
+        </div>
+      </a>
+
+      <!-- Right Actions: Currency Selector + Language Switcher -->
+      <div class="navbar-actions">
+        <app-currency-selector />
+
+        <button
+          type="button"
+          mat-button
+          class="lang-toggle-btn"
+          (click)="toggleLanguage()"
+          [attr.aria-label]="i18n.t('navbar.lang.aria')"
+        >
+          <span class="lang-label">{{ currentLanguage().toUpperCase() }}</span>
+          <mat-icon class="lang-icon">translate</mat-icon>
+        </button>
+      </div>
+    </div>
+  </mat-toolbar>
+</header>

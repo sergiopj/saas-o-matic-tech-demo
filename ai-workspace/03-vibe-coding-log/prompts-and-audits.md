@@ -5,6 +5,27 @@
 
 ---
 
+## 🎯 Marco Metodológico: Las Dos Dimensiones del Rol de Director de Orquesta
+
+Esta bitácora documenta de forma transparente la colaboración entre el desarrollador y los modelos de IA generativa. En lugar de un uso pasivo de "copiar y pegar prompts", el proceso se estructura en **dos dimensiones complementarias** que demuestran criterio senior:
+
+### 1. Dimensión Proactiva: Inputs Estratégicos y Dirección de Arquitectura
+El desarrollador establece los cimientos técnicos, directrices de diseño y reglas de negocio antes de la generación:
+- **Estrategia lingüística profesional:** Fijación de la regla "Código en inglés, documentación en español" para evitar código genérico y orientarlo al evaluador local.
+- **Rigor fiscal oficial:** Imposición de algoritmos reales de la AEAT (DNI/NIE/CIF con letras K, L, M y control mixto según RD 1065/2007) y sanitización previa de entradas.
+- **Simetría arquitectónica 1:1:** Diseño de carpetas modular simétrico entre backend NestJS y frontend Angular (`modules/customers/` y `modules/simulations/`).
+- **Developer Experience (DX) orientada a la evaluación:** Exigencia de comandos de test deterministas de una sola pasada (`--watch=false`) y plantillas de configuración (`.env.example`).
+- **Sistema de diseño corporativo:** Adopción de la identidad visual de `roams.es` con Design Tokens en `:root` propagados por cascada CSS nativa.
+- **Encapsulación Domain-Driven:** Aislamiento estricto de componentes, templates y SCSS dentro de cada módulo frente a componentes globales transversales de shell.
+
+### 2. Dimensión Reactiva: Auditoría Crítica, Code Review y Quality Gates
+El desarrollador actúa como filtro de calidad inflexible, detectando y erradicando los sesgos de inercia y *code smells* de la IA:
+- **Clean Code & Tipado:** Sustitución de bloques procedimentales `switch` por mapas declarativos $O(1)$ y fuentes únicas de verdad (`CURRENCY_METADATA`).
+- **Internacionalización Real (i18n):** Erradicación de formatos locales hardcodeados (`es-ES`) en favor del estándar W3C `Intl.NumberFormat`, y creación de `I18nService` reactivo con Signals para eliminar textos fijos en TypeScript.
+- **Higiene de código y APIs modernas:** Eliminación de advertencias de deprecación (`provideNoopAnimations`), supresión de ruido en consola (`stderr`) con espías `vi.spyOn`, y adopción estricta del *Built-in Control Flow* (`@for`, `@if`).
+
+---
+
 ## Sección 1: Definición de Especificaciones y Contratos (`01-specs/`)
 
 ### 1.1. Idioma: Código en inglés, Documentación en español
@@ -707,6 +728,60 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   2. *Auditoría de SCSS:*  
      Se verificó que los tres únicos ficheros SCSS del frontend (`styles.scss`, `currency-selector.component.scss` y `app.scss`) respetan de forma estricta el sistema de tokens `--roams-*` sin valores hexadecimales hardcodeados.
 - **Valor para la evaluación:** Proporciona una suite de pruebas determinista, rápida y con una salida de consola completamente limpia y profesional, validada contra los datos reales de la API externa.
+
+### 6.24. Principio de Encapsulación Modular: Aislamiento de Componentes por Feature (`modules/`) vs. Capa Global/Common (`shared/`)
+
+- **La directriz arquitectónica del Director de Orquesta:**
+  - Al iniciar la maquetación de componentes, el usuario estableció una frontera estricta de responsabilidades:
+    > *"Te explico: quiero que cada módulo tenga sus componentes y SCSS etc., y luego hay componentes globales o common."*
+- **Análisis de cohesión y empaquetado por dominio (Domain-Driven Frontend):**
+  - En aplicaciones medianas/grandes, un error frecuente de los modelos de IA es arrojar todos los componentes en una carpeta `shared/` o `components/` plana, rompiendo la modularidad y el principio de responsabilidad única.
+  - El criterio establecido por el usuario separa nítidamente dos tipos de componentes:
+    1. *Componentes de Dominio/Feature:* Los componentes de clientes (`customer-card`, `customer-search-bar`, vistas de listado y detalle) pertenecen y residen exclusivamente en `src/app/modules/customers/`, con sus propios templates, estilos SCSS encapsulados y specs. Lo mismo para `src/app/modules/simulations/` (`simulation-slider`, `simulation-history`).
+    2. *Componentes Globales / Transversales:* Únicamente los componentes del marco o shell de la aplicación (`navbar`, `currency-selector`, `error-banner`) que no pertenecen a un módulo de negocio particular residen en la capa compartida (`src/app/shared/components/`).
+- **Solución aplicada:** Se consolidó esta regla en `architecture-guidelines.md` (Sección 3.1) y se estructuró la Navbar como componente transversal de shell en `src/app/shared/components/navbar/`.
+- **Valor para la evaluación:** Demuestra disciplina en modularidad, alta cohesión interna y bajo acoplamiento entreBounded Contexts.
+
+### 6.25. Diagnóstico de Ciclo de Instanciación en DI de Angular: Resolución de Orden en Mocks de `HttpTestingController`
+
+- **El fallo detectado en la suite de pruebas:**
+  - Al ejecutar `npm test`, los tests de `navbar.component.spec.ts` y `app.spec.ts` fallaron con el error:
+    ```text
+    Error: Expected one matching request for criteria "Match URL: https://open.er-api.com/v6/latest/EUR", found none.
+    ```
+- **Diagnóstico técnico y causa raíz (Lazy Instantiation en Angular DI):**
+  - Los servicios en el inyector de dependencias de Angular se instancian de forma perezosa (*lazy*): no se ejecutan sus constructores hasta que una clase dependiente los inyecta de forma activa.
+  - La IA colocó la intercepción HTTP `httpTesting.expectOne(...)` en el bloque `beforeEach` **antes** de invocar `TestBed.createComponent(...)`.
+  - Dado que ni `NavbarComponent` ni `App` habían sido creados todavía en el DOM virtual de pruebas, el componente hijo `CurrencySelectorComponent` aún no existía y, por ende, `CurrencyService` todavía no se había instanciado ni había emitido su petición HTTP a la API externa.
+- **Acción correctora ejecutada:**
+  - Se reordenó la inicialización en ambos specs: primero se crea la instancia del componente (`TestBed.createComponent`), lo que desencadena la instanciación de los hijos y la emisión de la llamada HTTP; inmediatamente después se intercepta con `httpTesting.expectOne(...)` y se resuelve con `req.flush(...)`.
+- **Valor para la evaluación:** Demuestra dominio riguroso del ciclo de vida de componentes anidados y del inyector de dependencias en pruebas unitarias de Angular con `provideHttpClientTesting`.
+
+### 6.26. Diagnóstico del Servidor de Desarrollo Vite (`ng serve`) y Resolución de `ERR_CONNECTION_REFUSED`
+
+- **La incidencia reportada:**
+  - Al ejecutar `npm start` en el frontend, la terminal mostró:
+    ```text
+    Initial chunk files | Names         | Raw size
+    main.js             | main          | 34.66 kB | 
+    styles.css          | styles        |  9.85 kB | 
+                        | Initial total | 44.51 kB
+    Application bundle generation complete. [0.877 seconds] - 2026-11-13T13:58:21.053Z
+    ```
+  - Al abrir el navegador en `http://localhost:4200`, Chrome devolvió el error:
+    `ERR_CONNECTION_REFUSED (localhost refused to connect)`.
+  - El usuario indicó: *"no levanta, solo hace build... no lo abre"*.
+- **Diagnóstico técnico y causa raíz:**
+  1. *Comportamiento de `@angular/build:dev-server` con Vite:* En Angular moderno, el servidor de desarrollo se basa en Vite/esbuild. Tras compilar los bundles iniciales en memoria en menos de 1 segundo (`0.877s`), emite `Application bundle generation complete` y **permanece activo en primer plano escuchando conexiones HTTP entrantes y vigilando cambios de código (HMR)**.
+  2. *Causa de la desconexión:* Si el desarrollador pulsa `Ctrl + C` o cierra el proceso pensando que era una compilación estática por lotes (`ng build`), el servidor de desarrollo Vite finaliza de inmediato. Cuando el navegador intenta conectar a `localhost:4200`, el socket no responde y el kernel de Linux rechaza la conexión con `ECONNREFUSED`.
+  3. *Ausencia de apertura automática:* Por defecto, `ng serve` no lanza el navegador web a menos que se le añada la opción `--open`.
+- **Acción correctora ejecutada:**
+  1. Se actualizó el script `"start": "ng serve --open"` en `spa-saas-omatic/package.json` para que lance automáticamente Google Chrome en el puerto correspondiente en cuanto finaliza el bundle inicial.
+  2. Se instruyó al usuario sobre la naturaleza continua del servidor de desarrollo (debe permanecer abierto en una pestaña de terminal) y se verificó la accesibilidad en `http://localhost:4200` y `http://127.0.0.1:4200`.
+- **Valor para la evaluación:** Claridad operativa sobre la infraestructura de desarrollo moderna de Angular/Vite y resolución guiada de incidencias en entorno local.
+
+
+
 
 
 

@@ -7,6 +7,8 @@ export const TRANSLATIONS = {
     'currency.sync.synced': 'Tipos de cambio actualizados en vivo vía open.er-api.com',
     'navbar.title': 'SaaS-O-Matic',
     'navbar.subtitle': 'Optimizador Comercial',
+    'navbar.lang.aria': 'Cambiar idioma de la aplicación',
+    'navbar.home.aria': 'Ir al inicio del Dashboard',
   },
   en: {
     'currency.selector.aria': 'Select display currency',
@@ -16,6 +18,8 @@ export const TRANSLATIONS = {
     'currency.sync.synced': 'Exchange rates updated live via open.er-api.com',
     'navbar.title': 'SaaS-O-Matic',
     'navbar.subtitle': 'Commercial Optimizer',
+    'navbar.lang.aria': 'Change application language',
+    'navbar.home.aria': 'Go to Dashboard home',
   },
 } as const;
 
