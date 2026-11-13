@@ -1,6 +1,6 @@
 # 🎨 spa-saas-omatic — Frontend Dashboard
 
-Dashboard Comercial interactivo para la optimización y presupuestado dinámico de suscripciones SaaS multi-divisa, desarrollado con **Angular 22**, **Standalone Components**, **Signals reactivos** y **Angular Material** personalizado.
+Dashboard Comercial interactivo para la optimización y presupuestado dinámico de suscripciones SaaS multi-divisa, desarrollado con **Angular 22**, **Standalone Components**, **Signals reactivos**, **Built-in Control Flow (`@if`, `@for`)** y **Angular Material** personalizado.
 
 ---
 
@@ -8,10 +8,11 @@ Dashboard Comercial interactivo para la optimización y presupuestado dinámico 
 
 El frontend sigue una arquitectura orientada al dominio (**Feature-Driven**) con simetría 1:1 respecto al backend NestJS:
 
-- **`src/app/core/`**: Infraestructura transversal de la aplicación.
+- **`src/app/core/`**: Infraestructura transversal de la aplicación:
   - `errors/`: Formato estándar de errores **RFC 7807** (`problem-detail.model.ts`) e interceptor funcional global (`error.interceptor.ts`).
+  - `i18n/`: Catálogo de traducciones bilingüe (español/inglés) fuertemente tipado (`translations.ts`).
   - `models/`: Modelo de divisas (`currency.model.ts`) utilizando el patrón **`as const`** de TypeScript moderno.
-  - `services/`: Servicio reactivo de tipos de cambio (`currency.service.ts`) con caché en memoria y resiliencia de red.
+  - `services/`: Tipos de cambio (`currency.service.ts`) y servicio de localización reactiva con Signals (`i18n.service.ts`).
 - **`src/app/modules/`**: Módulos funcionales de negocio (simetría estricta con `mic-saas-omatic`):
   - `customers/`: Búsqueda, listado en tarjetas y detalle de clientes (`customer-api.service.ts`).
   - `simulations/`: Historial, cálculo de tramos a 60 FPS en memoria (`local-pricing-calculator.ts`) y persistencia bajo demanda (`simulation-api.service.ts`).

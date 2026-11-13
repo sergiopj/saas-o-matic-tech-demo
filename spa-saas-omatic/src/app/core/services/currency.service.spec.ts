@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { vi } from 'vitest';
 import { CurrencyService } from './currency.service';
 import { ExchangeRateApiResponse } from '../models/currency.model';
 import { environment } from '../../../environments/environment';
@@ -61,6 +62,7 @@ describe('CurrencyService', () => {
   });
 
   it('should retain fallback rates and set error signal on network failure', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const req = httpTesting.expectOne(environment.currencyApiUrl);
     req.error(new ProgressEvent('error'), { status: 0, statusText: 'Network Error' });
 
@@ -68,6 +70,8 @@ describe('CurrencyService', () => {
     expect(service.rates()['USD']).toBeGreaterThan(0);
     expect(service.error()).toBeTruthy();
     expect(service.loading()).toBe(false);
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 
   it('should update selected currency and recompute rate dynamically', () => {

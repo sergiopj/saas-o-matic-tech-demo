@@ -1,0 +1,37 @@
+<div class="currency-selector-wrapper">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="currency-field">
+    <mat-select
+      [value]="selectedCurrency()"
+      (valueChange)="onCurrencyChange($event)"
+      [attr.aria-label]="i18n.t('currency.selector.aria')"
+    >
+      @for (option of options(); track option.code) {
+        <mat-option [value]="option.code">
+          <span class="currency-option-content">
+            <strong class="currency-code">{{ option.code }}</strong>
+            <span class="currency-symbol">({{ option.symbol }})</span>
+          </span>
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <span
+    class="status-indicator"
+    [class.loading]="loading()"
+    [class.error]="error()"
+    [class.synced]="!loading() && !error()"
+    [matTooltip]="statusTooltip()"
+    [attr.aria-label]="i18n.t('currency.status.aria')"
+  >
+    <mat-icon class="status-icon">
+      @if (loading()) {
+        sync
+      } @else if (error()) {
+        cloud_off
+      } @else {
+        cloud_done
+      }
+    </mat-icon>
+  </span>
+</div>

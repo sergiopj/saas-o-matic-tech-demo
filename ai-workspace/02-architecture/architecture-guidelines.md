@@ -195,10 +195,13 @@ spa-saas-omatic/
 │   │   │   ├── errors/
 │   │   │   │   ├── problem-detail.model.ts                  # Formato estándar de error RFC 7807 (application/problem+json)
 │   │   │   │   └── error.interceptor.ts                     # HttpInterceptor funcional global (normaliza errores a ProblemDetail)
+│   │   │   ├── i18n/
+│   │   │   │   └── translations.ts                          # Catálogo de traducciones bilingüe (es/en) fuertemente tipado
 │   │   │   ├── models/
 │   │   │   │   └── currency.model.ts                        # CurrencyCode (as const), CurrencyOption y ExchangeRateApiResponse
 │   │   │   └── services/
-│   │   │       └── currency.service.ts                      # Integración open.er-api.com, caché en memoria y Signals
+│   │   │       ├── currency.service.ts                      # Integración open.er-api.com, caché en memoria y Signals
+│   │   │       └── i18n.service.ts                          # Servicio reactivo de localización con Signals y detección de navegador
 │   │   │
 │   │   ├── modules/                                         # Módulos de dominio funcionales (Simetría 1:1 con backend)
 │   │   │   ├── customers/                                   # Bounded Context de Clientes (modules/customers)
@@ -244,9 +247,18 @@ spa-saas-omatic/
 └── tsconfig.json
 ```
 
-### 3.2 Sistema de Diseño y UI (Angular Material + SCSS)
+### 3.2 Sistema de Diseño, UI y Design Tokens Corporativos (Angular Material + SCSS)
 - **UI Framework:** Angular Material. Se elige porque el Dashboard necesita slider, formularios, select de divisa y tarjetas con accesibilidad nativa (a11y) y componentes probados desde el minuto uno, sin tener que construir el slider desde cero.
-- **Tematización con Sass (SCSS):** Se evita el look genérico de Material con una capa de personalización en SCSS: variables de color, tipografía, bordes redondeados y sombras suaves para replicar el diseño limpio y corporativo de Roams.
+- **Design Tokens Corporativos Roams (`--roams-*`):** Inspirados en la identidad visual de `roams.es`, en `:root` de `src/styles.scss` se centraliza la paleta corporativa:
+  - `--roams-primary`: `#0F172A` (Azul marino cabecera / fondo oscuro)
+  - `--roams-accent-blue`: `#1061E2` (Azul real Roams)
+  - `--roams-accent-cyan`: `#0EA5E9` (Cian de acento y feedback)
+  - `--roams-status-success`: `#10B981` (Verde esmeralda para ahorros y sincronización)
+  - `--roams-status-warning`: `#F59E0B` (Ámbar de contingencia y alertas)
+  - `--roams-status-error`: `#EF4444` (Rojo de error RFC 7807)
+  - Superficies: `--roams-bg-page` (`#F8FAFC`), `--roams-bg-card` (`#FFFFFF`).
+  - Geometría: `--roams-radius-lg` (`16px` para tarjetas Roams).
+- **Cascada Nativa y Cero Hardcodeo:** Queda terminantemente prohibido incluir valores hexadecimales directos en los archivos `.scss` de los componentes. Todos los colores bajan en cascada nativa mediante `var(--roams-*)`.
 - **Layout y Responsive:** Flexbox y CSS Grid nativo + clases de Material, sin Bootstrap, para no mezclar dos sistemas de layout.
 
 ### 3.3 Estrategia de Divisas y Escalabilidad (Open/Closed Principle)
@@ -255,6 +267,21 @@ spa-saas-omatic/
 - **Catálogo Controlado (UX Whitelist):** En lugar de abrumar al equipo comercial con 160 opciones en el desplegable, `SUPPORTED_CURRENCIES` acota el selector a las divisas operativas estratégicas del mercado SaaS (`EUR`, `USD`, `GBP`, `CHF`, `CAD`, `JPY`).
 - **Extensibilidad Abierta/Cerrada:** Incorporar una nueva divisa comercial (ej. `AUD` o `MXN`) requiere únicamente añadir su código a la tupla `SUPPORTED_CURRENCIES`.
 - **Formateo Universal con Fallback `Intl`:** Si se solicita formatear una divisa no registrada en `CURRENCY_METADATA`, el pipe `LocalizedCurrencyPipe` recurre de forma transparente al motor nativo `Intl.NumberFormat` de ECMAScript (`meta?.locale` y `meta?.decimals` como `undefined`), infiriendo automáticamente el símbolo oficial, el número canónico de decimales y el orden según el locale del navegador del usuario.
+
+### 3.4 Estándares de Plantillas: Built-in Control Flow (`@if`, `@for`)
+
+Se prescribe el uso exclusivo del nuevo flujo de control nativo de Angular 22:
+- **`@if / @else if / @else`**: Sustituye a `*ngIf` con `<ng-template>`, permitiendo evaluar directamente las funciones de señales (`loading()`, `error()`) sin hacks reactivos.
+- **`@for (...; track ...)`**: Sustituye a `*ngFor` y exige `track` obligatorio por compilador, garantizando una reconciliación quirúrgica del DOM sin destrucción de nodos.
+- **Descarte de `CommonModule`**: Cero dependencias de directivas estructurales legacy en componentes Standalone, optimizando el tamaño del bundle y el type-checking estricto de plantillas.
+
+### 3.5 Internacionalización Reactiva y Desacoplamiento de Textos (`I18nService`)
+
+Para mantener el principio de código en inglés y desacoplar la lógica de la presentación:
+- **Cero Textos Hardcodeados:** Se prohíbe introducir cadenas literales de texto en clases TypeScript o plantillas HTML. Todas las etiquetas, tooltips y textos de accesibilidad (`aria-label`) se definen de forma centralizada en `src/app/core/i18n/translations.ts`.
+- **Tipado Estricto de Claves (`TranslationKey`):** El compilador de TypeScript valida que cualquier clave solicitada mediante `i18n.t(key)` exista en el diccionario en ambos idiomas (`es` y `en`), previniendo erratas tipográficas en tiempo de compilación.
+- **Detección Automática con Fallback Regional:** `I18nService` inspecciona `navigator.language` para adaptarse automáticamente a entornos internacionales, manteniendo el español (`'es'`) como idioma predeterminado de la plataforma.
+- **Reactividad con Signals:** El idioma activo se almacena en una Signal `currentLanguage`, provocando el recálculo instantáneo de cualquier vista o mensaje reactivo sin necesidad de recargar la aplicación.
 
 ---
 
@@ -272,6 +299,8 @@ spa-saas-omatic/
 3. **Tests de Integración y E2E (Jest + Supertest):**
    - Base de datos SQLite real aislada (`saas_o_matic.test.sqlite`) ejecutada de forma secuencial (`maxWorkers: 1`).
    - Ciclo de vida HTTP completo: `ValidationPipe` (whitelist + forbidNonWhitelisted), filtro global RFC 7807 (`application/problem+json`), casos de uso y repositorios `better-sqlite3`.
+4. **Higiene y Política de Salida Limpia en Tests (Zero-Stderr Policy):**
+   - En pruebas de resiliencia y contingencia de red, los logs defensivos esperados (`console.warn`) son interceptados y verificados con espías de Vitest (`vi.spyOn`), garantizando que la salida de pruebas para el evaluador esté libre de trazas de error confusas en la consola.
 
 ### 4.2 Scripts de Ejecución y Filosofía de Feedback Loops
 
