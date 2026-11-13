@@ -16,6 +16,23 @@ Para ver las directrices completas, consulta [`../ai-workspace/02-architecture/a
 
 ---
 
+## ⚙️ Variables de Entorno y Configuración (`.env`)
+
+El backend soporta carga nativa de variables de entorno (Node.js 20.6+ `process.loadEnvFile`). Se proporciona una plantilla [`.env.example`](.env.example) versionada:
+
+```bash
+# Copiar plantilla para entorno local si se desea personalizar
+cp .env.example .env
+```
+
+| Variable | Tipo | Por Defecto | Descripción |
+| :--- | :--- | :--- | :--- |
+| `PORT` | Number | `3000` | Puerto HTTP donde escucha el microservicio NestJS. |
+| `DATABASE_NAME` | String | `saas_o_matic.sqlite` | Nombre del fichero de base de datos SQLite en disco. |
+| `NODE_ENV` | String | `development` | Modo de ejecución de la aplicación. |
+
+---
+
 ## ⚡ Comandos Rápidos
 
 ```bash

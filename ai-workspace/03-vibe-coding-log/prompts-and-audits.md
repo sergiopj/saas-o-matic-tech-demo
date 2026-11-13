@@ -417,6 +417,197 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
 - **Acción correctora ejecutada:** Se eliminó toda la "paja" de comentarios tutoriales y el bloque repetido, reduciendo el archivo de 77 a 24 líneas limpias de SCSS profesional.
 - **Valor para la evaluación:** Transmite excelencia en *Clean Code*. Un repositorio senior no incluye comentarios autogenerados de scaffolding de CLI ni bloques de estilos repetidos.
 
+### 6.8. Resiliencia de Red y Adopción Canónica de `about:blank` en RFC 7807 (Frontend y Especificaciones)
+
+- **La observación crítica del Director de Orquesta:**
+  - Al revisar el método de captura de errores `handleError` en `CustomerApiService`, el usuario cuestionó una URI sintética introducida por la IA:
+    > *"No entiendo el type este, explícamelo: `https://errors.saas-o-matic.com/unknown`. Cámbialo a `about:blank` y mételo en los MDs correspondientes tanto si impacta al front como a la API."*
+- **Auditoría del Estándar IETF RFC 7807:**
+  - El campo `type` de un Problem Detail debe ser una URI que identifique la categoría de error.
+  - La IA había introducido una URL inventada (`.../unknown`) para el caso de contingencia (cuando la llamada falla a nivel de red antes de llegar a NestJS: servidor caído, desconexión de red, timeout o status 0).
+  - La Sección 4.2.1 del estándar RFC 7807 prescribe textualmente: *«When no specific URI documentation exists, its value is assumed to be "about:blank"»*.
+- **Acción correctora ejecutada:**
+  1. *En Frontend (`customer-api.service.ts`):* Se sustituyó la URI ficticia por la canónica `type: 'about:blank'` para el objeto defensivo de fallback de red.
+  2. *En Especificaciones Funcionales (`functional-specs.md`, Sección 4):* Se formalizó la regla: los errores originados en backend emiten su URI con código de estado (`https://errors.saas-o-matic.com/${status}`), mientras que los fallos de conectividad o sin documentación externa adoptan canónicamente `'about:blank'`.
+- **Valor para la evaluación:** Muestra rigor en estándares internacionales (IETF), eliminando URIs ficticias o arbitrarias y alineando la resiliencia de red de cliente con la especificación de la API.
+
+### 6.9. Anti-patrón de URLs Hardcodeadas vs. Centralización en Entornos (`environments/environment.ts`)
+
+- **El fallo detectado por el Director de Orquesta:**
+  - Al revisar los servicios HTTP, el usuario detectó que la IA había incrustado URLs a fuego en la clase (`private readonly baseUrl = 'http://localhost:3000/customers';`).
+  - Intervención inmediata:
+    > *"¿Esto no se mete en configuraciones globales, envs o algo así?"*
+- **Análisis arquitectónico (12-Factor App & Configuración desacoplada):**
+  - Hardcodear URLs locales (`localhost:3000`) en los servicios es un *code smell* que impide la portabilidad: cuando la SPA se despliegue en Docker, Nginx o producción, obligaría a buscar y reemplazar cadenas dispersas por todo el código fuente.
+  - La práctica estándar de la industria es centralizar las variables de entorno para que el origen de la API sea configurable sin alterar la lógica de negocio.
+- **Solución técnica implementada:**
+  - Se creó `spa-saas-omatic/src/environments/environment.ts`:
+    ```typescript
+    export const environment = {
+      production: false,
+      apiBaseUrl: 'http://localhost:3000',
+      currencyApiUrl: 'https://open.er-api.com/v6/latest/EUR',
+    };
+    ```
+  - Se inyectó `environment.apiBaseUrl` en `CustomerApiService` y `SimulationApiService`, y `environment.currencyApiUrl` en `CurrencyService`.
+- **Valor para la evaluación:** Garantiza preparación para entornos multi-contenedor (Docker Compose) y despliegues productivos limpios sin deuda técnica.
+
+### 6.10. Principio DRY y Arquitectura Enterprise de Errores: Desacoplamiento de Servicios mediante `errorInterceptor`
+
+- **La objeción crítica del Director de Orquesta:**
+  - Al revisar los métodos privados de error en los servicios HTTP, el usuario frenó la duplicación de código:
+    > *"Esto me parece horrible: 'An unexpected error occurred while communicating with the server.'. Si tenemos en el proyecto con el tiempo 50 servicios http se repetirá 50 veces el mismo texto. Centralízalo en un HttpInterceptor."*
+- **Análisis arquitectónico (Violación de DRY y Acoplamiento de Transporte):**
+  - Cada servicio de dominio (`CustomerApiService`, `SimulationApiService`) estaba asumiendo la responsabilidad de parsear `HttpErrorResponse`, verificar si existía el cuerpo de error y construir objetos sintéticos de contingencia con textos literales idénticos.
+  - En una arquitectura enterprise con decenas de servicios, este antipatrón multiplica la deuda técnica: un cambio de texto o de política de resiliencia exigiría modificar 50 archivos.
+- **Solución implementada (Arquitectura desacoplada con HttpInterceptor):**
+  1. *Creación de `errorInterceptor.ts` funcional:* Ubicado en `src/app/core/errors/error.interceptor.ts`. Intercepta globalmente cualquier fallo HTTP. Si la respuesta contiene el JSON RFC 7807 de NestJS, lo propaga directamente tipado; si es una desconexión de red (status 0) o un error sin cuerpo, genera de forma centralizada el `ProblemDetail` normalizado con `type: 'about:blank'`.
+  2. *Registro global en `app.config.ts`:* `provideHttpClient(withInterceptors([errorInterceptor]))`.
+  3. *Saneamiento radical de los servicios:* Se eliminó el método `handleError` y todo texto duplicado de los servicios. Ahora los servicios simplemente reciben el `ProblemDetail` ya normalizado por el interceptor y actualizan su Signal `error.set(problem)`.
+  4. *Suite de pruebas del interceptor:* Se creó `src/app/core/errors/error.interceptor.spec.ts` para verificar la normalización de red y la propagación de RFC 7807.
+- **Valor para la evaluación:** Refleja madurez técnica sobresaliente. Se pasa de servicios sobrecargados con lógica repetitiva de transporte a una arquitectura limpia, declarativa y escalable a cientos de endpoints.
+
+### 6.11. Adaptación a Vitest en Angular 22: Corrección de `fail()` a `throw new Error()`
+
+- **El error de inercia de la IA:** La IA escribió los tests unitarios utilizando la función global `fail('should have failed...')`, asumiendo el entorno tradicional de Jasmine / Karma.
+- **Detección del error en tiempo de compilación:**
+  - Al ejecutar `npm test`, el compilador arrojó `TS2304: Cannot find name 'fail'`.
+  - Causa raíz: Angular 22 ha migrado su ejecutor de pruebas predeterminado a **Vitest**, donde `fail()` no es un identificador global inyectado.
+- **Acción correctora ejecutada:** Se sustituyó en todos los specs (`customer-api.service.spec.ts`, `simulation-api.service.spec.ts`, `error.interceptor.spec.ts`) por el estándar universal ECMAScript:
+  ```typescript
+  next: () => {
+    throw new Error('should have failed with 400');
+  }
+  ```
+- **Valor para la evaluación:** Demuestra capacidad para diagnosticar discrepancias de tooling entre Jasmine y Vitest en Angular 22, asegurando tests limpios y portables.
+
+### 6.12. Experiencia de Evaluación (DX) y Configuración de Scripts de Test: Pase Único (`--watch=false`) vs. Modo Interactivo (`test:watch`)
+
+- **La fricción detectada por el Director de Orquesta:**
+  - Al ejecutar `npm test`, el proceso se quedaba colgado de forma indefinida tras la compilación de bundles (`Application bundle generation complete`), a la espera de interacciones manuales por estar en modo *watch*.
+  - El usuario frenó la ejecución y cuestionó la usabilidad:
+    > *"No veo que esto avance, se quedó así... ¿esto se explica en el README del front? ¿Se toca algo en el script del package también?"*
+- **Análisis de Developer Experience (DX) para Evaluación y CI/CD:**
+  - En un proceso de selección o pipeline automatizado de integración continua, un comando `npm test` bloqueante/interactivo es un fallo de usabilidad grave: el evaluador espera que el comando ejecute los tests, devuelva el informe en verde con código de salida 0 y libere la consola limpiamente.
+- **Acción correctora ejecutada:**
+  1. *Ajuste en `spa-saas-omatic/package.json`:*
+     - `"test": "ng test --watch=false"` (pase único predeterminado, determinista y limpio).
+     - `"test:watch": "ng test"` (modo desarrollo interactivo con hot-reload para desarrollo continuo).
+  2. *Reescritura de `spa-saas-omatic/README.md`:*
+     - Se sustituyó el README genérico en inglés por documentación en español explicando la arquitectura, los componentes y los dos modos de ejecución de pruebas.
+  3. *Sincronización de `README.md` (raíz) y `architecture-guidelines.md` (Sección 4.2):*
+     - Se incorporó la tabla de comandos de pruebas del frontend junto a la del backend.
+- **Valor para la evaluación:** Transmite consideración y profesionalidad hacia el evaluador (*Evaluator-First Design*), garantizando cero fricciones en la verificación del proyecto.
+
+### 6.13. Resiliencia Tipográfica: Pila de Fuentes del Sistema (*System Font Fallback Stack*)
+
+- **La observación del Director de Orquesta:**
+  - Al revisar `styles.scss`, el usuario reparó en la declaración de fuentes:
+    > *"¿Por defecto se usa Roboto? Si falla esa fuente, ¿se ponen alternativas?"*
+- **Análisis de resiliencia frontend:**
+  - Angular Material utiliza `Roboto` por ser el estándar histórico de Material Design.
+  - Sin embargo, confiar ciegamente en una fuente externa de Google Fonts es un fallo de diseño: si la aplicación se ejecuta en una red corporativa sin acceso exterior, en modo offline, en un contenedor Docker aislado o si el CDN de Google Fonts tarda en responder, el navegador salta a la fuente genérica del sistema operativo (que en muchos navegadores es una fuente con serifa anticuada como Times New Roman).
+- **Acción correctora ejecutada:**
+  1. *Pila de fuentes robusta en `styles.scss`:*  
+     Se configuró un *system font fallback stack* moderno:  
+     `font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;`  
+     Garantiza tipografías sans-serif nítidas y nativas según el sistema operativo: San Francisco en Apple (`-apple-system`), Segoe UI en Windows y sans-serif limpio en Linux/Android.
+  2. *Higiene en `index.html`:*  
+     Se eliminaron los enlaces redundantes duplicados que `ng add` había introducido dos veces.
+- **Valor para la evaluación:** Evita degradación visual en entornos sin conexión y demuestra buenas prácticas de CSS defensivo.
+
+### 6.14. Code Review del Pipe de Divisas: Detección de Code Smell (`switch` vs. Diccionario `const`) y Fuente Única de Verdad
+
+- **Las observaciones del Director de Orquesta:**
+  1. **Error de resolución de módulos:**
+     > *"Cannot find module '../../core/services/currency.service' or its corresponding type declarations.ts(2307)"*
+  2. **Refactorización a Clean Code:**
+     > *"¿Y por otro esto está bien? `private getSymbol(code: CurrencyCode): string { switch(code) { case 'EUR': ... } }` ¿no se llevaría a un const map o me estoy liando yo?"*
+- **Análisis técnico y pedagógico:**
+  - **Diagnóstico del error de import:** El fichero se había guardado accidentalmente en una ruta recursiva duplicada (`src/app/shared/pipes/spa-saas-omatic/src/app/shared/pipes/localized-currency.pipe.ts`). Dos niveles hacia arriba (`../../`) resolvían a una ruta inexistente. En la ubicación canónica (`src/app/shared/pipes/localized-currency.pipe.ts`), la resolución relativa es directa e inmediata.
+  - **Validación del criterio de diseño:** El usuario tenía toda la razón. Un bloque imperativo `switch` con 8 ramas para mapear códigos de moneda a símbolos es un *code smell* clásico (verboso, propenso a bifurcaciones innecesarias y viola el principio Abierto/Cerrado).
+  - **Optimización arquitectónica (DRY & Single Source of Truth):** En lugar de crear un diccionario aislado sólo para el Pipe, se centralizó `CURRENCY_METADATA` en `currency.model.ts` exportándolo como constante tipada `Record<CurrencyCode, { label: string; symbol: string }>`.
+  - De esta forma, tanto `CurrencyService` (para reactividad y opciones de selección) como `LocalizedCurrencyPipe` (para formateo visual O(1) con fallback `CURRENCY_METADATA[code]?.symbol ?? code`) comparten la misma fuente canónica de datos, eliminando 15 líneas de código repetitivo.
+- **Valor para la evaluación:** Demuestra capacidad de code review activo, erradicación de antipatrones procedimentales en Angular y aplicación estricta de DRY (*Don't Repeat Yourself*).
+
+### 6.15. Internacionalización Real (i18n): Formateo Nativo con `Intl.NumberFormat` vs. Hardcode de `'es-ES'`
+
+- **La observación crítica del Director de Orquesta:**
+  - Al inspeccionar la implementación del pipe de conversión monetaria, el usuario detectó una asunción no documentada en el formateo numérico:
+    > *"¿Por qué damos por hecho que el idioma es es? `const formattedAmount = converted.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });`"*
+- **Análisis de deficiencias técnicas de hardcodear `'es-ES'`:**
+  1. *Incoherencia cultural en divisas anglosajonas:* En países de habla inglesa, el símbolo monetario precede al importe y la puntuación es inversa a la europea (coma para millares y punto para decimales). Forzar `'es-ES'` renderizaba `1.250,50 $` o `1.250,50 £`, lo cual resulta extraño e informal en entornos B2B internacionales frente a `$1,250.50` y `£1,250.50`.
+  2. *Error contable en divisas sin decimales (Yen Japonés - JPY):* El Yen no fracciona su moneda en céntimos ni decimales. Forzar `minimumFractionDigits: 2` producía representaciones ficticias como `¥162.500,00` en lugar de la cifra contable real `¥162,500`.
+- **Acción correctora y solución arquitectónica aplicada:**
+  1. *Enriquecimiento de metadatos en `currency.model.ts`:*  
+     Se amplió la interfaz `CurrencyMetadata` para asociar a cada divisa su `locale` y precisión decimal (`decimals`) canónicos:
+     ```typescript
+     export const CURRENCY_METADATA: Record<CurrencyCode, CurrencyMetadata> = {
+       EUR: { label: 'Euro', symbol: '€', locale: 'es-ES', decimals: 2 },
+       USD: { label: 'US Dollar', symbol: '$', locale: 'en-US', decimals: 2 },
+       GBP: { label: 'British Pound', symbol: '£', locale: 'en-GB', decimals: 2 },
+       CHF: { label: 'Swiss Franc', symbol: 'CHF', locale: 'de-CH', decimals: 2 },
+       CAD: { label: 'Canadian Dollar', symbol: 'CA$', locale: 'en-CA', decimals: 2 },
+       JPY: { label: 'Japanese Yen', symbol: '¥', locale: 'ja-JP', decimals: 0 },
+     };
+     ```
+  2. *Refactorización de `LocalizedCurrencyPipe` con `Intl.NumberFormat`:*  
+     Se eliminaron las concatenaciones manuales `${formattedAmount} ${symbol}` y se delegó en la API estándar W3C/ECMAScript:
+     ```typescript
+     return new Intl.NumberFormat(meta.locale, {
+       style: 'currency',
+       currency,
+       minimumFractionDigits: meta.decimals,
+       maximumFractionDigits: meta.decimals,
+     }).format(converted);
+     ```
+  3. *Verificación automatizada en `localized-currency.pipe.spec.ts`:*  
+     Se añadieron casos de prueba específicos comprobando que `EUR` formatea con `1.250,50 €`, `USD` con `$108.00`, `GBP` con `£85.00` y `JPY` con `¥16,250` (sin punto ni decimales).
+- **Valor para la evaluación:** Transforma una utilidad cosmética básica en un motor de internacionalización riguroso y profesional, alineado con las mejores prácticas globales de SaaS multi-divisa.
+
+### 6.16. Omisión de Variables de Entorno (`.env` / `.env.example`) y Configuración Multi-entorno: El Director de Orquesta Detecta la Inercia de la IA
+
+- **La observación crítica del Director de Orquesta:**
+  - En una revisión global de la configuración del proyecto, el usuario frenó el flujo y lanzó una pregunta directa sobre la gestión de entornos:
+    > *"Venga una cosilla: ¿tanto en API como en Front estamos usando `.env`? [...] Crea los `.env` que necesites y eso hay que reflejarlo en los READMEs además de en los MDs correspondientes, que esto no lo vio venir el desarrollo con IA."*
+- **Análisis de la omisión y riesgos operacionales (12-Factor App):**
+  1. *El sesgo de inercia de la IA:* La IA asumió que, al tener expresiones como `process.env.PORT ?? 3000` y `process.env.DATABASE_NAME || 'saas_o_matic.sqlite'`, la configuración ya estaba resuelta, omitiendo por completo materializar los archivos físicos `.env` y `.env.example`.
+  2. *Impacto en la experiencia del evaluador / DevOps:* Un evaluador o ingeniero que clona el repositorio sin un `.env.example` se ve forzado a explorar el código fuente TypeScript para descubrir qué variables se leen, aumentando la fricción de puesta en marcha.
+  3. *Diferencias arquitectónicas cliente vs. servidor:* En el backend NestJS (Node.js), las variables de entorno se leen del sistema; pero en el frontend Angular (SPA compilada para el navegador), no existe `process.env`, requiriendo desacoplamiento mediante `src/environments/` (`environment.ts` vs `environment.development.ts` con reemplazo en tiempo de compilación).
+- **Acción correctora integral ejecutada:**
+  1. *Backend (`mic-saas-omatic`):*
+     - Creación de `.env.example` versionado y `.env` para desarrollo local con `PORT`, `DATABASE_NAME` y `NODE_ENV`.
+     - Activación de carga nativa en `main.ts` mediante `process.loadEnvFile()` (estándar en Node.js 20.6+ sin añadir dependencias pesadas de terceros).
+  2. *Frontend (`spa-saas-omatic`):*
+     - Creación de `src/environments/environment.development.ts` (desarrollo local) y `environment.ts` (producción).
+     - Configuración de `fileReplacements` en `angular.json` para sustitución automática en compilaciones de desarrollo vs. producción.
+  3. *Raíz del Repositorio:*
+     - Creación de `.env.example` unificado para la futura orquestación con Docker Compose (`BACKEND_PORT`, `FRONTEND_PORT`, `DATABASE_NAME`, `CURRENCY_API_URL`).
+  4. *Documentación Sincronizada:*
+     - Actualización de `mic-saas-omatic/README.md` (tabla de variables de entorno).
+     - Actualización de `spa-saas-omatic/README.md` (tabla de propiedades de entorno).
+     - Actualización de `README.md` (raíz) y `architecture-guidelines.md` (Sección 2.4).
+- **Valor para la evaluación:** Demuestra de manera fehaciente que el desarrollador no delega a ciegas en la IA, sino que ejerce un liderazgo técnico activo, garantizando buenas prácticas de configuración desacoplada y facilitando una experiencia de evaluación limpia y sin sorpresas.
+
+### 6.17. Diseño de Escalabilidad de Divisas: Catálogo Controlado (UX Whitelist) vs. Fallback Universal con `Intl`
+
+- **La consulta arquitectónica del Director de Orquesta:**
+  - El usuario cuestionó la escalabilidad y origen de las divisas:
+    > *"Dudas: usamos estas divisas... pero si en el futuro hay más nuevas, ¿eso se saca de la API externa que te dije o qué? [...] ¿Puedes explicarlo muy brevemente en el MD que toque?"*
+- **Análisis de arquitectura y experiencia de usuario:**
+  - La API externa `https://open.er-api.com/v6/latest/EUR` suministra en vivo más de 160 tasas de cambio mundiales, las cuales `CurrencyService` almacena de forma íntegra en memoria (`rates`).
+  - No obstante, volcar 160 monedas en el selector generaría una interfaz inmanejable para los comerciales de Roams. Por diseño de producto, se definió un catálogo acotado (`SUPPORTED_CURRENCIES` con EUR, USD, GBP, CHF, CAD y JPY).
+  - Para asegurar el **Principio Abierto/Cerrado (OCP)**, el pipe `LocalizedCurrencyPipe` se diseñó con un fallback elástico: si se pasa una divisa ISO-4217 no registrada explícitamente en `CURRENCY_METADATA` (ej. `AUD`), el motor nativo `Intl.NumberFormat` del navegador infiere el símbolo, orden y decimales sin necesidad de tocar código.
+- **Acción correctora ejecutada:**
+  - Se formalizó la estrategia de divisas en `architecture-guidelines.md` (Sección 3.3).
+  - Se flexibilizó el acceso a metadatos en `LocalizedCurrencyPipe` (`meta?.locale`, `meta?.decimals`).
+  - Se añadió un test unitario en `localized-currency.pipe.spec.ts` verificando el formateo automático de divisas no registradas (`AUD`).
+- **Valor para la evaluación:** Refleja madurez arquitectónica, separando claramente las responsabilidades de datos (160+ tasas de la API), producto (catálogo relevante para ventas) y presentación elástica (fallback W3C Intl).
+
+
+
+
+
 
 
 

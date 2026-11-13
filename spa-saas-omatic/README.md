@@ -1,59 +1,73 @@
-# Dashboard
+# 🎨 spa-saas-omatic — Frontend Dashboard
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.6.
+Dashboard Comercial interactivo para la optimización y presupuestado dinámico de suscripciones SaaS multi-divisa, desarrollado con **Angular 22**, **Standalone Components**, **Signals reactivos** y **Angular Material** personalizado.
 
-## Development server
+---
 
-To start a local development server, run:
+## 🏗️ Arquitectura del Frontend
 
-```bash
-ng serve
-```
+El frontend sigue una arquitectura orientada al dominio (**Feature-Driven**) con simetría 1:1 respecto al backend NestJS:
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- **`src/app/core/`**: Infraestructura transversal de la aplicación.
+  - `errors/`: Formato estándar de errores **RFC 7807** (`problem-detail.model.ts`) e interceptor funcional global (`error.interceptor.ts`).
+  - `models/`: Modelo de divisas (`currency.model.ts`) utilizando el patrón **`as const`** de TypeScript moderno.
+  - `services/`: Servicio reactivo de tipos de cambio (`currency.service.ts`) con caché en memoria y resiliencia de red.
+- **`src/app/modules/`**: Módulos funcionales de negocio (simetría estricta con `mic-saas-omatic`):
+  - `customers/`: Búsqueda, listado en tarjetas y detalle de clientes (`customer-api.service.ts`).
+  - `simulations/`: Historial, cálculo de tramos a 60 FPS en memoria (`local-pricing-calculator.ts`) y persistencia bajo demanda (`simulation-api.service.ts`).
+- **`src/app/shared/`**: Elementos transversales de UI:
+  - `components/`: Navbar corporativa estilo Roams, selector de divisas con Signals y visualizador RFC 7807.
+  - `pipes/`: `localized-currency.pipe.ts` con internacionalización nativa mediante `Intl.NumberFormat` (respetando orden de símbolos, puntuación cultural de millares/decimales y especificidades como 0 decimales en `JPY`).
 
-## Code scaffolding
+Para ver las directrices completas, consulta [`../ai-workspace/02-architecture/architecture-guidelines.md`](../ai-workspace/02-architecture/architecture-guidelines.md).
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+---
 
-```bash
-ng generate component component-name
-```
+## ⚙️ Gestión de Entornos (`src/environments/`)
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+En aplicaciones cliente (SPA) que se ejecutan en el navegador del usuario, no existe el runtime de Node.js ni `process.env`. Angular gestiona la configuración mediante ficheros tipados en `src/environments/`:
 
-```bash
-ng generate --help
-```
+- **`environment.development.ts`**: Utilizado durante `npm start` (desarrollo local contra `http://localhost:3000`).
+- **`environment.ts`**: Utilizado en compilaciones de producción (`npm run build`).
 
-## Building
+| Propiedad | Tipo | Valor | Propósito |
+| :--- | :--- | :--- | :--- |
+| `production` | Boolean | `false` / `true` | Indicador de modo producción para optimizaciones de Angular. |
+| `apiBaseUrl` | String | `http://localhost:3000` | URL base del microservicio backend NestJS. |
+| `currencyApiUrl` | String | `https://open.er-api.com/v6/latest/EUR` | Endpoint público para obtener tipos de cambio en vivo. |
 
-To build the project run:
+---
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+## ⚡ Comandos de Ejecución
 
 ```bash
-ng e2e
+# 1. Instalar dependencias
+npm install
+
+# 2. Levantar servidor de desarrollo (http://localhost:4200)
+npm start
+
+# 3. Compilar para producción (dist/)
+npm run build
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+---
 
-## Additional Resources
+## 🧪 Pruebas Unitarias (Vitest)
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Las pruebas están configuradas con **Vitest** (el ejecutor nativo de Angular 22) para máxima velocidad de ejecución:
+
+```bash
+# Ejecución limpia de una sola pasada (ideal para evaluación y CI/CD)
+npm test
+
+# Modo interactivo en desarrollo (recarga en caliente ante cambios)
+npm run test:watch
+```
+
+---
+
+## 🔗 Integración con Backend
+
+El frontend se conecta al microservicio `mic-saas-omatic` en `http://localhost:3000`.  
+La URL base se encuentra centralizada en `src/environments/environment.ts` para permitir portabilidad inmediata en Docker y despliegues productivos.

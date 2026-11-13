@@ -188,6 +188,10 @@ Todas las respuestas con código de estado HTTP $\ge 400$ deben seguir estrictam
 - `409 Conflict`: `taxId` ya existente en el sistema.
 - `500 Internal Server Error`: Error no controlado del servidor.
 
+### Convención del Miembro `type` (IETF RFC 7807)
+- En respuestas originadas por el backend, `type` referencia el código de estado (`https://errors.saas-o-matic.com/${status}`).
+- Para incidencias de conectividad de cliente (pérdida de red, timeout, servidor inalcanzable) o errores donde no exista una URI de documentación externa, se prescribe el uso de la URI canónica `'about:blank'`, según estipula la sección 4.2.1 del estándar RFC 7807.
+
 ---
 
 ## 5. Endpoints de la API REST

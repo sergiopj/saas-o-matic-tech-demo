@@ -7,6 +7,12 @@ import { parse } from 'yaml';
 import { AppModule } from './app.module';
 import { ProblemDetailExceptionFilter } from './shared/infrastructure/filters/problem-detail-exception.filter';
 
+// Load .env file natively in Node.js 20.6+ if present
+const envPath = join(process.cwd(), '.env');
+if (existsSync(envPath) && typeof process.loadEnvFile === 'function') {
+  process.loadEnvFile(envPath);
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 

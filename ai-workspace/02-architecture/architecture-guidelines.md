@@ -169,6 +169,18 @@ Frente a modelos como Java/Spring Boot (que requieren habilitar Virtual Threads 
 | **B. Concurrencia SQLite (Modo WAL)** | **APLICADA** (`enableWAL: true`) | SQLite por defecto usa *Rollback Journal*, bloqueando a los lectores durante las escrituras. Con WAL (*Write-Ahead Logging*), las lecturas concurrentes nunca bloquean las escrituras ni viceversa. |
 | **C. Multi-núcleo / Clustering** | **Descartada** (1 proceso Node.js) | En entornos con SQLite como base de datos embebida monoproceso, levantar múltiples procesos Node.js compitiendo por el archivo bloquea el driver. Un único proceso Node.js con `better-sqlite3` es la arquitectura óptima. |
 
+### 2.4 Gestión de Configuración Multi-entorno y Variables de Entorno
+
+Siguiendo el estándar *The Twelve-Factor App* (Factor III: Configuración):
+1. **Backend (`mic-saas-omatic`):**
+   - Soporte nativo de ficheros `.env` mediante `process.loadEnvFile()` de Node.js 20.6+ sin librerías externas superfluas.
+   - Plantilla versionada [`.env.example`](../../mic-saas-omatic/.env.example) y valores por defecto tolerantes a fallos (`PORT: 3000`, `DATABASE_NAME: saas_o_matic.sqlite`).
+2. **Frontend (`spa-saas-omatic`):**
+   - Desacoplamiento de entorno cliente mediante Angular `src/environments/` (`environment.ts` para producción y `environment.development.ts` para desarrollo local).
+   - Inyección de dependencias centralizada: ningún servicio o componente consume URLs literales.
+3. **Orquestación Global (Docker Compose):**
+   - Plantilla [`.env.example`](../../.env.example) en la raíz para unificar los puertos de publicación y las rutas de base de datos entre contenedores.
+
 ---
 
 ## 3. Arquitectura del Frontend (Angular 22)
@@ -181,7 +193,8 @@ spa-saas-omatic/
 │   ├── app/
 │   │   ├── core/                                            # Infraestructura transversal de la aplicación
 │   │   │   ├── errors/
-│   │   │   │   └── problem-detail.model.ts                  # Formato estándar de error RFC 7807 (application/problem+json)
+│   │   │   │   ├── problem-detail.model.ts                  # Formato estándar de error RFC 7807 (application/problem+json)
+│   │   │   │   └── error.interceptor.ts                     # HttpInterceptor funcional global (normaliza errores a ProblemDetail)
 │   │   │   ├── models/
 │   │   │   │   └── currency.model.ts                        # CurrencyCode (as const), CurrencyOption y ExchangeRateApiResponse
 │   │   │   └── services/
@@ -218,7 +231,7 @@ spa-saas-omatic/
 │   │   │   │   ├── currency-selector/                       # Selector EUR, USD, GBP con Signal reactivo
 │   │   │   │   └── error-banner/                            # Banner visual renderizador de RFC 7807
 │   │   │   └── pipes/
-│   │   │       └── localized-currency.pipe.ts               # Pipe para formatear importes en divisa seleccionada
+│   │   │       └── localized-currency.pipe.ts               # Pipe i18n con Intl.NumberFormat y metadatos nativos por país
 │   │   │
 │   │   ├── app.ts                                           # Shell de aplicación con Standalone Components
 │   │   ├── app.html                                         # Layout con Navbar + <router-outlet />
@@ -235,6 +248,13 @@ spa-saas-omatic/
 - **UI Framework:** Angular Material. Se elige porque el Dashboard necesita slider, formularios, select de divisa y tarjetas con accesibilidad nativa (a11y) y componentes probados desde el minuto uno, sin tener que construir el slider desde cero.
 - **Tematización con Sass (SCSS):** Se evita el look genérico de Material con una capa de personalización en SCSS: variables de color, tipografía, bordes redondeados y sombras suaves para replicar el diseño limpio y corporativo de Roams.
 - **Layout y Responsive:** Flexbox y CSS Grid nativo + clases de Material, sin Bootstrap, para no mezclar dos sistemas de layout.
+
+### 3.3 Estrategia de Divisas y Escalabilidad (Open/Closed Principle)
+
+- **Caché Completa de la API:** La API externa (`https://open.er-api.com/v6/latest/EUR`) devuelve más de 160 tipos de cambio. `CurrencyService` almacena el diccionario completo en memoria (`rates`), por lo que la aplicación ya dispone de las tasas de cualquier divisa mundial sin peticiones HTTP adicionales.
+- **Catálogo Controlado (UX Whitelist):** En lugar de abrumar al equipo comercial con 160 opciones en el desplegable, `SUPPORTED_CURRENCIES` acota el selector a las divisas operativas estratégicas del mercado SaaS (`EUR`, `USD`, `GBP`, `CHF`, `CAD`, `JPY`).
+- **Extensibilidad Abierta/Cerrada:** Incorporar una nueva divisa comercial (ej. `AUD` o `MXN`) requiere únicamente añadir su código a la tupla `SUPPORTED_CURRENCIES`.
+- **Formateo Universal con Fallback `Intl`:** Si se solicita formatear una divisa no registrada en `CURRENCY_METADATA`, el pipe `LocalizedCurrencyPipe` recurre de forma transparente al motor nativo `Intl.NumberFormat` de ECMAScript (`meta?.locale` y `meta?.decimals` como `undefined`), infiriendo automáticamente el símbolo oficial, el número canónico de decimales y el orden según el locale del navegador del usuario.
 
 ---
 
@@ -257,11 +277,18 @@ spa-saas-omatic/
 
 Para optimizar los tiempos de respuesta durante el desarrollo y asegurar la máxima calidad en los despliegues, se adopta una política de separación de responsabilidades en la ejecución de tests:
 
+#### A. Backend (`mic-saas-omatic`):
 | Comando | Tipo de Suite | Ámbito / Propósito | Tiempo de Ejecución |
 | :--- | :--- | :--- | :--- |
 | `npm test` | **Unitarios** | Dominio puro, casos de uso con mocks, mappers y controladores aislados. Feedback continuo durante el desarrollo local (`test:watch`). | Sub-segundo (< 1s) |
 | `npm run test:e2e` | **Integración E2E** | Pipeline HTTP completo contra base de datos SQLite real y filtro RFC 7807. Validación de integración entre capas. | ~3-4 segundos |
 | `npm run test:all` | **Suite Completa** | Ejecución encadenada (`npm test && npm run test:e2e`). Puerta de calidad obligatoria antes de commits, PRs y pipelines de CI/CD. | ~4-5 segundos |
+
+#### B. Frontend (`spa-saas-omatic`):
+| Comando | Tipo de Suite | Ámbito / Propósito | Tiempo de Ejecución |
+| :--- | :--- | :--- | :--- |
+| `npm test` | **Pase Único (Vitest)** | Ejecución determinista de una pasada (`ng test --watch=false`). Diseñado para evaluación y pipelines de CI/CD. | ~1-2 segundos |
+| `npm run test:watch` | **Modo Interactivo** | Recarga en caliente ante cambios de código para desarrollo local. | Continuo |
 
 ---
 

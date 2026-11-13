@@ -25,6 +25,16 @@ El proyecto sigue una convención corporativa de microservicio y single-page app
 
 ---
 
+## ⚙️ Variables de Entorno y Configuración
+
+El proyecto cuenta con plantillas de variables de entorno versionadas:
+
+- **Global / Docker:** [`.env.example`](.env.example) en la raíz para orquestación de puertos y servicios.
+- **Backend (`mic-saas-omatic`):** [`mic-saas-omatic/.env.example`](mic-saas-omatic/.env.example) para configuración del servidor NestJS y SQLite.
+- **Frontend (`spa-saas-omatic`):** Gestión nativa de Angular en `src/environments/` (`environment.ts` y `environment.development.ts`) para desacoplar las URLs de la API y de tipos de cambio.
+
+---
+
 ## ⚡ Puesta en Marcha Rápida (Backend en Local)
 
 ### 1. Instalación de Dependencias
@@ -45,6 +55,7 @@ npm run start:dev
 
 El proyecto cuenta con cobertura exhaustiva separada en distintos *feedback loops*:
 
+### Backend (`mic-saas-omatic`):
 ```bash
 cd mic-saas-omatic
 
@@ -56,6 +67,17 @@ npm run test:e2e
 
 # 3. Suite Completa Unificada (Ejecución determinista para CI/CD y pre-commit)
 npm run test:all
+```
+
+### Frontend (`spa-saas-omatic`):
+```bash
+cd spa-saas-omatic
+
+# 1. Tests Unitarios con Vitest (Modo ejecución determinista de una pasada para evaluación)
+npm test
+
+# 2. Modo interactivo en desarrollo (Watch mode con recarga en caliente)
+npm run test:watch
 ```
 
 ---
