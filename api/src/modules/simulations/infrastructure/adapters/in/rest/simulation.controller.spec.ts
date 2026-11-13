@@ -1,11 +1,13 @@
 import { SimulationController } from './simulation.controller';
 import { CreateSimulationUseCase } from '../../../../application/use-cases/create-simulation.use-case';
+import { ListSimulationsByCustomerUseCase } from '../../../../application/use-cases/list-simulations-by-customer.use-case';
 import { Simulation } from '../../../../domain/entities/simulation.entity';
 import { CreateSimulationDto } from './dto/create-simulation.dto';
 
 describe('SimulationController (Primary Adapter)', () => {
   let controller: SimulationController;
   let mockCreateSimulationUseCase: jest.Mocked<Partial<CreateSimulationUseCase>>;
+  let mockListSimulationsByCustomerUseCase: jest.Mocked<Partial<ListSimulationsByCustomerUseCase>>;
 
   const fixedDate = new Date('2026-06-15T10:00:00.000Z');
   const sampleSimulation = Simulation.reconstitute({
@@ -26,9 +28,13 @@ describe('SimulationController (Primary Adapter)', () => {
     mockCreateSimulationUseCase = {
       execute: jest.fn().mockResolvedValue(sampleSimulation),
     };
+    mockListSimulationsByCustomerUseCase = {
+      execute: jest.fn().mockResolvedValue([sampleSimulation]),
+    };
 
     controller = new SimulationController(
       mockCreateSimulationUseCase as CreateSimulationUseCase,
+      mockListSimulationsByCustomerUseCase as ListSimulationsByCustomerUseCase,
     );
   });
 
@@ -54,5 +60,14 @@ describe('SimulationController (Primary Adapter)', () => {
     expect(response.totalCost).toBe(169.40);
     expect(response.currency).toBe('EUR');
     expect(response.createdAt).toBe(fixedDate.toISOString());
+  });
+
+  it('should return simulations for a given customerId', async () => {
+    const response = await controller.findByCustomer('customer-uuid-1');
+
+    expect(mockListSimulationsByCustomerUseCase.execute).toHaveBeenCalledWith('customer-uuid-1');
+    expect(response).toHaveLength(1);
+    expect(response[0].customerId).toBe('customer-uuid-1');
+    expect(response[0].currency).toBe('EUR');
   });
 });

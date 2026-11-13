@@ -60,11 +60,10 @@ describe('CustomerController (Primary Adapter)', () => {
     expect(mockListCustomersUseCase.execute).toHaveBeenCalledWith('roams');
   });
 
-  it('should get customer detail by id with simulations array', async () => {
+  it('should get customer detail by id as flat CustomerResponseDto', async () => {
     const result = await controller.getById('uuid-100');
 
     expect(result.id).toBe('uuid-100');
-    expect(result.simulations).toEqual([]);
     expect(mockGetCustomerDetailUseCase.execute).toHaveBeenCalledWith('uuid-100');
   });
 });

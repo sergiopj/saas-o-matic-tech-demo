@@ -198,7 +198,8 @@ Base URL: `http://localhost:3000` (sin prefijo `/api/v1` según especificación 
 | :--- | :--- | :--- |
 | `POST` | `/customers` | Registra un nuevo cliente corporativo validando su fiscalidad. |
 | `GET` | `/customers?search=` | Lista clientes con filtro opcional insensible a mayúsculas por nombre o taxId. |
-| `GET` | `/customers/{id}` | Obtiene los datos del cliente junto con su listado histórico de simulaciones ordenadas descendentemente por fecha. |
+| `GET` | `/customers/{id}` | Obtiene los datos del cliente corporativo. |
+| `GET` | `/simulations?customerId=` | Lista el historial de simulaciones de un cliente ordenadas descendentemente por fecha. |
 | `POST` | `/simulations` | Registra y persiste una simulación calculando el coste por tramos e impuestos. |
 
 ---
@@ -212,3 +213,4 @@ Base URL: `http://localhost:3000` (sin prefijo `/api/v1` según especificación 
 | **Métricas de Almacenamiento y API** | Registradas con coste base 0 € | El enunciado define el algoritmo de facturación acumulativo únicamente sobre el volumen de usuarios activos, exigiendo guardar las otras métricas para histórico. |
 | **Moneda de Persistencia** | Siempre EUR en backend | Evita volatilidad y discrepancias por redondeo en base de datos. La conversión multi-divisa es una responsabilidad de presentación del frontend. |
 | **Desacoplamiento Hexagonal** | Dominio puro TypeScript | Entidades de dominio libres de decoradores de NestJS o TypeORM; NestJS reside únicamente en capas de infraestructura y aplicación. |
+| **Separación de Bounded Contexts** | `GET /simulations?customerId=` separado | Desacopla `Customers` de `Simulations` evitando dependencias circulares (`forwardRef`). El frontend compone ambos recursos en paralelo. |

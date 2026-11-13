@@ -30,9 +30,30 @@
 ### 1.5. Alineación de Errores RFC 7807: Ejemplos en Inglés y Formato URI de `type`
 - **Situación inicial:** En `functional-specs.md` y `openapi.yaml`, el JSON de ejemplo para el estándar RFC 7807 contenía mensajes en español (`"detail": "El identificador fiscal..."`) y una URI ficticia (`"type": ".../validation-error"`).
 - **Tu corrección:** Me señalaste la incoherencia: *"Código y payloads de la API en inglés, documentación en español. La API real devuelve `detail` en inglés. Además, en tu filtro pones `type: .../${status}` (ej. `.../400`). Alinea el contrato en ambos ficheros para no tener contradicciones en la defensa"*.
-- **Solución aplicada:** Se actualizaron `functional-specs.md` y `openapi.yaml` con `"type": "https://errors.saas-o-matic.com/400"`, `"detail": "Invalid tax identifier 'B1234567X' for country 'ES'."` y razones en inglés para `invalidParams`, logrando una coherencia del 100% entre especificación, contrato y filtro de excepciones.
+- **Solución aplicada:** Se actualizaron `functional-specs.md` y `openapi.yaml` con `"type": "https://errors.saas-o-matic.com/400"`, `"detail": "Invalid tax identifier 'B1234567X' for country 'ES'."` y razones en inglés para `invalidParams`, logrando una coherencia del 100% entre especificación, contrato y filtro de excepciones.---
 
+## Sección 5: Decisiones de Arquitectura Avanzada y Desacoplamiento de Módulos
 
+### 5.1. Desacoplamiento de Bounded Contexts: `GET /simulations?customerId=` vs `forwardRef`
+
+- **Situación inicial:** `GET /customers/:id` devolvía el cliente con un array `simulations: []` hardcodeado (placeholder). Para poblarlo había que inyectar `SIMULATION_REPOSITORY_PORT` en `CustomersModule`, lo que creaba una **dependencia circular**:
+  - `SimulationsModule` → importa `CustomersModule` (para verificar que el cliente existe al crear una simulación)
+  - `CustomersModule` → importaría `SimulationsModule` (para leer el historial de simulaciones)
+- **Opciones evaluadas:**
+  1. **`forwardRef` (Opción 1):** Parche de NestJS para romper el ciclo. Funciona, pero es un *code smell* reconocido por la comunidad: indica que dos módulos que debían ser independientes están acoplados en ambas direcciones.
+  2. **2 endpoints independientes (Opción 2):** `GET /customers/:id` devuelve el cliente plano. El historial se consulta con `GET /simulations?customerId=:id` en su propio bounded context. El frontend compone ambas respuestas en paralelo (`forkJoin`).
+  3. **Puerto de consulta con inversión de dependencia (Opción 3):** Interfaz `CustomerSimulationsPort` en `Customers` implementada por `Simulations`. Mantiene la respuesta unificada pero añade capas y sigue requiriendo resolución de ciclo en el wiring de NestJS.
+- **Decisión tomada (Opción 2):** Se eligió el enfoque REST puro con dos endpoints desacoplados por las siguientes razones:
+  - **DDD puro:** Un `Customer` y su historial de facturación son dos Bounded Contexts distintos. `CustomersModule` no tiene razón de negocio para conocer la estructura interna de `SimulationsModule`.
+  - **Sin deuda técnica:** Cero `forwardRef`, cero acoplamiento circular.
+  - **Escalabilidad:** Si en el futuro `Simulations` se extrae a un microservicio, `Customers` no se toca.
+  - **Componibilidad en el frontend:** `forkJoin([getCustomer(id), getSimulations(id)])` es un patrón estándar en Angular y más eficiente (peticiones paralelas).
+- **Cambios aplicados:**
+  - Nuevo use-case `ListSimulationsByCustomerUseCase` en `simulations/application/use-cases/`.
+  - `SimulationController` recibe `GET /simulations?customerId=:id` y delega al nuevo use-case.
+  - `CustomerController.getById` devuelve `CustomerResponseDto` plano (no `CustomerDetailResponseDto`).
+  - `openapi.yaml` actualizado: `GET /customers/{id}` devuelve `Customer`, `GET /simulations` documenta el query param `customerId`.
+  - Eliminado el schema `CustomerWithSimulations` del contrato OpenAPI.
 ---
 
 ## Sección 2: Directrices de Arquitectura y Scaffolding (`02-architecture/`)
@@ -99,9 +120,30 @@
 ### 3.8. Inmutabilidad de Fechas en Persistencia: Descarte de `@CreateDateColumn` en `CustomerTypeOrmEntity`
 - **El error de la IA:** La entidad TypeORM de clientes se definió inicialmente con `@CreateDateColumn({ type: 'datetime' })`.
 - **Tu corrección:** Me señalaste: *"En DDD el dominio gobierna sus invariantes y genera su propio `createdAt = new Date()`. `@CreateDateColumn` hace que TypeORM intercepte el `INSERT` y ponga su propio `NOW()`, generando dos fechas distintas entre memoria y base de datos con unos milisegundos de discrepancia. Usa `@Column('datetime')` para respetar fielmente el valor del dominio y limpia el import no utilizado"*.
-- **Solución aplicada:** Se sustituyó por `@Column('datetime')` tanto en `CustomerTypeOrmEntity` como en `SimulationTypeOrmEntity`, unificando el principio de inmutabilidad de fechas entre capas en todo el backend.
+- **Solución aplicada:** Se sustituyó por `@Column('datetime')` tanto en `CustomerTypeOrmEntity` como en `SimulationTypeOrmEntity`, unificando el principio de inmutabilidad de fechas entre capas en todo el backend.---
 
+## Sección 5: Decisiones de Arquitectura Avanzada y Desacoplamiento de Módulos
 
+### 5.1. Desacoplamiento de Bounded Contexts: `GET /simulations?customerId=` vs `forwardRef`
+
+- **Situación inicial:** `GET /customers/:id` devolvía el cliente con un array `simulations: []` hardcodeado (placeholder). Para poblarlo había que inyectar `SIMULATION_REPOSITORY_PORT` en `CustomersModule`, lo que creaba una **dependencia circular**:
+  - `SimulationsModule` → importa `CustomersModule` (para verificar que el cliente existe al crear una simulación)
+  - `CustomersModule` → importaría `SimulationsModule` (para leer el historial de simulaciones)
+- **Opciones evaluadas:**
+  1. **`forwardRef` (Opción 1):** Parche de NestJS para romper el ciclo. Funciona, pero es un *code smell* reconocido por la comunidad: indica que dos módulos que debían ser independientes están acoplados en ambas direcciones.
+  2. **2 endpoints independientes (Opción 2):** `GET /customers/:id` devuelve el cliente plano. El historial se consulta con `GET /simulations?customerId=:id` en su propio bounded context. El frontend compone ambas respuestas en paralelo (`forkJoin`).
+  3. **Puerto de consulta con inversión de dependencia (Opción 3):** Interfaz `CustomerSimulationsPort` en `Customers` implementada por `Simulations`. Mantiene la respuesta unificada pero añade capas y sigue requiriendo resolución de ciclo en el wiring de NestJS.
+- **Decisión tomada (Opción 2):** Se eligió el enfoque REST puro con dos endpoints desacoplados por las siguientes razones:
+  - **DDD puro:** Un `Customer` y su historial de facturación son dos Bounded Contexts distintos. `CustomersModule` no tiene razón de negocio para conocer la estructura interna de `SimulationsModule`.
+  - **Sin deuda técnica:** Cero `forwardRef`, cero acoplamiento circular.
+  - **Escalabilidad:** Si en el futuro `Simulations` se extrae a un microservicio, `Customers` no se toca.
+  - **Componibilidad en el frontend:** `forkJoin([getCustomer(id), getSimulations(id)])` es un patrón estándar en Angular y más eficiente (peticiones paralelas).
+- **Cambios aplicados:**
+  - Nuevo use-case `ListSimulationsByCustomerUseCase` en `simulations/application/use-cases/`.
+  - `SimulationController` recibe `GET /simulations?customerId=:id` y delega al nuevo use-case.
+  - `CustomerController.getById` devuelve `CustomerResponseDto` plano (no `CustomerDetailResponseDto`).
+  - `openapi.yaml` actualizado: `GET /customers/{id}` devuelve `Customer`, `GET /simulations` documenta el query param `customerId`.
+  - Eliminado el schema `CustomerWithSimulations` del contrato OpenAPI.
 ---
 
 ## Sección 4: Módulo de Simulaciones (`Simulations`) y Estabilización de Tests ESM
@@ -174,8 +216,29 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
 - **Tu detección y corrección técnica:**
   - Me reportaste el error en caliente en `typeorm.config.ts`. Auditamos los tipos internos de TypeORM 1.1 (`DatabaseType`) y comprobamos que TypeORM eliminó el driver legacy `'sqlite'` (paquete `sqlite3` asíncrono de callbacks) en favor de `'better-sqlite3'` (driver síncrono nativo, mucho más rápido y sin fugas de memoria).
   - Se corrigió el tipo a `type: 'better-sqlite3'` instalando `better-sqlite3` y sus tipos.
-  - Se sustituyó el glob frágil por `autoLoadEntities: true`, haciendo que cada módulo (`CustomersModule`, `SimulationsModule`) registre sus entidades de forma verdaderamente modular mediante `TypeOrmModule.forFeature()`.
+  - Se sustituyó el glob frágil por `autoLoadEntities: true`, haciendo que cada módulo (`CustomersModule`, `SimulationsModule`) registre sus entidades de forma verdaderamente modular mediante `TypeOrmModule.forFeature()`.---
 
+## Sección 5: Decisiones de Arquitectura Avanzada y Desacoplamiento de Módulos
 
+### 5.1. Desacoplamiento de Bounded Contexts: `GET /simulations?customerId=` vs `forwardRef`
+
+- **Situación inicial:** `GET /customers/:id` devolvía el cliente con un array `simulations: []` hardcodeado (placeholder). Para poblarlo había que inyectar `SIMULATION_REPOSITORY_PORT` en `CustomersModule`, lo que creaba una **dependencia circular**:
+  - `SimulationsModule` → importa `CustomersModule` (para verificar que el cliente existe al crear una simulación)
+  - `CustomersModule` → importaría `SimulationsModule` (para leer el historial de simulaciones)
+- **Opciones evaluadas:**
+  1. **`forwardRef` (Opción 1):** Parche de NestJS para romper el ciclo. Funciona, pero es un *code smell* reconocido por la comunidad: indica que dos módulos que debían ser independientes están acoplados en ambas direcciones.
+  2. **2 endpoints independientes (Opción 2):** `GET /customers/:id` devuelve el cliente plano. El historial se consulta con `GET /simulations?customerId=:id` en su propio bounded context. El frontend compone ambas respuestas en paralelo (`forkJoin`).
+  3. **Puerto de consulta con inversión de dependencia (Opción 3):** Interfaz `CustomerSimulationsPort` en `Customers` implementada por `Simulations`. Mantiene la respuesta unificada pero añade capas y sigue requiriendo resolución de ciclo en el wiring de NestJS.
+- **Decisión tomada (Opción 2):** Se eligió el enfoque REST puro con dos endpoints desacoplados por las siguientes razones:
+  - **DDD puro:** Un `Customer` y su historial de facturación son dos Bounded Contexts distintos. `CustomersModule` no tiene razón de negocio para conocer la estructura interna de `SimulationsModule`.
+  - **Sin deuda técnica:** Cero `forwardRef`, cero acoplamiento circular.
+  - **Escalabilidad:** Si en el futuro `Simulations` se extrae a un microservicio, `Customers` no se toca.
+  - **Componibilidad en el frontend:** `forkJoin([getCustomer(id), getSimulations(id)])` es un patrón estándar en Angular y más eficiente (peticiones paralelas).
+- **Cambios aplicados:**
+  - Nuevo use-case `ListSimulationsByCustomerUseCase` en `simulations/application/use-cases/`.
+  - `SimulationController` recibe `GET /simulations?customerId=:id` y delega al nuevo use-case.
+  - `CustomerController.getById` devuelve `CustomerResponseDto` plano (no `CustomerDetailResponseDto`).
+  - `openapi.yaml` actualizado: `GET /customers/{id}` devuelve `Customer`, `GET /simulations` documenta el query param `customerId`.
+  - Eliminado el schema `CustomerWithSimulations` del contrato OpenAPI.
 
 

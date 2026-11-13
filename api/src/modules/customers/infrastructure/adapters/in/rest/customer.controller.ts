@@ -13,7 +13,6 @@ import { ListCustomersUseCase } from '../../../../application/use-cases/list-cus
 import { GetCustomerDetailUseCase } from '../../../../application/use-cases/get-customer-detail.use-case';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
-import { CustomerDetailResponseDto } from './dto/customer-detail-response.dto';
 
 @Controller('customers')
 export class CustomerController {
@@ -39,8 +38,8 @@ export class CustomerController {
   }
 
   @Get(':id')
-  async getById(@Param('id') id: string): Promise<CustomerDetailResponseDto> {
+  async getById(@Param('id') id: string): Promise<CustomerResponseDto> {
     const customer = await this.getCustomerDetailUseCase.execute(id);
-    return CustomerDetailResponseDto.fromDomain(customer, []);
+    return CustomerResponseDto.fromDomain(customer);
   }
 }

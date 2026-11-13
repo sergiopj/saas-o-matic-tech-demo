@@ -57,7 +57,7 @@ paths:
 
   /customers/{id}:
     get:
-      summary: Obtiene el detalle de un cliente incluyendo su historial de simulaciones
+      summary: Obtiene el detalle de un cliente
       operationId: getCustomerById
       tags:
         - Customers
@@ -71,15 +71,37 @@ paths:
             format: uuid
       responses:
         '200':
-          description: Detalle del cliente y simulaciones ordenadas por createdAt desc
+          description: Datos del cliente
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CustomerWithSimulations'
+                $ref: '#/components/schemas/Customer'
         '404':
           $ref: '#/components/responses/NotFound'
 
   /simulations:
+    get:
+      summary: Lista las simulaciones de un cliente ordenadas por fecha desc
+      operationId: listSimulationsByCustomer
+      tags:
+        - Simulations
+      parameters:
+        - name: customerId
+          in: query
+          required: true
+          description: UUID del cliente cuyo historial se consulta
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Historial de simulaciones del cliente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Simulation'
     post:
       summary: Calcula y registra una simulación de costes
       operationId: createSimulation
@@ -227,18 +249,6 @@ components:
             createdAt:
               type: string
               format: date-time
-
-    CustomerWithSimulations:
-      allOf:
-        - $ref: '#/components/schemas/Customer'
-        - type: object
-          required:
-            - simulations
-          properties:
-            simulations:
-              type: array
-              items:
-                $ref: '#/components/schemas/Simulation'
 
     ProblemDetail:
       type: object

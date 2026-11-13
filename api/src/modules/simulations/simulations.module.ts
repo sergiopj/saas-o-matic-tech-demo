@@ -5,6 +5,7 @@ import { SimulationTypeOrmEntity } from './infrastructure/adapters/out/persisten
 import { SimulationPersistenceAdapter } from './infrastructure/adapters/out/persistence/simulation-persistence.adapter';
 import { SIMULATION_REPOSITORY_PORT } from './application/ports/out/simulation-repository.port';
 import { CreateSimulationUseCase } from './application/use-cases/create-simulation.use-case';
+import { ListSimulationsByCustomerUseCase } from './application/use-cases/list-simulations-by-customer.use-case';
 import { SimulationController } from './infrastructure/adapters/in/rest/simulation.controller';
 
 @Module({
@@ -15,6 +16,7 @@ import { SimulationController } from './infrastructure/adapters/in/rest/simulati
   controllers: [SimulationController],
   providers: [
     CreateSimulationUseCase,
+    ListSimulationsByCustomerUseCase,
     {
       provide: SIMULATION_REPOSITORY_PORT,
       useClass: SimulationPersistenceAdapter,
