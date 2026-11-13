@@ -24,6 +24,7 @@ Para garantizar mantenibilidad, testabilidad y aislamiento estricto de las regla
 7. **Soberanía del Dominio sobre Fechas y Precisión Financiera:**
    - Las entidades de dominio originan y gobiernan sus propios timestamps (`createdAt: new Date()`). En infraestructura, TypeORM utiliza `@Column('datetime')` en lugar de `@CreateDateColumn` para no sobrescribir ni desincronizar los ciclos de vida del dominio.
    - Todo importe monetario se persiste con `@Column('decimal', { precision: 10, scale: 2 })` (y `scale: 4` en tasas) para prevenir errores de coma flotante IEEE 754 de los tipos `float`.
+8. **Concurrencia de Base de Datos en Modo WAL (Write-Ahead Logging):** Para garantizar alto rendimiento y evitar contención en SQLite, la persistencia se configura con `enableWAL: true`. En modo WAL, las lecturas no bloquean a las escrituras y las escrituras no bloquean a las lecturas, permitiendo que múltiples usuarios consulten clientes mientras se registran simulaciones concurrentes.
 
 
 ---
@@ -64,10 +65,10 @@ Para garantizar mantenibilidad, testabilidad y aislamiento estricto de las regla
 
 ---
 
-### 2.2 Estructura Canónica de Directorios del Backend (`api/`)
+### 2.2 Estructura Canónica de Directorios del Backend (`mic-saas-omatic/`)
 
 ```text
-api/
+mic-saas-omatic/
 ├── src/
 │   ├── modules/
 │   │   ├── customers/
@@ -158,14 +159,24 @@ api/
 └── tsconfig.json
 ```
 
+### 2.3 Decisiones de Rendimiento y Concurrencia (Evaluación de Palancas Enterprise)
+
+Frente a modelos como Java/Spring Boot (que requieren habilitar Virtual Threads para evitar la saturación del modelo thread-per-request), Node.js opera de forma asíncrona no bloqueante mediante el Event Loop. No obstante, se han evaluado las 3 palancas clásicas de rendimiento en backend:
+
+| Palanca de Rendimiento | Decisión | Justificación Técnica Senior |
+| :--- | :---: | :--- |
+| **A. Motor HTTP (Fastify vs Express)** | **Descartada** (Se mantiene Express) | NestJS incluye Express por defecto, capaz de procesar >10.000 req/s. Migrar a Fastify añadiría complejidad innecesaria sin aportar beneficio medible al volumen de uso comercial interno. |
+| **B. Concurrencia SQLite (Modo WAL)** | **APLICADA** (`enableWAL: true`) | SQLite por defecto usa *Rollback Journal*, bloqueando a los lectores durante las escrituras. Con WAL (*Write-Ahead Logging*), las lecturas concurrentes nunca bloquean las escrituras ni viceversa. |
+| **C. Multi-núcleo / Clustering** | **Descartada** (1 proceso Node.js) | En entornos con SQLite como base de datos embebida monoproceso, levantar múltiples procesos Node.js compitiendo por el archivo bloquea el driver. Un único proceso Node.js con `better-sqlite3` es la arquitectura óptima. |
+
 ---
 
-## 3. Arquitectura del Frontend (Angular 21)
+## 3. Arquitectura del Frontend (Angular 22)
 
 ### 3.1 Patrón Arquitectónico: Componentes Standalone y Signals
 
 ```text
-dashboard/
+spa-saas-omatic/
 ├── src/
 │   ├── app/
 │   │   ├── core/                                            # Core transversal
@@ -225,9 +236,19 @@ dashboard/
 2. **Tests de Casos de Uso:**
    - Mocks de puertos secundarios (`CustomerRepositoryPort`, `SimulationRepositoryPort`).
    - Verificación de flujo y excepciones de dominio.
-3. **Tests de Integración de Adaptadores:**
-   - Persistencia SQLite en memoria.
-   - Filtro de excepciones RFC 7807 comprobando la cabecera `application/problem+json`.
+3. **Tests de Integración y E2E (Jest + Supertest):**
+   - Base de datos SQLite real aislada (`saas_o_matic.test.sqlite`) ejecutada de forma secuencial (`maxWorkers: 1`).
+   - Ciclo de vida HTTP completo: `ValidationPipe` (whitelist + forbidNonWhitelisted), filtro global RFC 7807 (`application/problem+json`), casos de uso y repositorios `better-sqlite3`.
+
+### 4.2 Scripts de Ejecución y Filosofía de Feedback Loops
+
+Para optimizar los tiempos de respuesta durante el desarrollo y asegurar la máxima calidad en los despliegues, se adopta una política de separación de responsabilidades en la ejecución de tests:
+
+| Comando | Tipo de Suite | Ámbito / Propósito | Tiempo de Ejecución |
+| :--- | :--- | :--- | :--- |
+| `npm test` | **Unitarios** | Dominio puro, casos de uso con mocks, mappers y controladores aislados. Feedback continuo durante el desarrollo local (`test:watch`). | Sub-segundo (< 1s) |
+| `npm run test:e2e` | **Integración E2E** | Pipeline HTTP completo contra base de datos SQLite real y filtro RFC 7807. Validación de integración entre capas. | ~3-4 segundos |
+| `npm run test:all` | **Suite Completa** | Ejecución encadenada (`npm test && npm run test:e2e`). Puerta de calidad obligatoria antes de commits, PRs y pipelines de CI/CD. | ~4-5 segundos |
 
 ---
 

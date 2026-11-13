@@ -30,30 +30,8 @@
 ### 1.5. Alineación de Errores RFC 7807: Ejemplos en Inglés y Formato URI de `type`
 - **Situación inicial:** En `functional-specs.md` y `openapi.yaml`, el JSON de ejemplo para el estándar RFC 7807 contenía mensajes en español (`"detail": "El identificador fiscal..."`) y una URI ficticia (`"type": ".../validation-error"`).
 - **Tu corrección:** Me señalaste la incoherencia: *"Código y payloads de la API en inglés, documentación en español. La API real devuelve `detail` en inglés. Además, en tu filtro pones `type: .../${status}` (ej. `.../400`). Alinea el contrato en ambos ficheros para no tener contradicciones en la defensa"*.
-- **Solución aplicada:** Se actualizaron `functional-specs.md` y `openapi.yaml` con `"type": "https://errors.saas-o-matic.com/400"`, `"detail": "Invalid tax identifier 'B1234567X' for country 'ES'."` y razones en inglés para `invalidParams`, logrando una coherencia del 100% entre especificación, contrato y filtro de excepciones.---
+- **Solución aplicada:** Se actualizaron `functional-specs.md` y `openapi.yaml` con `"type": "https://errors.saas-o-matic.com/400"`, `"detail": "Invalid tax identifier 'B1234567X' for country 'ES'."` y razones en inglés para `invalidParams`, logrando una coherencia del 100% entre especificación, contrato y filtro de excepciones.
 
-## Sección 5: Decisiones de Arquitectura Avanzada y Desacoplamiento de Módulos
-
-### 5.1. Desacoplamiento de Bounded Contexts: `GET /simulations?customerId=` vs `forwardRef`
-
-- **Situación inicial:** `GET /customers/:id` devolvía el cliente con un array `simulations: []` hardcodeado (placeholder). Para poblarlo había que inyectar `SIMULATION_REPOSITORY_PORT` en `CustomersModule`, lo que creaba una **dependencia circular**:
-  - `SimulationsModule` → importa `CustomersModule` (para verificar que el cliente existe al crear una simulación)
-  - `CustomersModule` → importaría `SimulationsModule` (para leer el historial de simulaciones)
-- **Opciones evaluadas:**
-  1. **`forwardRef` (Opción 1):** Parche de NestJS para romper el ciclo. Funciona, pero es un *code smell* reconocido por la comunidad: indica que dos módulos que debían ser independientes están acoplados en ambas direcciones.
-  2. **2 endpoints independientes (Opción 2):** `GET /customers/:id` devuelve el cliente plano. El historial se consulta con `GET /simulations?customerId=:id` en su propio bounded context. El frontend compone ambas respuestas en paralelo (`forkJoin`).
-  3. **Puerto de consulta con inversión de dependencia (Opción 3):** Interfaz `CustomerSimulationsPort` en `Customers` implementada por `Simulations`. Mantiene la respuesta unificada pero añade capas y sigue requiriendo resolución de ciclo en el wiring de NestJS.
-- **Decisión tomada (Opción 2):** Se eligió el enfoque REST puro con dos endpoints desacoplados por las siguientes razones:
-  - **DDD puro:** Un `Customer` y su historial de facturación son dos Bounded Contexts distintos. `CustomersModule` no tiene razón de negocio para conocer la estructura interna de `SimulationsModule`.
-  - **Sin deuda técnica:** Cero `forwardRef`, cero acoplamiento circular.
-  - **Escalabilidad:** Si en el futuro `Simulations` se extrae a un microservicio, `Customers` no se toca.
-  - **Componibilidad en el frontend:** `forkJoin([getCustomer(id), getSimulations(id)])` es un patrón estándar en Angular y más eficiente (peticiones paralelas).
-- **Cambios aplicados:**
-  - Nuevo use-case `ListSimulationsByCustomerUseCase` en `simulations/application/use-cases/`.
-  - `SimulationController` recibe `GET /simulations?customerId=:id` y delega al nuevo use-case.
-  - `CustomerController.getById` devuelve `CustomerResponseDto` plano (no `CustomerDetailResponseDto`).
-  - `openapi.yaml` actualizado: `GET /customers/{id}` devuelve `Customer`, `GET /simulations` documenta el query param `customerId`.
-  - Eliminado el schema `CustomerWithSimulations` del contrato OpenAPI.
 ---
 
 ## Sección 2: Directrices de Arquitectura y Scaffolding (`02-architecture/`)
@@ -120,30 +98,8 @@
 ### 3.8. Inmutabilidad de Fechas en Persistencia: Descarte de `@CreateDateColumn` en `CustomerTypeOrmEntity`
 - **El error de la IA:** La entidad TypeORM de clientes se definió inicialmente con `@CreateDateColumn({ type: 'datetime' })`.
 - **Tu corrección:** Me señalaste: *"En DDD el dominio gobierna sus invariantes y genera su propio `createdAt = new Date()`. `@CreateDateColumn` hace que TypeORM intercepte el `INSERT` y ponga su propio `NOW()`, generando dos fechas distintas entre memoria y base de datos con unos milisegundos de discrepancia. Usa `@Column('datetime')` para respetar fielmente el valor del dominio y limpia el import no utilizado"*.
-- **Solución aplicada:** Se sustituyó por `@Column('datetime')` tanto en `CustomerTypeOrmEntity` como en `SimulationTypeOrmEntity`, unificando el principio de inmutabilidad de fechas entre capas en todo el backend.---
+- **Solución aplicada:** Se sustituyó por `@Column('datetime')` tanto en `CustomerTypeOrmEntity` como en `SimulationTypeOrmEntity`, unificando el principio de inmutabilidad de fechas entre capas en todo el backend.
 
-## Sección 5: Decisiones de Arquitectura Avanzada y Desacoplamiento de Módulos
-
-### 5.1. Desacoplamiento de Bounded Contexts: `GET /simulations?customerId=` vs `forwardRef`
-
-- **Situación inicial:** `GET /customers/:id` devolvía el cliente con un array `simulations: []` hardcodeado (placeholder). Para poblarlo había que inyectar `SIMULATION_REPOSITORY_PORT` en `CustomersModule`, lo que creaba una **dependencia circular**:
-  - `SimulationsModule` → importa `CustomersModule` (para verificar que el cliente existe al crear una simulación)
-  - `CustomersModule` → importaría `SimulationsModule` (para leer el historial de simulaciones)
-- **Opciones evaluadas:**
-  1. **`forwardRef` (Opción 1):** Parche de NestJS para romper el ciclo. Funciona, pero es un *code smell* reconocido por la comunidad: indica que dos módulos que debían ser independientes están acoplados en ambas direcciones.
-  2. **2 endpoints independientes (Opción 2):** `GET /customers/:id` devuelve el cliente plano. El historial se consulta con `GET /simulations?customerId=:id` en su propio bounded context. El frontend compone ambas respuestas en paralelo (`forkJoin`).
-  3. **Puerto de consulta con inversión de dependencia (Opción 3):** Interfaz `CustomerSimulationsPort` en `Customers` implementada por `Simulations`. Mantiene la respuesta unificada pero añade capas y sigue requiriendo resolución de ciclo en el wiring de NestJS.
-- **Decisión tomada (Opción 2):** Se eligió el enfoque REST puro con dos endpoints desacoplados por las siguientes razones:
-  - **DDD puro:** Un `Customer` y su historial de facturación son dos Bounded Contexts distintos. `CustomersModule` no tiene razón de negocio para conocer la estructura interna de `SimulationsModule`.
-  - **Sin deuda técnica:** Cero `forwardRef`, cero acoplamiento circular.
-  - **Escalabilidad:** Si en el futuro `Simulations` se extrae a un microservicio, `Customers` no se toca.
-  - **Componibilidad en el frontend:** `forkJoin([getCustomer(id), getSimulations(id)])` es un patrón estándar en Angular y más eficiente (peticiones paralelas).
-- **Cambios aplicados:**
-  - Nuevo use-case `ListSimulationsByCustomerUseCase` en `simulations/application/use-cases/`.
-  - `SimulationController` recibe `GET /simulations?customerId=:id` y delega al nuevo use-case.
-  - `CustomerController.getById` devuelve `CustomerResponseDto` plano (no `CustomerDetailResponseDto`).
-  - `openapi.yaml` actualizado: `GET /customers/{id}` devuelve `Customer`, `GET /simulations` documenta el query param `customerId`.
-  - Eliminado el schema `CustomerWithSimulations` del contrato OpenAPI.
 ---
 
 ## Sección 4: Módulo de Simulaciones (`Simulations`) y Estabilización de Tests ESM
@@ -216,7 +172,23 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
 - **Tu detección y corrección técnica:**
   - Me reportaste el error en caliente en `typeorm.config.ts`. Auditamos los tipos internos de TypeORM 1.1 (`DatabaseType`) y comprobamos que TypeORM eliminó el driver legacy `'sqlite'` (paquete `sqlite3` asíncrono de callbacks) en favor de `'better-sqlite3'` (driver síncrono nativo, mucho más rápido y sin fugas de memoria).
   - Se corrigió el tipo a `type: 'better-sqlite3'` instalando `better-sqlite3` y sus tipos.
-  - Se sustituyó el glob frágil por `autoLoadEntities: true`, haciendo que cada módulo (`CustomersModule`, `SimulationsModule`) registre sus entidades de forma verdaderamente modular mediante `TypeOrmModule.forFeature()`.---
+  - Se sustituyó el glob frágil por `autoLoadEntities: true`, haciendo que cada módulo (`CustomersModule`, `SimulationsModule`) registre sus entidades de forma verdaderamente modular mediante `TypeOrmModule.forFeature()`.
+
+### 4.9. Naming Semántico y Convención Enterprise: `mic-saas-omatic` y `spa-saas-omatic`
+- **El error de la IA:** La carpeta raíz del servidor NestJS se scaffoldeó inicialmente como `api/` y el frontend como `dashboard/`.
+- **Tu corrección y dirección técnica (feedback de Andrés, evaluador de Roams):**
+  - *"Si a mí me pones todo el código en una carpeta llamada api y me dices que eso es una API, es un KO aunque esté todo lo demás OK. Una API es un YAML, un contrato."*
+  - *"Yo le llamaría `mic-saas-omatic` (microservicio backend) y el otro `spa-saas-omatic` (Single Page Application Angular)."*
+- **Razonamiento técnico:**
+  - En la industria y en proyectos corporativos maduros, una **API** es la especificación o contrato de interfaz (el `openapi.yaml` que reside en `01-specs/`). Llamar `api` a la implementación entera del backend confunde la especificación con la implementación de software.
+  - La nomenclatura prefijada `mic-` (Microservicio NestJS) y `spa-` (Single Page Application Angular) refleja con exactitud la naturaleza del artefacto desplegable y sigue las convenciones habituales de repositorios multi-proyecto / monorepos corporativos.
+- **Solución aplicada:**
+  - Renombrado de `api/` a `mic-saas-omatic/` y de `dashboard/` a `spa-saas-omatic/` mediante `git mv` para preservar el historial atómico de commits en Git.
+  - Actualización de `"name": "mic-saas-omatic"` en `mic-saas-omatic/package.json`.
+  - Actualización de `"name": "spa-saas-omatic"` en `spa-saas-omatic/package.json`.
+  - Actualización del árbol canónico en `architecture-guidelines.md`.
+
+---
 
 ## Sección 5: Decisiones de Arquitectura Avanzada y Desacoplamiento de Módulos
 
@@ -240,5 +212,67 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - `CustomerController.getById` devuelve `CustomerResponseDto` plano (no `CustomerDetailResponseDto`).
   - `openapi.yaml` actualizado: `GET /customers/{id}` devuelve `Customer`, `GET /simulations` documenta el query param `customerId`.
   - Eliminado el schema `CustomerWithSimulations` del contrato OpenAPI.
+
+### 5.2. Auditoría de la Pirámide de Testing: Cobertura E2E contra SQLite Real y Pipeline HTTP
+
+- **El sesgo de la IA y situación inicial:** La IA cayó en el sesgo típico de los copilotos generativos: tras desarrollar los componentes fichero a fichero acompañados de sus tests unitarios aislados con mocks, declaró apresuradamente la API como "100% completada y probada". Omitió por completo el escalón intermedio y superior de la pirámide de pruebas (integración y E2E), dejando intacto en `test/app.e2e-spec.ts` el test residual del scaffolding inicial (`Hello World!`).
+- **Tu intervención y dirección técnica:** Me frenaste en seco con una auditoría crítica de calidad: *"Un momento, revisa si los tipos de tests están cubiertos, los de integración y unitarios"*.
+- **La carencia arquitectónica detectada:**
+  - Los adaptadores de persistencia (`CustomerPersistenceAdapter`, `SimulationPersistenceAdapter`) solo estaban testeados unitariamente falseando el `Repository` de TypeORM con mocks de Jest.
+  - No existía ninguna prueba que levantara la aplicación NestJS completa con una base de datos SQLite real para verificar:
+    1. **Persistencia y Driver Real:** Que `better-sqlite3` ejecuta las sentencias SQL reales, respeta la inmutabilidad de fechas `@Column('datetime')` generadas por el dominio, no trunca importes monetarios decimales y resuelve la búsqueda con comodines `Like(...)`.
+    2. **Pipeline HTTP Integral:** Que `ValidationPipe` (con `whitelist` y `forbidNonWhitelisted`) y el filtro global RFC 7807 (`application/problem+json`) operan en armonía ante llamadas HTTP reales (`supertest`).
+- **Solución técnica implementada:**
+  - Se adaptó `test/jest-e2e.json` para ejecutar bajo ES Modules nativo en NestJS 12 (`useESM`, `tsconfig.spec.json`, mapeador de imports).
+  - Se creó `test/setup-e2e.ts` y se configuró `typeorm.config.ts` con `process.env.DATABASE_NAME || 'saas_o_matic.sqlite'` para aislar la base de datos de pruebas bajo `saas_o_matic.test.sqlite` (limpiándola automáticamente en `beforeAll` y `afterAll` sin alterar los datos de desarrollo).
+  - Se implementó la suite completa de integración `test/saas-o-matic.e2e-spec.ts` con `supertest`, validando:
+    - Registro de cliente con CIF español válido (`201 Created`).
+    - Rechazo de CIF inválido mediante algoritmo fiscal con cabecera `application/problem+json` (`400 Bad Request`).
+    - Detección de duplicidad de `taxId` normalizado (`409 Conflict`).
+    - Búsqueda insensible a mayúsculas y tolerante a guiones (`GET /customers?search=b-1234`).
+    - Consulta de cliente por ID (`200 OK`) y recurso no encontrado (`404 Not Found`).
+    - Simulación con cálculo de tramos e IVA español para 15 usuarios (140 € base + 29.40 € IVA = 169.40 €).
+    - Simulación multi-país para cliente alemán (19% MwSt sobre 470 € base = 559.30 € total).
+    - Rechazo de métricas negativas (`400 Bad Request` con `invalidParams`).
+    - Historial cronológico de simulaciones por cliente (`GET /simulations?customerId=...`).
+
+### 5.3. Depuración y Estabilización E2E: Bloqueos de SQLite y Validación en Capas (Sintáctica vs Semántica)
+
+- **Situación al ejecutar `npm run test:e2e`:** Tras generar la suite de integración, 11 tests pasaron en verde pero surgieron 2 fallos y una advertencia de base de datos bloqueada en el terminal:
+  1. `QueryFailedError: SqliteError: database is locked`: TypeORM fallaba al intentar sincronizar el esquema.
+  2. `POST /simulations` devolvía `400 Bad Request` en lugar de `404 Not Found` al simular con un cliente inexistente.
+  3. `GET /customers/:id` fallaba por aserción de texto en el mensaje de error de detalle.
+- **Auditoría técnica de las causas:**
+  - *Bloqueo concurrente de SQLite:* Jest ejecuta los ficheros de pruebas en paralelo por defecto utilizando múltiples procesos trabajadores (*workers*). Tanto `app.e2e-spec.ts` como `saas-o-matic.e2e-spec.ts` levantaron sendas instancias de la aplicación NestJS que intentaron ejecutar `DataSource.synchronize()` sobre el mismo archivo `saas_o_matic.test.sqlite` en el mismo milisegundo. Al ser SQLite un motor de base de datos embebido monoproceso para escrituras, la segunda conexión quedó bloqueada.
+  - *Precedencia de validación (Transporte DTO vs Negocio):* La IA utilizó `'11111111-1111-1111-1111-111111111111'` como identificador falso en el test de simulación, esperando que el caso de uso lanzara `EntityNotFoundError` (404). Sin embargo, esa cadena no cumple la estructura formal de un **UUID v4** (el carácter de versión debe ser `4`). El `ValidationPipe` global con `@IsUUID('4')` en `CreateSimulationDto` interceptó la petición en la capa de transporte HTTP y la rechazó legítimamente con `400 Bad Request` antes de que alcanzara la base de datos o el caso de uso.
+  - *Discrepancia en mensaje de dominio:* El test esperaba el texto `"with identifier"`, mientras que la excepción pura de dominio `EntityNotFoundError` genera `"with id"`.
+- **Solución aplicada:**
+  - Se configuró `"maxWorkers": 1` en `mic-saas-omatic/test/jest-e2e.json` para forzar la ejecución secuencial determinista de los tests de integración sobre SQLite.
+  - Se corrigió el test utilizando un UUID v4 sintácticamente perfecto pero inexistente en base de datos (`'b0000000-0000-4000-8000-000000000000'`), demostrando en la suite la separación real entre validación sintáctica de DTOs (400) y validación semántica de existencia en dominio (404).
+  - Se alineó la aserción con la plantilla oficial de `EntityNotFoundError` (`"Customer with id '...' was not found."`).
+
+### 5.4. Estrategia de Ejecución de Pruebas: Desacoplamiento de Feedback Loops y Script `test:all`
+
+- **Dilema técnico planteado:** ¿Deben ejecutarse los tests unitarios y de integración juntos en un único comando o mantenerse en comandos independientes?
+- **Auditoría de mejores prácticas enterprise:**
+  - *Desarrollo local iterativo (TDD / Vibe Coding):* Deben mantenerse separados. Los tests unitarios (`npm test`) se resuelven en memoria en menos de 1 segundo mediante mocks, permitiendo un ciclo de realimentación inmediato (*instant feedback loop*) con `npm run test:watch`. Por contra, los tests de integración (`npm run test:e2e`) levantan el servidor HTTP real, realizan operaciones de I/O contra SQLite en disco y sincronizan el esquema de la base de datos, lo que introduciría una fricción temporal inasumible si se ejecutaran a cada guardado de archivo.
+  - *Pipelines de CI/CD y control pre-commit:* En etapas de integración continua o justo antes de consolidar un commit en Git, es imprescindible validar **la totalidad de la pirámide de pruebas** en una sola orden encadenada que aplique la política de *fail-fast* (si fallan los unitarios, no se ejecutan los E2E).
+- **Solución implementada:**
+  - Se añadió el script unificado `"test:all": "npm test && npm run test:e2e"` en `mic-saas-omatic/package.json`.
+  - Se documentó la filosofía de feedback loops y la tabla de comandos en la Sección 4.2 de `architecture-guidelines.md`.
+
+### 5.5. Auditoría de Rendimiento y Concurrencia: SQLite WAL vs. Fastify vs. Clustering
+
+- **Pregunta técnica y contexto (Paralelismo con Spring Boot):** Se planteó si en NestJS existía alguna configuración equivalente a los *Virtual Threads* de Java 21 (`spring.threads.virtual.enabled=true`) para maximizar el rendimiento.
+- **Análisis del modelo de ejecución (Java vs. Node.js):**
+  - En Spring Boot tradicional, cada petición ocupa un hilo del Sistema Operativo (~1 MB de memoria). Los Virtual Threads nacen para sustituir esos hilos por corrutinas ligeras y evitar el colapso por cambio de contexto en I/O bloqueante.
+  - En Node.js / NestJS, **el Event Loop (reactor pattern con `libuv`) es no bloqueante por diseño** desde el primer día. Las operaciones de red y sockets no retienen hilos del SO; por tanto, no existe ni se necesita una bandera de "hilos virtuales".
+- **Evaluación y dictamen sobre las 3 palancas de rendimiento:**
+  1. *Motor HTTP (Fastify vs. Express):* **Descartada conscientemente.** Express atiende holgadamente más de 10.000 req/s. Cambiar el adaptador a Fastify aportaría sobre-ingeniería sin beneficio perceptible para una herramienta comercial interna.
+  2. *Concurrencia en Base de Datos (SQLite WAL Mode):* **APLICADA.** Se activó `enableWAL: true` en `typeOrmSqliteConfig` (`better-sqlite3`). SQLite opera por defecto con *Rollback Journal* (las escrituras bloquean a los lectores). Con el modo WAL (*Write-Ahead Logging*), las lecturas y las escrituras se desacoplan por completo, permitiendo que múltiples comerciales consulten clientes mientras se persisten simulaciones simultáneamente.
+  3. *Multi-proceso / Clustering:* **Descartada conscientemente.** En arquitecturas con SQLite embebido, levantar un clúster de múltiples procesos Node.js compitiendo por el bloqueo del archivo local en disco es contraproducente. La arquitectura canónica recomendada es un único proceso Node.js optimizado con el driver C++ nativo de `better-sqlite3`.
+
+
+
 
 
