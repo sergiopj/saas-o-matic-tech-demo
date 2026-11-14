@@ -101,8 +101,11 @@
   color: var(--roams-text-secondary);
   margin-bottom: 0.5rem;
 
+  .empty-icon,
   .material-symbols-outlined {
     font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
   }
 }
 

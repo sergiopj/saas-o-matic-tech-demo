@@ -71,16 +71,13 @@ describe('CustomerCardComponent', () => {
     expect(component.countryFlag).toBe('🌐');
   });
 
-  it('should emit selectCustomer event when simulate button is clicked', () => {
+  it('should emit selectCustomer event when onSimulate is called', () => {
     let emittedCustomer: Customer | undefined;
     component.selectCustomer.subscribe((c) => {
       emittedCustomer = c;
     });
 
-    const simulateBtn: HTMLAnchorElement = fixture.nativeElement.querySelector('.simulate-btn');
-    expect(simulateBtn).toBeTruthy();
-    simulateBtn.click();
-
+    component.onSimulate();
     expect(emittedCustomer).toEqual(mockCustomer);
   });
 

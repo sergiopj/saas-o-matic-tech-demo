@@ -6,7 +6,7 @@ import { CustomerApiService } from '../../services/customer-api.service';
 import { Customer } from '../../models/customer.model';
 import { CustomerSearchBarComponent } from '../../components/customer-search-bar/customer-search-bar.component';
 import { CustomerCardComponent } from '../../components/customer-card/customer-card.component';
-import { ErrorBannerComponent } from '../../../shared/components/error-banner/error-banner.component';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({

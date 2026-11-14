@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CustomerSearchBarComponent } from './customer-search-bar.component';
 import { I18nService } from '../../../../core/services/i18n.service';
 
@@ -8,6 +8,8 @@ describe('CustomerSearchBarComponent', () => {
   let i18nService: I18nService;
 
   beforeEach(async () => {
+    vi.useFakeTimers();
+
     await TestBed.configureTestingModule({
       imports: [CustomerSearchBarComponent],
     }).compileComponents();
@@ -17,6 +19,10 @@ describe('CustomerSearchBarComponent', () => {
     i18nService = TestBed.inject(I18nService);
     i18nService.setLanguage('es');
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should create the search bar component', () => {
@@ -29,7 +35,7 @@ describe('CustomerSearchBarComponent', () => {
     expect(inputEl.placeholder).toBe('Buscar por empresa, CIF/NIF o email...');
   });
 
-  it('should emit search term after 300ms debounce', fakeAsync(() => {
+  it('should emit search term after 300ms debounce', () => {
     let emittedTerm = '';
     component.searchChange.subscribe((term) => {
       emittedTerm = term;
@@ -38,47 +44,47 @@ describe('CustomerSearchBarComponent', () => {
     component.onInput('Roams Tech');
     expect(emittedTerm).toBe('');
 
-    tick(299);
+    vi.advanceTimersByTime(299);
     expect(emittedTerm).toBe('');
 
-    tick(1);
+    vi.advanceTimersByTime(1);
     expect(emittedTerm).toBe('Roams Tech');
-  }));
+  });
 
-  it('should not emit duplicate consecutive terms (distinctUntilChanged)', fakeAsync(() => {
+  it('should not emit duplicate consecutive terms (distinctUntilChanged)', () => {
     let emitCount = 0;
     component.searchChange.subscribe(() => {
       emitCount++;
     });
 
     component.onInput('Acme');
-    tick(300);
+    vi.advanceTimersByTime(300);
     expect(emitCount).toBe(1);
 
     component.onInput('Acme');
-    tick(300);
+    vi.advanceTimersByTime(300);
     expect(emitCount).toBe(1);
-  }));
+  });
 
-  it('should show clear button when query is present and reset on click', fakeAsync(() => {
+  it('should show clear button when query is present and reset on click', () => {
     let emittedTerm = 'initial';
     component.searchChange.subscribe((term) => {
       emittedTerm = term;
     });
 
     component.onInput('Telefónica');
-    tick(300);
+    vi.advanceTimersByTime(300);
     fixture.detectChanges();
 
     const clearBtn = fixture.nativeElement.querySelector('.clear-button');
     expect(clearBtn).toBeTruthy();
 
     clearBtn.click();
-    tick(300);
+    vi.advanceTimersByTime(300);
     fixture.detectChanges();
 
     expect(component['query']()).toBe('');
     expect(emittedTerm).toBe('');
     expect(fixture.nativeElement.querySelector('.clear-button')).toBeNull();
-  }));
+  });
 });

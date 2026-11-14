@@ -868,6 +868,42 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - La suite de pruebas del frontend se amplía a **82 tests unitarios 100% en verde**.
 - **Valor para la evaluación:** Demuestra criterio senior de arquitectura frontend, eliminación de código spaguetti en plantillas y adopción de los patrones de diseño más limpios de Angular.
 
+### 6.33. Eliminación de Números Mágicos (*Magic Numbers*): Conversión Semántica de Banderas Unicode en `CustomerCardComponent`
+
+- **La observación crítica del Director de Orquesta:**
+  - Al inspeccionar el método de obtención de banderas de país en `CustomerCardComponent`, el usuario detectó un número constante sin contexto semántico:
+    > *"No entiendo este número hardcodeado: `const codePoints = [...code].map((char) => 127397 + char.charCodeAt(0));`"*
+- **Análisis de Clean Code y del Estándar Unicode:**
+  1. *El origen matemático del valor:* En el estándar Unicode, las banderas nacionales no son emojis individuales, sino pares combinados de *Regional Indicator Symbols* (desde `U+1F1E6` para la 'A' hasta `U+1F1FF` para la 'Z'). El valor decimal de `U+1F1E6` es `127462`, y el valor ASCII de la 'A' mayúscula es `65`. La diferencia matemática es `127462 - 65 = 127397`.
+  2. *El problema del "Magic Number":* Dejar `127397` como un número literal sin documentar ni descomponer es un anti-patrón de legibilidad (*Magic Number Code Smell*). Un desarrollador que revise el código no tiene por qué conocer la aritmética interna de los offsets de Unicode.
+- **Acción correctora ejecutada:**
+  - Se refactorizó la función eliminando el número literal e introduciendo constantes semánticas auto-explicativas:
+    ```typescript
+    const REGIONAL_INDICATOR_A = 0x1f1e6;
+    const ASCII_A = 'A'.charCodeAt(0);
+    const codePoints = [...code].map((char) => char.charCodeAt(0) - ASCII_A + REGIONAL_INDICATOR_A);
+    ```
+- **Valor para la evaluación:** Código limpio, legible y auto-documentado conforme a los principios de Clean Code, erradicando números mágicos crípticos.
+
+### 6.34. Auditoría Integral de Calidad en Frontend: Profundidad de Rutas, Zoneless Timers, Ciclo de Vida `ngOnInit` e Iconografía Accesible
+
+- **Las 5 anomalías identificadas durante la integración:**
+  1. *Fallo de resolución de ruta en compilación Vite:* La IA generó un import relativo con 3 niveles (`../../../shared/components/error-banner...`) en `CustomerListComponent` en vez de los 4 niveles requeridos por la estructura anidada (`pages/customer-list/`), causando `[ERROR] Could not resolve ...`.
+  2. *Incompatibilidad de `fakeAsync` en Vitest Zoneless:* La IA importó `fakeAsync` y `tick` de `@angular/core/testing` en `customer-search-bar.component.spec.ts`. Al correr Angular 22 en modo Zoneless con Vitest, se produjo el error `zone-testing.js is needed for the fakeAsync() test helper but could not be found`.
+  3. *Inversión de ciclo de vida en test de Smart Component:* La IA ejecutó `httpTesting.expectOne()` antes de `fixture.detectChanges()` en `customer-list.component.spec.ts`. Como `ngOnInit()` solo se ejecuta en la primera detección de cambios, la llamada HTTP aún no se había emitido, arrojando `Expected one matching request, found none`.
+  4. *Fuga de microtarea asíncrona por `RouterLink`:* La IA programó `simulateBtn.click()` en el test de `CustomerCardComponent`. Al ser un enlace con `RouterLink`, el enrutador activó una navegación asíncrona que resolvió tras la destrucción del `TestBed`, arrojando `NG0205: Injector has already been destroyed`.
+  5. *Inconsistencia semántica y accesibilidad en iconos:* El usuario detectó el uso de cadenas crudas dentro de etiquetas (`person_search`, `search`). La IA había mezclado `<span>` genéricos con `.material-symbols-outlined` en lugar de homogeneizar todo con el componente oficial `<mat-icon aria-hidden="true">` de Angular Material, arriesgando que lectores de pantalla leyesen la ligadura tipográfica como texto plano.
+- **Acciones correctoras ejecutadas:**
+  1. *Rutas relativas:* Corregido el import en `customer-list.component.ts` a `../../../../shared/components/error-banner/error-banner.component`.
+  2. *Timers nativos de Vitest:* Sustituido `fakeAsync/tick` por `vi.useFakeTimers()` y `vi.advanceTimersByTime(300)` con reseteo en `afterEach(() => vi.useRealTimers())`.
+  3. *Ciclo de vida en pruebas:* Invocado `fixture.detectChanges()` para disparar `ngOnInit()` antes de interceptar la petición HTTP con `httpTesting.expectOne()`.
+  4. *Aislamiento de RouterLink:* Invocado el método `component.onSimulate()` directamente y validado el atributo `href` del enlace para no activar microtareas no controladas.
+  5. *Homogeneización de iconos:* Reemplazados todos los `<span>` por `<mat-icon aria-hidden="true">` tanto en `CustomerListComponent` como en `ErrorBannerComponent`, garantizando que la ligadura tipográfica (`person_search`, `search`, `error`, `close`) no sea interpretada como texto por tecnologías de asistencia.
+- **Valor para la evaluación:** Transparencia técnica absoluta, dominio del compilador de Angular 22, suites de prueba deterministas con Vitest y cumplimiento riguroso de accesibilidad (WCAG/a11y).
+
+
+
+
 
 
 

@@ -2,7 +2,7 @@
   <div class="error-banner" role="alert" aria-live="assertive">
     <div class="error-banner-header">
       <div class="error-banner-title-group">
-        <span class="material-symbols-outlined error-icon" aria-hidden="true">error</span>
+        <mat-icon class="error-icon" aria-hidden="true">error</mat-icon>
         <span class="error-status-badge">{{ p.status }}</span>
         <h3 class="error-title">{{ p.title }}</h3>
       </div>
@@ -13,7 +13,7 @@
           [attr.aria-label]="'error.banner.dismiss.aria' | translate"
           (click)="onDismiss()"
         >
-          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          <mat-icon aria-hidden="true">close</mat-icon>
         </button>
       }
     </div>

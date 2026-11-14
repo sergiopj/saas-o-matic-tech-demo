@@ -302,6 +302,27 @@ Para mantener el principio de código en inglés y desacoplar la lógica de la p
 - **Cero Boilerplate:** Se prohíbe escribir la propiedad redundante `standalone: true` en los metadatos de componentes, directivas o pipes. Únicamente en el caso excepcional de requerir integración con un `NgModule` legacy se especificaría de forma explícita `standalone: false`.
 - **Imports Quirúrgicos:** Los componentes declaran en `imports: [...]` exclusivamente los componentes, pipes o módulos de Angular Material que consumen sus plantillas, evitando bundles inflados.
 
+### 3.7 Clean Code y Erradicación de Números Mágicos (Banderas Unicode)
+
+- **Prohibición de Magic Numbers:** Toda constante matemática u offset dentro de componentes visuales debe descomponerse en variables semánticas auto-explicativas con referencias al estándar correspondiente.
+- **Conversión Canónica de Banderas ISO a Emoji (`CustomerCardComponent`):**
+  En lugar de sumar números literales crípticos (`127397`), el cálculo de banderas regionales se documenta y desglosa formalmente:
+  ```typescript
+  // Unicode Standard: Regional Indicator Symbol 'A' is U+1F1E6
+  // Offset converts standard ASCII 'A'-'Z' into Unicode flag indicator characters
+  const REGIONAL_INDICATOR_A = 0x1f1e6;
+  const ASCII_A = 'A'.charCodeAt(0);
+  const codePoints = [...code].map((char) => char.charCodeAt(0) - ASCII_A + REGIONAL_INDICATOR_A);
+  return String.fromCodePoint(...codePoints);
+  ```
+  Esto permite derivar dinámicamente cualquier bandera del mundo a partir de su código ISO-3166-1 alpha-2 (`ES -> 🇪🇸`, `US -> 🇺🇸`) sin dependencias de librerías externas ni assets gráficos estáticos pesados.
+
+### 3.8 Estándar de Iconografía y Accesibilidad (Ligaduras de Material Symbols y `aria-hidden`)
+
+- **Componente Oficial `<mat-icon>`:** Se prescribe el uso exclusivo de `<mat-icon>` de Angular Material frente a etiquetas `<span>` genéricas.
+- **Funcionamiento por Ligaduras OpenType:** Palabras clave en inglés como `search`, `close`, `mail` o `person_search` son ligaduras tipográficas que la fuente vectorial de Google sustituye por glifos en el canvas.
+- **Accesibilidad Estricta (`aria-hidden="true"`):** Todo icono decorativo o acompañado de etiqueta descriptiva debe portar `aria-hidden="true"`. Esto previene que las tecnologías de asistencia para personas con discapacidad visual pronuncien la palabra técnica del icono (ej. "search") en lugar del texto accesible traducido (`[attr.aria-label]="'customers.search.aria' | translate"`).
+
 ---
 
 ## 4. Estrategia de Testing y Aseguramiento de Calidad
@@ -320,6 +341,9 @@ Para mantener el principio de código en inglés y desacoplar la lógica de la p
    - Ciclo de vida HTTP completo: `ValidationPipe` (whitelist + forbidNonWhitelisted), filtro global RFC 7807 (`application/problem+json`), casos de uso y repositorios `better-sqlite3`.
 4. **Higiene y Política de Salida Limpia en Tests (Zero-Stderr Policy):**
    - En pruebas de resiliencia y contingencia de red, los logs defensivos esperados (`console.warn`) son interceptados y verificados con espías de Vitest (`vi.spyOn`), garantizando que la salida de pruebas para el evaluador esté libre de trazas de error confusas en la consola.
+5. **Testing en Entornos Zoneless con Vitest:**
+   - En Angular 22 zoneless, se descartan los helpers legacy dependientes de `zone.js` (`fakeAsync`, `tick`). Se adoptan los timers nativos de Vitest (`vi.useFakeTimers()`, `vi.advanceTimersByTime()`, `vi.useRealTimers()`).
+   - El ciclo de vida de los Smart Components exige ejecutar `fixture.detectChanges()` para disparar `ngOnInit()` antes de esperar peticiones en `HttpTestingController`.
 
 ### 4.2 Scripts de Ejecución y Filosofía de Feedback Loops
 

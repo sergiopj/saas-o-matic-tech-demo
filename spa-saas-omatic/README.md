@@ -14,7 +14,7 @@ El frontend sigue una arquitectura orientada al dominio (**Feature-Driven**) con
   - `models/`: Modelo de divisas (`currency.model.ts`) utilizando el patrón **`as const`** de TypeScript moderno.
   - `services/`: Tipos de cambio (`currency.service.ts`) y servicio de localización reactiva con Signals (`i18n.service.ts`).
 - **`src/app/modules/`**: Módulos funcionales de negocio (simetría estricta con `mic-saas-omatic`):
-  - `customers/`: Búsqueda, listado en tarjetas y detalle de clientes (`customer-api.service.ts`).
+  - `customers/`: Búsqueda reactiva con debounce de 300ms (`customer-search-bar/`), tarjetas corporativas Roams con bordes de 16px y banderas Unicode dinámicas calculadas sin números mágicos (`customer-card/`), listado responsivo con empty/loading states (`customer-list/`) y cliente API reactivo con Signals (`customer-api.service.ts`).
   - `simulations/`: Historial, cálculo de tramos a 60 FPS en memoria (`local-pricing-calculator.ts`) y persistencia bajo demanda (`simulation-api.service.ts`).
 - **`src/app/shared/`**: Elementos transversales de UI:
   - `components/`: Navbar corporativa estilo Roams, selector de divisas con Signals y visualizador RFC 7807.

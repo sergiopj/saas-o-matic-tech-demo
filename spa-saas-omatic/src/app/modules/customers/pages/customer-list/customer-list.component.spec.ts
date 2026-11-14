@@ -49,15 +49,18 @@ describe('CustomerListComponent', () => {
     fixture = TestBed.createComponent(CustomerListComponent);
     component = fixture.componentInstance;
     httpTesting = TestBed.inject(HttpTestingController);
-    customerApi = TestBed.inject(CustomerApiService);
     i18nService = TestBed.inject(I18nService);
     i18nService.setLanguage('es');
 
-    // Flush initial GET /customers on ngOnInit
+    // Trigger initial change detection to execute ngOnInit() -> loadCustomers()
+    fixture.detectChanges();
+
+    // Flush initial GET /customers triggered by ngOnInit
     const req = httpTesting.expectOne(`${environment.apiBaseUrl}/customers`);
     expect(req.request.method).toBe('GET');
     req.flush(mockCustomers);
 
+    // Update DOM with flushed customers
     fixture.detectChanges();
   });
 

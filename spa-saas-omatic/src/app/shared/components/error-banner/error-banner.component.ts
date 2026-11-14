@@ -1,10 +1,11 @@
 import { Component, input, output } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { ProblemDetail } from '../../../core/errors/problem-detail.model';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-error-banner',
-  imports: [TranslatePipe],
+  imports: [MatIconModule, TranslatePipe],
   templateUrl: './error-banner.component.html',
   styleUrl: './error-banner.component.scss',
 })
