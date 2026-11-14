@@ -4,7 +4,6 @@ import { CurrencyCode, CURRENCY_METADATA } from '../../core/models/currency.mode
 
 @Pipe({
   name: 'localizedCurrency',
-  standalone: true,
   pure: false,
 })
 export class LocalizedCurrencyPipe implements PipeTransform {

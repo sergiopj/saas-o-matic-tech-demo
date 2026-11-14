@@ -796,6 +796,48 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   4. Se añadió `stylePreprocessorOptions` en `spa-saas-omatic/angular.json`.
 - **Valor para la evaluación:** Refleja maestría en arquitectura frontend, modularidad según estándares de Sass/Angular y la capacidad del Director de Orquesta de elevar la calidad del código mediante refactorizaciones estructurales limpias.
 
+### 6.28. Implementación del Componente de Feedback y Resiliencia `ErrorBannerComponent` (RFC 7807)
+
+- **El requerimiento funcional y de resiliencia:**
+  - El frontend requería un componente visual transversal para mostrar errores de forma estructurada según la especificación RFC 7807 (`application/problem+json`) emitida por el backend NestJS o el interceptor de red.
+- **Criterios de diseño y accesibilidad:**
+  1. *Arquitectura Standalone con Signals:* Empleo de `input<ProblemDetail | null>(null)`, `input<boolean>(true)` y `output<void>()` de Angular 22, sin decoradores obsoletos (`@Input`, `@Output`).
+  2. *Accesibilidad (a11y):* Marcado semántico con `role="alert"` y `aria-live="assertive"`, permitiendo a lectores de pantalla vocalizar los fallos inmediatamente.
+  3. *Visualización de Validación Estructurada:* Renderizado condicional mediante `@if (p.invalidParams?.length)` con una tabla estilizada de parámetros no válidos (`name` y `reason`) usando tokens `--roams-*`.
+  4. *Internacionalización reactiva:* Conexión directa con `I18nService` para los encabezados y etiquetas de accesibilidad en español e inglés.
+- **Acción ejecutada:**
+  - Se crearon los 4 ficheros en `src/app/shared/components/error-banner/` (`error-banner.component.ts`, `.html`, `.scss`, `.spec.ts`).
+  - Se añadieron 7 pruebas unitarias cubriendo renderizado nulo, presentación de código HTTP, detalle, desglose de parámetros no válidos, evento de descarte y cambio dinámico de idioma.
+- **Valor para la evaluación:** Coherencia de diseño de extremo a extremo (Backend RFC 7807 -> Interceptor -> Banner UI accesible) y tolerancia a fallos contrastada con cobertura exhaustiva.
+
+### 6.29. Erradicación de Boilerplate Redundante: Adopción Estricta de `standalone: true` por Defecto (Angular 19/22)
+
+- **La observación crítica del Director de Orquesta:**
+  - Al revisar los metadatos de `@Component` en los componentes creados, el usuario cuestionó una inercia de código generada por la IA:
+    > *"¿Hace falta poner esto? ¿No es `standalone` a `true` por defecto? ¿O me confundo: `standalone: true`?"*
+- **Análisis de evolución del framework (Angular 14-18 vs. Angular 19+):**
+  1. *El origen de la inercia:* En Angular 14 a 18, los Standalone Components eran opcionales (*opt-in*), por lo que era mandatorio declarar `standalone: true` en `@Component`, `@Directive` y `@Pipe`.
+  2. *El nuevo estándar en Angular 19 y 22:* A partir de Angular 19, el equipo de Google Angular invirtió el comportamiento por defecto: **todos los componentes, directivas y pipes son standalone de forma predeterminada**. Declarar `standalone: true` es código redundante (*dead boilerplate*); únicamente si se requiriera vincular un componente a un `NgModule` legacy se declararía `standalone: false`.
+  3. *Higiene y concisión:* Un código senior para Angular 22 no debe arrastrar residuos sintácticos de versiones anteriores.
+- **Acción correctora ejecutada:**
+  - Se eliminó `standalone: true` de todos los componentes y pipes de la aplicación (`ErrorBannerComponent`, `NavbarComponent`, `CurrencySelectorComponent`, `App`, `LocalizedCurrencyPipe`).
+  - Se incorporó la directriz en las pautas arquitectónicas (`architecture-guidelines.md`, Sección 3.6).
+- **Valor para la evaluación:** Demuestra conocimiento profundo y actualizado de las últimas versiones de Angular (v19/v22) y la capacidad del Director de Orquesta para depurar malas costumbres e inercias sintácticas de los modelos de IA.
+
+### 6.30. Validación y Coherencia de URIs en RFC 7807: Uso Canónico de `about:blank` y Dominio del Sistema
+
+- **La consulta técnica del Director de Orquesta:**
+  - El usuario auditó el valor asignado al campo `type` en el mock de pruebas y en el interceptor, preguntando si el uso de `about:blank` para errores genéricos era canónico y correcto según la especificación.
+- **Análisis de la especificación RFC 7807 (Sección 3.1 y Sección 4.2):**
+  1. *El propósito de `about:blank`:* La RFC 7807 explicita que cuando un problema HTTP no cuenta con una URI documental específica o ocurre fuera del servidor (ej. fallo de red, timeout), el valor del miembro `type` debe ser `about:blank`. Esto formaliza que el fallo no tiene semántica extendida más allá del código HTTP.
+  2. *Coherencia en suites de prueba:* En lugar de usar la URL teórica del borrador del IETF (`https://tools.ietf.org/html/rfc7231#section-6.5.1`), se homogeneizó el `mockProblem` en `error-banner.component.spec.ts` para utilizar el patrón real emitido por el filtro del backend NestJS (`https://errors.saas-o-matic.com/400`).
+- **Acción ejecutada:**
+  - Se sustituyó la URI teórica en el mock del spec por la URL de dominio corporativo del microservicio (`https://errors.saas-o-matic.com/400`), manteniendo `about:blank` en los casos de contingencia de red del interceptor.
+- **Valor para la evaluación:** Alineación y coherencia estricta entre el contrato backend (`ProblemDetailExceptionFilter`), el cliente HTTP frontend (`error.interceptor.ts`) y los mocks de testing unitario.
+
+
+
+
 
 
 

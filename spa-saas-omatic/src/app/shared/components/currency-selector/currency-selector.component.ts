@@ -9,7 +9,6 @@ import { CurrencyCode } from '../../../core/models/currency.model';
 
 @Component({
   selector: 'app-currency-selector',
-  standalone: true,
   imports: [
     MatFormFieldModule,
     MatSelectModule,

@@ -9,6 +9,11 @@ export const TRANSLATIONS = {
     'navbar.subtitle': 'Optimizador Comercial',
     'navbar.lang.aria': 'Cambiar idioma de la aplicación',
     'navbar.home.aria': 'Ir al inicio del Dashboard',
+    'error.banner.dismiss.aria': 'Cerrar notificación de error',
+    'error.banner.invalidParams.title': 'Parámetros no válidos:',
+    'error.banner.field': 'Campo',
+    'error.banner.reason': 'Motivo',
+    'error.banner.status': 'Código HTTP',
   },
   en: {
     'currency.selector.aria': 'Select display currency',
@@ -20,6 +25,11 @@ export const TRANSLATIONS = {
     'navbar.subtitle': 'Commercial Optimizer',
     'navbar.lang.aria': 'Change application language',
     'navbar.home.aria': 'Go to Dashboard home',
+    'error.banner.dismiss.aria': 'Dismiss error notification',
+    'error.banner.invalidParams.title': 'Invalid parameters:',
+    'error.banner.field': 'Field',
+    'error.banner.reason': 'Reason',
+    'error.banner.status': 'HTTP Status',
   },
 } as const;
 

@@ -292,6 +292,12 @@ Para mantener el principio de código en inglés y desacoplar la lógica de la p
 - **Detección Automática con Fallback Regional:** `I18nService` inspecciona `navigator.language` para adaptarse automáticamente a entornos internacionales, manteniendo el español (`'es'`) como idioma predeterminado de la plataforma.
 - **Reactividad con Signals:** El idioma activo se almacena en una Signal `currentLanguage`, provocando el recálculo instantáneo de cualquier vista o mensaje reactivo sin necesidad de recargar la aplicación.
 
+### 3.6 Standalone por Defecto (Angular 19+) y Eliminación de Boilerplate Redundante
+
+- **Standalone Default:** A partir de Angular 19 (y ratificado en Angular 22), todos los decoradores `@Component`, `@Directive` y `@Pipe` son `standalone` por defecto (`standalone: true`).
+- **Cero Boilerplate:** Se prohíbe escribir la propiedad redundante `standalone: true` en los metadatos de componentes, directivas o pipes. Únicamente en el caso excepcional de requerir integración con un `NgModule` legacy se especificaría de forma explícita `standalone: false`.
+- **Imports Quirúrgicos:** Los componentes declaran en `imports: [...]` exclusivamente los componentes, pipes o módulos de Angular Material que consumen sus plantillas, evitando bundles inflados.
+
 ---
 
 ## 4. Estrategia de Testing y Aseguramiento de Calidad

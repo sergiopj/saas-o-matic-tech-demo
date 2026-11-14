@@ -1,0 +1,47 @@
+@if (problem(); as p) {
+  <div class="error-banner" role="alert" aria-live="assertive">
+    <div class="error-banner-header">
+      <div class="error-banner-title-group">
+        <span class="material-symbols-outlined error-icon" aria-hidden="true">error</span>
+        <span class="error-status-badge">{{ p.status }}</span>
+        <h3 class="error-title">{{ p.title }}</h3>
+      </div>
+      @if (dismissable()) {
+        <button
+          type="button"
+          class="dismiss-btn"
+          [attr.aria-label]="i18n.t('error.banner.dismiss.aria')"
+          (click)="onDismiss()"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      }
+    </div>
+
+    @if (p.detail) {
+      <p class="error-detail">{{ p.detail }}</p>
+    }
+
+    @if (p.invalidParams && p.invalidParams.length > 0) {
+      <div class="invalid-params-section">
+        <span class="invalid-params-title">{{ i18n.t('error.banner.invalidParams.title') }}</span>
+        <table class="invalid-params-table">
+          <thead>
+            <tr>
+              <th scope="col">{{ i18n.t('error.banner.field') }}</th>
+              <th scope="col">{{ i18n.t('error.banner.reason') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (param of p.invalidParams; track param.name) {
+              <tr>
+                <td class="param-name"><code>{{ param.name }}</code></td>
+                <td class="param-reason">{{ param.reason }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}

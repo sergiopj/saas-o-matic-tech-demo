@@ -8,7 +8,6 @@ import { I18nService } from '../../../core/services/i18n.service';
 
 @Component({
   selector: 'app-navbar',
-  standalone: true,
   imports: [
     RouterLink,
     MatToolbarModule,
