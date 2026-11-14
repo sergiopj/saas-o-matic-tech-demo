@@ -20,7 +20,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         ...(typeof err.error === 'object' && err.error !== null ? err.error : {}),
         title: err.error?.title || i18n.t('error.communication.title'),
         detail: err.error?.detail || i18n.t('error.communication.detail'),
-        status: err.status,
+        status: err.status ? err.status : undefined,
       };
 
       return throwError(() => problem);
