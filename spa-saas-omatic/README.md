@@ -19,6 +19,10 @@ El frontend sigue una arquitectura orientada al dominio (**Feature-Driven**) con
 - **`src/app/shared/`**: Elementos transversales de UI:
   - `components/`: Navbar corporativa estilo Roams, selector de divisas con Signals y visualizador RFC 7807.
   - `pipes/`: `localized-currency.pipe.ts` con internacionalización nativa mediante `Intl.NumberFormat` (respetando orden de símbolos, puntuación cultural de millares/decimales y especificidades como 0 decimales en `JPY`).
+- **`src/styles/`**: Arquitectura modular de estilos (Patrón 7-1 de Sass):
+  - `_colors.scss`: Paleta corporativa de Roams, variables compile-time y Design Tokens `--roams-*` en `:root`.
+  - `_variables.scss`: Geometría de curvatura (`--roams-radius-*`) y matrices de sombras de elevación (`--roams-shadow-*`).
+  - `styles.scss`: Orquestador raíz limpio con soporte de `stylePreprocessorOptions` en `angular.json`.
 
 Para ver las directrices completas, consulta [`../ai-workspace/02-architecture/architecture-guidelines.md`](../ai-workspace/02-architecture/architecture-guidelines.md).
 

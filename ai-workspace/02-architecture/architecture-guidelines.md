@@ -241,15 +241,24 @@ spa-saas-omatic/
 │   │   ├── app.config.ts                                    # Configuración global (provideHttpClient, Router)
 │   │   └── app.routes.ts                                    # Configuración de rutas con Lazy Loading
 │   ├── index.html
-│   └── styles.scss                                          # CSS Grid / Flexbox + Custom Roams SCSS Theme
+│   ├── styles/                                              # Arquitectura modular SCSS (Patrón 7-1)
+│   │   ├── _colors.scss                                     # Paleta corporativa Roams + Design Tokens :root
+│   │   └── _variables.scss                                  # Radios y elevación de sombras
+│   └── styles.scss                                          # Orquestador SCSS raíz (@use 'colors', 'variables')
 ├── angular.json
 ├── package.json
 └── tsconfig.json
 ```
 
-### 3.2 Sistema de Diseño, UI y Design Tokens Corporativos (Angular Material + SCSS)
+### 3.2 Sistema de Diseño, UI y Design Tokens Corporativos (Angular Material + SCSS Modular)
 - **UI Framework:** Angular Material. Se elige porque el Dashboard necesita slider, formularios, select de divisa y tarjetas con accesibilidad nativa (a11y) y componentes probados desde el minuto uno, sin tener que construir el slider desde cero.
-- **Design Tokens Corporativos Roams (`--roams-*`):** Inspirados en la identidad visual de `roams.es`, en `:root` de `src/styles.scss` se centraliza la paleta corporativa:
+- **Arquitectura Modular de Estilos SCSS (Patrón 7-1 / Single Source of Truth):**
+  En lugar de mezclar declaraciones de diseño en el archivo global `styles.scss`, los estilos se desacoplan en parciales dedicados con responsabilidad única:
+  - `src/styles/_colors.scss`: Define las variables SCSS (`$roams-*`) y proyecta el catálogo de Design Tokens a variables CSS Custom Properties (`--roams-*`) en `:root`.
+  - `src/styles/_variables.scss`: Centraliza radios de curvatura (`--roams-radius-*`) y matrices de elevación y sombra (`--roams-shadow-*`).
+  - `src/styles.scss`: Actúa exclusivamente como orquestador raíz limpio, importando los parciales mediante `@use './styles/colors'` y `@use './styles/variables'`.
+  - `angular.json`: Se configura `stylePreprocessorOptions.includePaths: ["src/styles"]`, permitiendo a cualquier componente importar `@use 'colors'` directamente sin rutas relativas frágiles (`../../styles`).
+- **Design Tokens Corporativos Roams (`--roams-*`):** Inspirados en la identidad visual de `roams.es`, en `_colors.scss` se centraliza la paleta corporativa:
   - `--roams-primary`: `#0F172A` (Azul marino cabecera / fondo oscuro)
   - `--roams-accent-blue`: `#1061E2` (Azul real Roams)
   - `--roams-accent-cyan`: `#0EA5E9` (Cian de acento y feedback)

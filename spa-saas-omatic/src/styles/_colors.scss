@@ -1,0 +1,57 @@
+/* ========================================================================
+   Roams Corporate Color Palette & Design Tokens (_colors.scss)
+   Single Source of Truth for Visual Identity (roams.es)
+   ======================================================================== */
+
+// SCSS Variables (for compile-time usage, mixins and functions)
+$roams-primary: #0f172a;           // Deep Navy (Navbar / Topbar / Main Headers)
+$roams-primary-light: #1e293b;     // Slate Dark
+$roams-accent-blue: #1061e2;       // Roams Royal Blue
+$roams-accent-cyan: #0ea5e9;       // Roams Cyan
+
+$roams-status-success: #10b981;    // Emerald / Synced / Savings
+$roams-status-warning: #f59e0b;    // Amber / Contingency / Alert
+$roams-status-error: #ef4444;      // Red / Validation Error
+$roams-status-info: #0ea5e9;       // Cyan / Live Sync
+
+$roams-bg-page: #f8fafc;           // Canvas background
+$roams-bg-card: #ffffff;           // Card surface
+$roams-bg-input-dark: rgba(255, 255, 255, 0.1); // Transparent input over dark navbar
+
+$roams-text-primary: #0f172a;      // Dark Charcoal for headers & body
+$roams-text-secondary: #64748b;    // Muted Slate for secondary text & hints
+$roams-text-inverse: #ffffff;      // White text for dark surfaces
+$roams-text-inverse-muted: rgba(255, 255, 255, 0.7);
+
+$roams-border: #e2e8f0;            // Subtle border for light cards
+$roams-border-inverse: rgba(255, 255, 255, 0.2); // Subtle border for dark inputs
+
+// CSS Custom Properties (:root) for runtime cascade & dynamic theming
+:root {
+  /* Brand Colors */
+  --roams-primary: #{$roams-primary};
+  --roams-primary-light: #{$roams-primary-light};
+  --roams-accent-blue: #{$roams-accent-blue};
+  --roams-accent-cyan: #{$roams-accent-cyan};
+
+  /* Status & Visual Feedback */
+  --roams-status-success: #{$roams-status-success};
+  --roams-status-warning: #{$roams-status-warning};
+  --roams-status-error: #{$roams-status-error};
+  --roams-status-info: #{$roams-status-info};
+
+  /* Surfaces & Backgrounds */
+  --roams-bg-page: #{$roams-bg-page};
+  --roams-bg-card: #{$roams-bg-card};
+  --roams-bg-input-dark: #{$roams-bg-input-dark};
+
+  /* Typography Colors */
+  --roams-text-primary: #{$roams-text-primary};
+  --roams-text-secondary: #{$roams-text-secondary};
+  --roams-text-inverse: #{$roams-text-inverse};
+  --roams-text-inverse-muted: #{$roams-text-inverse-muted};
+
+  /* Borders & Dividers */
+  --roams-border: #{$roams-border};
+  --roams-border-inverse: #{$roams-border-inverse};
+}

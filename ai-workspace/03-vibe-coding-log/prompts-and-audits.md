@@ -780,6 +780,23 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   2. Se instruyó al usuario sobre la naturaleza continua del servidor de desarrollo (debe permanecer abierto en una pestaña de terminal) y se verificó la accesibilidad en `http://localhost:4200` y `http://127.0.0.1:4200`.
 - **Valor para la evaluación:** Claridad operativa sobre la infraestructura de desarrollo moderna de Angular/Vite y resolución guiada de incidencias en entorno local.
 
+### 6.27. Refactorización Proactiva de Estilos: Desacoplamiento de Tokens en Parcial Modular `_colors.scss` (Patrón 7-1)
+
+- **La intervención estratégica del Director de Orquesta:**
+  - Tras la unificación de tokens corporativos en `styles.scss`, el usuario planteó una mejora arquitectónica de diseño modular:
+    > *"Vale, lo último que revisamos: el tema de los colores en SCSS, ¿eso no va mejor aún en un `_colors.scss`?"*
+- **Análisis arquitectónico (Patrón 7-1 / ITCSS / Modular SCSS):**
+  1. *El anti-patrón del archivo monolítico:* Mantener variables SCSS, reglas CSS de `:root`, mixins globales y reglas de reseteo en un único archivo `styles.scss` monolítico viola el principio de responsabilidad única (SRP) y entorpece la escalabilidad a medida que el sistema de diseño crece.
+  2. *Uso de parciales (`_*.scss`):* En Dart Sass moderno, los archivos prefijados con guion bajo (`_colors.scss`, `_variables.scss`) son parciales (*partials*): no generan artefactos CSS independientes en tiempo de compilación, sino que se integran mediante `@use` manteniendo el espacio de nombres limpio y evitando duplicación de código.
+  3. *Inclusión de rutas en preprocesador (`angular.json`):* Configurar `stylePreprocessorOptions.includePaths: ["src/styles"]` en la configuración de compilación de Angular permite a cualquier componente desacoplado importar `@use 'colors'` directamente, eliminando rutas relativas quebradizas como `../../styles/_colors.scss`.
+- **Acción ejecutada:**
+  1. Se creó `src/styles/_colors.scss` conteniendo las variables SCSS compile-time (`$roams-*`) y su proyección a CSS Custom Properties runtime (`--roams-*` en `:root`).
+  2. Se creó `src/styles/_variables.scss` conteniendo la geometría de bordes (`--roams-radius-*`) y las matrices de sombra (`--roams-shadow-*`).
+  3. Se limpió `src/styles.scss`, quedando exclusivamente como orquestador raíz mediante `@use './styles/colors'` y `@use './styles/variables'`.
+  4. Se añadió `stylePreprocessorOptions` en `spa-saas-omatic/angular.json`.
+- **Valor para la evaluación:** Refleja maestría en arquitectura frontend, modularidad según estándares de Sass/Angular y la capacidad del Director de Orquesta de elevar la calidad del código mediante refactorizaciones estructurales limpias.
+
+
 
 
 
