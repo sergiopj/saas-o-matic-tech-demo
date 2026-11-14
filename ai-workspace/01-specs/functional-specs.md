@@ -39,7 +39,7 @@ Representa una entidad legal corporativa registrada en el sistema.
 
 #### Reglas de Negocio de `Customer`
 1. **Unicidad de `taxId`:** No pueden existir dos clientes con el mismo identificador fiscal. Si se intenta registrar un duplicado, el sistema responde con `409 Conflict`.
-2. **Búsqueda flexible:** El sistema debe permitir búsqueda parcial insensible a mayúsculas/minúsculas (`ILIKE` o `LIKE %search%`) tanto por `companyName` como por `taxId`.
+2. **Búsqueda y Filtrado Server-Side:** El sistema debe permitir búsqueda parcial insensible a mayúsculas/minúsculas (`LIKE %search%`) tanto por `companyName`, `taxId` o `email`, así como filtrado exacto por jurisdicción fiscal (`country`). Ambos filtros operan de forma combinable directamente en el motor de base de datos del backend para garantizar consistencia con paginación y óptimo rendimiento.
 
 ---
 

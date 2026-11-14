@@ -6,6 +6,10 @@ import { Customer, CustomerCreate } from '../models/customer.model';
 import { ProblemDetail } from '../../../core/errors/problem-detail.model';
 import { I18nService } from '../../../core/services/i18n.service';
 
+/**
+ * Service orchestrating HTTP communication with the /customers backend API.
+ * Encapsulates server-side searching, error normalization (RFC 7807), and reactive loading signals.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -31,13 +35,20 @@ export class CustomerApiService {
     };
   }
 
-  search(term?: string): Observable<Customer[]> {
+  /**
+   * Queries customers using server-side filtering by partial company name / tax ID / email
+   * and strict ISO country jurisdiction.
+   */
+  search(term?: string, country?: string): Observable<Customer[]> {
     this.loading.set(true);
     this.error.set(null);
 
     let params = new HttpParams();
     if (term && term.trim()) {
       params = params.set('search', term.trim());
+    }
+    if (country && country.trim() && country.trim().toUpperCase() !== 'ALL') {
+      params = params.set('country', country.trim().toUpperCase());
     }
 
     return this.http.get<Customer[]>(this.baseUrl, { params }).pipe(
@@ -79,9 +90,5 @@ export class CustomerApiService {
       }),
       finalize(() => this.loading.set(false))
     );
-  }
-
-  clearError(): void {
-    this.error.set(null);
   }
 }

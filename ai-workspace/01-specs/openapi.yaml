@@ -45,6 +45,13 @@ paths:
           schema:
             type: string
             example: "Roams"
+        - name: country
+          in: query
+          required: false
+          description: Código de país ISO 3166-1 alpha-2 para filtrado de jurisdicción fiscal
+          schema:
+            type: string
+            example: "ES"
       responses:
         '200':
           description: Lista de clientes encontrados

@@ -35,11 +35,11 @@ describe('ListCustomersUseCase', () => {
     expect(mockRepository.search).toHaveBeenCalledWith(undefined);
   });
 
-  it('should pass search filter to the repository', async () => {
+  it('should pass search filter and country filter to the repository', async () => {
     mockRepository.search.mockResolvedValue([]);
 
-    await useCase.execute('telecom');
+    await useCase.execute('telecom', 'ES');
 
-    expect(mockRepository.search).toHaveBeenCalledWith('telecom');
+    expect(mockRepository.search).toHaveBeenCalledWith('telecom', 'ES');
   });
 });

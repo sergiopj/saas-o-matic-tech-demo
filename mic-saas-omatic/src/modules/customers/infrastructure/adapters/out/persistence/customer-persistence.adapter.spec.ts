@@ -68,6 +68,16 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
     expect(result?.getCompanyName()).toBe('Telecom Corp');
   });
 
+  it('should return all customers ordered by createdAt DESC when no filters provided', async () => {
+    (mockTypeOrmRepo.find as jest.Mock).mockResolvedValue([]);
+
+    await adapter.search();
+
+    expect(mockTypeOrmRepo.find).toHaveBeenCalledWith({
+      order: { createdAt: 'DESC' },
+    });
+  });
+
   it('should search with clean term for company, normalized term for taxId, and email', async () => {
     (mockTypeOrmRepo.find as jest.Mock).mockResolvedValue([]);
 
@@ -79,6 +89,42 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
         { taxId: expect.anything() },
         { email: expect.anything() },
       ],
+      order: { createdAt: 'DESC' },
+    });
+  });
+
+  it('should filter strictly by fiscal jurisdiction when only country is provided', async () => {
+    (mockTypeOrmRepo.find as jest.Mock).mockResolvedValue([]);
+
+    await adapter.search(undefined, 'es');
+
+    expect(mockTypeOrmRepo.find).toHaveBeenCalledWith({
+      where: { country: 'ES' },
+      order: { createdAt: 'DESC' },
+    });
+  });
+
+  it('should combine text search and country filter in where conditions', async () => {
+    (mockTypeOrmRepo.find as jest.Mock).mockResolvedValue([]);
+
+    await adapter.search('Roams', 'es');
+
+    expect(mockTypeOrmRepo.find).toHaveBeenCalledWith({
+      where: [
+        { companyName: expect.anything(), country: 'ES' },
+        { taxId: expect.anything(), country: 'ES' },
+        { email: expect.anything(), country: 'ES' },
+      ],
+      order: { createdAt: 'DESC' },
+    });
+  });
+
+  it('should ignore country filter when country is ALL', async () => {
+    (mockTypeOrmRepo.find as jest.Mock).mockResolvedValue([]);
+
+    await adapter.search(undefined, 'ALL');
+
+    expect(mockTypeOrmRepo.find).toHaveBeenCalledWith({
       order: { createdAt: 'DESC' },
     });
   });

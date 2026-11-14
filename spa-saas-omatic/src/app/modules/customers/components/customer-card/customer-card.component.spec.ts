@@ -1,15 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { CustomerCardComponent } from './customer-card.component';
 import { Customer } from '../../models/customer.model';
 import { I18nService } from '../../../../core/services/i18n.service';
+import { CustomerEmailDialogComponent } from '../customer-email-dialog/customer-email-dialog.component';
 
 describe('CustomerCardComponent', () => {
   let fixture: ComponentFixture<CustomerCardComponent>;
   let component: CustomerCardComponent;
   let componentRef: ComponentRef<CustomerCardComponent>;
   let i18nService: I18nService;
+  let dialog: MatDialog;
 
   const mockCustomer: Customer = {
     id: 'cust-123',
@@ -32,6 +35,7 @@ describe('CustomerCardComponent', () => {
     componentRef = fixture.componentRef;
     componentRef.setInput('customer', mockCustomer);
     i18nService = TestBed.inject(I18nService);
+    dialog = TestBed.inject(MatDialog);
     i18nService.setLanguage('es');
     fixture.detectChanges();
   });
@@ -59,16 +63,27 @@ describe('CustomerCardComponent', () => {
     expect(avatarEl.textContent.trim()).toBe('A');
   });
 
-  it('should compute country flag emoji from 2-letter country code', () => {
-    expect(component.countryFlag).toBe('🇪🇸');
+  it('should render the country code in the country badge', () => {
+    const countryEl = fixture.nativeElement.querySelector('.country-code');
+    expect(countryEl.textContent.trim()).toBe('ES');
 
     componentRef.setInput('customer', { ...mockCustomer, country: 'US' });
     fixture.detectChanges();
-    expect(component.countryFlag).toBe('🇺🇸');
+    expect(countryEl.textContent.trim()).toBe('US');
+  });
 
-    componentRef.setInput('customer', { ...mockCustomer, country: 'UNKNOWN' });
-    fixture.detectChanges();
-    expect(component.countryFlag).toBe('🌐');
+  it('should open CustomerEmailDialogComponent when clicking the email button', () => {
+    const openSpy = vi.spyOn(dialog, 'open').mockReturnValue({} as any);
+
+    const emailBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.email-action-btn');
+    emailBtn.click();
+
+    expect(openSpy).toHaveBeenCalledWith(
+      CustomerEmailDialogComponent,
+      expect.objectContaining({
+        data: { customer: mockCustomer },
+      })
+    );
   });
 
   it('should emit selectCustomer event when onSimulate is called', () => {

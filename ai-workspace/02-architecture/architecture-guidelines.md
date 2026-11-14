@@ -181,6 +181,18 @@ Siguiendo el estándar *The Twelve-Factor App* (Factor III: Configuración):
 3. **Orquestación Global (Docker Compose):**
    - Plantilla [`.env.example`](../../.env.example) en la raíz para unificar los puertos de publicación y las rutas de base de datos entre contenedores.
 
+### 2.5 Filtrado Server-Side Completo vs. Client-Side (Consistencia de Paginación y Rendimiento SQL)
+
+En sistemas empresariales escalables, el filtrado de entidades de negocio (**empresa, identificador fiscal, email y jurisdicción fiscal por país**) debe ejecutarse obligatoriamente en el **Backend (Server-Side)**:
+1. **Fallo de Consistencia en Paginación (*Pagination Loss*):**
+   Si la API pagine los clientes (ej. `LIMIT 20 OFFSET 0`) y el frontend filtra en memoria con un `.filter()`, el cliente solo ve los registros de ese país presentes en la página actual (ej. 1 solo resultado), ignorando decenas de coincidencias que residen en las páginas 2, 3 o 10. Al filtrar en el motor de base de datos (`WHERE country = :country`), la consulta devuelve exactamente el conjunto íntegro de resultados coincidentes.
+2. **Eficiencia de Red y CPU Cliente:**
+   Un catálogo con miles de clientes corporativos saturaría el ancho de banda y la memoria del navegador si exigiera transferir un payload masivo completo. La base de datos resuelve las cláusulas combinadas `LIKE` y equality (`WHERE (company_name LIKE :term OR tax_id LIKE :term) AND country = :country`) en milisegundos mediante índices B-Tree optimizados.
+3. **Arquitectura Hexagonal Limpia:**
+   - **Inbound Controller:** Recibe query params opcionales `@Query('search') search?: string, @Query('country') country?: string`.
+   - **Use Case:** Orquesta la llamada pasando ambos criterios de forma desacoplada al puerto de salida.
+   - **Outbound Persistence Adapter:** Compone dinámicamente las ramas `where` de TypeORM según los filtros activos (`ALL`, país específico, búsqueda textual o ambos combinados) ordenando por `createdAt DESC`.
+
 ---
 
 ## 3. Arquitectura del Frontend (Angular 22)
@@ -377,16 +389,15 @@ Para mantener el principio de código en inglés y desacoplar la lógica de la p
 - **Cero Boilerplate:** Se prohíbe escribir la propiedad redundante `standalone: true` en los metadatos de componentes, directivas o pipes. Únicamente en el caso excepcional de requerir integración con un `NgModule` legacy se especificaría de forma explícita `standalone: false`.
 - **Imports Quirúrgicos:** Los componentes declaran en `imports: [...]` exclusivamente los componentes, pipes o módulos de Angular Material que consumen sus plantillas, evitando bundles inflados.
 
-### 3.7 Clean Code vs. Clever Code: Erradicación de Números Mágicos y Mantenibilidad (Banderas de Jurisdicción)
+### 3.7 Principio YAGNI y Mantenibilidad: Códigos ISO Textuales vs. Mantenimiento de Banderas Cosméticas
 
-- **El debate entre "Clever Code" y "Clean Code":**
-  - *La solución "ingeniosa" (Clever Code):* En el estándar Unicode, las banderas de países se componen combinando dos caracteres del bloque *Regional Indicator Symbols* (`U+1F1E6` para '🇦' hasta `U+1F1FF` para '🇿'). Aunque calcular la bandera mediante una fórmula matemática (`char.charCodeAt(0) - 65 + 0x1F1E6`) ahorra líneas, introduce **constantes hexadecimales crípticas (`0x1F1E6`) y aritmética de punteros Unicode** que confunden en code reviews, aumentan la carga cognitiva y se perciben como "magia negra" o código hardcodeado inexplicable.
-  - *La solución Senior y Mantenible (Clean Code):* Se sustituye cualquier truco algorítmico opaco por un **diccionario declarativo canónico `COUNTRY_FLAGS`** en `src/app/shared/utils/country-flag.util.ts`.
-- **Ventajas de Diseño de `COUNTRY_FLAGS`:**
-  1. **Transparencia Inmediata (Zero Cognitive Load):** Cualquier miembro del equipo (junior o senior) comprende al instante qué bandera corresponde a cada país (`ES: '🇪🇸'`, `US: '🇺🇸'`, `DE: '🇩🇪'`), sin necesidad de descifrar especificaciones hexadecimales de bajo nivel.
-  2. **Rendimiento Óptimo $O(1)$:** El acceso por clave en un objeto inmutable de JavaScript es instantáneo y no requiere transformaciones de cadenas ni llamadas a `String.fromCodePoint()`.
-  3. **Principio de Mínima Sorpresa y Fallback Seguro:** Si un cliente tiene un código de país no listado o nulo, la función `getCountryFlag(code)` devuelve de forma limpia y predecible el emoji universal `'🌐'`, evitando renderizados corruptos o caracteres invisibles.
-- Tanto `CustomerCardComponent` como `CustomerListComponent` consumen `getCountryFlag(code)` de forma centralizada, garantizando coherencia visual y facilidad para añadir nuevas jurisdicciones comerciales en una sola línea.
+- **La Decisión de Producto y Arquitectura (YAGNI):**
+  - Mantener diccionarios o conversores algorítmicos de banderas emoji para cientos de países cliente en un sistema B2B introduce una deuda técnica innecesaria:
+    1. *Inconsistencia de Plataforma:* Las banderas emoji no se renderizan en muchos sistemas operativos de escritorio (ej. Windows muestra códigos de letras `ES` en lugar de la bandera, Linux depende de fuentes de emojis instaladas y Android usa estilos dispares).
+    2. *Mantenimiento Innecesario (YAGNI):* La prueba de Roams exige validar la jurisdicción fiscal del cliente (España, UE, fuera de UE), no construir un catálogo gráfico de banderas internacionales.
+    3. *Claridad y Accesibilidad:* Los códigos ISO 3166-1 alpha-2 en texto claro (`ES`, `US`, `DE`) acompañados del icono semántico accesible `<mat-icon>public</mat-icon>` son universales, no sufren problemas tipográficos y transmiten la información fiscal de un vistazo.
+- **Diferenciación con el Selector de Idioma de la Aplicación:**
+  - Mientras que para los datos dinámicos de clientes se prescinde de banderas cosméticas en favor de texto ISO limpio, en el selector de idiomas de la barra de navegación (`LanguageSelectorComponent`) sí se emplean los 4 emojis específicos de los idiomas soportados (`🇪🇸 ES`, `🇬🇧 EN`, `🇩🇪 DE`, `🇫🇷 FR`) como convención visual de navegación de interfaz para el usuario.
 
 ### 3.8 Estándar de Iconografía y Accesibilidad (Ligaduras de Material Symbols y `aria-hidden`)
 
@@ -421,6 +432,36 @@ Para garantizar que fallos en elementos cosméticos o de micro-interacción (spi
    Las animaciones de tarjetas (`roamsCardEntrance`) están implementadas en CSS nativo acelerado por GPU (sin librerías JS pesadas). Mediante `@media (prefers-reduced-motion: reduce)`, si el navegador o sistema operativo del usuario tiene desactivadas las animaciones, el estilo se desactiva instantáneamente y el contenido se presenta estático a opacidad 1 sin latencia ni artefactos.
 6. **Separación Estricta de Ficheros (Cero Templates Inline):**
    Todo componente compartido debe desacoplar su lógica (`.ts`), plantilla (`.html`), estilos corporativos (`.scss`) y pruebas unitarias (`.spec.ts`) en ficheros independientes, prohibiendo templates embebidos en el decorador para facilitar su mantenimiento y evitar mezclas de responsabilidades.
+
+### 3.11 Escalabilidad y Usabilidad en Filtros Facetados (Selector Canónico `<mat-select>` vs. Botones/Chips)
+
+- **El Problema del Layout Shift con Chips Horizontales y Botones Manuales:**
+  Disponer filtros de países como botones/chips planos contiguos es aceptable para 2 o 3 opciones. Sin embargo, en un entorno SaaS internacional con 12 o 25 jurisdicciones fiscales, los chips envuelven en múltiples líneas (*layout wrapping*), provocando saltos bruscos en la interfaz (*Cumulative Layout Shift*), empujando el grid hacia abajo y degradando severamente la experiencia de usuario en dispositivos móviles. Tampoco es estándar usar botones custom con menús si existe un control canónico de selección de formulario.
+- **La Solución Enterprise:**
+  Se integra un **Selector Nativo de Material (`mat-form-field` con `mat-select`)** junto al buscador:
+  1. **Control de Formulario Canónico:** Utiliza `<mat-select>` con accesibilidad completa W3C ARIA, navegación por teclado (flechas, enter, escape) y etiqueta flotante integrada (`mat-label`).
+  2. **Espacio Constante y Predictible:** Ocupa un ancho fijo y unificado (`subscriptSizing="dynamic"`), alineado exactamente con la barra de búsqueda sin alterar la altura de la página.
+  3. **Lista Desplegable Scrollable:** El panel desplegable de opciones maneja decenas de países con scroll fluido sin alterar el DOM de la página principal.
+  4. **Identificación Limpia y Textual:** Cada opción expone el código ISO en texto claro junto a la insignia de recuento numérico (`ES (1)`, `US (1)`), evitando dependencias de emojis y garantizando máxima legibilidad.
+
+### 3.12 Omnicanalidad y Redacción Dinámica de Correo Comercial (`CustomerEmailDialogComponent`)
+
+- **Integración Nativa con Gestores de Correo (RFC 6068 `mailto:`):**
+  Al hacer clic en el correo electrónico de la tarjeta del cliente, el sistema permite contactar directamente con el cliente corporativo sin fricción.
+- **Plantilla Dinámica, Multidioma y Editable en Diálogo Modal:**
+  En lugar de disparar un enlace ciego, se abre un modal interactivo (`CustomerEmailDialogComponent`) que:
+  1. **Interpolación Reactiva i18n:** Rellena automáticamente el asunto y el cuerpo del mensaje según el idioma del navegador/usuario (`es`, `en`, `de`, `fr`) inyectando dinámicamente el nombre de la empresa (`{{company}}`) y su plan suscrito (`{{plan}}`).
+  2. **Totalmente Editable:** El comercial puede revisar, personalizar y ajustar el asunto o el cuerpo del texto antes de enviarlo.
+  3. **Doble Vía de Despacho:**
+     - *Abrir en gestor de correo:* Construye la URI `mailto:` con asunto y cuerpo codificados y la envía al cliente de correo del sistema (Outlook, Gmail, Thunderbird, Apple Mail).
+     - *Copiar plantilla:* Copia el mensaje al portapapeles mediante la API nativa `navigator.clipboard` con feedback visual, garantizando resiliencia total si el usuario opera en un entorno web sin gestor de correo predeterminado configurado.
+
+### 3.13 Regla de Oro: "Code in English, documentation in Spanish"
+
+- **Prohibición Estricta de Castellano en Código Fuente:**
+  Todas las declaraciones de variables, nombres de métodos, interfaces, tipos, selectores de componentes, estilos CSS y comentarios JSDoc (`/** ... */`) dentro de los ficheros de código (`.ts`, `.html`, `.scss`, `.js`) deben redactarse exclusivamente en **inglés**.
+- **Documentación en Español:**
+  La documentación de arquitectura (`architecture-guidelines.md`), especificaciones funcionales (`functional-specs.md`), bitácoras de auditoría (`prompts-and-audits.md`) y el `README.md` principal se redactan en **español**, tal como exige el pliego técnico de Roams.
 
 ---
 

@@ -153,27 +153,38 @@ describe('CustomerListComponent', () => {
     expect(errorBanner.textContent).toContain('Database unreachable');
   });
 
-  it('should compute country filter chips dynamically from loaded customers', () => {
+  it('should compute country filter options dynamically from loaded customers', () => {
     const filters = component.countryFilters();
     expect(filters.length).toBe(3); // ALL, ES, US
-    expect(filters[0]).toEqual({ code: 'ALL', flag: '🌐', count: 2 });
-    expect(filters[1]).toEqual({ code: 'ES', flag: '🇪🇸', count: 1 });
-    expect(filters[2]).toEqual({ code: 'US', flag: '🇺🇸', count: 1 });
+    expect(filters[0]).toEqual({ code: 'ALL', label: 'Todos los países' });
+    expect(filters[1]).toEqual({ code: 'ES', label: 'ES' });
+    expect(filters[2]).toEqual({ code: 'US', label: 'US' });
   });
 
-  it('should filter customers reactively by selected country jurisdiction', () => {
+  it('should render the country filter mat-select field', () => {
+    const filterField = fixture.nativeElement.querySelector('.country-filter-field');
+    expect(filterField).toBeTruthy();
+  });
+
+  it('should trigger server-side query when country is selected', () => {
     component.selectCountry('ES');
+
+    const req = httpTesting.expectOne(`${environment.apiBaseUrl}/customers?country=ES`);
+    expect(req.request.method).toBe('GET');
+    req.flush([mockCustomers[0]]);
     fixture.detectChanges();
 
-    expect(component.filteredCustomers().length).toBe(1);
-    expect(component.filteredCustomers()[0].country).toBe('ES');
+    expect(component.customers().length).toBe(1);
+    expect(component.customers()[0].country).toBe('ES');
 
     const cards = fixture.nativeElement.querySelectorAll('app-customer-card');
     expect(cards.length).toBe(1);
 
     component.selectCountry('ALL');
+    const allReq = httpTesting.expectOne(`${environment.apiBaseUrl}/customers`);
+    allReq.flush(mockCustomers);
     fixture.detectChanges();
 
-    expect(component.filteredCustomers().length).toBe(2);
+    expect(component.customers().length).toBe(2);
   });
 });

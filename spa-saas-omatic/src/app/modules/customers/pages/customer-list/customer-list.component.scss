@@ -39,66 +39,41 @@
   gap: 1rem;
 }
 
-.filters-bar {
+.toolbar-row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  gap: 1rem;
+  width: 100%;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
-.filter-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 9999px;
-  background-color: var(--roams-bg-card);
-  border: 1px solid var(--roams-border);
-  color: var(--roams-text-secondary);
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
+.search-box {
+  flex: 1;
+  min-width: 0;
+}
 
-  &:hover {
-    border-color: var(--roams-accent-blue);
-    color: var(--roams-accent-blue);
-    background-color: rgba(16, 97, 226, 0.04);
+.filter-select-wrapper {
+  flex-shrink: 0;
+  min-width: 220px;
+
+  @media (max-width: 640px) {
+    width: 100%;
   }
 
-  &.active {
-    background-color: var(--roams-accent-blue);
-    border-color: var(--roams-accent-blue);
-    color: var(--roams-text-inverse);
-    font-weight: 600;
-    box-shadow: 0 2px 4px rgba(16, 97, 226, 0.25);
+  .country-filter-field {
+    width: 100%;
 
-    .chip-count {
-      background-color: rgba(255, 255, 255, 0.25);
-      color: var(--roams-text-inverse);
+    .filter-icon {
+      color: var(--roams-teal);
+      margin-right: 8px;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
     }
-  }
-
-  .chip-flag {
-    font-size: 1rem;
-    line-height: 1;
-  }
-
-  .chip-label {
-    letter-spacing: 0.02em;
-  }
-
-  .chip-count {
-    background-color: var(--roams-bg-page);
-    color: var(--roams-text-secondary);
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.1rem 0.45rem;
-    border-radius: 9999px;
-    min-width: 1.25rem;
-    text-align: center;
-    transition: all 0.2s ease;
   }
 }
 

@@ -52,12 +52,12 @@ describe('CustomerController (Primary Adapter)', () => {
     expect(mockCreateCustomerUseCase.execute).toHaveBeenCalledTimes(1);
   });
 
-  it('should list customers and return CustomerResponseDto array', async () => {
-    const result = await controller.list('roams');
+  it('should list customers by search term and country, returning CustomerResponseDto array', async () => {
+    const result = await controller.list('roams', 'ES');
 
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('uuid-100');
-    expect(mockListCustomersUseCase.execute).toHaveBeenCalledWith('roams');
+    expect(mockListCustomersUseCase.execute).toHaveBeenCalledWith('roams', 'ES');
   });
 
   it('should get customer detail by id as flat CustomerResponseDto', async () => {

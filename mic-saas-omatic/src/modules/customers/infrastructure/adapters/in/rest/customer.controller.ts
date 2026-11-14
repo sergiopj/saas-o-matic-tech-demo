@@ -14,6 +14,9 @@ import { GetCustomerDetailUseCase } from '../../../../application/use-cases/get-
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
 
+/**
+ * Primary inbound REST controller exposing Customer management endpoints.
+ */
 @Controller('customers')
 export class CustomerController {
   constructor(
@@ -32,8 +35,11 @@ export class CustomerController {
   }
 
   @Get()
-  async list(@Query('search') search?: string): Promise<CustomerResponseDto[]> {
-    const customers = await this.listCustomersUseCase.execute(search);
+  async list(
+    @Query('search') search?: string,
+    @Query('country') country?: string,
+  ): Promise<CustomerResponseDto[]> {
+    const customers = await this.listCustomersUseCase.execute(search, country);
     return customers.map(CustomerResponseDto.fromDomain);
   }
 

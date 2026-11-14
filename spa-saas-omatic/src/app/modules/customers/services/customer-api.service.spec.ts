@@ -74,9 +74,41 @@ describe('CustomerApiService', () => {
       const req = httpTesting.expectOne(baseUrl);
       expect(req.request.method).toBe('GET');
       expect(req.request.params.has('search')).toBe(false);
+      expect(req.request.params.has('country')).toBe(false);
       req.flush([mockCustomer]);
 
       expect(result).toEqual([mockCustomer]);
+    });
+
+    it('should query customers with country filter parameter', () => {
+      let result: Customer[] = [];
+
+      service.search(undefined, 'ES').subscribe((customers) => {
+        result = customers;
+      });
+
+      const req = httpTesting.expectOne(`${baseUrl}?country=ES`);
+      expect(req.request.method).toBe('GET');
+      req.flush([mockCustomer]);
+
+      expect(result).toEqual([mockCustomer]);
+    });
+
+    it('should combine search term and country filter in query params', () => {
+      service.search('Roams', 'ES').subscribe();
+
+      const req = httpTesting.expectOne(`${baseUrl}?search=Roams&country=ES`);
+      expect(req.request.method).toBe('GET');
+      req.flush([mockCustomer]);
+    });
+
+    it('should omit country param when country is ALL', () => {
+      service.search('Roams', 'ALL').subscribe();
+
+      const req = httpTesting.expectOne(`${baseUrl}?search=Roams`);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.params.has('country')).toBe(false);
+      req.flush([mockCustomer]);
     });
   });
 

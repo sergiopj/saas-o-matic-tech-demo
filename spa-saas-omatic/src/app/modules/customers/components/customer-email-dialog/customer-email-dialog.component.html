@@ -1,0 +1,85 @@
+<div class="email-dialog-container">
+  <div class="dialog-header">
+    <div class="header-icon-box" aria-hidden="true">
+      <mat-icon>mail</mat-icon>
+    </div>
+    <div class="header-text">
+      <h2 mat-dialog-title class="dialog-title">{{ 'customers.emailDialog.title' | translate }}</h2>
+      <p class="dialog-subtitle">{{ data.customer.companyName }} ({{ data.customer.country }})</p>
+    </div>
+    <button
+      type="button"
+      mat-icon-button
+      class="close-btn"
+      (click)="close()"
+      [attr.aria-label]="'customers.emailDialog.cancel' | translate"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-body">
+    <mat-form-field appearance="outline" class="form-field full-width">
+      <mat-label>{{ 'customers.emailDialog.recipient' | translate }}</mat-label>
+      <input
+        matInput
+        type="email"
+        [value]="recipient()"
+        (input)="recipient.set($any($event.target).value)"
+        readonly
+      />
+      <mat-icon matPrefix class="field-icon" aria-hidden="true">contact_mail</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field full-width">
+      <mat-label>{{ 'customers.emailDialog.subject' | translate }}</mat-label>
+      <input
+        matInput
+        type="text"
+        [value]="subject()"
+        (input)="subject.set($any($event.target).value)"
+      />
+      <mat-icon matPrefix class="field-icon" aria-hidden="true">subject</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field full-width message-field">
+      <mat-label>{{ 'customers.emailDialog.body' | translate }}</mat-label>
+      <textarea
+        matInput
+        rows="8"
+        [value]="body()"
+        (input)="body.set($any($event.target).value)"
+      ></textarea>
+      <mat-icon matPrefix class="field-icon textarea-icon" aria-hidden="true">edit_note</mat-icon>
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions" align="end">
+    <button
+      type="button"
+      mat-button
+      class="copy-btn"
+      (click)="copyTemplate()"
+      [class.is-copied]="copied()"
+    >
+      <mat-icon aria-hidden="true">{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
+      <span>{{ (copied() ? 'customers.emailDialog.copied' : 'customers.emailDialog.copy') | translate }}</span>
+    </button>
+
+    <div class="actions-divider"></div>
+
+    <button type="button" mat-stroked-button (click)="close()">
+      {{ 'customers.emailDialog.cancel' | translate }}
+    </button>
+
+    <button
+      type="button"
+      mat-flat-button
+      class="dispatch-btn"
+      (click)="openMailClient()"
+    >
+      <mat-icon aria-hidden="true">send</mat-icon>
+      <span>{{ 'customers.emailDialog.openClient' | translate }}</span>
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -9,20 +9,30 @@
   <app-error-banner [problem]="customerApi.error()" (dismiss)="customerApi.error.set(null)" />
 
   <section class="controls-section">
-    <app-customer-search-bar [loading]="customerApi.loading()" (searchChange)="onSearchChange($event)" />
+    <div class="toolbar-row">
+      <div class="search-box">
+        <app-customer-search-bar [loading]="customerApi.loading()" (searchChange)="onSearchChange($event)" />
+      </div>
 
-    @if (!initialLoading() && customers().length > 0) {
-    <div class="filters-bar" role="radiogroup" [attr.aria-label]="'customers.filter.country.aria' | translate">
-      @for (filter of countryFilters(); track filter.code) {
-      <button type="button" class="filter-chip" [class.active]="selectedCountry() === filter.code"
-        (click)="selectCountry(filter.code)" role="radio" [attr.aria-checked]="selectedCountry() === filter.code">
-        <span class="chip-flag" aria-hidden="true">{{ filter.flag }}</span>
-        <span class="chip-label">{{ filter.code === 'ALL' ? ('customers.filter.all' | translate) : filter.code }}</span>
-        <span class="chip-count">{{ filter.count }}</span>
-      </button>
+      @if (!initialLoading() && customers().length > 0) {
+      <div class="filter-select-wrapper">
+        <mat-form-field appearance="outline" class="country-filter-field" subscriptSizing="dynamic">
+          <mat-label>{{ 'customers.filter.selectCountry' | translate }}</mat-label>
+          <mat-icon matPrefix class="filter-icon" aria-hidden="true">public</mat-icon>
+          <mat-select [value]="selectedCountry()" (selectionChange)="selectCountry($event.value)"
+            [attr.aria-label]="'customers.filter.dropdownAria' | translate">
+            @for (filter of countryFilters(); track filter.code) {
+            <mat-option [value]="filter.code">
+              {{ filter.label }}
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
       }
     </div>
 
+    @if (!initialLoading() && customers().length > 0) {
     <div class="results-meta">
       <span class="count-badge">{{ filteredCustomers().length }}</span>
       <span class="count-text">{{ 'customers.list.count' | translate }}</span>
@@ -52,22 +62,22 @@
     }
   </div>
   } @else if (filteredCustomers().length === 0) {
-  <div class="empty-state">
+  <div class="empty-state country-empty-state">
     <div class="empty-icon-circle" aria-hidden="true">
-      <mat-icon class="empty-icon" aria-hidden="true">filter_alt_off</mat-icon>
+      <mat-icon class="empty-icon" aria-hidden="true">public_off</mat-icon>
     </div>
     <h2 class="empty-title">{{ 'customers.filter.empty.title' | translate }}</h2>
     <p class="empty-desc">{{ 'customers.filter.empty.desc' | translate }}</p>
     <button mat-stroked-button class="reset-search-btn" (click)="selectCountry('ALL')">
-      <mat-icon aria-hidden="true">restart_alt</mat-icon>
+      <mat-icon aria-hidden="true">public</mat-icon>
       <span>{{ 'customers.filter.reset' | translate }}</span>
     </button>
   </div>
   } @else {
-  <div class="customers-grid" [class.is-searching]="customerApi.loading()">
+  <main class="customers-grid" [class.is-searching]="customerApi.loading()" [attr.aria-busy]="customerApi.loading()">
     @for (customer of filteredCustomers(); track customer.id) {
     <app-customer-card [customer]="customer" />
     }
-  </div>
+  </main>
   }
 </div>

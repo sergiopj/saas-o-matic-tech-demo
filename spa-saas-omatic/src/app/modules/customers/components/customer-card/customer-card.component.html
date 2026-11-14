@@ -9,7 +9,7 @@
           {{ customer().companyName }}
         </h3>
         <span class="country-badge" [title]="customer().country">
-          <span class="flag-icon" aria-hidden="true">{{ countryFlag }}</span>
+          <mat-icon class="country-icon" aria-hidden="true">public</mat-icon>
           <span class="country-code">{{ customer().country }}</span>
         </span>
       </div>
@@ -30,8 +30,17 @@
     </div>
 
     <div class="meta-row email-row">
-      <mat-icon class="email-icon" aria-hidden="true">mail</mat-icon>
-      <span class="email-text" [title]="customer().email">{{ customer().email }}</span>
+      <button
+        type="button"
+        class="email-action-btn"
+        (click)="openEmailComposer($event)"
+        [matTooltip]="'customers.card.emailTooltip' | translate"
+        [attr.aria-label]="('customers.card.emailTooltip' | translate) + ': ' + customer().email"
+      >
+        <mat-icon class="email-icon" aria-hidden="true">mail</mat-icon>
+        <span class="email-text" [title]="customer().email">{{ customer().email }}</span>
+        <mat-icon class="email-launch-icon" aria-hidden="true">open_in_new</mat-icon>
+      </button>
     </div>
   </mat-card-content>
 

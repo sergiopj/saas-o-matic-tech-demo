@@ -1175,7 +1175,91 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Se refactorizó `country-flag.util.ts` eliminando las constantes hexadecimales y adoptando el mapa declarativo `COUNTRY_FLAGS`.
   - Se actualizaron las pruebas unitarias en `country-flag.util.spec.ts` verificando la cobertura de jurisdicciones y la resiliencia ante entradas anómalas.
   - Se actualizó la sección 3.7 de `architecture-guidelines.md` contrastando *Clever Code* con *Clean Code*.
-- **Valor para la evaluación:** Demuestra madurez ingenieril: no escribir código "rebuscado" por aparentar ingenio, sino escribir código legible, autoexplicativo, mantenible y sin sorpresas (*Principle of Least Astonishment*).
+### 6.50. Auditoría de Idioma en Código Fuente: Erradicación de JSDocs en Español
+
+- **La observación crítica del Director de Orquesta:**
+  - El usuario inspeccionó `country-flag.util.ts` y detectó de inmediato una transgresión de la regla del proyecto:
+    > *"¿Esto nunca código en español dentro de funcionalidad? `/** Mapa canónico de banderas por código de país ISO 3166-1 alpha-2... */`"*
+- **Análisis de Convención y Regla de Oro:**
+  - El pliego del proyecto establece de forma inapelable: **"Code in English, documentation in Spanish"**.
+  - Aunque los ficheros Markdown (`ai-workspace/`, `README.md`) deben estar en español, todo artefacto de código fuente (`.ts`, `.html`, `.scss`), incluidos sus identificadores y sus comentarios JSDoc, debe redactarse estrictamente en **inglés**.
+- **Acción ejecutada:**
+  - Se reescribieron todos los comentarios y JSDocs de `country-flag.util.ts`, `i18n.service.ts`, `customer-list.component.ts` y componentes vinculados a inglés profesional.
+  - Se formalizó esta restricción en la sección 3.13 de `architecture-guidelines.md`.
+- **Valor para la evaluación:** Coherencia absoluta con los estándares internacionales de desarrollo de software empresarial y estricta adhesión a las especificaciones del reto.
+
+### 6.51. Escalabilidad de Filtros de Jurisdicción (Dropdown) y Redactor Omnicanal de Correo (`CustomerEmailDialogComponent`)
+
+- **El debate de diseño y producto planteado por el Director de Orquesta:**
+  - El usuario cuestionó la escalabilidad de los filtros en botones planos y propuso una funcionalidad de alto valor comercial:
+    > *"Los filters los prefiero en listado chulo y bonito, no en botones. Si tenemos 12 países, ¿qué pasaría? ¿O qué opinas? Por otro lado, el email que pintamos, ¿estaría bien clickable para que te lleve al gestor de envío de email directamente? Y que además ponga un asunto dinámico y cuerpo del correo base editable, ¿o me estoy viniendo muy arriba? Si puede hacerse que sea bien con componentes e idioma de los textos según idioma del navegador."*
+- **Análisis de Arquitectura y UX:**
+  1. *El fallo de diseño de los botones/chips para 12+ países:*
+     - Con 12 o más países, una barra de chips planos envuelve en 3-4 líneas, empuja el grid de tarjetas, produce *Cumulative Layout Shift* (CLS) y arruina la visualización en dispositivos móviles.
+     - La solución profesional: Un **Dropdown de Filtro (`mat-menu`)** integrado en la barra de herramientas. Permite visualizar la selección activa (`[ 🌐 Todos los países (2) ▾ ]`) y despliega un panel scrollable (`max-height: 280px`) con banderas, nombres, insignias de recuento y checkmarks, ocupando un espacio vertical constante.
+  2. *Valor de Negocio del Redactor de Correo Comercial:*
+     - No es "venirse muy arriba", es una funcionalidad CRM estratégica en SaaS: permite a los comerciales contactar con clientes de un clic con propuestas contextualizadas según su plan y empresa.
+  3. *Arquitectura Desacoplada del Diálogo Modal (`CustomerEmailDialogComponent`):*
+     - Creado en 4 ficheros independientes en `src/app/modules/customers/components/customer-email-dialog/` (lógica, plantilla, estilos SCSS con tokens y tests).
+     - Rellena dinámicamente un asunto y mensaje base según el idioma del navegador/usuario (`es`, `en`, `de`, `fr`) inyectando `{{company}}` y `{{plan}}`.
+     - Campos de entrada editables para que el comercial adapte el texto libremente.
+     - Botón "Abrir en gestor de correo" que compone la URI `mailto:` (RFC 6068) y abre la aplicación nativa del usuario (Outlook, Gmail, etc.).
+     - Botón "Copiar plantilla" al portapapeles con feedback visual mediante `navigator.clipboard`.
+- **Acciones ejecutadas:**
+  - Se crearon los 4 ficheros de `CustomerEmailDialogComponent` y su suite de pruebas unitarias.
+  - Se transformó el email de `CustomerCardComponent` en un botón interactivo accesible que dispara el modal.
+  - Se refactorizó la barra de filtros en `CustomerListComponent` a un selector de menú desplegable.
+  - Se incorporaron las cadenas multidioma en los 4 idiomas (`translations.ts`) y soporte de interpolación en `I18nService`.
+  - Se documentaron las decisiones en las secciones 3.11 y 3.12 de `architecture-guidelines.md`.
+- **Valor para la evaluación:** Refleja visión de producto orientada a ventas B2B, diseño elástico a prueba de crecimiento y máxima resiliencia técnica.
+
+### 6.52. Principio YAGNI: Supresión de Banderas de Clientes en Favor de Texto ISO y Adopción del Selector Canónico `<mat-select>`
+
+- **Las observaciones críticas del Director de Orquesta:**
+  - El usuario evaluó la viabilidad a largo plazo de mantener banderas gráficas para cada cliente y la interacción del filtro:
+    > *"Seguimos filtrando teniendo un botón por país, mejor un selector o algo así chulo. Por otro lado, ¿necesitamos tener las banderas de cada país en nuestro sistema? ¿Eso es sostenible y escalable y mantenible? Prefiero ahorrarme esa funcionalidad y pintar el país con texto o algo así. Lo del selector de idioma del user sí lo veo bien."*
+- **Análisis de Diseño de Software: YAGNI y Experiencia de Usuario:**
+  1. *El antipatrón del catálogo de banderas para clientes (YAGNI & Fragilidad):*
+     - Mantener diccionarios o cálculos de banderas emoji para cientos de países cliente en un SaaS añade deuda técnica innecesaria: fuentes dispares según el sistema operativo (Windows no renderiza banderas emoji, Linux requiere fuentes específicas), problemas de compatibilidad y carga cognitiva nula para el objetivo fiscal del negocio.
+     - En contraste, los códigos ISO 3166-1 alpha-2 en texto claro (`ES`, `US`, `DE`) acompañados de un icono semántico `<mat-icon>public</mat-icon>` son universales, accesibles y 100% predecibles.
+     - *Diferenciación justificada:* En el selector de idiomas de la barra superior (`LanguageSelectorComponent`), los 4 emojis de idioma (`🇪🇸`, `🇬🇧`, `🇩🇪`, `🇫🇷`) sí se mantienen por ser un control cerrado y estático de navegación de la aplicación.
+  2. *Sustitución de Triggers Manuales por Selector de Formulario Canónico (`<mat-select>`):*
+     - En lugar de inventar botones de disparo custom (`mat-menu`), la buena práctica en Angular Material es emplear el componente oficial de formulario: `<mat-form-field appearance="outline">` con `<mat-select>`.
+     - Proporciona navegación por teclado accesible (W3C ARIA), alineación perfecta de altura con el buscador de clientes (`subscriptSizing="dynamic"`), etiqueta flotante ("Jurisdicción fiscal") y opciones con el código y recuento de clientes (`ES (1)`, `US (1)`).
+- **Acciones ejecutadas:**
+  - Se retiró la utilidad de banderas `country-flag.util.ts` de la aplicación.
+  - Se actualizó `CustomerCardComponent` para renderizar el código de país en una insignia textual limpia (`.country-badge`) con icono vectorial.
+  - Se refactorizó `CustomerListComponent` para emplear `<mat-select>` dentro de `<mat-form-field appearance="outline">`.
+  - Se actualizaron las pruebas unitarias en `customer-card.component.spec.ts` y `customer-list.component.spec.ts`.
+  - Se actualizaron las secciones 3.7 y 3.11 de `architecture-guidelines.md`.
+- **Valor para la evaluación:** Madurez en la toma de decisiones: aplicar el principio YAGNI (*You Aren't Gonna Need It*), eliminar complejidades cosméticas frágiles en favor de estándares sólidos y emplear controles de formulario nativos.
+
+### 6.53. Arquitectura de Filtrado Server-Side Total (API) vs. Client-Side y Blindaje ante Paginación
+
+- **La observación crítica del Director de Orquesta:**
+  - El usuario cuestionó la ubicación del filtrado de datos:
+    > *"Otra cosa, ¿quién debería filtrar por país, company o tax: la API y no el front, verdad? Para ver los customers."*
+- **Análisis de Arquitectura y Rendimiento Empresarial:**
+  1. *El fallo del filtrado en memoria (Client-Side):*
+     - Aunque el término de búsqueda de empresa y CIF/NIF ya corría en la API, el filtro de país se había dejado preliminarmente en el frontend (`computed()`).
+     - **Inconsistencia de Paginación:** Si en una paginación real (`LIMIT 20`) se filtra en el navegador, solo se evalúan los clientes descargados en la página activa, ocultando falsamente coincidencias de ese país en páginas siguientes.
+     - **Sobrecarga de Red y CPU:** Descargar miles de clientes para filtrarlos en JavaScript degrada la experiencia de usuario y satura la memoria.
+  2. *Diseño Hexagonal Server-Side Completo:*
+     - Se extendió el contrato OpenAPI (`GET /customers?search=...&country=...`) para recibir ambos criterios.
+     - En el backend NestJS:
+       - `CustomerController` extrae `@Query('country') country?: string`.
+       - `ListCustomersUseCase` orquesta la consulta combinada.
+       - `CustomerPersistenceAdapter` compone las cláusulas SQL con TypeORM (`WHERE (company_name LIKE :cleanTerm OR tax_id LIKE :normalizedTaxTerm OR email LIKE :cleanTerm) AND country = :country`), soportando filtros aislados, combinados y el caso `'ALL'` por defecto.
+     - En el frontend Angular:
+       - `CustomerApiService.search(term, country)` delega toda la computación a la API con `HttpParams`.
+       - `CustomerListComponent` actualiza la UI de forma reactiva consumiendo los resultados ya filtrados por el backend a velocidad de base de datos indexada.
+- **Acciones ejecutadas:**
+  - Se actualizó el contrato `openapi.yaml` y la especificación funcional en `functional-specs.md`.
+  - Se actualizaron `CustomerRepositoryPort`, `ListCustomersUseCase`, `CustomerPersistenceAdapter` y `CustomerController`.
+  - Se ampliaron las pruebas unitarias en `customer-persistence.adapter.spec.ts`, `customer.controller.spec.ts` y `list-customers.use-case.spec.ts`.
+  - Se actualizaron `CustomerApiService`, `CustomerListComponent` y sus suites de pruebas unitarias correspondientes.
+  - Se documentaron los principios en la sección 2.5 de `architecture-guidelines.md`.
+- **Valor para la evaluación:** Distintivo de ingeniería Senior/Staff: diseñar sistemas con consistencia de datos garantizada, tolerancia a grandes volúmenes de registros y blindaje nativo ante futuras paginaciones.
 
 
 

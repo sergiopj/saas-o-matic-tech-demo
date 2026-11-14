@@ -8,10 +8,9 @@ export class ListCustomersUseCase {
   constructor(
     @Inject(CUSTOMER_REPOSITORY_PORT)
     private readonly customerRepository: CustomerRepositoryPort,
-  ) { }
+  ) {}
 
-  async execute(searchTerm?: string): Promise<Customer[]> {
-    return this.customerRepository.search(searchTerm);
+  async execute(searchTerm?: string, country?: string): Promise<Customer[]> {
+    return this.customerRepository.search(searchTerm, country);
   }
 }
-
