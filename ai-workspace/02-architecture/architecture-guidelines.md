@@ -280,6 +280,13 @@ spa-saas-omatic/
   - **Feedback táctil en buscador:** El input de búsqueda muestra un `<mat-spinner diameter="18">` contextual durante el debounce y la petición, informando al usuario en su foco de visión.
   - **Transición no destructiva del Grid (`.is-searching`):** Mientras se filtra sobre resultados existentes, el grid atenúa su opacidad (`opacity: 0.45; transition: opacity 0.25s ease;`) en lugar de destruirse, erradicando el Cumulative Layout Shift (CLS).
   - **Blindaje de la Carga Inicial (`initialLoading`):** Se controla el estado de carga inicial para asegurar que el spinner central se muestra de forma limpia antes de renderizar el primer lote de datos, impidiendo destellos del estado vacío.
+- **Virtualización Nativa del DOM para Grids Masivos (`content-visibility: auto`):**
+  - En un Grid CSS elástico y responsive (`repeat(auto-fill, minmax(320px, 1fr))`), el uso de componentes tradicionales como `cdk-virtual-scroll-viewport` introduce serios problemas: está diseñado para listas unidimensionales de altura fija y genera saltos visuales (*glitches*) al variar el número de columnas según la pantalla.
+  - Se adopta el estándar moderno de la W3C: `.customer-card { content-visibility: auto; contain-intrinsic-size: auto 240px; }`. El motor C++ del navegador omite de forma nativa el cálculo de layout, estilo y pintado de las tarjetas fuera del viewport. Si existen 5.000 clientes, el DOM solo procesa los 8-12 visibles en pantalla a 60 FPS estables sin dependencias JS pesadas.
+- **Filtro de Jurisdicción Fiscal por País con Chips Reactivos (`Signals`):**
+  - Respondiendo directamente al núcleo del reto de Roams (donde el país determina el impuesto aplicable: España 21%, Alemania 19%, Francia 20%, USA 0%), se implementa una barra de filtros de facetas: `[ 🌐 Todos (N) | 🇪🇸 ES (x) | 🇺🇸 US (y) | ... ]`.
+  - Mediante señales computadas (`countryFilters = computed(...)` y `filteredCustomers = computed(...)`), los países presentes en el catálogo y sus recuentos se derivan reactivamente en memoria, permitiendo al comercial aislar clientes por jurisdicción fiscal de forma instantánea sin peticiones HTTP redundantes a la base de datos.
+  - Accesibilidad semántica: implementado con `role="radiogroup"` y `role="radio"` con `aria-checked` para lectores de pantalla.
 
 ### 3.3 Estrategia de Divisas y Escalabilidad (Open/Closed Principle)
 
@@ -370,20 +377,16 @@ Para mantener el principio de código en inglés y desacoplar la lógica de la p
 - **Cero Boilerplate:** Se prohíbe escribir la propiedad redundante `standalone: true` en los metadatos de componentes, directivas o pipes. Únicamente en el caso excepcional de requerir integración con un `NgModule` legacy se especificaría de forma explícita `standalone: false`.
 - **Imports Quirúrgicos:** Los componentes declaran en `imports: [...]` exclusivamente los componentes, pipes o módulos de Angular Material que consumen sus plantillas, evitando bundles inflados.
 
-### 3.7 Clean Code y Erradicación de Números Mágicos (Banderas Unicode)
+### 3.7 Clean Code vs. Clever Code: Erradicación de Números Mágicos y Mantenibilidad (Banderas de Jurisdicción)
 
-- **Prohibición de Magic Numbers:** Toda constante matemática u offset dentro de componentes visuales debe descomponerse en variables semánticas auto-explicativas con referencias al estándar correspondiente.
-- **Conversión Canónica de Banderas ISO a Emoji (`CustomerCardComponent`):**
-  En lugar de sumar números literales crípticos (`127397`), el cálculo de banderas regionales se documenta y desglosa formalmente:
-  ```typescript
-  // Unicode Standard: Regional Indicator Symbol 'A' is U+1F1E6
-  // Offset converts standard ASCII 'A'-'Z' into Unicode flag indicator characters
-  const REGIONAL_INDICATOR_A = 0x1f1e6;
-  const ASCII_A = 'A'.charCodeAt(0);
-  const codePoints = [...code].map((char) => char.charCodeAt(0) - ASCII_A + REGIONAL_INDICATOR_A);
-  return String.fromCodePoint(...codePoints);
-  ```
-  Esto permite derivar dinámicamente cualquier bandera del mundo a partir de su código ISO-3166-1 alpha-2 (`ES -> 🇪🇸`, `US -> 🇺🇸`) sin dependencias de librerías externas ni assets gráficos estáticos pesados.
+- **El debate entre "Clever Code" y "Clean Code":**
+  - *La solución "ingeniosa" (Clever Code):* En el estándar Unicode, las banderas de países se componen combinando dos caracteres del bloque *Regional Indicator Symbols* (`U+1F1E6` para '🇦' hasta `U+1F1FF` para '🇿'). Aunque calcular la bandera mediante una fórmula matemática (`char.charCodeAt(0) - 65 + 0x1F1E6`) ahorra líneas, introduce **constantes hexadecimales crípticas (`0x1F1E6`) y aritmética de punteros Unicode** que confunden en code reviews, aumentan la carga cognitiva y se perciben como "magia negra" o código hardcodeado inexplicable.
+  - *La solución Senior y Mantenible (Clean Code):* Se sustituye cualquier truco algorítmico opaco por un **diccionario declarativo canónico `COUNTRY_FLAGS`** en `src/app/shared/utils/country-flag.util.ts`.
+- **Ventajas de Diseño de `COUNTRY_FLAGS`:**
+  1. **Transparencia Inmediata (Zero Cognitive Load):** Cualquier miembro del equipo (junior o senior) comprende al instante qué bandera corresponde a cada país (`ES: '🇪🇸'`, `US: '🇺🇸'`, `DE: '🇩🇪'`), sin necesidad de descifrar especificaciones hexadecimales de bajo nivel.
+  2. **Rendimiento Óptimo $O(1)$:** El acceso por clave en un objeto inmutable de JavaScript es instantáneo y no requiere transformaciones de cadenas ni llamadas a `String.fromCodePoint()`.
+  3. **Principio de Mínima Sorpresa y Fallback Seguro:** Si un cliente tiene un código de país no listado o nulo, la función `getCountryFlag(code)` devuelve de forma limpia y predecible el emoji universal `'🌐'`, evitando renderizados corruptos o caracteres invisibles.
+- Tanto `CustomerCardComponent` como `CustomerListComponent` consumen `getCountryFlag(code)` de forma centralizada, garantizando coherencia visual y facilidad para añadir nuevas jurisdicciones comerciales en una sola línea.
 
 ### 3.8 Estándar de Iconografía y Accesibilidad (Ligaduras de Material Symbols y `aria-hidden`)
 

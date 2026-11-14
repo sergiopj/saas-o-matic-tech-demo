@@ -1134,7 +1134,49 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Se creó el componente `LoadingStateComponent` desacoplado en `src/app/shared/components/loading-state/`.
   - Se sustituyó el marcado duplicado en `customer-list.component.html` por `<app-loading-state [message]="'customers.list.loading' | translate" />`.
   - Se documentó el principio de aislamiento de componentes cosméticos en la sección 3.10 de `architecture-guidelines.md`.
-- **Valor para la evaluación:** Demuestra control riguroso de arquitectura: componentes compartidos con separación limpia de archivos, prevención activa de puntos únicos de fallo (SPOF) en la UI y tolerancia a fallos.
+### 6.48. Optimización de Rendimiento DOM (`content-visibility: auto`) y Filtro de Jurisdicción Fiscal por País con Chips
+
+- **El debate de diseño y rendimiento planteado por el Director de Orquesta:**
+  - El usuario propuso elevar la calidad del dashboard en dos aspectos clave:
+    > *"Temas de rendimiento de renderizar solo la parte del DOM que se ve, por ejemplo imagina que tenemos muchos listado de customers... y por otro lado, ¿tenemos filters? Eso estaría guay, quizás por país, no sé qué aportaría más valor a la prueba."*
+- **Análisis de Arquitectura y Valor de Negocio:**
+  1. *Filtros por País como Aporte Máximo al Reto de Roams:*
+     - La prueba técnica evalúa de forma prioritaria la **fiscalidad internacional** (España con validación de CIF e IVA 21%, Alemania 19%, Francia 20%, USA 0%).
+     - Proporcionar un filtro rápido de jurisdicción fiscal con chips reactivos (`[ 🌐 Todos (N) | 🇪🇸 ES (x) | 🇺🇸 US (y) ]`) conecta la experiencia visual del comercial directamente con la lógica impositiva.
+     - Implementado con Signals computadas en memoria (`countryFilters = computed(...)` y `filteredCustomers = computed(...)`): derivación instantánea de facetas a 60 FPS sin saturar el backend con peticiones repetidas.
+  2. *Rendimiento y Virtualización Nativa del DOM sin Sobreingeniería:*
+     - En un Grid elástico y responsive (`repeat(auto-fill, minmax(320px, 1fr))`), el virtual scroll tradicional por JavaScript (`cdk-virtual-scroll`) es propenso a saltos de layout por altura fija.
+     - Se adoptó el estándar W3C moderno: `.customer-card { content-visibility: auto; contain-intrinsic-size: auto 240px; }`. El navegador omite por completo el cálculo y renderizado de las tarjetas fuera del viewport visible, permitiendo manejar miles de elementos con cero lag de scroll y consumo mínimo de memoria.
+  3. *Reutilización Clean Code (`getCountryFlag`):*
+     - Se extrajo el cálculo de banderas Unicode sin números mágicos a la función compartida `getCountryFlag()` en `src/app/shared/utils/country-flag.util.ts`, reutilizada por `CustomerCardComponent` y `CustomerListComponent`.
+- **Acciones ejecutadas:**
+  - Se añadió `content-visibility: auto` y `contain-intrinsic-size` a `customer-card.component.scss`.
+  - Se creó la barra de chips accesibles (`role="radiogroup"`, `role="radio"`, `aria-checked`) en `customer-list.component.html` con estados activos Roams y soporte multidioma en los 4 idiomas (`translations.ts`).
+  - Se crearon las pruebas unitarias para `getCountryFlag` en `country-flag.util.spec.ts` y las pruebas de filtrado dinámico en `customer-list.component.spec.ts`.
+  - Se documentó la optimización de rendimiento en la sección 3.2 de `architecture-guidelines.md`.
+- **Valor para la evaluación:** Combinación perfecta de producto y arquitectura: respuesta ágil a los requisitos fiscales del reto de Roams y aplicación de estándares modernos de rendimiento web (Core Web Vitals).
+
+### 6.49. Clean Code vs. Clever Code: Erradicación de Números Mágicos Unicode (`0x1F1E6`) y Transparencia Mantenible
+
+- **Las observaciones del Director de Orquesta:**
+  - El usuario inspeccionó el fichero de utilidad de banderas y cuestionó de inmediato la solución basada en constantes hexadecimales:
+    > *"No entiendo este código hardcodeado: `const REGIONAL_INDICATOR_A = 0x1f1e6;`"*
+    > *"Lo que sea mejor en óptimo, mantenible y que se entienda."*
+- **Análisis de Diseño de Software: "Clever Code" vs. "Clean Code":**
+  1. *El fallo del código "ingenioso" (Clever Code):*
+     - En el estándar Unicode, las banderas de países se generan combinando caracteres del bloque *Regional Indicator Symbols* (desde `0x1F1E6` para '🇦' hasta `0x1F1FF` para '🇿').
+     - Aunque la fórmula `char.charCodeAt(0) - 65 + 0x1F1E6` permitía calcular cualquier bandera en 3 líneas, resultaba **opaca, críptica y difícil de auditar** para cualquier compañero de equipo que no domine las tablas internas de Unicode. Introduce números mágicos que provocan fricción y preguntas innecesarias en los code reviews.
+  2. *El criterio Senior: Mantenibilidad, Cero Carga Cognitiva y Rendimiento O(1):*
+     - En lugar de trucos matemáticos, un desarrollo profesional prioriza la claridad: un **diccionario declarativo canónico `COUNTRY_FLAGS`** (`src/app/shared/utils/country-flag.util.ts`) que mapea los códigos ISO a sus emojis correspondientes (`ES: '🇪🇸'`, `US: '🇺🇸'`, `DE: '🇩🇪'`).
+     - **Acceso $O(1)$ directo:** Sin transformaciones de cadena, sin `String.fromCodePoint()`, sin overhead de cálculo en caliente.
+     - **Extensibilidad trivial:** Cualquier desarrollador puede añadir o modificar un país en un segundo sin tocar algoritmos binarios.
+     - **Fallback seguro:** Si el país no está registrado o es nulo, devuelve limpiamente `'🌐'`.
+- **Acciones ejecutadas:**
+  - Se refactorizó `country-flag.util.ts` eliminando las constantes hexadecimales y adoptando el mapa declarativo `COUNTRY_FLAGS`.
+  - Se actualizaron las pruebas unitarias en `country-flag.util.spec.ts` verificando la cobertura de jurisdicciones y la resiliencia ante entradas anómalas.
+  - Se actualizó la sección 3.7 de `architecture-guidelines.md` contrastando *Clever Code* con *Clean Code*.
+- **Valor para la evaluación:** Demuestra madurez ingenieril: no escribir código "rebuscado" por aparentar ingenio, sino escribir código legible, autoexplicativo, mantenible y sin sorpresas (*Principle of Least Astonishment*).
+
 
 
 

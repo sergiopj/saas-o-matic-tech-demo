@@ -32,6 +32,12 @@ describe('I18nService', () => {
     });
   });
 
+  it('should interpolate parameter placeholders when provided', () => {
+    service.setLanguage('es');
+    const interpolated = service.t('customers.emailDialog.defaultSubject', { company: 'Acme Corp' });
+    expect(interpolated).toBe('SaaS-O-Matic: Propuesta de optimización para Acme Corp');
+  });
+
   it('should ignore unsupported languages and preserve current language', () => {
     service.setLanguage(SUPPORTED_LANGUAGES[0].code);
     service.setLanguage('unsupported' as any);

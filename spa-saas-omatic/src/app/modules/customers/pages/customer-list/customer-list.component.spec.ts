@@ -152,4 +152,28 @@ describe('CustomerListComponent', () => {
     expect(errorBanner).toBeTruthy();
     expect(errorBanner.textContent).toContain('Database unreachable');
   });
+
+  it('should compute country filter chips dynamically from loaded customers', () => {
+    const filters = component.countryFilters();
+    expect(filters.length).toBe(3); // ALL, ES, US
+    expect(filters[0]).toEqual({ code: 'ALL', flag: '🌐', count: 2 });
+    expect(filters[1]).toEqual({ code: 'ES', flag: '🇪🇸', count: 1 });
+    expect(filters[2]).toEqual({ code: 'US', flag: '🇺🇸', count: 1 });
+  });
+
+  it('should filter customers reactively by selected country jurisdiction', () => {
+    component.selectCountry('ES');
+    fixture.detectChanges();
+
+    expect(component.filteredCustomers().length).toBe(1);
+    expect(component.filteredCustomers()[0].country).toBe('ES');
+
+    const cards = fixture.nativeElement.querySelectorAll('app-customer-card');
+    expect(cards.length).toBe(1);
+
+    component.selectCountry('ALL');
+    fixture.detectChanges();
+
+    expect(component.filteredCustomers().length).toBe(2);
+  });
 });

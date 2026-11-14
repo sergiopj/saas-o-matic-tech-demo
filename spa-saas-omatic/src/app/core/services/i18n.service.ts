@@ -7,6 +7,10 @@ import {
   LanguageOption,
 } from '../i18n/translations';
 
+/**
+ * Enterprise internationalization service managing reactive application locale,
+ * browser language auto-detection, and dictionary interpolation.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -20,9 +24,24 @@ export class I18nService {
     return this.languages.find((l) => l.code === this.currentLanguage())?.flag ?? '🌐';
   });
 
-  t(key: TranslationKey): string {
+  /**
+   * Translates a dictionary key into the active language, optionally interpolating
+   * placeholder parameters formatted as {{key}}.
+   *
+   * @param key Translation key from the catalog
+   * @param params Optional key-value record for token replacement
+   */
+  t(key: TranslationKey, params?: Record<string, string | number>): string {
     const lang = this.currentLanguage();
-    return TRANSLATIONS[lang][key] ?? key;
+    let text: string = TRANSLATIONS[lang][key] ?? key;
+
+    if (params) {
+      for (const [paramKey, value] of Object.entries(params)) {
+        text = text.replaceAll(`{{${paramKey}}}`, String(value));
+      }
+    }
+
+    return text;
   }
 
   setLanguage(lang: SupportedLanguage): void {

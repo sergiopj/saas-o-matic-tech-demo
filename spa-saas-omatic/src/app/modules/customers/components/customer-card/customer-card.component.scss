@@ -1,4 +1,6 @@
 .customer-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
   background-color: var(--roams-bg-card);
   border: 1px solid var(--roams-border);
   border-radius: var(--roams-radius-lg);
