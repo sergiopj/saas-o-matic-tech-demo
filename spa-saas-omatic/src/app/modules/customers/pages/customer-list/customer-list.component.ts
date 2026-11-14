@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { CustomerApiService } from '../../services/customer-api.service';
@@ -7,6 +6,7 @@ import { Customer } from '../../models/customer.model';
 import { CustomerSearchBarComponent } from '../../components/customer-search-bar/customer-search-bar.component';
 import { CustomerCardComponent } from '../../components/customer-card/customer-card.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
+import { LoadingStateComponent } from '../../../../shared/components/loading-state/loading-state.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
@@ -15,7 +15,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
     CustomerSearchBarComponent,
     CustomerCardComponent,
     ErrorBannerComponent,
-    MatProgressSpinnerModule,
+    LoadingStateComponent,
     MatButtonModule,
     MatIconModule,
     TranslatePipe,
@@ -28,6 +28,7 @@ export class CustomerListComponent implements OnInit {
 
   readonly customers = signal<Customer[]>([]);
   readonly searchTerm = signal<string>('');
+  readonly initialLoading = signal<boolean>(true);
 
   ngOnInit(): void {
     this.loadCustomers();
@@ -35,8 +36,13 @@ export class CustomerListComponent implements OnInit {
 
   loadCustomers(term?: string): void {
     this.customerApi.search(term).subscribe({
-      next: (data) => this.customers.set(data),
-      error: () => {},
+      next: (data) => {
+        this.customers.set(data);
+        this.initialLoading.set(false);
+      },
+      error: () => {
+        this.initialLoading.set(false);
+      },
     });
   }
 

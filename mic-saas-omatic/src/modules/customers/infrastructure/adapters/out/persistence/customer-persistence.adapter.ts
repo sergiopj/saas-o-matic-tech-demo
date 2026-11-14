@@ -40,7 +40,11 @@ export class CustomerPersistenceAdapter implements CustomerRepositoryPort {
     const normalizedTaxTerm = `%${normalizeTaxId(term)}%`;
 
     const found = await this.repository.find({
-      where: [{ companyName: Like(cleanTerm) }, { taxId: Like(normalizedTaxTerm) }],
+      where: [
+        { companyName: Like(cleanTerm) },
+        { taxId: Like(normalizedTaxTerm) },
+        { email: Like(cleanTerm) },
+      ],
       order: { createdAt: 'DESC' },
     });
 

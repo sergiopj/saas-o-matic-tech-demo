@@ -9,7 +9,6 @@ import { environment } from '../../../../environments/environment';
 describe('NavbarComponent', () => {
   let component: NavbarComponent;
   let fixture: ComponentFixture<NavbarComponent>;
-  let i18nService: I18nService;
   let httpTesting: HttpTestingController;
 
   beforeEach(async () => {
@@ -24,8 +23,6 @@ describe('NavbarComponent', () => {
     }).compileComponents();
 
     httpTesting = TestBed.inject(HttpTestingController);
-    i18nService = TestBed.inject(I18nService);
-    i18nService.setLanguage('es');
 
     // Create component first; child CurrencySelectorComponent instantiates CurrencyService
     fixture = TestBed.createComponent(NavbarComponent);
@@ -57,11 +54,8 @@ describe('NavbarComponent', () => {
     expect(compiled.querySelector('app-currency-selector')).toBeTruthy();
   });
 
-  it('should toggle language between ES and EN when toggleLanguage is invoked', () => {
-    expect(component.currentLanguage()).toBe('es');
-    component.toggleLanguage();
-    expect(component.currentLanguage()).toBe('en');
-    component.toggleLanguage();
-    expect(component.currentLanguage()).toBe('es');
+  it('should render the embedded language selector', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('app-language-selector')).toBeTruthy();
   });
 });

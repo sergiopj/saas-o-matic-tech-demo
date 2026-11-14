@@ -14,20 +14,10 @@
         </div>
       </a>
 
-      <!-- Right Actions: Currency Selector + Language Switcher -->
+      <!-- Right Actions: Currency Selector + Decoupled Language Selector -->
       <div class="navbar-actions">
         <app-currency-selector />
-
-        <button
-          type="button"
-          mat-button
-          class="lang-toggle-btn"
-          (click)="toggleLanguage()"
-          [attr.aria-label]="'navbar.lang.aria' | translate"
-        >
-          <span class="lang-label">{{ currentLanguage().toUpperCase() }}</span>
-          <mat-icon class="lang-icon">translate</mat-icon>
-        </button>
+        <app-language-selector />
       </div>
     </div>
   </mat-toolbar>

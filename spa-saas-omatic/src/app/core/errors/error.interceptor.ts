@@ -1,8 +1,12 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { ProblemDetail } from './problem-detail.model';
+import { I18nService } from '../services/i18n.service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
+  const i18n = inject(I18nService);
+
   return next(req).pipe(
     catchError((err: HttpErrorResponse) => {
       const problem: ProblemDetail =
@@ -10,9 +14,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           ? (err.error as ProblemDetail)
           : {
               type: 'about:blank',
-              title: 'Communication Error',
+              title: i18n.t('error.communication.title'),
               status: err.status || 500,
-              detail: 'An unexpected error occurred while communicating with the server.',
+              detail: i18n.t('error.communication.detail'),
               instance: req.url || err.url || '/api',
               timestamp: new Date().toISOString(),
             };

@@ -1,0 +1,71 @@
+.lang-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--roams-bg-input-dark) !important;
+  color: var(--roams-text-inverse) !important;
+  border: 1px solid var(--roams-border-inverse) !important;
+  border-radius: var(--roams-radius-md) !important;
+  padding: 0 10px !important;
+  height: 40px !important;
+  min-width: auto !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.16) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+  }
+
+  .current-flag {
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .current-code {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .dropdown-arrow {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--roams-text-inverse-muted);
+    margin-left: -2px;
+  }
+}
+
+::ng-deep .lang-menu-panel {
+  border-radius: var(--roams-radius-md) !important;
+  box-shadow: var(--roams-shadow-lg) !important;
+  border: 1px solid var(--roams-border) !important;
+
+  .lang-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+
+    .item-flag {
+      font-size: 1.1rem;
+    }
+
+    .item-label {
+      flex: 1;
+    }
+
+    .item-check {
+      color: var(--roams-accent-blue);
+      font-size: 1.15rem;
+      margin-left: 8px;
+    }
+
+    &.active-item {
+      font-weight: 600;
+      color: var(--roams-accent-blue);
+      background-color: rgba(16, 97, 226, 0.06);
+    }
+  }
+}

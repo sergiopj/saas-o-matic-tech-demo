@@ -9,17 +9,21 @@
       [placeholder]="'customers.search.placeholder' | translate"
       [attr.aria-label]="'customers.search.aria' | translate"
     />
-    @if (query()) {
-      <button
-        mat-icon-button
-        matSuffix
-        type="button"
-        class="clear-button"
-        [attr.aria-label]="'customers.search.clear.aria' | translate"
-        (click)="clear()"
-      >
-        <mat-icon aria-hidden="true">close</mat-icon>
-      </button>
-    }
+    <div matSuffix class="search-actions">
+      @if (loading() || isDebouncing()) {
+        <mat-spinner diameter="18" strokeWidth="2.5" class="search-spinner" />
+      }
+      @if (query()) {
+        <button
+          mat-icon-button
+          type="button"
+          class="clear-button"
+          [attr.aria-label]="'customers.search.clear.aria' | translate"
+          (click)="clear()"
+        >
+          <mat-icon aria-hidden="true">close</mat-icon>
+        </button>
+      }
+    </div>
   </mat-form-field>
 </div>

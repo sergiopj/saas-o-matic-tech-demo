@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { CustomerListComponent } from './customer-list.component';
 import { CustomerApiService } from '../../services/customer-api.service';
 import { I18nService } from '../../../../core/services/i18n.service';
+import { errorInterceptor } from '../../../../core/errors/error.interceptor';
 import { Customer } from '../../models/customer.model';
 import { environment } from '../../../../../environments/environment';
 
@@ -40,7 +41,7 @@ describe('CustomerListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [CustomerListComponent],
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withInterceptors([errorInterceptor])),
         provideHttpClientTesting(),
         provideRouter([]),
       ],

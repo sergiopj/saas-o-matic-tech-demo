@@ -232,9 +232,12 @@ spa-saas-omatic/
 │   │   │   ├── components/
 │   │   │   │   ├── navbar/                                  # Navbar corporativa estilo Roams
 │   │   │   │   ├── currency-selector/                       # Selector EUR, USD, GBP con Signal reactivo
+│   │   │   │   ├── language-selector/                       # Menú flotante mat-menu con flags y OCP
+│   │   │   │   ├── loading-state/                           # Estado de carga accesible reutilizable
 │   │   │   │   └── error-banner/                            # Banner visual renderizador de RFC 7807
 │   │   │   └── pipes/
-│   │   │       └── localized-currency.pipe.ts               # Pipe i18n con Intl.NumberFormat y metadatos nativos por país
+│   │   │       ├── localized-currency.pipe.ts               # Pipe i18n con Intl.NumberFormat y metadatos nativos por país
+│   │   │       └── translate.pipe.ts                        # Pipe declarativo de traducción reactiva con Signals
 │   │   │
 │   │   ├── app.ts                                           # Shell de aplicación con Standalone Components
 │   │   ├── app.html                                         # Layout con Navbar + <router-outlet />
@@ -272,6 +275,11 @@ spa-saas-omatic/
   - Toda la interfaz (Navbar, buscador, tarjetas, modal/vistas y slider) se diseña bajo enfoque **Mobile-First**: el layout base se concibe para pantallas móviles compactas (`320px` - `480px`), adaptándose de forma progresiva a tablets (`768px`) y escritorio (`1024px` - `1440px+`).
   - Empleo exclusivo de **CSS Flexbox y CSS Grid elástico** (`grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))`), garantizando cero scrollbars horizontales no deseados (`overflow-x: hidden` en contenedor principal) y wrapping fluido de controles de acción.
   - Sin dependencias de frameworks CSS pesados (Bootstrap o Tailwind): 100% estilos nativos y Angular Material para mantener el bundle ultraligero (< 50 kB inicial).
+- **Micro-interacciones y Animaciones Fluidas (Core Web Vitals):**
+  - **Entrada suave de tarjetas:** Cada tarjeta `CustomerCard` entra con una animación suave de opacidad y desplazamiento (`opacity: 0 -> 1`, `translateY: 10px -> 0`) mediante aceleración Material `cubic-bezier(0.16, 1, 0.3, 1)` de 350ms, evitando apariciones bruscas.
+  - **Feedback táctil en buscador:** El input de búsqueda muestra un `<mat-spinner diameter="18">` contextual durante el debounce y la petición, informando al usuario en su foco de visión.
+  - **Transición no destructiva del Grid (`.is-searching`):** Mientras se filtra sobre resultados existentes, el grid atenúa su opacidad (`opacity: 0.45; transition: opacity 0.25s ease;`) en lugar de destruirse, erradicando el Cumulative Layout Shift (CLS).
+  - **Blindaje de la Carga Inicial (`initialLoading`):** Se controla el estado de carga inicial para asegurar que el spinner central se muestra de forma limpia antes de renderizar el primer lote de datos, impidiendo destellos del estado vacío.
 
 ### 3.3 Estrategia de Divisas y Escalabilidad (Open/Closed Principle)
 
@@ -298,6 +306,63 @@ Para mantener el principio de código en inglés y desacoplar la lógica de la p
 - **Tipado Estricto de Claves (`TranslationKey`):** El compilador de TypeScript valida que cualquier clave solicitada exista en el diccionario en ambos idiomas (`es` y `en`), previniendo erratas tipográficas en tiempo de compilación.
 - **Detección Automática con Fallback Regional:** `I18nService` inspecciona `navigator.language` para adaptarse automáticamente a entornos internacionales, manteniendo el español (`'es'`) como idioma predeterminado de la plataforma.
 - **Reactividad con Signals:** El idioma activo se almacena en una Signal `currentLanguage`, provocando el recálculo instantáneo de cualquier vista o mensaje reactivo sin necesidad de recargar la aplicación.
+- **Escalabilidad de la UI y Desacoplamiento (Menú Desplegable `mat-menu` + `LanguageSelectorComponent`):**
+  Para evitar que la barra de navegación colapse al incorporar nuevos idiomas ($\ge 3$ o $\ge 4$) y salvaguardar el principio *Mobile-First*, el selector de idioma se desacopla completamente del Navbar en su propio componente standalone (`src/app/shared/components/language-selector/`). Utiliza un menú flotante (`MatMenuModule`) con botón disparador de tamaño fijo (`[ 🇪🇸 ES ▾ ]`), desacoplando la cantidad de idiomas disponibles del espacio horizontal de la pantalla. Soporta de forma nativa cuádruple idioma (`Español` 🇪🇸, `English` 🇬🇧, `Deutsch` 🇩🇪, `Français` 🇫🇷) mediante la tupla centralizada `SUPPORTED_LANGUAGES`.
+- **Patrón UX de Priorización del Idioma Activo (`sortedLanguages`):**
+  Al abrir el menú desplegable de selección de idioma, el idioma actualmente activo se posiciona automáticamente en el primer lugar de la lista (`sortedLanguages = computed(...)`), seguido por el resto de opciones disponibles. Esto aporta confirmación visual inmediata del estado actual sin forzar al usuario a buscar o hacer scroll, mejorando la ergonomía táctil en dispositivos móviles.
+
+#### 3.5.1 Deuda Técnica de la Edición Manual de Diccionarios y Solución Enterprise con TMS (Tolgee)
+
+- **El Problema de la Gestión Manual de i18n (Archivos Estáticos en Git):**
+  En pruebas de concepto o fases iniciales de un proyecto, mantener un objeto o archivo estático `translations.ts` o archivos JSON manuales en el repositorio Git es una solución rápida y autocontenida. Sin embargo, en un entorno empresarial de producción como el de Roams (con presencia o proyección en múltiples mercados europeos como España, Reino Unido, Alemania y Francia), este enfoque introduce **graves vicios y deuda técnica**:
+  1. *El desarrollador como cuello de botella:* Cualquier corrección ortográfica, cambio comercial de copywriting o adaptación legal de términos exige crear ramas de Git, revisar Pull Requests, esperar a pipelines de CI/CD y desplegar una nueva versión de la aplicación.
+  2. *Falta de contexto visual para traductores:* Los lingüistas o redactores reciben listas aisladas de claves (`customers.card.simulate.btn`) sin saber en qué pantalla aparecen, qué tamaño tienen o si el texto desbordará en pantallas móviles (*layout shift*).
+  3. *Riesgo de corrupción sintáctica:* Traductores no técnicos que editan JSONs directamente suelen romper comillas, comas o caracteres escapados, provocando errores en tiempo de compilación.
+  4. *Desincronización de claves entre idiomas:* A medida que el producto crece, es habitual olvidar traducir claves en alemán o francés, provocando huecos en la UI.
+
+- **La Arquitectura Enterprise con un TMS Moderno: [Tolgee](https://tolgee.io):**
+  La solución profesional consiste en desacoplar el contenido del código fuente mediante una plataforma de **Translation Management System (TMS)** como **Tolgee** (open-source, auto-hospedable o SaaS), integrándola en el ciclo de vida de desarrollo:
+
+  ```
+  ┌─────────────────────────────────────────────────────────────────────────────────┐
+  │                           CI / CD & LOCAL WORKFLOW                              │
+  └─────────────────────────────────────────────────────────────────────────────────┘
+     [Frontend Code] ───────( tolgee push )────────> [ Tolgee Platform (TMS) ]
+     (HTML/TS keys)                                   │  - Traductores & Copywriters
+                                                      │  - Traducción asistida por IA
+                                                      │  - Capturas & In-Context Preview
+                                                      ▼
+     [Production Build] <───( tolgee pull )────────── [ Exportación JSON Automática ]
+     (assets/i18n/*.json)
+  ```
+
+  1. **Extracción y Subida Automatizada (`@tolgee/cli push`):**
+     Los ingenieros desarrollan utilizando las claves semánticas. Un script en `package.json` o un hook de Git / GitHub Actions ejecuta el CLI de Tolgee para extraer automáticamente todas las claves nuevas de las plantillas y subirlas al servidor central de traducciones sin intervención manual:
+     ```bash
+     npx @tolgee/cli push --force-mode OVERRIDE
+     ```
+  2. **Traducción en Contexto (In-Context Translation con `@tolgee/ngx`):**
+     En entornos de desarrollo y staging, Tolgee permite la traducción en vivo dentro de la propia aplicación Angular:
+     - El traductor o product manager pulsa `Alt + Clic` sobre cualquier texto de la UI en su navegador (`localhost:4200` o entorno de pruebas).
+     - Se abre un diálogo flotante donde edita el texto en caliente, ve el resultado instantáneamente y la herramienta captura automáticamente una captura de pantalla (*screenshot*) con el elemento resaltado.
+     - Los traductores externos ven exactamente dónde se ubica cada botón, tarjeta o etiqueta y su restricción espacial.
+  3. **Descarga y Empaquetado en Build (`@tolgee/cli pull`):**
+     Antes de compilar la versión de producción (`ng build`), el pipeline de integración continua descarga de forma desatendida los archivos JSON finales validados por el equipo lingüístico directamente a la carpeta de assets:
+     ```bash
+     npx @tolgee/cli pull --path ./src/assets/i18n --format JSON
+     ```
+  4. **Scripts de Integración en `package.json`:**
+     ```json
+     {
+       "scripts": {
+         "i18n:push": "tolgee push --path ./src",
+         "i18n:pull": "tolgee pull --path ./src/assets/i18n --format JSON",
+         "i18n:sync": "tolgee sync --path ./src"
+       }
+     }
+     ```
+  5. **Carga Reactiva Asíncrona (HttpClient):**
+     En lugar de importar un bundle estático en el archivo `.ts`, el servicio `I18nService` consume los JSON descargados mediante un `HttpBackend` o el SDK oficial `@tolgee/ngx`, permitiendo cargar bajo demanda (*Lazy Loading*) exclusivamente el paquete del idioma seleccionado por el usuario, reduciendo el bundle inicial transferido al cliente.
 
 ### 3.6 Standalone por Defecto (Angular 19+) y Eliminación de Boilerplate Redundante
 
@@ -326,6 +391,34 @@ Para mantener el principio de código en inglés y desacoplar la lógica de la p
 - **Funcionamiento por Ligaduras OpenType:** Palabras clave en inglés como `search`, `close`, `mail` o `person_search` son ligaduras tipográficas que la fuente vectorial de Google sustituye por glifos en el canvas.
 - **Accesibilidad Estricta (`aria-hidden="true"`):** Todo icono decorativo o acompañado de etiqueta descriptiva debe portar `aria-hidden="true"`. Esto previene que las tecnologías de asistencia para personas con discapacidad visual pronuncien la palabra técnica del icono (ej. "search") en lugar del texto accesible traducido (`[attr.aria-label]="'customers.search.aria' | translate"`).
 
+### 3.9 Manejo Centralizado de Errores RFC 7807 (`errorInterceptor` vs. Servicios de Dominio)
+
+- **Principio de Responsabilidad Única (SRP / DRY):**
+  La transformación, captura y normalización de errores HTTP a objetos **RFC 7807** (`ProblemDetail`) pertenece exclusivamente a la capa de infraestructura transversal: **`errorInterceptor`** (`src/app/core/errors/error.interceptor.ts`).
+- **Prohibición de Textos Hardcodeados y Fugas de Depuración:**
+  1. Queda terminantemente prohibido incluir literales quemados en inglés (como `'An unexpected error occurred.'`) como valor por defecto en los servicios.
+  2. Queda prohibido recurrir a `httpErr.message`, ya que Angular genera internamente cadenas técnicas en inglés (`"Http failure response for ..."`), ocultando las traducciones corporativas.
+  3. Los fallbacks de contingencia ante caídas de red o fallos 500 no estructurados deben derivarse obligatoriamente de las claves centralizadas de `I18nService`: `'error.communication.title'` y `'error.communication.detail'`.
+- **Servicios de Negocio Limpios:**
+  Servicios como `CustomerApiService` y `SimulationApiService` reciben a través del flujo de RxJS el `ProblemDetail` ya garantizado y normalizado por el interceptor, limitándose a actualizar sus señales reactivas (`error.set(problem)`) sin duplicar lógica de parseo HTTP.
+
+### 3.10 Aislamiento de Componentes Estéticos y Tolerancia a Fallos (Fault-Tolerant UI & Graceful Degradation)
+
+Para garantizar que fallos en elementos cosméticos o de micro-interacción (spinners, animaciones, badges) jamás bloqueen la funcionalidad base ni la carga de datos del negocio:
+1. **Inmunidad del Flujo de Datos:**
+   El ciclo de vida de los datos (`CustomerApiService`, `HttpClient`, RxJS) opera de forma estrictamente desacoplada de la UI. La llamada a la base de datos y la actualización de las señales (`customers()`) no están atadas a si un componente visual se renderiza o no.
+2. **Garantía Anti-Bloqueo de Carga (`finalize` en RxJS):**
+   Toda señal de carga (`loading`) en los servicios de API se apaga obligatoriamente en el operador `finalize()`. Esto blinda al sistema contra "spinners infinitos": tanto si la petición es exitosa (`200`), como si falla con error (`400`, `500`), o se cancela, `loading` pasa inmediatamente a `false`, liberando la UI.
+3. **Desacoplamiento Estricto de Componentes Presentacionales:**
+   - Componentes como `<app-loading-state>` (`src/app/shared/components/loading-state/`) o `<mat-spinner>` son puramente tontos (*Dumb Components*): reciben inputs primitivos (`message`, `diameter`) y carecen de efectos secundarios (*Zero Side Effects*).
+   - El spinner del buscador (`CustomerSearchBarComponent`) es un adorno visual en el sufijo del input: el pipeline reactivo de filtrado (`Subject -> debounceTime -> emit`) corre en memoria y emitirá el término de búsqueda con independencia total del renderizado del spinner.
+4. **Resiliencia de Renderizado y No Destrucción:**
+   Cuando existen datos en memoria (`customers().length > 0`), las búsquedas secundarias no destruyen el grid ni lo sustituyen por un spinner de bloqueo: simplemente atenúan la opacidad (`.is-searching { opacity: 0.45; }`), permitiendo que el usuario siga visualizando la información en todo momento.
+5. **Degradación Elegante de Animaciones (`prefers-reduced-motion`):**
+   Las animaciones de tarjetas (`roamsCardEntrance`) están implementadas en CSS nativo acelerado por GPU (sin librerías JS pesadas). Mediante `@media (prefers-reduced-motion: reduce)`, si el navegador o sistema operativo del usuario tiene desactivadas las animaciones, el estilo se desactiva instantáneamente y el contenido se presenta estático a opacidad 1 sin latencia ni artefactos.
+6. **Separación Estricta de Ficheros (Cero Templates Inline):**
+   Todo componente compartido debe desacoplar su lógica (`.ts`), plantilla (`.html`), estilos corporativos (`.scss`) y pruebas unitarias (`.spec.ts`) en ficheros independientes, prohibiendo templates embebidos en el decorador para facilitar su mantenimiento y evitar mezclas de responsabilidades.
+
 ---
 
 ## 4. Estrategia de Testing y Aseguramiento de Calidad
@@ -347,6 +440,9 @@ Para mantener el principio de código en inglés y desacoplar la lógica de la p
 5. **Testing en Entornos Zoneless con Vitest:**
    - En Angular 22 zoneless, se descartan los helpers legacy dependientes de `zone.js` (`fakeAsync`, `tick`). Se adoptan los timers nativos de Vitest (`vi.useFakeTimers()`, `vi.advanceTimersByTime()`, `vi.useRealTimers()`).
    - El ciclo de vida de los Smart Components exige ejecutar `fixture.detectChanges()` para disparar `ngOnInit()` antes de esperar peticiones en `HttpTestingController`.
+6. **Invariantes de Test Dinámicos contra la Configuración SSOT (Open-Closed Principle):**
+   - Los tests unitarios nunca deben depender de arrays literales quemados (ej. `['es', 'en', 'de', 'fr']`) ni de comprobaciones de longitud estáticas (`length === 4`).
+   - En su lugar, validan de forma invariante contra la configuración autoritativa del proyecto (`SUPPORTED_LANGUAGES`). Si en el futuro se añade un nuevo idioma al catálogo de configuración (vía Tolgee o TS), la suite de pruebas sigue pasando al 100% de forma determinista sin exigir modificar ningún archivo de test.
 
 ### 4.2 Scripts de Ejecución y Filosofía de Feedback Loops
 

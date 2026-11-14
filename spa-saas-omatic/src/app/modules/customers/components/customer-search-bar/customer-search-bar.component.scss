@@ -55,6 +55,20 @@
   margin-right: 0.5rem;
 }
 
+.search-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.search-spinner {
+  margin-right: 0.25rem;
+
+  ::ng-deep circle {
+    stroke: var(--roams-accent-blue) !important;
+  }
+}
+
 .clear-button {
   color: var(--roams-text-secondary);
   transition: color 0.15s ease;

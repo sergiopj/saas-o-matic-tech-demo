@@ -1,0 +1,28 @@
+<button
+  type="button"
+  mat-button
+  class="lang-menu-trigger"
+  [matMenuTriggerFor]="langMenu"
+  [attr.aria-label]="'navbar.lang.aria' | translate"
+>
+  <span class="current-flag" aria-hidden="true">{{ currentFlag() }}</span>
+  <span class="current-code">{{ currentLanguage().toUpperCase() }}</span>
+  <mat-icon class="dropdown-arrow" aria-hidden="true">arrow_drop_down</mat-icon>
+</button>
+
+<mat-menu #langMenu="matMenu" class="lang-menu-panel" xPosition="before">
+  @for (lang of sortedLanguages(); track lang.code) {
+    <button
+      mat-menu-item
+      class="lang-menu-item"
+      [class.active-item]="currentLanguage() === lang.code"
+      (click)="setLanguage(lang.code)"
+    >
+      <span class="item-flag" aria-hidden="true">{{ lang.flag }}</span>
+      <span class="item-label">{{ lang.label }}</span>
+      @if (currentLanguage() === lang.code) {
+        <mat-icon class="item-check" aria-hidden="true">check</mat-icon>
+      }
+    </button>
+  }
+</mat-menu>

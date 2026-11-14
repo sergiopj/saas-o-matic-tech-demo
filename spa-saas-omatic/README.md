@@ -8,7 +8,7 @@ Dashboard Comercial interactivo para la optimización y presupuestado dinámico 
 
 El frontend sigue una arquitectura orientada al dominio (**Feature-Driven**) con simetría 1:1 respecto al backend NestJS:
 
-- **`src/app/core/`**: Infraestructura transversal (errores RFC 7807, modelos e i18n con catálogo bilingüe y detección de idioma).
+- **`src/app/core/`**: Infraestructura transversal (errores RFC 7807, modelos e i18n con catálogo multidioma [ES, EN, DE, FR], detección por navegador y arquitectura lista para TMS como Tolgee).
 - **`src/app/modules/`**: Módulos funcionales de negocio por dominio (Bounded Contexts):
   - `customers/`: Búsqueda, gestión y fichas de clientes corporativos.
   - `simulations/`: Motor interactivo de cálculo de tramos a 60 FPS, desglose fiscal multi-divisa e historial de presupuestos.

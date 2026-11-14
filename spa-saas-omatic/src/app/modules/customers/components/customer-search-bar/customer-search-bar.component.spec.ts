@@ -29,10 +29,24 @@ describe('CustomerSearchBarComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render the search input with localized placeholder', () => {
+  it('should render the search input with localized placeholder matching SSOT', () => {
     const inputEl: HTMLInputElement = fixture.nativeElement.querySelector('input');
     expect(inputEl).toBeTruthy();
-    expect(inputEl.placeholder).toBe('Buscar por empresa, CIF/NIF o email...');
+    expect(inputEl.placeholder).toBe('Buscar por empresa o CIF/NIF...');
+  });
+
+  it('should show spinner when debouncing user input', () => {
+    component.onInput('Roams');
+    fixture.detectChanges();
+
+    expect(component.isDebouncing()).toBe(true);
+    const spinner = fixture.nativeElement.querySelector('.search-spinner');
+    expect(spinner).toBeTruthy();
+
+    vi.advanceTimersByTime(300);
+    fixture.detectChanges();
+
+    expect(component.isDebouncing()).toBe(false);
   });
 
   it('should emit search term after 300ms debounce', () => {

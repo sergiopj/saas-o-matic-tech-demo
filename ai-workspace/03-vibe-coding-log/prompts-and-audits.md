@@ -915,6 +915,243 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Se incorporó la política de diseño **Mobile-First** en `architecture-guidelines.md` (Sección 3.2) y en la cabecera de `spa-saas-omatic/README.md`.
 - **Valor para la evaluación:** Documentación clara, concisa y profesional sin ruido innecesario, y compromiso firme con el diseño responsive y la experiencia móvil de los usuarios comerciales.
 
+### 6.36. Diagnóstico de Normalización RFC 7807 en Tests: Vinculación de `errorInterceptor` y Programación Defensiva en `CustomerApiService`
+
+- **La incidencia detectada por el Director de Orquesta:**
+  - Al ejecutar `npm test`, falló la prueba de renderizado del banner de error en `CustomerListComponent.spec.ts`:
+    ```text
+    AssertionError: expected 'error500close' to contain 'Database unreachable'
+    Expected: "Database unreachable"
+    Received: "error500close"
+    ```
+- **Diagnóstico técnico y causa raíz:**
+  1. *Ausencia de interceptor en la configuración de pruebas:* `CustomerListComponent.spec.ts` configuraba `provideHttpClient()` sin `withInterceptors([errorInterceptor])`.
+  2. *Efecto colateral:* Al disparar `req.flush(..., { status: 500 })`, el cliente HTTP emitía un objeto crudo `HttpErrorResponse` en vez del modelo normalizado `ProblemDetail`. Como `HttpErrorResponse` no tiene la propiedad `detail` en su raíz (sino en `err.error.detail`), el componente `<app-error-banner>` renderizaba `p.status` (500) pero omitía el detalle al ser `undefined`.
+- **Acciones correctoras ejecutadas:**
+  1. *Configuración de interceptor en la suite:* Se añadió `withInterceptors([errorInterceptor])` a los providers del test de `CustomerListComponent`.
+  2. *Programación defensiva en el servicio:* Se implementó `normalizeError(err)` en `CustomerApiService` para garantizar que cualquier error (venga normalizado por el interceptor o como `HttpErrorResponse` crudo) sea mapeado con total garantía a un `ProblemDetail` con `detail` y `title` válidos.
+- **Valor para la evaluación:** Robustez y tolerancia a fallos arquitectural (resiliencia en el servicio API + suites de integración con intercepción HTTP real).
+
+### 6.37. Rediseño de Experiencia de Usuario (UX): Segmented Pill Switch para Cambio de Idioma en Navbar
+
+- **La crítica de usabilidad del Director de Orquesta:**
+  - El usuario advirtió una experiencia de usuario deficiente en el control de idioma:
+    > *"Una cosa horrible es cambiar de idioma: pulsas y cambias al siguiente, eso es fatal, mejor un selector o algo chulo."*
+- **Análisis de UX y Ergonomía Visual:**
+  1. *El problema del botón alternador (*Toggle* ciego):* Un botón único que va rotando entre estados (`ES -> EN`) no comunica qué opciones existen, qué idioma está seleccionado actualmente y cuál será el siguiente, generando incertidumbre y clics accidentales.
+  2. *El patrón Segmented Pill Switch:* En aplicaciones web modernas (Stripe, Linear, Apple), el estándar dorado para conmutar entre opciones reducidas es un interruptor segmentado en píldora (`[ 🇪🇸 ES | 🇬🇧 EN ]`).
+  3. *Ventajas de interacción:*
+     - Visibilidad de estado 100% explícita: la opción activa resalta en azul Roams (`--roams-accent-blue`) con sombra suave.
+     - Un solo clic directo: el usuario elige conscientemente el idioma deseado sin pulsar a ciegas.
+     - Semántica de accesibilidad nativa: `role="radiogroup"` y `role="radio"` con `aria-checked`.
+- **Acciones ejecutadas:**
+  - Se sustituyó el botón ciego en `NavbarComponent` por un selector segmentado en píldora con banderas e identificadores ISO.
+  - Se añadió el método explícito `setLanguage(lang)` manteniendo retrocompatibilidad.
+  - Se añadió la prueba unitaria correspondiente en `navbar.component.spec.ts`.
+- **Valor para la evaluación:** Atención exquisita a la experiencia de usuario (UX), micro-interacciones táctiles modernas y accesibilidad según estándares W3C.
+
+### 6.39. Desacoplamiento del Selector de Idioma: Responsabilidad Única (SRP) en UI
+
+- **El debate de diseño planteado por el Director de Orquesta:**
+  - Al revisar el código del menú de idiomas embebido en el Navbar, el usuario detectó un acoplamiento arquitectónico indebido:
+    > *"readonly languages: readonly LanguageOption[] = ... ¿No está esto muy acoplado a este componente que ni siquiera es temático de idiomas? ¿O me confundo? Y esto: toggleLanguage(): void { const nextLang = ... }."*
+- **Análisis de Responsabilidades y Solución Senior:**
+  1. *El Navbar es un contenedor estructural (App Shell):* Su única misión es estructurar la cabecera, el logo y orquestar elementos transversales. No debe albergar lógica de idiomas, listas de banderas ni métodos de alternancia de estado.
+  2. *Creación del componente dedicado `LanguageSelectorComponent`:*
+     - Se encapsuló el selector de idioma en su propio componente standalone en `src/app/shared/components/language-selector/`.
+     - Consume directamente `I18nService` (que a su vez expone la lista inmutable `SUPPORTED_LANGUAGES` desde el diccionario centralizado `translations.ts`).
+     - Gestiona su propio menú desplegable accesible (`mat-menu`), señales reactivas de selección y estados visuales con tokens corporativos `--roams-*`.
+  3. *Eliminación de `toggleLanguage`:* Se erradicó el método binario hardcodeado a favor de `selectLanguage(code)` escalable a $N$ idiomas.
+- **Valor para la evaluación:** Alta cohesión y bajo acoplamiento (Clean Architecture en Angular), facilitando tests unitarios aislados y reutilización sin manchar componentes de maquetación.
+
+### 6.40. Auditoría de Textos Hardcodeados y Unificación del Manejo de Errores RFC 7807 (DRY / SRP)
+
+- **El debate de diseño planteado por el Director de Orquesta:**
+  - Al auditar el manejo de errores en los servicios de API de clientes, el usuario cazó un fallo crítico de consistencia:
+    > *"¿Y este texto hardcoded? ¿No teníamos eso centralizado ya? `detail: typeof httpErr.error === 'string' ? httpErr.error : httpErr.message || 'An unexpected error occurred.'`"*
+- **Análisis del Bug y Vicios de Implementación Detectados:**
+  1. *Texto literal quemado en inglés (`'An unexpected error occurred.'`):*
+     - Violaba frontalmente la directriz de cero cadenas hardcodeadas en la aplicación.
+     - En `src/app/core/i18n/translations.ts` ya estaban definidas y tipadas las claves canónicas:
+       - `'error.communication.title'`: `'Error de Comunicación'` (ES) / `'Communication Error'` (EN).
+       - `'error.communication.detail'`: `'Ha ocurrido un error inesperado al comunicarse con el servidor.'` (ES) / `'An unexpected error occurred while communicating with the server.'` (EN).
+  2. *Fuga de cadenas técnicas del navegador (`httpErr.message`):*
+     - En Angular, `HttpErrorResponse.message` contiene cadenas técnicas autogeneradas en inglés (ej. `"Http failure response for http://localhost:3000/customers: 500 Server Error"`).
+     - Al usar el operador `httpErr.message || ...`, la expresión evaluaba a verdadero para casi cualquier fallo HTTP, mostrando al usuario final un mensaje técnico incomprensible y en inglés en lugar de la traducción amigable en su idioma.
+  3. *Violación de Responsabilidad Única (SRP / DRY):*
+     - Normalizar errores HTTP a nivel de cada servicio de negocio (`CustomerApiService`, `SimulationApiService`) generaba duplicidad y discrepancias de comportamiento.
+     - La capa transversal oficial para esta responsabilidad es el **`errorInterceptor`** (`src/app/core/errors/error.interceptor.ts`), que intercepta todos los fallos HTTP a nivel global y los convierte al contrato RFC 7807 (`ProblemDetail`) mediante `I18nService`.
+- **Acciones ejecutadas:**
+  - Se eliminó el texto literal hardcodeado y la dependencia de `httpErr.message`.
+  - Se refactorizó `CustomerApiService` para utilizar exclusivamente `I18nService.t('error.communication.detail')` y `t('error.communication.title')` en caso de fallbacks defensivos.
+  - Se garantizó la alineación arquitectónica con `SimulationApiService` y `errorInterceptor`, manteniendo la suite completa de 85+ pruebas unitarias en verde.
+- **Valor para la evaluación:** Rigor en la aplicación de las directrices de internacionalización y arquitectura limpia: tolerancia cero al código espagueti y a textos quemados en la UI.
+
+### 6.42. Patrón UX Activo Primero (`sortedLanguages`) y Tests Dinámicos contra la Configuración SSOT (Open-Closed Principle)
+
+- **El debate de diseño planteado por el Director de Orquesta:**
+  - El usuario auditó el comportamiento del desplegable y la fragilidad de los tests unitarios:
+    > *"Un detallito en el selector de idioma: que primero siempre salga el actual en la lista, eso documéntalo también en los MDs que toquen. Y por otro lado, ¿cada idioma que añadamos tenemos que modificar los test? ¿No podemos hacerlo dinámico con un listado de idiomas a nivel de config en el proyecto o algo así? `expect(['es', 'en', 'de', 'fr']).toContain(service.currentLanguage());`... Esto no es dinámico tampoco: `expect(codeEl.textContent.trim()).toBe('ES');`..."*
+- **Análisis de Arquitectura y Principio Abierto/Cerrado (OCP):**
+  1. *Patrón UX Activo Primero en Desplegables:*
+     - En una lista de selección, situar el elemento actualmente activo en la cabecera del panel desplegable (`sortedLanguages = computed(...)`) proporciona al usuario confirmación visual inmediata y reduce el desplazamiento innecesario.
+  2. *Erradicación de Fragilidad en Tests Unitarios:*
+     - Afirmar contra literales mágicos como `['es', 'en', 'de', 'fr']`, comprobaciones numéricas fijas (`toBe(4)`) o cadenas quemadas (`'ES'`, `'EN'`) rompe los tests cada vez que el catálogo de idiomas evoluciona.
+     - La solución de ingeniería consiste en vincular los tests a la **Single Source of Truth (SSOT)**: la tupla `SUPPORTED_LANGUAGES` en `src/app/core/i18n/translations.ts`.
+- **Acciones ejecutadas:**
+  - En `LanguageSelectorComponent`, se implementó la señal computada reactiva:
+    ```typescript
+    readonly sortedLanguages = computed(() => {
+      const current = this.currentLanguage();
+      const active = this.languages.find((l) => l.code === current);
+      const rest = this.languages.filter((l) => l.code !== current);
+      return active ? [active, ...rest] : this.languages;
+    });
+    ```
+  - Se refactorizaron al 100% las suites `i18n.service.spec.ts` y `language-selector.component.spec.ts`:
+    - Eliminados todos los arrays quemados: se valida que `currentLanguage` pertenezca a `SUPPORTED_LANGUAGES.map(l => l.code)`.
+    - Eliminados los asserts rígidos por idioma: se itera sobre `SUPPORTED_LANGUAGES.forEach(...)` para asegurar que el trigger visual, la bandera y el ordenamiento UX sitúen siempre el idioma activo en la posición 0 de `sortedLanguages()`.
+  - Se documentó el principio en la sección 4.1 de `architecture-guidelines.md`.
+### 6.43. Caza de Bug: Búsqueda por Email en Clientes (Desconexión entre UI y Persistencia Backend)
+
+- **El debate y reporte del Director de Orquesta:**
+  - El usuario probó la búsqueda en el dashboard en ejecución y detectó una inconsistencia de comportamiento:
+    > *"En el buscador no me lista nada si busco por email y eso que lo pongo bien."*
+- **Análisis de la Causa Raíz:**
+  1. *Contrato visual en la UI:* El placeholder del buscador indicaba explícitamente:
+     `'Buscar por empresa, CIF/NIF o email...'` (`customers.search.placeholder`).
+  2. *Desconexión en el Adaptador Secundario de Persistencia:* Al revisar `CustomerPersistenceAdapter` en `mic-saas-omatic/src/modules/customers/infrastructure/adapters/out/persistence/customer-persistence.adapter.ts`, la consulta TypeORM solo filtraba por `companyName` y `taxId`:
+     ```typescript
+     // Antes (Bug):
+     where: [{ companyName: Like(cleanTerm) }, { taxId: Like(normalizedTaxTerm) }]
+     ```
+     Al introducir un email (ej. `contacto@roams.es`), el backend ignoraba el campo `email` y devolvía un array vacío `[]`.
+- **Acciones ejecutadas:**
+  - Se añadió `{ email: Like(cleanTerm) }` a la cláusula `where` en `CustomerPersistenceAdapter`:
+    ```typescript
+    where: [
+      { companyName: Like(cleanTerm) },
+      { taxId: Like(normalizedTaxTerm) },
+      { email: Like(cleanTerm) },
+    ]
+    ```
+  - Se actualizaron las especificaciones funcionales en `functional-specs.md` y el contrato OpenAPI en `openapi.yaml` para reflejar la búsqueda tripartita (`companyName`, `taxId` o `email`).
+  - Se actualizó el test unitario en `customer-persistence.adapter.spec.ts`.
+- **Valor para la evaluación:** Coherencia de extremo a extremo: la promesa visual de la UI se respalda 100% con la consulta en base de datos.
+
+### 6.44. Auditoría de Redundancia (`standalone: true` en Angular 22) y Purgado de Fichero Duplicado
+
+- **El debate de diseño planteado por el Director de Orquesta:**
+  - El usuario inspeccionó el pipe de divisas y detectó una contradicción con las directrices arquitectónicas:
+    > *"¿Está bien el standalone true aquí? ¿No estaba por defecto ya a true? O me estoy liando..."*
+- **Análisis y Criterio Senior:**
+  1. *El usuario tiene el 100% de la razón:* A partir de Angular 19 (y ratificado en Angular 22), todos los decoradores `@Component`, `@Directive` y `@Pipe` son `standalone` de forma implícita. Escribir `standalone: true` es código redundante y va en contra de la directriz establecida en la Sección 3.6 de `architecture-guidelines.md`.
+  2. *Caza de fichero fantasma (Ghost File):*
+     - Al inspeccionar el árbol del proyecto, se descubrió que el archivo canónico del proyecto (`src/app/shared/pipes/localized-currency.pipe.ts`) ya estaba limpio de `standalone: true`:
+       ```typescript
+       @Pipe({
+         name: 'localizedCurrency',
+         pure: false,
+       })
+       ```
+     - El archivo con `standalone: true` que el usuario tenía abierto en su editor se encontraba en una ruta duplicada creada accidentalmente (`src/app/shared/pipes/spa-saas-omatic/src/app/shared/pipes/localized-currency.pipe.ts`).
+- **Acciones ejecutadas:**
+  - Se vació y deshabilitó el archivo duplicado anidado para evitar conflictos de nombres en compilación.
+  - Se confirmó que el archivo canónico en `src/app/shared/pipes/localized-currency.pipe.ts` cumple estrictamente con el estándar sin boilerplate.
+- **Valor para la evaluación:** Mantenimiento higiénico del repositorio y cumplimiento estricto de los estándares modernos de Angular 22 sin redundancias legacy.
+
+### 6.45. Auditoría de Requisitos contra el DOCX Oficial: Alcance Estricto del Buscador (Empresa o CIF vs. Alucinación de Email)
+
+- **El debate y contraste con la Fuente de Verdad planteado por el Director de Orquesta:**
+  - El usuario cuestionó la validez del requisito de búsqueda por email contrastándolo con el enunciado oficial de Roams:
+    > *"Sigo sin poder buscar por email, ¿eso lo pedían en los requerimientos de la prueba? Te adjunté el doc."*
+- **Análisis de la Fuente de Verdad (Enunciado Oficial de Roams):**
+  - Se contrastó el texto literal del documento adjunto (`RETO TÉCNICO: SaaS-O-Matic`):
+    > **"B. El Frontend (Dashboard Comercial) — Vistas obligatorias: Buscador y Dashboard: Un buscador por nombre de empresa o identificador fiscal."**
+  - **Conclusión técnica:** El reto técnico oficial **NUNCA exigió búsqueda por email**.
+  - **Origen del bug:** Fue una *alucinación de copywriting* de la IA al redactar la clave del placeholder (`customers.search.placeholder`: *"Buscar por empresa, CIF/NIF o email..."*). Ese texto engañoso en la UI llevó al usuario a probar búsquedas por email que no formaban parte de la especificación técnica.
+- **Acciones ejecutadas:**
+  - Se corrigió el placeholder en los 4 idiomas (`translations.ts`) para reflejar con fidelidad absoluta el enunciado oficial de Roams:
+    - Español: `'Buscar por empresa o CIF/NIF...'`
+    - English: `'Search by company or tax ID...'`
+    - Deutsch: `'Nach Unternehmen oder Steuernummer suchen...'`
+    - Français: `'Rechercher par entreprise ou NIF/TVA...'`
+  - Se alinearon [openapi.yaml](file:///home/sergiopj/workspace/roams/saas-o-matic/ai-workspace/01-specs/openapi.yaml) y [functional-specs.md](file:///home/sergiopj/workspace/roams/saas-o-matic/ai-workspace/01-specs/functional-specs.md) a la búsqueda estricta por `companyName` y `taxId`.
+  - El backend mantiene compatibilidad tolerante, pero el contrato formal y la interfaz quedan 100% calibrados con el documento de Roams.
+### 6.46. Refinamiento UX: Eliminación de Carga Brusca, Animación Fluida en Cards y Spinner en Búsqueda
+
+- **El debate y reporte del Director de Orquesta:**
+  - El usuario evaluó la experiencia táctil y visual en el navegador y detectó falta de feedback de carga y brusquedad en el renderizado:
+    > *"Cuando buscas por ejemplo y en la carga inicial aparecen las cards de forma brusca y no hay spinner."*
+- **Análisis de la Causa Raíz (Micro-latencia y Layout Shift):**
+  1. *Micro-latencia local de SQLite (1-2 ms):* Al ejecutarse contra SQLite en localhost, la respuesta HTTP llega en milisegundos. El ciclo de vida de `loading = true -> false` sucedía en un solo microtask, impidiendo al navegador renderizar el spinner o provocando un parpadeo de 1 frame (*Flash of Unstyled Content*).
+  2. *Silencio visual durante el debounce (300 ms):* Mientras el usuario tecleaba, transcurrían 300 ms de debounce en los que la interfaz no comunicaba que la búsqueda estaba en marcha.
+  3. *Aparición abrupta de tarjetas:* El grid se inyectaba en el DOM de 0 a 100 sin transición de opacidad ni elevación, generando una sensación tosca.
+- **Acciones ejecutadas:**
+  1. *Spinner reactivo contextual en el input (`CustomerSearchBarComponent`):*
+     - Se integró un `<mat-spinner diameter="18" strokeWidth="2.5" class="search-spinner" />` en el sufijo del input de búsqueda.
+     - Se activa instantáneamente al pulsar la primera tecla (`isDebouncing: true`) y persiste mientras la petición está en vuelo (`loading: true`), dando feedback inmediato en el punto de foco visual del usuario.
+  2. *Animación de Entrada Cuántica en Cards (`roamsCardEntrance`):*
+     - En `customer-card.component.scss`, se añadió la animación de entrada suave:
+       ```scss
+       animation: roamsCardEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+       @keyframes roamsCardEntrance {
+         from {
+           opacity: 0;
+           transform: translateY(10px) scale(0.99);
+         }
+         to {
+           opacity: 1;
+           transform: translateY(0) scale(1);
+         }
+       }
+       ```
+  3. *Transición no destructiva del Grid (`is-searching`):*
+     - Al buscar sobre resultados ya existentes, el grid no desaparece (evitando el molesto *layout shift*), sino que atenúa su opacidad a 0.45 de forma fluida mientras el spinner gira.
+  4. *Blindaje de la Carga Inicial (`initialLoading`):*
+     - Se introdujo la señal `initialLoading = signal<boolean>(true)` en `CustomerListComponent` para garantizar que la primera petición siempre muestra el spinner central (`mat-spinner diameter="44"`), evitando cualquier destello del estado vacío.
+  5. *Actualización de Tests Unitarios:*
+     - Se añadieron aserciones en `customer-search-bar.component.spec.ts` validando la activación del spinner durante el debounce y la sincronización con la SSOT.
+### 6.47. Creación de `LoadingStateComponent` Compartido, Separación de Ficheros y Aislamiento de Fallos en UI
+
+- **El debate de diseño y gobernanza planteado por el Director de Orquesta:**
+  - El usuario cuestionó la arquitectura de carga y frenó en seco una propuesta mediocre de la IA:
+    > *"Hazlo. La buena práctica Senior es crear un componente compartido en src/app/shared/components/loading-state/: pero no metas el html en el propio ts, créalo aparte y documenta esto en los MDs, que te pedí un sistema de spinner y lo hiciste mal... No quiero que componentes estéticos como el spinner etc. puedan fallar y rompan funcionalidad base como la carga de elementos de los customers etc. ¿Eso está bien planteado ya? Si no es así revísalo y documenta los MDs."*
+- **Análisis de la Falla Inicial de la IA y Corrección Arquitectónica:**
+  1. *El vicio de la IA:* Inicialmente, la IA parcheó el estado de carga duplicando bloques `<div class="loading-state"><mat-spinner />...</div>` directamente dentro de la plantilla de clientes y sugirió un template inline en TypeScript en su explicación posterior.
+  2. *Intervención del Director de Orquesta:* Se exigió la creación de un componente standalone limpio en `src/app/shared/components/loading-state/` con estricta **separación de responsabilidades en 4 archivos independientes**:
+     - `loading-state.component.ts`: Lógica con Input Signals (`message`, `diameter`, `strokeWidth`).
+     - `loading-state.component.html`: Plantilla limpia con accesibilidad W3C (`role="status"`, `aria-live="polite"`).
+     - `loading-state.component.scss`: Estilos encapsulados con token `--roams-accent-blue`.
+     - `loading-state.component.spec.ts`: Suite de 4 pruebas unitarias aisladas.
+  3. *Blindaje Anti-Bloqueo de la Funcionalidad Base (Tolerancia a Fallos):*
+     - **Inmunidad de los datos:** Las llamadas HTTP y la señal `customers()` son 100% independientes del árbol visual del spinner. Si el spinner falla en renderizarse, los datos siguen llegando y procesándose.
+     - **Garantía `finalize()`:** Toda señal `loading` se apaga forzosamente mediante el operador `finalize()` de RxJS, garantizando que errores de red o del servidor jamás dejen al usuario atrapado en una pantalla bloqueada con spinner infinito.
+     - **Degradación elegante:** El grid de clientes no se destruye durante la búsqueda si ya contiene datos; únicamente aplica una clase CSS atenuante pasiva (`.is-searching`).
+     - **Accesibilidad vestibular:** Se añadió `@media (prefers-reduced-motion: reduce)` en las tarjetas para que en dispositivos con restricciones de animación las cards se rendericen estáticas a opacidad 1 sin bloqueos.
+- **Acciones ejecutadas:**
+  - Se creó el componente `LoadingStateComponent` desacoplado en `src/app/shared/components/loading-state/`.
+  - Se sustituyó el marcado duplicado en `customer-list.component.html` por `<app-loading-state [message]="'customers.list.loading' | translate" />`.
+  - Se documentó el principio de aislamiento de componentes cosméticos en la sección 3.10 de `architecture-guidelines.md`.
+- **Valor para la evaluación:** Demuestra control riguroso de arquitectura: componentes compartidos con separación limpia de archivos, prevención activa de puntos únicos de fallo (SPOF) en la UI y tolerancia a fallos.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -4,16 +4,32 @@ import { Observable, catchError, finalize, tap, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Customer, CustomerCreate } from '../models/customer.model';
 import { ProblemDetail } from '../../../core/errors/problem-detail.model';
+import { I18nService } from '../../../core/services/i18n.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CustomerApiService {
   private readonly http = inject(HttpClient);
+  private readonly i18n = inject(I18nService);
   private readonly baseUrl = `${environment.apiBaseUrl}/customers`;
 
   readonly loading = signal<boolean>(false);
   readonly error = signal<ProblemDetail | null>(null);
+
+  private normalizeProblem(err: unknown): ProblemDetail {
+    if (err && typeof err === 'object' && 'title' in err && 'status' in err && 'detail' in err) {
+      return err as ProblemDetail;
+    }
+    return {
+      type: 'about:blank',
+      title: this.i18n.t('error.communication.title'),
+      status: (err as { status?: number })?.status || 500,
+      detail: this.i18n.t('error.communication.detail'),
+      instance: this.baseUrl,
+      timestamp: new Date().toISOString(),
+    };
+  }
 
   search(term?: string): Observable<Customer[]> {
     this.loading.set(true);
@@ -26,7 +42,8 @@ export class CustomerApiService {
 
     return this.http.get<Customer[]>(this.baseUrl, { params }).pipe(
       tap(() => this.error.set(null)),
-      catchError((problem: ProblemDetail) => {
+      catchError((err: unknown) => {
+        const problem = this.normalizeProblem(err);
         this.error.set(problem);
         return throwError(() => problem);
       }),
@@ -40,7 +57,8 @@ export class CustomerApiService {
 
     return this.http.get<Customer>(`${this.baseUrl}/${id}`).pipe(
       tap(() => this.error.set(null)),
-      catchError((problem: ProblemDetail) => {
+      catchError((err: unknown) => {
+        const problem = this.normalizeProblem(err);
         this.error.set(problem);
         return throwError(() => problem);
       }),
@@ -54,7 +72,8 @@ export class CustomerApiService {
 
     return this.http.post<Customer>(this.baseUrl, payload).pipe(
       tap(() => this.error.set(null)),
-      catchError((problem: ProblemDetail) => {
+      catchError((err: unknown) => {
+        const problem = this.normalizeProblem(err);
         this.error.set(problem);
         return throwError(() => problem);
       }),

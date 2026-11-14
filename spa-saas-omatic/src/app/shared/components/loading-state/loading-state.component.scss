@@ -1,0 +1,20 @@
+.loading-state-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 1rem;
+  gap: 1rem;
+  text-align: center;
+
+  ::ng-deep circle {
+    stroke: var(--roams-accent-blue) !important;
+  }
+
+  .loading-message {
+    margin: 0;
+    color: var(--roams-text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+}

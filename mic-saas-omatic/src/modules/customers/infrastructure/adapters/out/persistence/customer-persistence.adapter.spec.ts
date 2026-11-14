@@ -68,13 +68,17 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
     expect(result?.getCompanyName()).toBe('Telecom Corp');
   });
 
-  it('should search with clean term for company and normalized term for taxId', async () => {
+  it('should search with clean term for company, normalized term for taxId, and email', async () => {
     (mockTypeOrmRepo.find as jest.Mock).mockResolvedValue([]);
 
     await adapter.search('  b - 1234  ');
 
     expect(mockTypeOrmRepo.find).toHaveBeenCalledWith({
-      where: [{ companyName: expect.anything() }, { taxId: expect.anything() }],
+      where: [
+        { companyName: expect.anything() },
+        { taxId: expect.anything() },
+        { email: expect.anything() },
+      ],
       order: { createdAt: 'DESC' },
     });
   });
