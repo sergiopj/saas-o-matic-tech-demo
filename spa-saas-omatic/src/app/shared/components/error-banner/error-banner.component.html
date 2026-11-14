@@ -2,20 +2,33 @@
   <div class="error-banner" role="alert" aria-live="assertive">
     <div class="error-banner-header">
       <div class="error-banner-title-group">
-        <mat-icon class="error-icon" aria-hidden="true">error</mat-icon>
-        <span class="error-status-badge">{{ p.status }}</span>
+        <mat-icon class="error-icon" aria-hidden="true">error_outline</mat-icon>
         <h3 class="error-title">{{ p.title }}</h3>
       </div>
-      @if (dismissable()) {
-        <button
-          type="button"
-          class="dismiss-btn"
-          [attr.aria-label]="'error.banner.dismiss.aria' | translate"
-          (click)="onDismiss()"
-        >
-          <mat-icon aria-hidden="true">close</mat-icon>
-        </button>
-      }
+
+      <div class="error-banner-actions">
+        @if (retryable()) {
+          <button
+            type="button"
+            class="retry-btn"
+            [attr.aria-label]="'error.banner.retry' | translate"
+            (click)="onRetry()"
+          >
+            <mat-icon aria-hidden="true">refresh</mat-icon>
+            <span>{{ 'error.banner.retry' | translate }}</span>
+          </button>
+        }
+        @if (dismissable()) {
+          <button
+            type="button"
+            class="dismiss-btn"
+            [attr.aria-label]="'error.banner.dismiss.aria' | translate"
+            (click)="onDismiss()"
+          >
+            <mat-icon aria-hidden="true">close</mat-icon>
+          </button>
+        }
+      </div>
     </div>
 
     @if (p.detail) {

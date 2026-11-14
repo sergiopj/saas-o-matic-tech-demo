@@ -27,20 +27,16 @@
   flex-wrap: wrap;
 }
 
+.error-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .error-icon {
   color: var(--roams-status-error);
   font-size: 1.5rem;
   line-height: 1;
-}
-
-.error-status-badge {
-  background-color: var(--roams-status-error);
-  color: var(--roams-text-inverse);
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.15rem 0.45rem;
-  border-radius: var(--roams-radius-sm);
-  letter-spacing: 0.03em;
 }
 
 .error-title {
@@ -48,6 +44,32 @@
   font-size: 1rem;
   font-weight: 600;
   color: var(--roams-text-primary);
+}
+
+.retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: var(--roams-radius-sm);
+  background-color: var(--roams-bg-card);
+  color: var(--roams-status-error);
+  border: 1px solid var(--roams-status-error);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &:hover {
+    background-color: var(--roams-status-error);
+    color: var(--roams-text-inverse);
+  }
 }
 
 .dismiss-btn {
@@ -67,7 +89,6 @@
     color: var(--roams-status-error);
   }
 
-  .material-symbols-outlined,
   mat-icon {
     font-size: 1.25rem;
     width: 1.25rem;

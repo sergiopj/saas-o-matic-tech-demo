@@ -129,28 +129,39 @@ describe('CustomerListComponent', () => {
     expect(component.customers().length).toBe(2);
   });
 
-  it('should render error banner when customer API reports a problem', () => {
+  it('should render error banner when customer API reports a problem and retry on click', () => {
     component.onSearchChange('error-trigger');
 
     const req = httpTesting.expectOne(
       `${environment.apiBaseUrl}/customers?search=error-trigger`
     );
     req.flush(
-      {
-        type: 'about:blank',
-        title: 'Communication Error',
-        status: 500,
-        detail: 'Database unreachable',
-        instance: '/customers',
-        timestamp: '2026-11-14T10:00:00.000Z',
-      },
+      { message: 'Database unreachable' },
       { status: 500, statusText: 'Internal Server Error' }
     );
     fixture.detectChanges();
 
     const errorBanner = fixture.nativeElement.querySelector('.error-banner');
     expect(errorBanner).toBeTruthy();
-    expect(errorBanner.textContent).toContain('Database unreachable');
+    expect(errorBanner.textContent).toContain(i18nService.t('error.communication.detail'));
+
+    // Status badge must be hidden on 500 per defensive UX guidelines
+    const statusBadge = fixture.nativeElement.querySelector('.error-status-badge');
+    expect(statusBadge).toBeNull();
+
+    // Retry button should re-trigger customer load
+    const retryBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.retry-btn');
+    expect(retryBtn).toBeTruthy();
+    retryBtn.click();
+
+    const retryReq = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?search=error-trigger`
+    );
+    expect(retryReq.request.method).toBe('GET');
+    retryReq.flush(mockCustomers);
+    fixture.detectChanges();
+
+    expect(component.customers().length).toBe(2);
   });
 
   it('should compute country filter options dynamically from loaded customers', () => {

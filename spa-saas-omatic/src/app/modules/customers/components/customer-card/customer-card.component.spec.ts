@@ -73,7 +73,7 @@ describe('CustomerCardComponent', () => {
   });
 
   it('should open CustomerEmailDialogComponent when clicking the email button', () => {
-    const openSpy = vi.spyOn(dialog, 'open').mockReturnValue({} as any);
+    const openSpy = vi.spyOn((component as any).dialog, 'open').mockReturnValue({} as any);
 
     const emailBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.email-action-btn');
     emailBtn.click();

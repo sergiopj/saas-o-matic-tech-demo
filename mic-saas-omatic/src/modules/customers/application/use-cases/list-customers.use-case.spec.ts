@@ -32,7 +32,7 @@ describe('ListCustomersUseCase', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].getCompanyName()).toBe('Roams Corp');
-    expect(mockRepository.search).toHaveBeenCalledWith(undefined);
+    expect(mockRepository.search).toHaveBeenCalledWith(undefined, undefined);
   });
 
   it('should pass search filter and country filter to the repository', async () => {

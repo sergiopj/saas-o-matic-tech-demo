@@ -1,4 +1,4 @@
-// RFC 7807 Problem Details for HTTP APIs (application/problem+json)
+// RFC 7807 / RFC 9457 Problem Details for HTTP APIs (application/problem+json)
 export interface ProblemDetailInvalidParam {
   name: string;
   reason: string;
@@ -7,7 +7,7 @@ export interface ProblemDetailInvalidParam {
 export interface ProblemDetail {
   type: string;
   title: string;
-  status: number;
+  status?: number;
   detail: string;
   instance: string;
   invalidParams?: ProblemDetailInvalidParam[];

@@ -10,7 +10,7 @@ describe('ErrorBannerComponent', () => {
   let componentRef: ComponentRef<ErrorBannerComponent>;
   let i18nService: I18nService;
 
-  const mockProblem: ProblemDetail = {
+  const mockClientProblem: ProblemDetail = {
     type: 'https://errors.saas-o-matic.com/400',
     title: 'Bad Request',
     status: 400,
@@ -21,6 +21,15 @@ describe('ErrorBannerComponent', () => {
       { name: 'taxId', reason: 'taxId must be unique' },
       { name: 'country', reason: 'country must be an ISO-3166 alpha-2 code' },
     ],
+  };
+
+  const mockServerProblem: ProblemDetail = {
+    type: 'about:blank',
+    title: 'Servicio temporalmente no disponible',
+    status: 500,
+    detail: 'No hemos podido conectar con el servidor.',
+    instance: '/api/customers',
+    timestamp: '2026-11-14T10:00:00.000Z',
   };
 
   beforeEach(async () => {
@@ -41,25 +50,51 @@ describe('ErrorBannerComponent', () => {
     expect(bannerEl).toBeNull();
   });
 
-  it('should render problem status badge, title and detail when problem is provided', () => {
-    componentRef.setInput('problem', mockProblem);
+  it('should render title, detail, and semantic icon when problem is provided', () => {
+    componentRef.setInput('problem', mockClientProblem);
     fixture.detectChanges();
 
     const bannerEl = fixture.nativeElement.querySelector('.error-banner');
     expect(bannerEl).toBeTruthy();
-
-    const statusBadge = fixture.nativeElement.querySelector('.error-status-badge');
-    expect(statusBadge.textContent.trim()).toBe('400');
 
     const titleEl = fixture.nativeElement.querySelector('.error-title');
     expect(titleEl.textContent.trim()).toBe('Bad Request');
 
     const detailEl = fixture.nativeElement.querySelector('.error-detail');
     expect(detailEl.textContent.trim()).toBe('Customer with taxId already exists');
+
+    const icon = fixture.nativeElement.querySelector('.error-icon');
+    expect(icon.textContent.trim()).toBe('error_outline');
+  });
+
+  it('should render retry button and emit retry event when retryable is true', () => {
+    componentRef.setInput('problem', mockServerProblem);
+    componentRef.setInput('retryable', true);
+    fixture.detectChanges();
+
+    let retryEmitted = false;
+    component.retry.subscribe(() => {
+      retryEmitted = true;
+    });
+
+    const retryBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.retry-btn');
+    expect(retryBtn).toBeTruthy();
+    expect(retryBtn.textContent.trim()).toContain('Reintentar');
+
+    retryBtn.click();
+    expect(retryEmitted).toBe(true);
+  });
+
+  it('should not render retry button by default (when retryable is false)', () => {
+    componentRef.setInput('problem', mockServerProblem);
+    fixture.detectChanges();
+
+    const retryBtn = fixture.nativeElement.querySelector('.retry-btn');
+    expect(retryBtn).toBeNull();
   });
 
   it('should render invalid parameters table when invalidParams are present', () => {
-    componentRef.setInput('problem', mockProblem);
+    componentRef.setInput('problem', mockClientProblem);
     fixture.detectChanges();
 
     const rows = fixture.nativeElement.querySelectorAll('.invalid-params-table tbody tr');
@@ -75,16 +110,7 @@ describe('ErrorBannerComponent', () => {
   });
 
   it('should not render invalid parameters section if invalidParams is omitted or empty', () => {
-    const simpleProblem: ProblemDetail = {
-      type: 'about:blank',
-      title: 'Server Error',
-      status: 500,
-      detail: 'Internal failure',
-      instance: '/api',
-      timestamp: '2026-11-14T10:00:00.000Z',
-    };
-
-    componentRef.setInput('problem', simpleProblem);
+    componentRef.setInput('problem', mockServerProblem);
     fixture.detectChanges();
 
     const invalidSection = fixture.nativeElement.querySelector('.invalid-params-section');
@@ -92,7 +118,7 @@ describe('ErrorBannerComponent', () => {
   });
 
   it('should emit dismiss event when close button is clicked', () => {
-    componentRef.setInput('problem', mockProblem);
+    componentRef.setInput('problem', mockClientProblem);
     fixture.detectChanges();
 
     let dismissed = false;
@@ -108,7 +134,7 @@ describe('ErrorBannerComponent', () => {
   });
 
   it('should not render close button when dismissable is false', () => {
-    componentRef.setInput('problem', mockProblem);
+    componentRef.setInput('problem', mockClientProblem);
     componentRef.setInput('dismissable', false);
     fixture.detectChanges();
 
@@ -116,13 +142,17 @@ describe('ErrorBannerComponent', () => {
     expect(closeBtn).toBeNull();
   });
 
-  it('should update table header labels when language changes', () => {
-    componentRef.setInput('problem', mockProblem);
+  it('should update table header labels and retry label when language changes', () => {
+    componentRef.setInput('problem', mockClientProblem);
+    componentRef.setInput('retryable', true);
     fixture.detectChanges();
 
     let thList = fixture.nativeElement.querySelectorAll('.invalid-params-table th');
     expect(thList[0].textContent.trim()).toBe('Campo');
     expect(thList[1].textContent.trim()).toBe('Motivo');
+
+    let retryBtn = fixture.nativeElement.querySelector('.retry-btn');
+    expect(retryBtn.textContent.trim()).toContain('Reintentar');
 
     i18nService.setLanguage('en');
     fixture.detectChanges();
@@ -130,5 +160,8 @@ describe('ErrorBannerComponent', () => {
     thList = fixture.nativeElement.querySelectorAll('.invalid-params-table th');
     expect(thList[0].textContent.trim()).toBe('Field');
     expect(thList[1].textContent.trim()).toBe('Reason');
+
+    retryBtn = fixture.nativeElement.querySelector('.retry-btn');
+    expect(retryBtn.textContent.trim()).toContain('Retry');
   });
 });

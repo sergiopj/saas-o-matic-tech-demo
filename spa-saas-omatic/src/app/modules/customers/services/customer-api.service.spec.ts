@@ -5,11 +5,13 @@ import { CustomerApiService } from './customer-api.service';
 import { Customer, CustomerCreate } from '../models/customer.model';
 import { ProblemDetail } from '../../../core/errors/problem-detail.model';
 import { errorInterceptor } from '../../../core/errors/error.interceptor';
+import { I18nService } from '../../../core/services/i18n.service';
 import { environment } from '../../../../environments/environment';
 
 describe('CustomerApiService', () => {
   let service: CustomerApiService;
   let httpTesting: HttpTestingController;
+  let i18n: I18nService;
   const baseUrl = `${environment.apiBaseUrl}/customers`;
 
   const mockCustomer: Customer = {
@@ -33,6 +35,7 @@ describe('CustomerApiService', () => {
 
     service = TestBed.inject(CustomerApiService);
     httpTesting = TestBed.inject(HttpTestingController);
+    i18n = TestBed.inject(I18nService);
   });
 
   afterEach(() => {
@@ -202,7 +205,7 @@ describe('CustomerApiService', () => {
       req.error(new ProgressEvent('error'), { status: 0, statusText: 'Unknown Error' });
 
       expect(capturedError?.type).toBe('about:blank');
-      expect(capturedError?.title).toBe('Communication Error');
+      expect(capturedError?.title).toBe(i18n.t('error.communication.title'));
       expect(service.error()?.type).toBe('about:blank');
       expect(service.loading()).toBe(false);
     });

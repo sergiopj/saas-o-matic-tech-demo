@@ -3,10 +3,12 @@ import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { errorInterceptor } from './error.interceptor';
 import { ProblemDetail } from './problem-detail.model';
+import { I18nService } from '../services/i18n.service';
 
 describe('errorInterceptor', () => {
   let http: HttpClient;
   let httpTesting: HttpTestingController;
+  let i18nService: I18nService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -18,13 +20,15 @@ describe('errorInterceptor', () => {
 
     http = TestBed.inject(HttpClient);
     httpTesting = TestBed.inject(HttpTestingController);
+    i18nService = TestBed.inject(I18nService);
+    i18nService.setLanguage('es');
   });
 
   afterEach(() => {
     httpTesting.verify();
   });
 
-  it('should forward structured ProblemDetail from backend response directly', () => {
+  it('should forward structured client ProblemDetail (4xx) directly', () => {
     const backendProblem: ProblemDetail = {
       type: 'https://errors.saas-o-matic.com/400',
       title: 'Bad Request',
@@ -51,7 +55,29 @@ describe('errorInterceptor', () => {
     expect(caughtError).toEqual(backendProblem);
   });
 
-  it('should transform network or non-JSON errors into a normalized about:blank ProblemDetail', () => {
+  it('should mask 500 server errors with empathetic localized copy', () => {
+    let caughtError: ProblemDetail | undefined;
+
+    http.get('/crash-endpoint').subscribe({
+      next: () => {
+        throw new Error('should have failed');
+      },
+      error: (err: ProblemDetail) => {
+        caughtError = err;
+      },
+    });
+
+    const req = httpTesting.expectOne('/crash-endpoint');
+    req.flush({ message: 'Internal SQL syntax error' }, { status: 500, statusText: 'Internal Server Error' });
+
+    expect(caughtError).toBeDefined();
+    expect(caughtError?.status).toBe(500);
+    expect(caughtError?.title).toBe(i18nService.t('error.communication.title'));
+    expect(caughtError?.detail).toBe(i18nService.t('error.communication.detail'));
+    expect(caughtError?.instance).toBe('/crash-endpoint');
+  });
+
+  it('should transform network drops (status 0) into a normalized empathetic ProblemDetail', () => {
     let caughtError: ProblemDetail | undefined;
 
     http.get('/offline-endpoint').subscribe({
@@ -68,8 +94,9 @@ describe('errorInterceptor', () => {
 
     expect(caughtError).toBeDefined();
     expect(caughtError?.type).toBe('about:blank');
-    expect(caughtError?.title).toBe('Communication Error');
-    expect(caughtError?.detail).toBe('An unexpected error occurred while communicating with the server.');
+    expect(caughtError?.status).toBeUndefined();
+    expect(caughtError?.title).toBe(i18nService.t('error.communication.title'));
+    expect(caughtError?.detail).toBe(i18nService.t('error.communication.detail'));
     expect(caughtError?.instance).toBe('/offline-endpoint');
   });
 });

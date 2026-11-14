@@ -14,7 +14,6 @@ describe('CustomerEmailDialogComponent', () => {
     country: 'ES',
     email: 'billing@acme.com',
     selectedPlan: 'ENTERPRISE',
-    currentUsers: 25,
     createdAt: new Date().toISOString(),
   };
 

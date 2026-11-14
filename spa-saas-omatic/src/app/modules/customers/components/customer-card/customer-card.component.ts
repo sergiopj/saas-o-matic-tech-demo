@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Customer } from '../../models/customer.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
@@ -20,7 +20,6 @@ import { CustomerEmailDialogComponent } from '../customer-email-dialog/customer-
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatDialogModule,
     MatTooltipModule,
     TranslatePipe,
   ],

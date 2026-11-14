@@ -6,7 +6,8 @@
     </div>
   </header>
 
-  <app-error-banner [problem]="customerApi.error()" (dismiss)="customerApi.error.set(null)" />
+  <app-error-banner [problem]="customerApi.error()" [retryable]="true" (retry)="loadCustomers()"
+    (dismiss)="customerApi.error.set(null)" />
 
   <section class="controls-section">
     <div class="toolbar-row">

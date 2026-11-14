@@ -463,6 +463,21 @@ Para garantizar que fallos en elementos cosméticos o de micro-interacción (spi
 - **Documentación en Español:**
   La documentación de arquitectura (`architecture-guidelines.md`), especificaciones funcionales (`functional-specs.md`), bitácoras de auditoría (`prompts-and-audits.md`) y el `README.md` principal se redactan en **español**, tal como exige el pliego técnico de Roams.
 
+### 3.14 Desacoplamiento del Protocolo HTTP en la UI y UX Defensiva (OWASP & Clean Presentation)
+
+- **Principio de Aislamiento de Capas y Mínima Revelación:**
+  Bajo las directrices de Clean Architecture, seguridad OWASP y los estándares de UX en B2B SaaS, **los códigos de transporte HTTP (`400`, `404`, `500`) pertenecen al protocolo de red, nunca a la interfaz de usuario**:
+  1. *Fuga de Abstracción:* Mostrar badges con `400` o `500` en la interfaz es un antipatrón que confunde a comerciales y directivos, asemejando la aplicación a una consola de depuración en lugar de un producto SaaS terminado.
+  2. *Antipatrón de Números Mágicos en Componentes:* Condicionar el renderizado de la UI con chequeos como `p.status === 0 || p.status >= 500` introduce lógica de transporte en componentes puramente presentacionales.
+- **La Solución Enterprise Implementada:**
+  1. **Enmascaramiento en Interceptor (`errorInterceptor`):** Si una respuesta HTTP devuelve un código `>= 500` o `0` (caída de conectividad), el interceptor enmascara automáticamente cualquier traza interna transformándola en un `ProblemDetail` con título y detalle amigables y localizados (`error.communication.title`: *"Servicio temporalmente no disponible"*, `error.communication.detail`: *"No hemos podido conectar con el servidor..."*).
+  2. **Erradicación Total de Badges de Estado HTTP en la UI (`ErrorBannerComponent`):** El componente presentacional no renderiza ningún número de código HTTP. Se centra exclusivamente en lo que el usuario necesita:
+     - Título descriptivo (`p.title`)
+     - Detalle legible (`p.detail`)
+     - Tabla estructurada de parámetros no válidos (`p.invalidParams`) para validaciones de formulario.
+  3. **Componente Presentacional Puro:** Sin números mágicos ni heurísticas de protocolo. El modelo `ProblemDetail` mantiene `status?: number` de forma opcional por compatibilidad con el estándar RFC 9457 y trazabilidad de logs, pero la capa visual queda 100% desacoplada.
+  4. **Acción Reconciliadora Inmediata (`[retryable]="true"` y `(retry)`):** Proporciona un botón explícito de reintento (`Reintentar` / `Retry`) con icono de refresco que permite al usuario volver a solicitar los datos (`loadCustomers()`) sin necesidad de recargar toda la página del navegador.
+
 ---
 
 ## 4. Estrategia de Testing y Aseguramiento de Calidad
