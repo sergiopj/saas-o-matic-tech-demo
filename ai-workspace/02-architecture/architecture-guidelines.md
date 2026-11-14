@@ -268,7 +268,10 @@ spa-saas-omatic/
   - Superficies: `--roams-bg-page` (`#F8FAFC`), `--roams-bg-card` (`#FFFFFF`).
   - Geometría: `--roams-radius-lg` (`16px` para tarjetas Roams).
 - **Cascada Nativa y Cero Hardcodeo:** Queda terminantemente prohibido incluir valores hexadecimales directos en los archivos `.scss` de los componentes. Todos los colores bajan en cascada nativa mediante `var(--roams-*)`.
-- **Layout y Responsive:** Flexbox y CSS Grid nativo + clases de Material, sin Bootstrap, para no mezclar dos sistemas de layout.
+- **Diseño Mobile-First y Responsividad Total:**
+  - Toda la interfaz (Navbar, buscador, tarjetas, modal/vistas y slider) se diseña bajo enfoque **Mobile-First**: el layout base se concibe para pantallas móviles compactas (`320px` - `480px`), adaptándose de forma progresiva a tablets (`768px`) y escritorio (`1024px` - `1440px+`).
+  - Empleo exclusivo de **CSS Flexbox y CSS Grid elástico** (`grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))`), garantizando cero scrollbars horizontales no deseados (`overflow-x: hidden` en contenedor principal) y wrapping fluido de controles de acción.
+  - Sin dependencias de frameworks CSS pesados (Bootstrap o Tailwind): 100% estilos nativos y Angular Material para mantener el bundle ultraligero (< 50 kB inicial).
 
 ### 3.3 Estrategia de Divisas y Escalabilidad (Open/Closed Principle)
 

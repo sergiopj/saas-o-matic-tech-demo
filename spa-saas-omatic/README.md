@@ -1,6 +1,6 @@
 # 🎨 spa-saas-omatic — Frontend Dashboard
 
-Dashboard Comercial interactivo para la optimización y presupuestado dinámico de suscripciones SaaS multi-divisa, desarrollado con **Angular 22**, **Standalone Components**, **Signals reactivos**, **Built-in Control Flow (`@if`, `@for`)** y **Angular Material** personalizado.
+Dashboard Comercial interactivo para la optimización y presupuestado dinámico de suscripciones SaaS multi-divisa, desarrollado bajo metodología **Mobile-First** con **Angular 22**, **Standalone Components**, **Signals reactivos**, **Built-in Control Flow (`@if`, `@for`)** y **Angular Material** personalizado.
 
 ---
 
@@ -8,21 +8,12 @@ Dashboard Comercial interactivo para la optimización y presupuestado dinámico 
 
 El frontend sigue una arquitectura orientada al dominio (**Feature-Driven**) con simetría 1:1 respecto al backend NestJS:
 
-- **`src/app/core/`**: Infraestructura transversal de la aplicación:
-  - `errors/`: Formato estándar de errores **RFC 7807** (`problem-detail.model.ts`) e interceptor funcional global (`error.interceptor.ts`).
-  - `i18n/`: Catálogo de traducciones bilingüe (español/inglés) fuertemente tipado (`translations.ts`).
-  - `models/`: Modelo de divisas (`currency.model.ts`) utilizando el patrón **`as const`** de TypeScript moderno.
-  - `services/`: Tipos de cambio (`currency.service.ts`) y servicio de localización reactiva con Signals (`i18n.service.ts`).
-- **`src/app/modules/`**: Módulos funcionales de negocio (simetría estricta con `mic-saas-omatic`):
-  - `customers/`: Búsqueda reactiva con debounce de 300ms (`customer-search-bar/`), tarjetas corporativas Roams con bordes de 16px y banderas Unicode dinámicas calculadas sin números mágicos (`customer-card/`), listado responsivo con empty/loading states (`customer-list/`) y cliente API reactivo con Signals (`customer-api.service.ts`).
-  - `simulations/`: Historial, cálculo de tramos a 60 FPS en memoria (`local-pricing-calculator.ts`) y persistencia bajo demanda (`simulation-api.service.ts`).
-- **`src/app/shared/`**: Elementos transversales de UI:
-  - `components/`: Navbar corporativa estilo Roams, selector de divisas con Signals y visualizador RFC 7807.
-  - `pipes/`: `localized-currency.pipe.ts` con internacionalización nativa mediante `Intl.NumberFormat` (respetando orden de símbolos, puntuación cultural de millares/decimales y especificidades como 0 decimales en `JPY`).
-- **`src/styles/`**: Arquitectura modular de estilos (Patrón 7-1 de Sass):
-  - `_colors.scss`: Paleta corporativa de Roams, variables compile-time y Design Tokens `--roams-*` en `:root`.
-  - `_variables.scss`: Geometría de curvatura (`--roams-radius-*`) y matrices de sombras de elevación (`--roams-shadow-*`).
-  - `styles.scss`: Orquestador raíz limpio con soporte de `stylePreprocessorOptions` en `angular.json`.
+- **`src/app/core/`**: Infraestructura transversal (errores RFC 7807, modelos e i18n con catálogo bilingüe y detección de idioma).
+- **`src/app/modules/`**: Módulos funcionales de negocio por dominio (Bounded Contexts):
+  - `customers/`: Búsqueda, gestión y fichas de clientes corporativos.
+  - `simulations/`: Motor interactivo de cálculo de tramos a 60 FPS, desglose fiscal multi-divisa e historial de presupuestos.
+- **`src/app/shared/`**: Componentes transversales del marco de la aplicación (Navbar corporativa Roams, selector de divisas y `TranslatePipe`).
+- **`src/styles/`**: Arquitectura modular de estilos (Patrón 7-1 de Sass) con Design Tokens corporativos Roams (`_colors.scss`, `_variables.scss` y `styles.scss`).
 
 Para ver las directrices completas, consulta [`../ai-workspace/02-architecture/architecture-guidelines.md`](../ai-workspace/02-architecture/architecture-guidelines.md).
 

@@ -901,6 +901,21 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   5. *Homogeneización de iconos:* Reemplazados todos los `<span>` por `<mat-icon aria-hidden="true">` tanto en `CustomerListComponent` como en `ErrorBannerComponent`, garantizando que la ligadura tipográfica (`person_search`, `search`, `error`, `close`) no sea interpretada como texto por tecnologías de asistencia.
 - **Valor para la evaluación:** Transparencia técnica absoluta, dominio del compilador de Angular 22, suites de prueba deterministas con Vitest y cumplimiento riguroso de accesibilidad (WCAG/a11y).
 
+### 6.35. Principio Mobile-First y Síntesis de Documentación a Alto Nivel (Eliminación de Grasa en README)
+
+- **Las dos directrices estratégicas del Director de Orquesta:**
+  - El usuario delimitó dos principios fundamentales para el frontend y la documentación:
+    1. *Mobile-First estricto:* La aplicación debe ser 100% responsiva, garantizando que el diseño y la usabilidad se optimicen en primer lugar para móviles y escalen a escritorio.
+    2. *Eliminación de sobre-especificación en README:* El archivo `README.md` del frontend no debe detallar cada fichero o función interna de los módulos cada vez que se programa algo; debe explicar los directorios a **alto nivel** (`customers` y `simulations`) para ser claro, mantenible y profesional.
+- **Análisis de calidad y mantenimiento:**
+  - Describir detalles de implementación interna en el README principal satura al evaluador de información efímera y crea deuda técnica de documentación (cada refactorización exigiría reescribir el README).
+  - Un README de nivel Enterprise resume los propósitos de negocio de cada Bounded Context a vista de pájaro, remitiendo a las guías de arquitectura detalladas para especificaciones profundas.
+- **Acciones ejecutadas:**
+  - Se sintetizó la sección de `src/app/modules/` en `spa-saas-omatic/README.md`, dejando una descripción limpia a alto nivel de los módulos de clientes y simulaciones.
+  - Se incorporó la política de diseño **Mobile-First** en `architecture-guidelines.md` (Sección 3.2) y en la cabecera de `spa-saas-omatic/README.md`.
+- **Valor para la evaluación:** Documentación clara, concisa y profesional sin ruido innecesario, y compromiso firme con el diseño responsive y la experiencia móvil de los usuarios comerciales.
+
+
 
 
 
