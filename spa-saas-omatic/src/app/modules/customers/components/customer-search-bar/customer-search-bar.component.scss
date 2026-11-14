@@ -1,0 +1,65 @@
+.search-bar-wrapper {
+  width: 100%;
+}
+
+.search-field {
+  width: 100%;
+
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      background-color: var(--roams-bg-card);
+      border-radius: var(--roams-radius-md);
+      box-shadow: var(--roams-shadow-sm);
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .mat-mdc-form-field-flex {
+      align-items: center;
+      padding: 0 0.5rem;
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--roams-border) !important;
+      border-radius: var(--roams-radius-md);
+    }
+
+    &.mat-focused {
+      .mat-mdc-text-field-wrapper {
+        box-shadow: var(--roams-shadow-md);
+      }
+
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--roams-accent-blue) !important;
+        border-width: 2px !important;
+      }
+    }
+
+    input.mat-mdc-input-element {
+      color: var(--roams-text-primary);
+      font-size: 0.95rem;
+
+      &::placeholder {
+        color: var(--roams-text-secondary);
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+.search-icon {
+  color: var(--roams-text-secondary);
+  margin-right: 0.5rem;
+}
+
+.clear-button {
+  color: var(--roams-text-secondary);
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--roams-status-error);
+  }
+}

@@ -5,12 +5,12 @@
       <a
         routerLink="/"
         class="brand-link"
-        [attr.aria-label]="i18n.t('navbar.home.aria')"
+        [attr.aria-label]="'navbar.home.aria' | translate"
       >
         <div class="brand-badge">ROAMS</div>
         <div class="brand-text">
-          <span class="app-title">{{ i18n.t('navbar.title') }}</span>
-          <span class="app-subtitle">{{ i18n.t('navbar.subtitle') }}</span>
+          <span class="app-title">{{ 'navbar.title' | translate }}</span>
+          <span class="app-subtitle">{{ 'navbar.subtitle' | translate }}</span>
         </div>
       </a>
 
@@ -23,7 +23,7 @@
           mat-button
           class="lang-toggle-btn"
           (click)="toggleLanguage()"
-          [attr.aria-label]="i18n.t('navbar.lang.aria')"
+          [attr.aria-label]="'navbar.lang.aria' | translate"
         >
           <span class="lang-label">{{ currentLanguage().toUpperCase() }}</span>
           <mat-icon class="lang-icon">translate</mat-icon>

@@ -6,6 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { CurrencyService } from '../../../core/services/currency.service';
 import { I18nService } from '../../../core/services/i18n.service';
 import { CurrencyCode } from '../../../core/models/currency.model';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-currency-selector',
@@ -14,6 +15,7 @@ import { CurrencyCode } from '../../../core/models/currency.model';
     MatSelectModule,
     MatIconModule,
     MatTooltipModule,
+    TranslatePipe,
   ],
   templateUrl: './currency-selector.component.html',
   styleUrl: './currency-selector.component.scss',

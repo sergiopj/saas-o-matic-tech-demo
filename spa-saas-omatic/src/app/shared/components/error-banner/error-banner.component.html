@@ -10,7 +10,7 @@
         <button
           type="button"
           class="dismiss-btn"
-          [attr.aria-label]="i18n.t('error.banner.dismiss.aria')"
+          [attr.aria-label]="'error.banner.dismiss.aria' | translate"
           (click)="onDismiss()"
         >
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
@@ -24,12 +24,12 @@
 
     @if (p.invalidParams && p.invalidParams.length > 0) {
       <div class="invalid-params-section">
-        <span class="invalid-params-title">{{ i18n.t('error.banner.invalidParams.title') }}</span>
+        <span class="invalid-params-title">{{ 'error.banner.invalidParams.title' | translate }}</span>
         <table class="invalid-params-table">
           <thead>
             <tr>
-              <th scope="col">{{ i18n.t('error.banner.field') }}</th>
-              <th scope="col">{{ i18n.t('error.banner.reason') }}</th>
+              <th scope="col">{{ 'error.banner.field' | translate }}</th>
+              <th scope="col">{{ 'error.banner.reason' | translate }}</th>
             </tr>
           </thead>
           <tbody>

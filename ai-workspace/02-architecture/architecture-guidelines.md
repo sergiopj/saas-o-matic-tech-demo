@@ -284,11 +284,15 @@ Se prescribe el uso exclusivo del nuevo flujo de control nativo de Angular 22:
 - **`@for (...; track ...)`**: Sustituye a `*ngFor` y exige `track` obligatorio por compilador, garantizando una reconciliación quirúrgica del DOM sin destrucción de nodos.
 - **Descarte de `CommonModule`**: Cero dependencias de directivas estructurales legacy en componentes Standalone, optimizando el tamaño del bundle y el type-checking estricto de plantillas.
 
-### 3.5 Internacionalización Reactiva y Desacoplamiento de Textos (`I18nService`)
+### 3.5 Internacionalización Reactiva y Desacoplamiento de Textos (`I18nService` + `TranslatePipe`)
 
 Para mantener el principio de código en inglés y desacoplar la lógica de la presentación:
 - **Cero Textos Hardcodeados:** Se prohíbe introducir cadenas literales de texto en clases TypeScript o plantillas HTML. Todas las etiquetas, tooltips y textos de accesibilidad (`aria-label`) se definen de forma centralizada en `src/app/core/i18n/translations.ts`.
-- **Tipado Estricto de Claves (`TranslationKey`):** El compilador de TypeScript valida que cualquier clave solicitada mediante `i18n.t(key)` exista en el diccionario en ambos idiomas (`es` y `en`), previniendo erratas tipográficas en tiempo de compilación.
+- **Patrón Declarativo con Pipe (`TranslatePipe`):**
+  En lugar de invocar métodos de servicio en las plantillas (`{{ i18n.t(...) }}`), se prescribe el uso del pipe reactivo `{{ 'clave' | translate }}`. Esto:
+  1. Erradica la inyección obligatoria de `I18nService` en los componentes tontos (*Dumb Components*), manteniendo sus clases TypeScript limpias y libres de dependencias innecesarias.
+  2. Sigue el estándar idiomático de Angular para i18n (familiar para evaluadores acostumbrados a *Transloco* o *ngx-translate*).
+- **Tipado Estricto de Claves (`TranslationKey`):** El compilador de TypeScript valida que cualquier clave solicitada exista en el diccionario en ambos idiomas (`es` y `en`), previniendo erratas tipográficas en tiempo de compilación.
 - **Detección Automática con Fallback Regional:** `I18nService` inspecciona `navigator.language` para adaptarse automáticamente a entornos internacionales, manteniendo el español (`'es'`) como idioma predeterminado de la plataforma.
 - **Reactividad con Signals:** El idioma activo se almacena en una Signal `currentLanguage`, provocando el recálculo instantáneo de cualquier vista o mensaje reactivo sin necesidad de recargar la aplicación.
 

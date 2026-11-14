@@ -3,7 +3,7 @@
     <mat-select
       [value]="selectedCurrency()"
       (valueChange)="onCurrencyChange($event)"
-      [attr.aria-label]="i18n.t('currency.selector.aria')"
+      [attr.aria-label]="'currency.selector.aria' | translate"
     >
       @for (option of options(); track option.code) {
         <mat-option [value]="option.code">
@@ -22,7 +22,7 @@
     [class.error]="error()"
     [class.synced]="!loading() && !error()"
     [matTooltip]="statusTooltip()"
-    [attr.aria-label]="i18n.t('currency.status.aria')"
+    [attr.aria-label]="'currency.status.aria' | translate"
   >
     <mat-icon class="status-icon">
       @if (loading()) {

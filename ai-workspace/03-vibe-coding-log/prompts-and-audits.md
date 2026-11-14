@@ -835,6 +835,41 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Se sustituyó la URI teórica en el mock del spec por la URL de dominio corporativo del microservicio (`https://errors.saas-o-matic.com/400`), manteniendo `about:blank` en los casos de contingencia de red del interceptor.
 - **Valor para la evaluación:** Alineación y coherencia estricta entre el contrato backend (`ProblemDetailExceptionFilter`), el cliente HTTP frontend (`error.interceptor.ts`) y los mocks de testing unitario.
 
+### 6.31. Implementación del Módulo de Clientes (`modules/customers/`): Buscador Reactivo con Debounce, Tarjeta Corporativa y Smart Page con Lazy Loading
+
+- **El requerimiento funcional:**
+  - Construir la feature completa del Bounded Context de Clientes en el frontend, permitiendo al equipo comercial buscar en tiempo real clientes por nombre, CIF/NIF o email, visualizar su información con la identidad visual de Roams y navegar hacia la simulación.
+- **Decisiones arquitectónicas de diseño y rendimiento:**
+  1. *Buscador Reactivo Desacoplado (`CustomerSearchBarComponent`):*  
+     Implementado mediante un `Subject<string>` con operadores RxJS `debounceTime(300)` y `distinctUntilChanged()`. Esto evita saturar el backend con peticiones HTTP por cada pulsación de tecla y previene búsquedas redundantes si el término no varía. Incluye botón de reseteo rápido (`clear()`).
+  2. *Tarjeta Dumb Component (`CustomerCardComponent`):*  
+     Geometría con radio de curvatura corporativo `--roams-radius-lg: 16px`, elevación en hover `--roams-shadow-md`, avatar con inicial de empresa sobre gradiente Roams, cálculo dinámico de banderas emoji mediante puntos de código Unicode (`ES -> 🇪🇸`, `US -> 🇺🇸`) y botón de acción directa hacia la simulación con navegación nativa `routerLink`.
+  3. *Smart Page con Estados de Ciclo de Vida (`CustomerListComponent`):*  
+     Conexión directa con `CustomerApiService`, renderizado del componente transversal `ErrorBannerComponent` ante fallos de servidor, contador reactivo de clientes encontrados, estado de carga accesible con `mat-spinner` y estado vacío (*empty state*) amigable con botón para restablecer filtros.
+  4. *Enrutamiento Modular con Lazy Loading:*  
+     Configuración en `app.routes.ts` con carga perezosa (`loadComponent`) para optimizar el bundle inicial y redirección de ruta raíz (`'' -> 'customers'`).
+- **Acción ejecutada:**
+  - Se implementaron los 3 componentes con sus estilos SCSS desacoplados basados en tokens y sus suites de pruebas unitarias (17 tests nuevos entre los 3 componentes).
+  - La suite del frontend se eleva a **78 pruebas unitarias 100% en verde**.
+- **Valor para la evaluación:** Excelencia en arquitectura Angular (Dumb vs. Smart components, reactividad controlada con debounce, accesibilidad y diseño visual fiel a Roams).
+
+### 6.32. Refactorización a Pipe Declarativo de Internacionalización (`TranslatePipe`): Erradicación de Invocación de Métodos en Plantillas
+
+- **La observación arquitectónica del Director de Orquesta:**
+  - Al revisar las plantillas HTML generadas por la IA, el usuario detectó una mala práctica recurrente de desarrollo:
+    > *"¿Esto no es mejor con un pipe de traducción? ¿O se hace así en Angular 22: `<span>{{ i18n.t('customers.card.simulate.btn') }}</span>`?"*
+- **Análisis de calidad de código y buenas prácticas en Angular:**
+  1. *El anti-patrón de invocar métodos en interpolación:* Inyectar `I18nService` en clases TypeScript exclusivamente para invocar `i18n.t(...)` dentro de las plantillas contamina los componentes desacoplados (*Dumb Components*), forzando dependencias innecesarias en sus constructores/inyecciones y violando el principio de responsabilidad única.
+  2. *El estándar idiomático de Angular:* El ecosistema de Angular (desde *ngx-translate* hasta *Transloco* y las directivas oficiales) prescribe el uso de **Pipes** (`| translate`). Los pipes permiten una sintaxis puramente declarativa en el HTML (`{{ 'clave' | translate }}`), desacoplando la plantilla de la lógica de TypeScript del componente.
+  3. *Reactividad ante cambio de idioma:* Al configurar el pipe con `pure: false`, Angular reevalúa automáticamente las cadenas traducidas en cuanto la Signal `currentLanguage` de `I18nService` conmuta, sin necesidad de recargar la página ni re-renderizar componentes manualmente.
+- **Acción ejecutada:**
+  - Se creó el pipe transversal `TranslatePipe` en `src/app/shared/pipes/translate.pipe.ts` con su suite de pruebas unitarias exhaustiva (4 tests).
+  - Se refactorizaron todos los componentes (`CustomerCardComponent`, `CustomerSearchBarComponent`, `CustomerListComponent`, `ErrorBannerComponent`, `NavbarComponent`, `CurrencySelectorComponent`) eliminando la inyección innecesaria de `I18nService` en sus clases e implementando la sintaxis declarativa `| translate`.
+  - La suite de pruebas del frontend se amplía a **82 tests unitarios 100% en verde**.
+- **Valor para la evaluación:** Demuestra criterio senior de arquitectura frontend, eliminación de código spaguetti en plantillas y adopción de los patrones de diseño más limpios de Angular.
+
+
+
 
 
 

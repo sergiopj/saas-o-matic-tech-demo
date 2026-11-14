@@ -1,0 +1,50 @@
+<mat-card class="customer-card">
+  <div class="card-header">
+    <div class="company-brand">
+      <div class="company-avatar" aria-hidden="true">
+        {{ customer().companyName.charAt(0).toUpperCase() }}
+      </div>
+      <div class="company-info">
+        <h3 class="company-name" [title]="customer().companyName">
+          {{ customer().companyName }}
+        </h3>
+        <span class="country-badge" [title]="customer().country">
+          <span class="flag-icon" aria-hidden="true">{{ countryFlag }}</span>
+          <span class="country-code">{{ customer().country }}</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <mat-card-content class="card-content">
+    <div class="meta-row">
+      <span class="meta-label">{{ 'customers.card.taxId' | translate }}</span>
+      <code class="tax-id-badge">{{ customer().taxId }}</code>
+    </div>
+
+    <div class="meta-row">
+      <span class="meta-label">{{ 'customers.card.plan' | translate }}</span>
+      <span class="plan-pill" [class]="'plan-' + customer().selectedPlan.toLowerCase()">
+        {{ customer().selectedPlan }}
+      </span>
+    </div>
+
+    <div class="meta-row email-row">
+      <mat-icon class="email-icon" aria-hidden="true">mail</mat-icon>
+      <span class="email-text" [title]="customer().email">{{ customer().email }}</span>
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions class="card-actions">
+    <a
+      mat-flat-button
+      class="simulate-btn"
+      [routerLink]="['/customers', customer().id]"
+      [attr.aria-label]="('customers.card.simulate.aria' | translate) + ' ' + customer().companyName"
+      (click)="onSimulate()"
+    >
+      <mat-icon aria-hidden="true">calculate</mat-icon>
+      <span>{{ 'customers.card.simulate.btn' | translate }}</span>
+    </a>
+  </mat-card-actions>
+</mat-card>

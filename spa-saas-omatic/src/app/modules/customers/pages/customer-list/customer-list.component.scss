@@ -1,0 +1,131 @@
+.customer-list-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-header {
+  border-bottom: 1px solid var(--roams-border);
+  padding-bottom: 1.25rem;
+}
+
+.header-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--roams-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--roams-text-secondary);
+  line-height: 1.4;
+}
+
+.controls-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.results-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--roams-text-secondary);
+}
+
+.count-badge {
+  background-color: var(--roams-primary);
+  color: var(--roams-text-inverse);
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.customers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  gap: 1rem;
+
+  .loading-text {
+    margin: 0;
+    color: var(--roams-text-secondary);
+    font-size: 0.95rem;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  text-align: center;
+  background-color: var(--roams-bg-card);
+  border: 1px dashed var(--roams-border);
+  border-radius: var(--roams-radius-lg);
+  gap: 0.75rem;
+}
+
+.empty-icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: var(--roams-bg-page);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--roams-text-secondary);
+  margin-bottom: 0.5rem;
+
+  .material-symbols-outlined {
+    font-size: 2rem;
+  }
+}
+
+.empty-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--roams-text-primary);
+}
+
+.empty-desc {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--roams-text-secondary);
+  max-width: 400px;
+}
+
+.reset-search-btn {
+  margin-top: 0.5rem;
+  border-color: var(--roams-border) !important;
+  color: var(--roams-accent-blue) !important;
+  border-radius: var(--roams-radius-md) !important;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
