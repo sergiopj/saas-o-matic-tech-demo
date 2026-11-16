@@ -296,4 +296,41 @@ describe('CustomerListComponent', () => {
     const postLoadingBar = fixture.nativeElement.querySelector('.grid-loading-bar');
     expect(postLoadingBar).toBeNull();
   });
+
+  it('should localize pagination range text and aria-label according to active language', () => {
+    component.totalCount.set(15);
+    fixture.detectChanges();
+
+    // Spanish (default in beforeEach)
+    const nav = fixture.nativeElement.querySelector('.pagination-container');
+    expect(nav.getAttribute('aria-label')).toBe('Paginación de clientes');
+
+    const rangeText = fixture.nativeElement.querySelector('.range-text');
+    expect(rangeText.textContent).toContain('Mostrando');
+    expect(rangeText.textContent).toContain('de');
+
+    // Switch to English
+    i18nService.setLanguage('en');
+    fixture.detectChanges();
+
+    expect(nav.getAttribute('aria-label')).toBe('Customer pagination');
+    expect(rangeText.textContent).toContain('Showing');
+    expect(rangeText.textContent).toContain('of');
+
+    // Switch to German
+    i18nService.setLanguage('de');
+    fixture.detectChanges();
+
+    expect(nav.getAttribute('aria-label')).toBe('Kundennavigation');
+    expect(rangeText.textContent).toContain('Zeige');
+    expect(rangeText.textContent).toContain('von');
+
+    // Switch to French
+    i18nService.setLanguage('fr');
+    fixture.detectChanges();
+
+    expect(nav.getAttribute('aria-label')).toBe('Pagination des clients');
+    expect(rangeText.textContent).toContain('Affichage');
+    expect(rangeText.textContent).toContain('sur');
+  });
 });

@@ -1463,6 +1463,40 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
      - Esto blinda la aplicación contra "spam de clics", peticiones HTTP concurrentes y estados inconsistentes en redes lentas.
 - **Valor para la evaluación:** Demostración de máxima atención al detalle en Experiencia de Usuario (UX) B2B, erradicación de falsas señales visuales y blindaje de la interfaz ante interacción asíncrona.
 
+### 6.65. Auditoría de Cadenas Residuales: Internacionalización Completa de la Paginación con `TranslatePipe`
+
+- **La observación del Director de Orquesta:**
+  - El usuario cazó textos en castellano quemados en el componente de paginación:
+    > *"estos textos todo multiidioma segun el idioma configurado fijate bien:
+    <nav class="pagination-container" aria-label="Paginación de clientes">
+    <div class="pagination-info">
+      <span class="range-text">
+        Mostrando <strong>{{ displayedRange().start }}–{{ displayedRange().end }}</strong> de <strong>{{ displayedRange().total }}</strong>
+      </span>
+    </div> y usa el pipe que tengo de translate"*
+- **Análisis de Accesibilidad e Internacionalización Estricta:**
+  1. *El fallo de internacionalización:*
+     - Aunque los botones de navegación (`first`, `prev`, `next`, `last`) y el selector de tamaño (`pageSize`) utilizaban el pipe `translate`, la descripción del rango (`"Mostrando ... de ..."`) y el atributo de accesibilidad de navegación (`aria-label="Paginación de clientes"`) se habían introducido como texto literal estático en español.
+     - Esto rompía la inmersión cuando un usuario comercial cambiaba la aplicación a inglés, alemán o francés.
+  2. *Refactorización con el `TranslatePipe`:*
+     - Se crearon las claves canónicas en `translations.ts` para los 4 idiomas (`es`, `en`, `de`, `fr`):
+       - `'pagination.aria'`
+       - `'pagination.showing'`
+       - `'pagination.of'`
+       - `'pagination.showingRange'`
+       - `'customers.list.updating'`
+     - La plantilla HTML se refactorizó para consumir el pipe reactivo:
+       ```html
+       <nav class="pagination-container" [attr.aria-label]="'pagination.aria' | translate">
+         <div class="pagination-info">
+           <span class="range-text">
+             {{ 'pagination.showing' | translate }} <strong>{{ displayedRange().start }}–{{ displayedRange().end }}</strong> {{ 'pagination.of' | translate }} <strong>{{ displayedRange().total }}</strong>
+           </span>
+         </div>
+       ```
+     - Se preservó el formateo semántico en negrita (`<strong>`) garantizando traducción reactiva instantánea ante cualquier cambio en `I18nService`.
+- **Valor para la evaluación:** Cero cadenas quemadas en la interfaz de usuario, accesibilidad W3C ARIA multilingüe y test unitario de regresión en Vitest que valida la conmutación en caliente entre los 4 idiomas.
+
 
 
 

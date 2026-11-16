@@ -93,7 +93,7 @@
     }
   } @else {
   @if (customerApi.loading() && customers().length > 0) {
-  <div class="grid-loading-bar" role="progressbar" aria-label="Actualizando lista de clientes">
+  <div class="grid-loading-bar" role="progressbar" [attr.aria-label]="'customers.list.updating' | translate">
     <mat-progress-bar mode="indeterminate" />
   </div>
   }
@@ -105,10 +105,10 @@
   </main>
 
   @if (totalPages() > 1 || totalFiltered() > 6) {
-  <nav class="pagination-container" aria-label="Paginación de clientes">
+  <nav class="pagination-container" [attr.aria-label]="'pagination.aria' | translate">
     <div class="pagination-info">
       <span class="range-text">
-        Mostrando <strong>{{ displayedRange().start }}–{{ displayedRange().end }}</strong> de <strong>{{ displayedRange().total }}</strong>
+        {{ 'pagination.showing' | translate }} <strong>{{ displayedRange().start }}–{{ displayedRange().end }}</strong> {{ 'pagination.of' | translate }} <strong>{{ displayedRange().total }}</strong>
       </span>
     </div>
 
