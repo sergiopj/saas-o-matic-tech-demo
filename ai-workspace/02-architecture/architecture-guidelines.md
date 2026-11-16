@@ -561,6 +561,9 @@ Para responder a las necesidades de extensión futura del equipo comercial y sep
    - El formulario utiliza un control deslizante `<mat-slider>` sincronizado con inputs numéricos para manipular usuarios activos (1–150), almacenamiento (GB) y llamadas API.
    - Toda la proyección de costes y desglose por tramos se ejecuta mediante señales computadas reactivas (`computed()`) apoyadas en `LocalPricingCalculator`, garantizando 60 FPS sin latencia de red.
    - El botón «Guardar Simulación» persiste la simulación en SQLite llamando a `POST /simulations` y actualiza reactivamente el historial cronológico de presupuestos del cliente.
+4. **Patrón de Selector Accesible y Permanencia de Botones de Acción (Zero Layout Shift):**
+   - En selectores y lanzadores de acción (ej. `SimulationHubComponent`), se prohíbe la duplicación de etiquetas externas y placeholders estáticos en `<mat-select>`. Se consolidan en un único `<mat-label>` flotante nativo de Angular Material con opción nula explícita (`-- Seleccionar cliente corporativo --`).
+   - Los botones de acción principal nunca deben destruirse o eliminarse condicionalmente del DOM mediante directivas estructurales (`@if`) durante estados de carga o selecciones vacías: permanecen siempre renderizados en el layout con enlace reactivo `[disabled]` y estilos CSS accesibles (`cursor: not-allowed; opacity: 0.75`), blindando la interfaz contra saltos de diseño (*layout shift*).
 
 ---
 
