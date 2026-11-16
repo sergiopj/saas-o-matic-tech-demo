@@ -82,6 +82,23 @@ npm run test:watch
 
 ---
 
+## 🔍 Análisis Estático y Calidad de Código (Linter Oxlint)
+
+El monorepo utiliza **Oxlint** (`oxlint` + `oxlint-tsgolint`), un linter ultrarrápido programado en Rust con soporte *type-aware* e inspección de promesas flotantes, unificado para backend y frontend:
+
+```bash
+# Frontend (inspección de 46 archivos en ~250 ms)
+cd spa-saas-omatic
+npm run lint
+
+# Backend (inspección de 60 archivos en ~600 ms)
+cd mic-saas-omatic
+npm run lint
+```
+> Oxlint reporta advertencias y errores en consola indicando la ruta del fichero, número de línea, columna exacta y bloque contextual de código con sugerencias de remediación. Ambos módulos pasan con **0 errores y 0 advertencias**.
+
+---
+
 ## 🐳 Despliegue con Docker
 
 Para levantar la solución completa en contenedores sin fricción:

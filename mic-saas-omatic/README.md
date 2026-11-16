@@ -45,6 +45,9 @@ npm run start:dev
 # 3. Compilar para producción
 npm run build
 npm run start:prod
+
+# 4. Pasar el linter estático (Oxlint con soporte Type-Aware)
+npm run lint
 ```
 
 ---
@@ -61,6 +64,18 @@ npm run test:e2e
 # Toda la suite (Unitarios + E2E secuencial)
 npm run test:all
 ```
+
+---
+
+## 🔍 Análisis Estático y Linter (`oxlint`)
+
+```bash
+npm run lint
+# Ejecuta: oxlint --type-aware src/ test/
+```
+
+- Inspección de 60 archivos TypeScript en ~600 ms.
+- Configuración declarativa en [`.oxlintrc.json`](.oxlintrc.json).
 
 ---
 

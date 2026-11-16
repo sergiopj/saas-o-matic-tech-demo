@@ -45,6 +45,9 @@ npm start
 
 # 3. Compilar para producción (dist/)
 npm run build
+
+# 4. Pasar el linter estático (Oxlint con soporte Type-Aware)
+npm run lint
 ```
 
 ---
@@ -60,6 +63,22 @@ npm test
 # Modo interactivo en desarrollo (recarga en caliente ante cambios)
 npm run test:watch
 ```
+
+---
+
+## 🔍 Análisis Estático y Linter (`oxlint`)
+
+El proyecto utiliza **Oxlint** (`oxlint` + `oxlint-tsgolint`) para análisis estático en Rust:
+
+```bash
+npm run lint
+# Ejecuta: oxlint --type-aware src/
+```
+
+- **Velocidad sub-segundo:** Inspecciona los 46 ficheros TypeScript/Angular en ~250 ms.
+- **Diagnósticos precisos:** Informa por consola con ruta exacta de fichero, número de línea, columna y extracto visual con sugerencia.
+- **Configuración declarativa:** Basada en [`.oxlintrc.json`](.oxlintrc.json).
+- **Estado:** 0 errores y 0 advertencias.
 
 ---
 
