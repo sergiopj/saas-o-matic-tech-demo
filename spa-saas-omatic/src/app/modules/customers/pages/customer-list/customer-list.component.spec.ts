@@ -266,4 +266,34 @@ describe('CustomerListComponent', () => {
 
     expect(component.activeSortKey()).toBe('name_asc');
   });
+
+  it('should render mat-progress-bar and disable pagination controls while request is in flight without activating search spinner', () => {
+    // Set total count to 15 so totalPages is 3 and page 2 is valid
+    component.totalCount.set(15);
+    fixture.detectChanges();
+
+    component.goToPage(2);
+    expect(component.customerApi.loading()).toBe(true);
+    expect(component.isSearchingText()).toBe(false);
+
+    fixture.detectChanges();
+
+    const progressBar = fixture.nativeElement.querySelector('.grid-loading-bar mat-progress-bar');
+    expect(progressBar).toBeTruthy();
+
+    const navButtons: HTMLButtonElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('.page-nav-btn')
+    );
+    expect(navButtons.every((btn) => btn.disabled)).toBe(true);
+
+    const req = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?page=2&limit=6&sortBy=createdAt&order=DESC`
+    );
+    req.flush(mockCustomers, { headers: { 'x-total-count': '15' } });
+    fixture.detectChanges();
+
+    expect(component.customerApi.loading()).toBe(false);
+    const postLoadingBar = fixture.nativeElement.querySelector('.grid-loading-bar');
+    expect(postLoadingBar).toBeNull();
+  });
 });

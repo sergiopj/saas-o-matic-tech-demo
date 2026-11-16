@@ -12,7 +12,7 @@
   <section class="controls-section">
     <div class="toolbar-row">
       <div class="search-box">
-        <app-customer-search-bar [loading]="customerApi.loading()" (searchChange)="onSearchChange($event)" />
+        <app-customer-search-bar [loading]="isSearchingText()" (searchChange)="onSearchChange($event)" />
       </div>
 
       @if (!initialLoading() && customers().length > 0) {
@@ -20,7 +20,7 @@
         <mat-form-field appearance="outline" class="country-filter-field" subscriptSizing="dynamic">
           <mat-label>{{ 'customers.filter.selectCountry' | translate }}</mat-label>
           <mat-icon matPrefix class="filter-icon" aria-hidden="true">public</mat-icon>
-          <mat-select [value]="selectedCountry()" (selectionChange)="selectCountry($event.value)"
+          <mat-select [value]="selectedCountry()" [disabled]="customerApi.loading()" (selectionChange)="selectCountry($event.value)"
             [attr.aria-label]="'customers.filter.dropdownAria' | translate">
             @for (filter of countryFilters(); track filter.code) {
             <mat-option [value]="filter.code">
@@ -35,7 +35,7 @@
         <mat-form-field appearance="outline" class="sort-filter-field" subscriptSizing="dynamic">
           <mat-label>{{ 'customers.sort.label' | translate }}</mat-label>
           <mat-icon matPrefix class="sort-icon" aria-hidden="true">sort</mat-icon>
-          <mat-select [value]="activeSortKey()" (selectionChange)="onSortChange($event.value)"
+          <mat-select [value]="activeSortKey()" [disabled]="customerApi.loading()" (selectionChange)="onSortChange($event.value)"
             [attr.aria-label]="'customers.sort.aria' | translate">
             @for (opt of sortOptions; track opt.key) {
             <mat-option [value]="opt.key">
@@ -92,6 +92,12 @@
     </div>
     }
   } @else {
+  @if (customerApi.loading() && customers().length > 0) {
+  <div class="grid-loading-bar" role="progressbar" aria-label="Actualizando lista de clientes">
+    <mat-progress-bar mode="indeterminate" />
+  </div>
+  }
+
   <main class="customers-grid" [class.is-searching]="customerApi.loading()" [attr.aria-busy]="customerApi.loading()">
     @for (customer of paginatedCustomers(); track customer.id) {
     <app-customer-card [customer]="customer" />
@@ -111,7 +117,7 @@
         mat-icon-button
         type="button"
         class="page-nav-btn"
-        [disabled]="currentPage() === 1"
+        [disabled]="customerApi.loading() || currentPage() === 1"
         (click)="goToPage(1)"
         [attr.aria-label]="'pagination.first' | translate"
       >
@@ -122,7 +128,7 @@
         mat-icon-button
         type="button"
         class="page-nav-btn"
-        [disabled]="currentPage() === 1"
+        [disabled]="customerApi.loading() || currentPage() === 1"
         (click)="goToPage(currentPage() - 1)"
         [attr.aria-label]="'pagination.prev' | translate"
       >
@@ -136,6 +142,7 @@
           type="button"
           class="page-num-btn"
           [class.is-active]="p === currentPage()"
+          [disabled]="customerApi.loading()"
           (click)="goToPage(p)"
           [attr.aria-current]="p === currentPage() ? 'page' : null"
         >
@@ -148,7 +155,7 @@
         mat-icon-button
         type="button"
         class="page-nav-btn"
-        [disabled]="currentPage() === totalPages()"
+        [disabled]="customerApi.loading() || currentPage() === totalPages()"
         (click)="goToPage(currentPage() + 1)"
         [attr.aria-label]="'pagination.next' | translate"
       >
@@ -159,7 +166,7 @@
         mat-icon-button
         type="button"
         class="page-nav-btn"
-        [disabled]="currentPage() === totalPages()"
+        [disabled]="customerApi.loading() || currentPage() === totalPages()"
         (click)="goToPage(totalPages())"
         [attr.aria-label]="'pagination.last' | translate"
       >
@@ -170,7 +177,7 @@
     <div class="pagination-size">
       <mat-form-field appearance="outline" class="size-select-field" subscriptSizing="dynamic">
         <mat-label>{{ 'pagination.pageSize' | translate }}</mat-label>
-        <mat-select [value]="pageSize()" (selectionChange)="onPageSizeChange($event.value)">
+        <mat-select [value]="pageSize()" [disabled]="customerApi.loading()" (selectionChange)="onPageSizeChange($event.value)">
           @for (size of pageSizeOptions; track size) {
           <mat-option [value]="size">{{ size }}</mat-option>
           }

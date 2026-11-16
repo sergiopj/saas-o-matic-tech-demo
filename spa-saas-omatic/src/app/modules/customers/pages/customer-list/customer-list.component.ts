@@ -3,6 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { CustomerApiService } from '../../services/customer-api.service';
 import {
   Customer,
@@ -71,6 +72,7 @@ export const CUSTOMER_SORT_OPTIONS: readonly SortOptionItem[] = [
     MatIconModule,
     MatFormFieldModule,
     MatSelectModule,
+    MatProgressBarModule,
     TranslatePipe,
   ],
   templateUrl: './customer-list.component.html',
@@ -85,6 +87,14 @@ export class CustomerListComponent implements OnInit {
   readonly searchTerm = signal<string>('');
   readonly selectedCountry = signal<string>('ALL');
   readonly initialLoading = signal<boolean>(true);
+
+  /**
+   * Scoped loading flag for the search bar: only triggers when actively searching by text.
+   * Prevents search bar spinner from activating during page navigation, filtering, or sorting.
+   */
+  readonly isSearchingText = computed<boolean>(
+    () => this.customerApi.loading() && Boolean(this.searchTerm().trim()),
+  );
 
   // Centralized fiscal country registry
   readonly availableCountries = signal<readonly string[]>(

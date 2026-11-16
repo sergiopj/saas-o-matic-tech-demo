@@ -132,6 +132,19 @@
   border-radius: 9999px;
 }
 
+.grid-loading-bar {
+  margin-bottom: 0.75rem;
+  border-radius: var(--roams-radius-full);
+  overflow: hidden;
+  height: 4px;
+
+  mat-progress-bar {
+    --mdc-linear-progress-active-indicator-color: var(--roams-accent-blue);
+    --mdc-linear-progress-track-color: rgba(16, 97, 226, 0.12);
+    height: 4px;
+  }
+}
+
 .customers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));

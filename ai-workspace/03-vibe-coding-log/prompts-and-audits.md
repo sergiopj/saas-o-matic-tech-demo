@@ -1431,6 +1431,38 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
      - Las opciones del desplegable se derivan de forma pura y reactiva mediante `computed(() => [...SUPPORTED_FISCAL_COUNTRIES])`.
 - **Valor para la evaluación:** Erradicación de dependencias circulares y estado mutable volátil a favor de fuentes de verdad autoritativas (Single Source of Truth).
 
+### 6.64. Corrección Crítica del Evaluador: Desacoplamiento de Indicadores de Carga Contextuales (Search vs. Grid Loading)
+
+- **La corrección del Director de Orquesta:**
+  - El usuario auditó el comportamiento visual de la carga y detectó un defecto flagrante de UX:
+    > *"el spinner solo lo veo en el buscador, pero lo estamos usando al cargar el listado de customes y pasar de pagina?"*
+- **Análisis del Defecto y Vicio Previo de Implementación:**
+  1. *El Vicio de la Señal Global Indiscriminada:*
+     - Anteriormente, el template enlazaba la señal global de petición HTTP directamente al input de búsqueda:
+       ```html
+       <app-customer-search-bar [loading]="customerApi.loading()" ... />
+       ```
+     - Cuando el usuario navegaba a la página 2, seleccionaba una jurisdicción o conmutaba la ordenación, **el spinner que giraba era el del input de búsqueda**, mientras que la lista de clientes inferior únicamente reducía su opacidad, desconcertando al usuario que no estaba realizando ninguna búsqueda por texto.
+  2. *El Dilema entre Destrucción de DOM vs. Feedback Continuo:*
+     - Al pasar de página con tarjetas ya presentes (`customers().length > 0`), no es deseable destruir el grid para poner un spinner gigante a pantalla completa (`<app-loading-state>`), pues causaría un molesto parpadeo (*flash of empty content* / *layout shift*).
+     - Sin embargo, una simple atenuación de opacidad sin indicador de progreso es insuficiente: el usuario necesita ver un feedback dinámico explícito sobre la lista y saber que los controles de paginación están bloqueados mientras se procesa su clic.
+- **Acciones Correctoras Ejecutadas (Resolución Enterprise):**
+  1. *Aislamiento Estricto del Spinner del Buscador (`isSearchingText`):*
+     - Se creó una señal computada en `CustomerListComponent`:
+       ```typescript
+       readonly isSearchingText = computed<boolean>(
+         () => this.customerApi.loading() && Boolean(this.searchTerm().trim()),
+       );
+       ```
+     - El spinner del input de búsqueda se activa **únicamente** cuando hay un término de búsqueda por texto activo.
+  2. *Indicador de Progreso Contextual en el Grid (`<mat-progress-bar>`):*
+     - Se añadió un indicador lineal indeterminado de Material (`<mat-progress-bar mode="indeterminate">`) justo encima de la cuadrícula de tarjetas (`.grid-loading-bar`), estilizado con las variables corporativas `--roams-accent-blue`.
+     - Permite que el usuario vea la cuadrícula atenuada mientras la barra de progreso confirma de inmediato que la nueva página está en camino.
+  3. *Bloqueo Defensivo contra Condiciones de Carrera (`Race Conditions`):*
+     - Se inyectó `[disabled]="customerApi.loading()"` en todos los botones del paginador (primera, anterior, números de página, siguiente, última), en el selector de tamaño de página y en los selectores de filtro y ordenación.
+     - Esto blinda la aplicación contra "spam de clics", peticiones HTTP concurrentes y estados inconsistentes en redes lentas.
+- **Valor para la evaluación:** Demostración de máxima atención al detalle en Experiencia de Usuario (UX) B2B, erradicación de falsas señales visuales y blindaje de la interfaz ante interacción asíncrona.
+
 
 
 

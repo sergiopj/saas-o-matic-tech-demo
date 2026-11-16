@@ -426,8 +426,12 @@ Para garantizar que fallos en elementos cosméticos o de micro-interacción (spi
 3. **Desacoplamiento Estricto de Componentes Presentacionales:**
    - Componentes como `<app-loading-state>` (`src/app/shared/components/loading-state/`) o `<mat-spinner>` son puramente tontos (*Dumb Components*): reciben inputs primitivos (`message`, `diameter`) y carecen de efectos secundarios (*Zero Side Effects*).
    - El spinner del buscador (`CustomerSearchBarComponent`) es un adorno visual en el sufijo del input: el pipeline reactivo de filtrado (`Subject -> debounceTime -> emit`) corre en memoria y emitirá el término de búsqueda con independencia total del renderizado del spinner.
-4. **Resiliencia de Renderizado y No Destrucción:**
-   Cuando existen datos en memoria (`customers().length > 0`), las búsquedas secundarias no destruyen el grid ni lo sustituyen por un spinner de bloqueo: simplemente atenúan la opacidad (`.is-searching { opacity: 0.45; }`), permitiendo que el usuario siga visualizando la información en todo momento.
+4. **Resiliencia de Renderizado, No Destrucción e Indicadores Contextuales:**
+   Cuando existen datos en memoria (`customers().length > 0`), las transiciones de página, búsquedas secundarias o cambios de ordenación no destruyen el grid ni lo sustituyen por un spinner de bloqueo:
+   - *Atenuación del grid:* El contenedor de tarjetas atenúa su opacidad (`.is-searching { opacity: 0.45; pointer-events: none; }`).
+   - *Barra de Progreso Contextual (`mat-progress-bar`):* Se proyecta una barra indeterminada de Material justo encima del grid (`.grid-loading-bar`) para dar feedback explícito de carga sin provocar layout shift.
+   - *Aislamiento del Spinner del Buscador:* El spinner dentro del campo de texto de búsqueda se gobierna mediante la señal computada específica `isSearchingText` (`customerApi.loading() && Boolean(searchTerm())`), impidiendo que gire erróneamente cuando el usuario navega entre páginas o cambia de país/orden.
+   - *Blindaje contra Race Conditions:* Los botones de navegación de página, selectores de filtro y ordenamiento se deshabilitan defensivamente (`[disabled]="customerApi.loading()"`) mientras la petición HTTP está en tránsito, impidiendo condiciones de carrera por clics concurrentes.
 5. **Degradación Elegante de Animaciones (`prefers-reduced-motion`):**
    Las animaciones de tarjetas (`roamsCardEntrance`) están implementadas en CSS nativo acelerado por GPU (sin librerías JS pesadas). Mediante `@media (prefers-reduced-motion: reduce)`, si el navegador o sistema operativo del usuario tiene desactivadas las animaciones, el estilo se desactiva instantáneamente y el contenido se presenta estático a opacidad 1 sin latencia ni artefactos.
 6. **Separación Estricta de Ficheros (Cero Templates Inline):**
