@@ -14,38 +14,42 @@
     <div class="launcher-content">
       <mat-icon class="launcher-icon" aria-hidden="true">domain</mat-icon>
       <div class="launcher-form">
-        <label for="hub-customer-select" class="launcher-label">
-          {{ 'simulations.hub.selectCustomer' | translate }}
-        </label>
+        <div class="select-action-row">
+          <mat-form-field appearance="outline" class="customer-picker-field" subscriptSizing="dynamic">
+            <mat-label>{{ 'simulations.hub.selectCustomer' | translate }}</mat-label>
+            <mat-select
+              id="hub-customer-select"
+              [value]="selectedCustomerId()"
+              [disabled]="customerApi.loading()"
+              (selectionChange)="onSelectCustomer($event.value)"
+            >
+              <mat-option [value]="''">
+                -- {{ 'simulations.hub.selectCustomer' | translate }} --
+              </mat-option>
+              @for (c of customers(); track c.id) {
+                <mat-option [value]="c.id">
+                  {{ c.companyName }} ({{ c.country }} - {{ c.taxId }})
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <button
+            mat-flat-button
+            type="button"
+            class="launch-btn"
+            [disabled]="!selectedCustomerId() || customerApi.loading()"
+            (click)="goToSimulation()"
+          >
+            <mat-icon aria-hidden="true">tune</mat-icon>
+            <span>{{ 'simulations.hub.startBtn' | translate }}</span>
+          </button>
+        </div>
 
         @if (customerApi.loading() && customers().length === 0) {
-          <app-loading-state [message]="'customers.list.loading' | translate" />
-        } @else {
-          <div class="select-action-row">
-            <mat-form-field appearance="outline" class="customer-picker-field" subscriptSizing="dynamic">
-              <mat-select
-                id="hub-customer-select"
-                [value]="selectedCustomerId()"
-                (selectionChange)="onSelectCustomer($event.value)"
-                placeholder="Elige una cuenta corporativa..."
-              >
-                @for (c of customers(); track c.id) {
-                  <mat-option [value]="c.id">
-                    {{ c.companyName }} ({{ c.country }} - {{ c.taxId }})
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-
-            <button
-              mat-flat-button
-              class="launch-btn"
-              [disabled]="!selectedCustomerId()"
-              (click)="goToSimulation()"
-            >
-              <mat-icon aria-hidden="true">tune</mat-icon>
-              <span>{{ 'simulations.hub.startBtn' | translate }}</span>
-            </button>
+          <div class="launcher-loading-hint">
+            <mat-icon class="spin-icon" aria-hidden="true">sync</mat-icon>
+            <span>{{ 'customers.list.loading' | translate }}</span>
           </div>
         }
       </div>

@@ -118,7 +118,7 @@ export const TRANSLATIONS = {
     'simulation.history.converted': 'Convertido',
     'simulations.hub.title': 'Centro de Simulaciones',
     'simulations.hub.subtitle': 'Selecciona un cliente corporativo para iniciar una simulación personalizada con tramos y conversión de divisa.',
-    'simulations.hub.selectCustomer': 'Seleccionar cliente corporativo...',
+    'simulations.hub.selectCustomer': 'Seleccionar cliente corporativo',
     'simulations.hub.startBtn': 'Abrir Simulador',
   },
   en: {
@@ -240,7 +240,7 @@ export const TRANSLATIONS = {
     'simulation.history.converted': 'Converted',
     'simulations.hub.title': 'Simulations Hub',
     'simulations.hub.subtitle': 'Select a corporate customer to start a personalized simulation with tiers and currency conversion.',
-    'simulations.hub.selectCustomer': 'Select corporate customer...',
+    'simulations.hub.selectCustomer': 'Select corporate customer',
     'simulations.hub.startBtn': 'Open Simulator',
   },
   de: {
@@ -362,7 +362,7 @@ export const TRANSLATIONS = {
     'simulation.history.converted': 'Umgerechnet',
     'simulations.hub.title': 'Simulationszentrum',
     'simulations.hub.subtitle': 'Wählen Sie einen Geschäftskunden aus, um eine personalisierte Simulation zu starten.',
-    'simulations.hub.selectCustomer': 'Geschäftskunden auswählen...',
+    'simulations.hub.selectCustomer': 'Geschäftskunden auswählen',
     'simulations.hub.startBtn': 'Simulator öffnen',
   },
   fr: {
@@ -484,7 +484,7 @@ export const TRANSLATIONS = {
     'simulation.history.converted': 'Converti',
     'simulations.hub.title': 'Centre de Simulations',
     'simulations.hub.subtitle': 'Sélectionnez un client entreprise pour démarrer une simulation personnalisée avec paliers et conversion de devise.',
-    'simulations.hub.selectCustomer': 'Sélectionner un client entreprise...',
+    'simulations.hub.selectCustomer': 'Sélectionner un client entreprise',
     'simulations.hub.startBtn': 'Ouvrir le Simulateur',
   },
 } as const;

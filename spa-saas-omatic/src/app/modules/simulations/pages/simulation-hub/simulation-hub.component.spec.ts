@@ -58,6 +58,16 @@ describe('SimulationHubComponent', () => {
     expect(component.customers().length).toBe(1);
   });
 
+  it('should keep the launch button in DOM and disabled when no customer is selected', () => {
+    const launchBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.launch-btn');
+    expect(launchBtn).toBeTruthy();
+    expect(launchBtn.disabled).toBe(true);
+
+    component.onSelectCustomer('cust-1');
+    fixture.detectChanges();
+    expect(launchBtn.disabled).toBe(false);
+  });
+
   it('should navigate to customer simulation when launcher is clicked', () => {
     const navigateSpy = vi.spyOn(router, 'navigate');
     component.onSelectCustomer('cust-1');

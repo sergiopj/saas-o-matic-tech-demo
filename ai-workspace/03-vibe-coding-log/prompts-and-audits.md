@@ -1572,6 +1572,48 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
      - Linter `oxlint --type-aware src/` pasando con **0 errores y 0 advertencias**.
 - **Valor para la evaluación:** Cumplimiento íntegro y sin atajos de todas las vistas y requisitos técnicos obligatorios del reto Roams, implementando modularidad de routing escalable para el futuro, experiencia de usuario comercial fluida a 60 FPS y persistencia bidireccional cliente-servidor.
 
+### 6.68. Auditoría UX del Selector del Hub: Unificación de Textos Redundantes y Preservación del Botón Deshabilitado
+
+- **La observación del Director de Orquesta:**
+  - El usuario detectó una redundancia textual en el selector y solicitó mantener el botón permanentemente en pantalla en estado deshabilitado:
+    > *"Seleccionar cliente corporativo... Elige una cuenta corporativa... boton disabled pero sin eliminarlo si no hay algo seleccilonado Seleccionar cliente corporativo... Elige una cuenta corporativa..."*
+- **Análisis de la Deuda UX y Fallos Detectados:**
+  1. *Textos Duplicados e Inconsistentes:*
+     - Existía una etiqueta HTML exterior `<label class="launcher-label">` que renderizaba *"Seleccionar cliente corporativo..."*, mientras que el desplegable `<mat-select>` incluía un atributo `placeholder="Elige una cuenta corporativa..."`. Ambos textos coexistían en el mismo bloque visual generando confusión.
+  2. *Eliminación Condicional del Botón en Carga:*
+     - El botón de acción rápida estaba contenido dentro de un bloque `@if / @else` que reemplazaba toda la fila por un componente de carga, eliminando el botón del DOM en lugar de mantenerlo visible y deshabilitado.
+  3. *Estilo de Deshabilitado Ausente en CSS:*
+     - La clase `.launch-btn` forzaba un color azul corporativo `#1061e2` sin reglas específicas para el estado `:disabled`, lo que impedía que el usuario percibiera visualmente que el botón no estaba operativo.
+- **Implementación y Solución:**
+  1. *Unificación en `<mat-label>` Nativo de Angular Material:*
+     - Se eliminó la etiqueta `<label>` exterior redundante y el placeholder estático, consolidando la descripción en un único `<mat-label>{{ 'simulations.hub.selectCustomer' | translate }}</mat-label>`.
+     - Se añadió una primera opción vacía explícita:
+       ```html
+       <mat-option [value]="''">
+         -- {{ 'simulations.hub.selectCustomer' | translate }} --
+       </mat-option>
+       ```
+  2. *Permanencia del Botón en el DOM con Estado `[disabled]`:*
+     - El botón se mantiene visible en todo momento (nunca se destruye ni desaparece):
+       ```html
+       <button
+         mat-flat-button
+         type="button"
+         class="launch-btn"
+         [disabled]="!selectedCustomerId() || customerApi.loading()"
+         (click)="goToSimulation()"
+       >
+         <mat-icon aria-hidden="true">tune</mat-icon>
+         <span>{{ 'simulations.hub.startBtn' | translate }}</span>
+       </button>
+       ```
+  3. *Estilos Accesibles de Deshabilitado:*
+     - Se definieron estilos claros para `&:disabled, &[disabled]`: fondo gris suave `#e2e8f0`, texto e icono en `#94a3b8`, `cursor: not-allowed` y opacidad al 75%.
+  4. *Test de Regresión Automatizado:*
+     - Se añadió una prueba en `simulation-hub.component.spec.ts` verificando que el botón existe en el DOM, se inicia en `disabled: true`, y conmuta a `disabled: false` de inmediato al seleccionar una cuenta corporativa.
+- **Valor para la evaluación:** Ergonomía visual de nivel enterprise, erradicación de saltos en el DOM (*layout shift*) y feedback interactivo inequívoco para el usuario.
+
+
 
 
 

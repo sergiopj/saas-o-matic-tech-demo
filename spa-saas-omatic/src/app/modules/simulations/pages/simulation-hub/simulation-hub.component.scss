@@ -70,14 +70,6 @@
     .launcher-form {
       flex: 1;
 
-      .launcher-label {
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: var(--roams-primary, #0c1a30);
-        margin-bottom: 0.85rem;
-        display: block;
-      }
-
       .select-action-row {
         display: flex;
         align-items: center;
@@ -98,9 +90,52 @@
           font-size: 0.95rem;
           border-radius: 10px;
           gap: 0.5rem;
+          transition: all 0.2s ease-in-out;
+
+          &:hover:not(:disabled) {
+            background-color: #0d4eb8;
+          }
+
+          &:disabled,
+          &[disabled] {
+            background-color: #e2e8f0 !important;
+            color: #94a3b8 !important;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+            opacity: 0.75;
+
+            mat-icon {
+              color: #94a3b8 !important;
+            }
+          }
+        }
+      }
+
+      .launcher-loading-hint {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.825rem;
+        color: var(--roams-text-secondary, #64748b);
+        margin-top: 0.5rem;
+
+        .spin-icon {
+          font-size: 1rem;
+          width: 1rem;
+          height: 1rem;
+          animation: spin 1s linear infinite;
         }
       }
     }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 

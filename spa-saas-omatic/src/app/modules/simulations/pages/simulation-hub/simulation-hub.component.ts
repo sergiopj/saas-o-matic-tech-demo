@@ -8,7 +8,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { CustomerApiService } from '../../../customers/services/customer-api.service';
 import { Customer } from '../../../customers/models/customer.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { LoadingStateComponent } from '../../../../shared/components/loading-state/loading-state.component';
 
 /**
  * Simulations Hub landing page.
@@ -24,7 +23,6 @@ import { LoadingStateComponent } from '../../../../shared/components/loading-sta
     MatSelectModule,
     MatFormFieldModule,
     TranslatePipe,
-    LoadingStateComponent,
   ],
   templateUrl: './simulation-hub.component.html',
   styleUrl: './simulation-hub.component.scss',
