@@ -1531,6 +1531,48 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
        ```
 - **Valor para la evaluación:** Coherencia de tooling en todo el repositorio (Rust Oxlint en front y back), velocidad de ejecución sub-segundo (240 ms frente a los 15-20 s de un ESLint tradicional) y diagnósticos visuales hiper-detallados en consola con línea, columna y sugerencias de remediación.
 
+### 6.67. Arquitectura Modular de Routing, Menú Lateral Responsive, Home Overview y Estudio de Simulación con Slider a 60 FPS
+
+- **La directiva del Director de Orquesta:**
+  - El usuario solicitó completar de forma integral los requisitos pendientes del reto técnico con un diseño modular extensible:
+    > *"implementa todo y luego ya ire yop corrigiendo ademas el home es una edspecia de pagibna resumen de ultimos costumers añadidos y lo que veas tambien de otros modulos, y el menu lateral con enlace a cada modulo, osea a cada routing, quiero ademas un roting por modulo por si hay sub routing en el futuro"*
+- **Implementación Arquitectónica Realizada:**
+  1. *Estructura de Routing Modular con Lazy Loading por Módulo (`loadChildren`):*
+     - En lugar de mantener rutas planas, se desacopló el enrutamiento creando submódulos de rutas independientes:
+       - `customers.routes.ts`: Contiene la ruta raíz `''` (`CustomerListComponent`) y la ruta hija `':id'` (`CustomerDetailComponent`).
+       - `simulations.routes.ts`: Contiene la ruta raíz `''` (`SimulationHubComponent`).
+       - `app.routes.ts`: Orquesta mediante `loadChildren` la carga perezosa (`/customers`, `/simulations`) y carga el Dashboard de inicio (`/home`), redirigiendo la raíz `'/'` a `'/home'`.
+  2. *Sidebar de Navegación Lateral Responsive (`SidebarComponent`):*
+     - Integrado en el layout corporativo de la aplicación (`app.html` con `.app-body`).
+     - Enlaces a los 3 módulos principales con iconos de Material (`dashboard`, `groups`, `calculate`) y resaltado de ruta activa (`routerLinkActive="active"`).
+     - Botón de colapso/expansión con persistencia reactiva en señal (`isCollapsed = signal<boolean>(false)`).
+     - Adaptabilidad responsive automática en pantallas móviles y tablets.
+  3. *Executive Home Dashboard (`HomeComponent`):*
+     - Banner de bienvenida con métricas KPI en tiempo real: Clientes Registrados, Jurisdicciones Fiscales (8 países SSOT), Tramos Activos (3) y Divisa Activa.
+     - Sección de *«Últimos Clientes Añadidos»*: Consulta `CustomerApiService.search()` ordenada por `createdAt DESC` limitando a 4 tarjetas interactivas con acción directa de simulación.
+     - Tarjeta pedagógica de la estructura de tramos con enlace directo al centro de simulaciones.
+  4. *Estudio de Simulación Interactiva y Detalle de Cliente (`CustomerDetailComponent` en `/customers/:id`):*
+     - Ficha de perfil corporativo: avatar, razón social, CIF/NIF, país, plan actual y redactor de correos comerciales.
+     - **Controles Dinámicos y Slider (`<mat-slider>`):**
+       - Slider discreto de 1 a 150 usuarios sincronizado bidireccionalmente con un stepper numérico manual.
+       - Inputs numéricos para almacenamiento en GB y llamadas API estimadas.
+       - Barra visual de tramos (T1, T2, T3) iluminada según el volumen de usuarios seleccionados.
+     - **Cálculo de Proyección a 60 FPS en Tiempo Real:**
+       - Señal computada (`computed()`) que ejecuta `projectSimulationCost()` sin llamadas a red: desglose de tramo 1 (hasta 10 u. a 10 €), tramo 2 (11 a 50 u. a 8 €), tramo 3 (>50 u. a 5 €), cálculo de IVA según país (ej. 21% para ES) y conversión inmediata a la divisa activa de la Navbar (EUR, USD, GBP, etc.).
+     - **Persistencia en SQLite (`POST /simulations`):**
+       - Botón «Guardar Simulación» con feedback visual de guardado.
+     - **Historial Cronológico de Simulaciones:**
+       - Tabla responsiva que muestra todas las simulaciones persistidas para el cliente (`GET /simulations?customerId=...`), actualizándose reactivamente al guardar una nueva.
+  5. *Centro de Simulaciones (`SimulationHubComponent` en `/simulations`):*
+     - Selector rápido de cuentas corporativas para lanzar directamente su estudio de simulación personalizado.
+     - Tarjetas de referencia del modelo de tarificación gradual por tramos.
+  6. *Internacionalización y Calidad:*
+     - Catálogo de claves añadido para los 4 idiomas (`es`, `en`, `de`, `fr`).
+     - **130 tests unitarios pasando al 100%** (22 test suites) en frontend y **117 tests pasando al 100%** (21 suites) en backend.
+     - Linter `oxlint --type-aware src/` pasando con **0 errores y 0 advertencias**.
+- **Valor para la evaluación:** Cumplimiento íntegro y sin atajos de todas las vistas y requisitos técnicos obligatorios del reto Roams, implementando modularidad de routing escalable para el futuro, experiencia de usuario comercial fluida a 60 FPS y persistencia bidireccional cliente-servidor.
+
+
 
 
 

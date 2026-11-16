@@ -545,6 +545,23 @@ Para garantizar que fallos en elementos cosméticos o de micro-interacción (spi
 2. **Catálogo Maestro Centralizado e Inmutable (`SUPPORTED_FISCAL_COUNTRIES`):**
    Tanto en el frontend como en el backend se define una constante canónica inmutable (`SUPPORTED_FISCAL_COUNTRIES: readonly string[] = ['CH', 'DE', 'ES', 'FR', 'GB', 'IT', 'SE', 'US'] as const`). El selector `<mat-select>` se alimenta de forma pura y reactiva de esta constante única, eliminando mutaciones en caliente, estados inconsistentes y algoritmos innecesarios de ordenación ad-hoc en los componentes.
 
+### 3.17 Arquitectura de Routing Modular por Módulos y Estudio de Simulación Interactiva
+
+Para responder a las necesidades de extensión futura del equipo comercial y separar con nitidez las responsabilidades de navegación:
+
+1. **Routing Modularizado con Lazy Loading (`loadChildren`):**
+   - En lugar de concentrar todas las rutas en `app.routes.ts`, cada módulo encapsula su propio árbol de rutas:
+     - `customers.routes.ts`: `''` (listado y buscador de clientes) y `':id'` (detalle del cliente con simulador interactivo e historial).
+     - `simulations.routes.ts`: `''` (hub comercial de simulaciones y selector rápido de cuenta).
+     - `app.routes.ts`: Configura `loadChildren` para cada dominio funcional y delega la ruta raíz a `HomeComponent` (`/home`).
+2. **Sidebar de Navegación Lateral (`SidebarComponent`):**
+   - Menú lateral persistente en el layout de la aplicación con navegación accesible a los módulos: Inicio (`/home`), Clientes (`/customers`) y Simulaciones (`/simulations`).
+   - Soporte para colapso a iconos con `signal<boolean>` y adaptación responsive automática en móviles.
+3. **Estudio de Simulación con Slider a 60 FPS (`CustomerDetailComponent`):**
+   - El formulario utiliza un control deslizante `<mat-slider>` sincronizado con inputs numéricos para manipular usuarios activos (1–150), almacenamiento (GB) y llamadas API.
+   - Toda la proyección de costes y desglose por tramos se ejecuta mediante señales computadas reactivas (`computed()`) apoyadas en `LocalPricingCalculator`, garantizando 60 FPS sin latencia de red.
+   - El botón «Guardar Simulación» persiste la simulación en SQLite llamando a `POST /simulations` y actualiza reactivamente el historial cronológico de presupuestos del cliente.
+
 ---
 
 ## 4. Estrategia de Testing y Aseguramiento de Calidad

@@ -124,4 +124,8 @@ export class CustomerApiService {
       finalize(() => this.loading.set(false))
     );
   }
+
+  clearError(): void {
+    this.error.set(null);
+  }
 }

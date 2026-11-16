@@ -1,0 +1,132 @@
+<div class="home-container">
+  <!-- Hero Section -->
+  <section class="hero-banner">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <mat-icon aria-hidden="true">verified</mat-icon>
+        <span>SaaS-O-Matic Engine</span>
+      </div>
+      <h1 class="hero-title">{{ 'home.hero.title' | translate }}</h1>
+      <p class="hero-subtitle">{{ 'home.hero.subtitle' | translate }}</p>
+    </div>
+  </section>
+
+  <app-error-banner
+    [problem]="customerApi.error()"
+    [retryable]="true"
+    (retry)="loadRecentCustomers()"
+    (dismiss)="customerApi.error.set(null)"
+  />
+
+  <!-- KPI Metrics Grid -->
+  <section class="kpis-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon-circle blue">
+        <mat-icon aria-hidden="true">groups</mat-icon>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value">{{ totalCustomers() }}</span>
+        <span class="kpi-label">{{ 'home.kpi.customers' | translate }}</span>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon-circle emerald">
+        <mat-icon aria-hidden="true">public</mat-icon>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value">{{ supportedCountriesCount }}</span>
+        <span class="kpi-label">{{ 'home.kpi.countries' | translate }}</span>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon-circle amber">
+        <mat-icon aria-hidden="true">layers</mat-icon>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value">3</span>
+        <span class="kpi-label">{{ 'home.kpi.tiers' | translate }}</span>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon-circle purple">
+        <mat-icon aria-hidden="true">payments</mat-icon>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value">{{ currencyService.selectedCurrency() }}</span>
+        <span class="kpi-label">{{ 'home.kpi.currency' | translate }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Tiers Feature Banner -->
+  <section class="pricing-feature-card">
+    <div class="pricing-header">
+      <div class="pricing-title-group">
+        <mat-icon class="pricing-icon" aria-hidden="true">trending_up</mat-icon>
+        <h2 class="pricing-title">{{ 'home.pricing.title' | translate }}</h2>
+      </div>
+      <a mat-stroked-button routerLink="/simulations" class="hub-link-btn">
+        <mat-icon aria-hidden="true">calculate</mat-icon>
+        <span>{{ 'sidebar.simulations' | translate }}</span>
+      </a>
+    </div>
+
+    <div class="tiers-pills-row">
+      <div class="tier-pill tier-1">
+        <div class="tier-badge">T1</div>
+        <div class="tier-info">
+          <span class="tier-name">{{ 'home.pricing.tier1' | translate }}</span>
+          <span class="tier-desc">0–10 usuarios • 10 €/u</span>
+        </div>
+      </div>
+
+      <div class="tier-pill tier-2">
+        <div class="tier-badge">T2</div>
+        <div class="tier-info">
+          <span class="tier-name">{{ 'home.pricing.tier2' | translate }}</span>
+          <span class="tier-desc">11–50 usuarios • 8 €/u</span>
+        </div>
+      </div>
+
+      <div class="tier-pill tier-3">
+        <div class="tier-badge">T3</div>
+        <div class="tier-info">
+          <span class="tier-name">{{ 'home.pricing.tier3' | translate }}</span>
+          <span class="tier-desc">>50 usuarios • 5 €/u</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="pricing-tax-note">
+      <mat-icon class="info-icon" aria-hidden="true">info</mat-icon>
+      <span>{{ 'home.pricing.taxNote' | translate }}</span>
+    </p>
+  </section>
+
+  <!-- Recent Customers Section -->
+  <section class="recent-section">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">{{ 'home.recent.title' | translate }}</h2>
+        <p class="section-subtitle">{{ 'home.recent.subtitle' | translate }}</p>
+      </div>
+      <a mat-flat-button routerLink="/customers" class="view-all-btn">
+        <span>{{ 'home.recent.viewAll' | translate }}</span>
+        <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+      </a>
+    </div>
+
+    @if (customerApi.loading() && recentCustomers().length === 0) {
+      <app-loading-state [message]="'customers.list.loading' | translate" />
+    } @else {
+      <div class="recent-grid">
+        @for (customer of recentCustomers(); track customer.id) {
+          <app-customer-card [customer]="customer" />
+        }
+      </div>
+    }
+  </section>
+</div>
