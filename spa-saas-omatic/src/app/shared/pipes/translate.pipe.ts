@@ -14,7 +14,7 @@ export class TranslatePipe implements PipeTransform {
   private readonly i18n = inject(I18nService);
 
   transform(
-    key: TranslationKey | string | null | undefined,
+    key: TranslationKey | (string & {}) | null | undefined,
     params?: Record<string, string | number>
   ): string {
     if (!key) return '';

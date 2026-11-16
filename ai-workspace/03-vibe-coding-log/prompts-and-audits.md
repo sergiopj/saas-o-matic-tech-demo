@@ -1497,6 +1497,40 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
      - Se preservó el formateo semántico en negrita (`<strong>`) garantizando traducción reactiva instantánea ante cualquier cambio en `I18nService`.
 - **Valor para la evaluación:** Cero cadenas quemadas en la interfaz de usuario, accesibilidad W3C ARIA multilingüe y test unitario de regresión en Vitest que valida la conmutación en caliente entre los 4 idiomas.
 
+### 6.66. Configuración de Linter en Frontend (`oxlint`), Diagnósticos en Consola y Purga de Código Huérfano
+
+- **La consulta del Director de Orquesta:**
+  - El usuario preguntó sobre el estado del linter en la aplicación cliente:
+    > *"tenemos un linter en el front? que ademas lo ejecutemos como scrpit y te liste los warnings por consola de los ficheros y sitios de los mismos donde no pase le lint"*
+- **Diagnóstico del Estado Previo:**
+  - En el backend (`mic-saas-omatic`), existía `oxlint` configurado con `"lint": "oxlint --type-aware src/ test/"`.
+  - En el frontend (`spa-saas-omatic`), **no existía ningún script ni paquete de linter** en `package.json` (únicamente `prettier`).
+- **Implementación y Unificación Arquitectónica:**
+  1. *Instalación de Oxlint en el Frontend:*
+     - Se incorporaron `oxlint` y `oxlint-tsgolint` como `devDependencies` en `spa-saas-omatic`.
+     - Se añadió el script canónico en `package.json`:
+       ```json
+       "scripts": {
+         "lint": "oxlint --type-aware src/"
+       }
+       ```
+     - Se creó el archivo de configuración declarativa `.oxlintrc.json` con entorno navegador y reglas estrictas para promesas flotantes.
+  2. *Detección Inmediata de Incidencias en Consola:*
+     - Al ejecutar `npm run lint`, Oxlint analizó 46 archivos en 240 ms y reportó con precisión quirúrgica:
+       - Un directorio anidado accidental y archivo vacío huérfano (`spa-saas-omatic/src/app/shared/pipes/spa-saas-omatic/...`).
+       - Tres variables asignadas pero no utilizadas en tests unitarios (`dialog`, `originalHref`, `customerApi`).
+       - Una unión de tipos redundante en `translate.pipe.ts` (`TranslationKey | string` sobrescrito por `string`).
+  3. *Resolución y Política Cero Advertencias:*
+     - Se eliminó el directorio anidado huérfano.
+     - Se limpiaron las declaraciones y dependencias no utilizadas en los tests.
+     - Se perfeccionó la firma del `TranslatePipe` utilizando el patrón idiomático de TypeScript `TranslationKey | (string & {}) | null | undefined`.
+     - Se verificó que `npm run lint` finalizara con:
+       ```
+       Found 0 warnings and 0 errors.
+       Finished in 243ms on 46 files with 111 rules using 12 threads.
+       ```
+- **Valor para la evaluación:** Coherencia de tooling en todo el repositorio (Rust Oxlint en front y back), velocidad de ejecución sub-segundo (240 ms frente a los 15-20 s de un ESLint tradicional) y diagnósticos visuales hiper-detallados en consola con línea, columna y sugerencias de remediación.
+
 
 
 

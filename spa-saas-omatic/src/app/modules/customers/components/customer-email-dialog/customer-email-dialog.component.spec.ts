@@ -67,7 +67,6 @@ describe('CustomerEmailDialogComponent', () => {
   });
 
   it('should dispatch mailto URI on openMailClient and close dialog', () => {
-    const originalHref = window.location.href;
     component.openMailClient();
 
     expect(mockDialogRef.close).toHaveBeenCalledWith('dispatched');

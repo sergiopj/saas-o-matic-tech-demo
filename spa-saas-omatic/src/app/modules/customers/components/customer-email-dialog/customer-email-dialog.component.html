@@ -20,9 +20,11 @@
 
   <mat-dialog-content class="dialog-body">
     <mat-form-field appearance="outline" class="form-field full-width">
-      <mat-label>{{ 'customers.emailDialog.recipient' | translate }}</mat-label>
+      <mat-label id="recipient-label">{{ 'customers.emailDialog.recipient' | translate }}</mat-label>
       <input
         matInput
+        id="recipient-email"
+        aria-labelledby="recipient-label"
         type="email"
         [value]="recipient()"
         (input)="recipient.set($any($event.target).value)"
@@ -32,9 +34,11 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="form-field full-width">
-      <mat-label>{{ 'customers.emailDialog.subject' | translate }}</mat-label>
+      <mat-label id="subject-label">{{ 'customers.emailDialog.subject' | translate }}</mat-label>
       <input
         matInput
+        id="subject"
+        aria-labelledby="subject-label"
         type="text"
         [value]="subject()"
         (input)="subject.set($any($event.target).value)"
@@ -43,9 +47,11 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="form-field full-width message-field">
-      <mat-label>{{ 'customers.emailDialog.body' | translate }}</mat-label>
+      <mat-label id="body-label">{{ 'customers.emailDialog.body' | translate }}</mat-label>
       <textarea
         matInput
+        id="body"
+        aria-labelledby="body-label"
         rows="8"
         [value]="body()"
         (input)="body.set($any($event.target).value)"

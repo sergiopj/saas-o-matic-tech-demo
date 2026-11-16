@@ -586,6 +586,43 @@ Para optimizar los tiempos de respuesta durante el desarrollo y asegurar la máx
 | :--- | :--- | :--- | :--- |
 | `npm test` | **Pase Único (Vitest)** | Ejecución determinista de una pasada (`ng test --watch=false`). Diseñado para evaluación y pipelines de CI/CD. | ~1-2 segundos |
 | `npm run test:watch` | **Modo Interactivo** | Recarga en caliente ante cambios de código para desarrollo local. | Continuo |
+| `npm run lint` | **Análisis Estático (Oxlint)** | Linter Rust ultrarrápido (`oxlint --type-aware src/`). Muestra diagnósticos de advertencias y errores con ruta de fichero, número de línea y fragmento visual de código. | ~250 ms |
+
+---
+
+### 4.3 Herramientas de Análisis Estático y Linter Unificado (`oxlint`)
+
+Para garantizar la máxima higiene y consistencia sintáctica y tipológica en todo el monorepo sin penalizar el flujo de trabajo con la lentitud de ESLint tradicional:
+1. **Unificación de Tooling de Linting en Monorepo:**
+   - Tanto el backend (`mic-saas-omatic`) como el frontend (`spa-saas-omatic`) utilizan **Oxlint** (`oxlint` + `oxlint-tsgolint`), un linter de última generación programado en Rust compatible con TypeScript y Type-Aware diagnostics.
+   - En el frontend, se ejecuta mediante el script de npm:
+     ```bash
+     npm run lint
+     # Ejecuta: oxlint --type-aware src/
+     ```
+2. **Diagnósticos en Consola Precisos y Contextuales:**
+   - Cuando se detecta cualquier discrepancia (variables sin uso, uniones de tipos redundantes, archivos vacíos, promesas flotantes), Oxlint imprime en la terminal:
+     - Nombre de la regla y severidad (`eslint(no-unused-vars)`, `typescript(no-redundant-type-constituents)`, etc.).
+     - Ruta absoluta y relativa exacta del archivo afectado.
+     - Coordenadas de línea y columna (`archivo.ts:16:7`).
+     - Bloque contextual de código coloreado con marcadores visuales (`^^^|^^^`) indicando el token problemático.
+     - Mensaje de ayuda accionable (`help: Did you mean to use this variable?`).
+3. **Configuración Declarativa (`.oxlintrc.json`):**
+   - El frontend cuenta con su archivo de configuración `.oxlintrc.json`:
+     ```json
+     {
+       "$schema": "./node_modules/oxlint/configuration_schema.json",
+       "rules": {
+         "typescript/no-explicit-any": "off",
+         "typescript/no-floating-promises": "error"
+       },
+       "env": {
+         "browser": true
+       }
+     }
+     ```
+4. **Política de Cero Advertencias y Cero Errores:**
+   - La suite completa del frontend pasa con `0 warnings and 0 errors` tras la purga de código huérfano y variables no utilizadas en specs.
 
 ---
 

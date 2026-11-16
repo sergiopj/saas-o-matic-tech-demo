@@ -3,7 +3,6 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { CustomerListComponent } from './customer-list.component';
-import { CustomerApiService } from '../../services/customer-api.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { errorInterceptor } from '../../../../core/errors/error.interceptor';
 import { Customer } from '../../models/customer.model';
@@ -13,7 +12,6 @@ describe('CustomerListComponent', () => {
   let fixture: ComponentFixture<CustomerListComponent>;
   let component: CustomerListComponent;
   let httpTesting: HttpTestingController;
-  let customerApi: CustomerApiService;
   let i18nService: I18nService;
 
   const mockCustomers: Customer[] = [
