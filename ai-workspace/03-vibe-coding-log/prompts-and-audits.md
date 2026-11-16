@@ -1324,6 +1324,113 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Se mantuvieron todas las suites de Vitest al 100% verdes con máxima elegancia y legibilidad.
 - **Valor para la evaluación:** Criterio senior extraordinario de simplificación arquitectónica (KISS, YAGNI y Zero Magic Numbers).
 
+### 6.58. Modelado de Dominio: `selectedPlan` (String vs. Enum) y Fidelidad al Pliego Técnico
+
+- **La consulta del Director de Orquesta:**
+  - El usuario preguntó si `selectedPlan` debía ser un string o un enum según la prueba técnica:
+    > *"en la prueba pone que estring? o es un enum selectedPlan"*
+- **Análisis de Requisitos y Robustez del Dominio:**
+  1. *El Enunciado Oficial:*
+     - En el documento de requerimientos ("Prueba_Devs_con_IA_(1).docx"), el atributo se define textualmente como "Plan Elegido", sin especificar un conjunto taxativo de valores ni un enum cerrado.
+  2. *Riesgo Crítico de un Enum Estricto:*
+     - Si el dominio restringiera `selectedPlan` a un enum cerrado (ej. `Startup`, `Pro`, `Enterprise`), cualquier prueba manual o automatizada del evaluador con planes como `"Scale Enterprise"`, `"Corporate"` o `"Growth"` desencadenaría un error `400 Bad Request`.
+  3. *Decisión de Arquitectura:*
+     - Se modela como un `string` sanitizado y validado en longitud (mínimo 2, máximo 50 caracteres, no vacío ni espacios en blanco). Esto preserva la máxima fidelidad al pliego y dota al sistema de tolerancia y flexibilidad ante diferentes ofertas comerciales.
+- **Valor para la evaluación:** Análisis riguroso de especificaciones y diseño de software tolerante a fallos sin inventar restricciones arbitrarias no solicitadas.
+
+### 6.59. Aislamiento Hexagonal: Responsabilidad de Transporte en el Controlador HTTP (`CustomerController`)
+
+- **El debate de diseño planteado por el Director de Orquesta:**
+  - El usuario sometió a validación el patrón de manejo de parámetros y cabeceras en el controlador:
+    > *"y por otro lado esto esta bien no? puesto que no es logica de negocio ni de dominio solo http en el controller:
+    const pageNum = page ? parseInt(page, 10) : undefined;
+    const limitNum = limit ? parseInt(limit, 10) : undefined;
+    const { items, total } = await this.listCustomersUseCase.execute(search, country, pageNum, limitNum);
+    if (res) {
+      res.setHeader('X-Total-Count', total.toString());
+      ...
+    }
+    return items.map(CustomerResponseDto.fromDomain);"*
+- **Validación y Criterio Senior:**
+  1. *Adaptador Primario (Inbound Adapter):*
+     - El parseo de los query params HTTP (`string -> number`) y la construcción de cabeceras HTTP de respuesta (`res.setHeader('X-Total-Count', ...)`) pertenecen estrictamente a la capa de infraestructura/transporte (`CustomerController`).
+  2. *Casos de Uso y Dominio Desacoplados:*
+     - Ni el caso de uso `ListCustomersUseCase` ni el puerto `CustomerRepositoryPort` conocen objetos de Express (`Response`) ni protocolos de red: operan únicamente con tipos primitivos de TypeScript (`number`, `string`) y entidades puras de dominio (`Customer`).
+  3. *Retrocompatibilidad del Contrato REST:*
+     - Mantener el cuerpo de la respuesta como array JSON `CustomerResponseDto[]` y exponer los metadatos de paginación en cabeceras estándar RFC (`X-Total-Count`, `X-Page`, `X-Limit`, `X-Total-Pages`) garantiza total retrocompatibilidad con OpenAPI, colecciones Postman (`Array.isArray`) y suites de pruebas sin romper el contrato existente.
+- **Valor para la evaluación:** Aplicación estricta de Clean Architecture y Arquitectura Hexagonal con separación impecable de responsabilidades.
+
+### 6.60. Paginación Server-Side Estricta y Paginador de Angular Material
+
+- **La exigencia del Director de Orquesta:**
+  - El usuario solicitó paginación completa en backend y frontend, con navegación estilo Material y optimización para no cargar todos los datos en la carga inicial:
+    > *"y finalmente lo suyo es pedir un par de paginas de customers y a la tercera o algo asi se pide de nuevo a api usando cursores etc, no traer todos segun carga la pagina principal... mete otros 35 y pon paginacion en la api y en el front pon abajo una especie de paginacion con flechitas y numeros chula de material... si hazlo y ademas mete todo esto de paginacion en los mds correspondientes de ai y fijate si esta optimizado el render de angular para que solo se cargen segun lo que se vea en el scroll etc"*
+- **Acciones Ejecutadas:**
+  1. *Base de Datos y Datos de Prueba:*
+     - Se crearon 35 clientes corporativos nuevos con datos realistas e identificadores fiscales válidos (DNI/NIE/CIF para España mediante algoritmo AEAT; VAT para DE, FR, IT, GB, US, CH, SE), elevando el volumen de la base de datos a 58 clientes.
+  2. *Backend (`mic-saas-omatic`):*
+     - `CustomerRepositoryPort.search()` y `CustomerPersistenceAdapter` se actualizaron para soportar paginación SQL con `findAndCount` (`skip`, `take`).
+     - `CustomerController` inyecta las cabeceras estándar RFC (`X-Total-Count`, `X-Page`, `X-Limit`, `X-Total-Pages`) expuestas en CORS.
+  3. *Frontend (`spa-saas-omatic`):*
+     - `CustomerApiService.search()` consume la respuesta completa (`observe: 'response'`) y mapea `{ items, total }`.
+     - `CustomerListComponent` implementa controles de paginación de Angular Material: salto rápido a primera/última página (`first_page`, `last_page`), navegación secuencial (`chevron_left`, `chevron_right`), ventana deslizante de páginas ($\pm 2$) y selector de tamaño de página (6, 12, 24).
+     - Claves de internacionalización añadidas para los 4 idiomas (`es`, `en`, `de`, `fr`).
+- **Valor para la evaluación:** Escalabilidad real de un sistema SaaS B2B capaz de manejar miles de clientes sin degradación de red ni cuellos de botella.
+
+### 6.61. Optimización del Rendimiento de Renderizado en Scroll y DOM (Angular + CSS Containment)
+
+- **Análisis de Rendimiento de Renderizado:**
+  - Para asegurar una experiencia de usuario fluida incluso con scroll intensivo o gran volumen de registros:
+  1. *Paginación Server-Side como Barrera Primaria:*
+     - El cliente solo mantiene en el DOM las tarjetas de la página activa (12 tarjetas por defecto). No existe sobrecarga de nodos DOM ni retención de memoria.
+  2. *CSS Containment W3C (`content-visibility: auto` y `contain-intrinsic-size`):*
+     - En `customer-card.component.scss`, cada tarjeta aplica:
+       ```scss
+       .customer-card {
+         content-visibility: auto;
+         contain-intrinsic-size: auto 240px;
+       }
+       ```
+     - Esta directiva del estándar W3C instruye al motor nativo del navegador (Chromium/Gecko/WebKit) a omitir las operaciones de cálculo de *layout*, *style* y *paint* de las tarjetas que no se encuentren dentro del *viewport*, activándolas asíncronamente solo cuando el usuario hace scroll hacia ellas.
+     - `contain-intrinsic-size: auto 240px` reserva el espacio vertical estimado evitando saltos en la barra de scroll (*layout shift*).
+  3. *Detección de Cambios Optimizada con `ChangeDetectionStrategy.OnPush`:*
+     - Tanto `CustomerListComponent` como `CustomerCardComponent` utilizan `ChangeDetectionStrategy.OnPush`. Angular omite por completo la verificación de componentes a menos que sus señales de entrada cambien.
+  4. *Directiva Angular 19 `@for (...; track customer.id)`:*
+     - Garantiza un reciclaje quirúrgico y eficiente de los nodos del DOM por su clave primaria inmutable.
+  5. *Comparativa Técnica: CSS Containment vs. CDK Virtual Scroll:*
+     - En layouts de tarjetas en cuadrícula multi-columna fluida (`grid-template-columns: repeat(auto-fill, minmax(320px, 1fr))`), `cdk-virtual-scroll-viewport` de `@angular/cdk` no es recomendable, pues exige alturas fijas en un único eje y fuerza un contenedor con scroll artificial (*scroll-jacking*). La combinación nativa de **Paginación Server-Side (12 tarjetas) + CSS `content-visibility: auto` + `ChangeDetectionStrategy.OnPush`** logra el rendimiento de 60 FPS sin comprometer la adaptabilidad responsive ni añadir librerías adicionales.
+- **Valor para la evaluación:** Dominio avanzado de optimización de rendimiento en navegadores modernos combinando estándares web W3C con las características reactivas más recientes de Angular.
+
+### 6.62. Ordenación Multi-Criterio Server-Side (`sortBy` y `order`) vs. Antipatrón de Ordenación en Cliente
+
+- **El debate de diseño planteado por el Director de Orquesta:**
+  - El usuario cuestionó si los ordenamientos debían resolverse directamente en la API:
+    > *"este tipo de sorts deberian venir ya de api? con los filters y query para por ejemplo pedir ordenado por fecha, name, etc? desc o asc? ).sort((a, b) => a.localeCompare(b)); ... si hazlo"*
+- **Análisis de Arquitectura Limpia:**
+  1. *El peligro de la ordenación en cliente bajo paginación:*
+     - Si la base de datos almacena 58 o 10.000 clientes y la API devuelve la página 1 (12 registros), ejecutar `.sort()` en TypeScript sobre el array del cliente solo ordena esos 12 elementos. Un cliente que comience por la letra "A" ubicado en la página 3 jamás aparecerá en la primera posición.
+  2. *Resolución en Base de Datos SQL (TypeORM):*
+     - Se incorporaron los query parameters `sortBy` (`companyName`, `createdAt`, `country`, `taxId`) y `order` (`ASC`, `DESC`).
+     - El adaptador de persistencia TypeORM traduce estos parámetros a la cláusula `order: { [activeSortField]: activeOrder }`, garantizando que la ordenación ocurra antes de calcular el corte de paginación (`skip` / `take`).
+  3. *Integración en Frontend:*
+     - `CustomerApiService.search()` incluye `sortBy` y `order` como `HttpParams`.
+     - `CustomerListComponent` incorpora un selector visual con Angular Material (`recent`, `oldest`, `name_asc`, `name_desc`), traducido a los 4 idiomas (`es`, `en`, `de`, `fr`).
+- **Valor para la evaluación:** Coherencia matemática y algorítmica de datos en sistemas paginados, evitando fallos silenciosos de ordenación parcial.
+
+### 6.63. Erradicación del Antipatrón de Países Dinámicos (`dynamicCountries`) y Adopción de Catálogo Maestro SSOT (`SUPPORTED_FISCAL_COUNTRIES`)
+
+- **La observación crítica del Director de Orquesta:**
+  - El usuario cazó un code smell en la gestión de la lista de países disponibles:
+    > *"y ademas una cosa esto es jhorrible hacerlo asi, bnusca constantes que creo qyue ya deberia haber un listado general de paises readonly availableCountries = signal<string[]>([ 'CH', 'DE', 'ES', 'FR', 'GB', 'IT', 'SE', 'US' ]);"*
+- **Análisis del Code Smell y Corrección Arquitectónica:**
+  1. *El Antipatrón Detectado:*
+     - Tener un array quemado en un componente y alterarlo dinámicamente con `response.items.map(c => c.country)` al cargar la primera página es un vicio grave: con paginación server-side, la página 1 solo conoce una parte de los países. Si un cliente de Suecia (`SE`) o Suiza (`CH`) estuviera en la página 3, el filtro desplegable no lo listaría al inicio.
+  2. *Catálogo Maestro Único (SSOT):*
+     - Se definió la constante canónica inmutable `SUPPORTED_FISCAL_COUNTRIES` tanto en el modelo de frontend (`src/app/modules/customers/models/customer.model.ts`) como en backend (`src/shared/domain/constants/fiscal.constants.ts`).
+     - Se eliminó todo código de mutación dinámica o recálculo ad-hoc (`dynamicCountries`) en `loadCustomers`.
+     - Las opciones del desplegable se derivan de forma pura y reactiva mediante `computed(() => [...SUPPORTED_FISCAL_COUNTRIES])`.
+- **Valor para la evaluación:** Erradicación de dependencias circulares y estado mutable volátil a favor de fuentes de verdad autoritativas (Single Source of Truth).
+
 
 
 

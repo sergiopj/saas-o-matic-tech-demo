@@ -478,6 +478,69 @@ Para garantizar que fallos en elementos cosméticos o de micro-interacción (spi
   3. **Componente Presentacional Puro:** Sin números mágicos ni heurísticas de protocolo. El modelo `ProblemDetail` mantiene `status?: number` de forma opcional por compatibilidad con el estándar RFC 9457 y trazabilidad de logs, pero la capa visual queda 100% desacoplada.
   4. **Acción Reconciliadora Inmediata (`[retryable]="true"` y `(retry)`):** Proporciona un botón explícito de reintento (`Reintentar` / `Retry`) con icono de refresco que permite al usuario volver a solicitar los datos (`loadCustomers()`) sin necesidad de recargar toda la página del navegador.
 
+### 3.15 Arquitectura de Paginación Server-Side y Optimización de Renderizado en Scroll
+
+#### A. Aislamiento de Transporte Hexagonal en Backend
+1. **Responsabilidad de Transporte en el Adaptador Primario:**
+   El controlador REST (`CustomerController`) es el único responsable de parsear los query parameters `page` y `limit` de tipo `string` a números enteros (`parseInt(page, 10)`), validar sus rangos y construir las cabeceras HTTP de respuesta estándar RFC:
+   ```typescript
+   res.setHeader('X-Total-Count', total.toString());
+   if (pageNum) res.setHeader('X-Page', pageNum.toString());
+   if (limitNum) {
+     res.setHeader('X-Limit', limitNum.toString());
+     res.setHeader('X-Total-Pages', Math.max(1, Math.ceil(total / limitNum)).toString());
+   }
+   ```
+2. **Dominio y Casos de Uso Desacoplados:**
+   El caso de uso `ListCustomersUseCase` y el puerto de repositorio `CustomerRepositoryPort` manejan `page?: number` y `limit?: number` puramente como parámetros numéricos de dominio, devolviendo `PaginatedResult<Customer>` (`{ items: Customer[]; total: number }`), completamente agnósticos del framework NestJS o de la interfaz `Response` de Express.
+3. **Persistencia SQL Eficiente (`findAndCount`):**
+   El adaptador de persistencia `CustomerPersistenceAdapter` delega la paginación a la base de datos SQLite ejecutando `skip: (page - 1) * limit` y `take: limit`, garantizando que únicamente los registros solicitados sean transferidos desde disco a memoria.
+4. **Retrocompatibilidad del Contrato REST (Cero Breaking Changes):**
+   El cuerpo de la respuesta HTTP (`response.body`) continúa devolviendo un array plano `CustomerResponseDto[]`. Esto asegura que los clientes existentes, pruebas E2E y suites de Postman (`pm.expect(pm.response.json()).to.be.an('array')`) sigan funcionando de forma transparente mientras exponen los metadatos de recuento total a clientes avanzados a través de cabeceras CORS autorizadas (`exposedHeaders: ['X-Total-Count', ...]`).
+
+#### B. Paginación Server-Side y Optimización de DOM en Frontend
+1. **Consumo Reactivo en `CustomerApiService`:**
+   El servicio de Angular consume la API configurando `observe: 'response'` en `HttpClient` para extraer de forma combinada el payload tipado `res.body` y el valor numérico de la cabecera `x-total-count`, emitiendo `CustomerListResponse { items: Customer[]; total: number }`.
+2. **Paginador Canónico de Angular Material:**
+   `CustomerListComponent` implementa controles de paginación basados en Material con botones de salto rápido (`first_page`, `last_page`), desplazamiento paso a paso (`chevron_left`, `chevron_right`), ventana deslizante de páginas visibles ($\pm 2$) y selector dinámico de tamaño de página (6, 12, 24).
+3. **Renderizado Mínimo y Control de Memoria:**
+   Bajo paginación puramente server-side, únicamente se mantienen en el DOM los elementos correspondientes a la página activa (máximo 12 tarjetas por defecto). Esto evita la acumulación de cientos de nodos en memoria cuando la base de datos crece.
+4. **Aceleración por GPU y CSS Containment (`content-visibility: auto`):**
+   Cada tarjeta (`.customer-card`) declara la directiva W3C CSS Containment:
+   ```scss
+   .customer-card {
+     content-visibility: auto;
+     contain-intrinsic-size: auto 240px;
+   }
+   ```
+   Esta propiedad instruye al motor C++ del navegador (Chromium/Gecko/WebKit) para omitir por completo las operaciones de cálculo de diseño (*layout*), pintado (*paint*) y renderizado de aquellas tarjetas que se encuentran fuera del área visible (*viewport*), activándolas de forma asíncrona solo a medida que el usuario hace scroll hacia ellas. La reserva de altura `contain-intrinsic-size: auto 240px` previene saltos bruscos en la barra de scroll (*layout shift*).
+5. **Detección de Cambios Optimizada (`ChangeDetectionStrategy.OnPush` y `@for track`):**
+   Tanto `CustomerListComponent` como `CustomerCardComponent` emplean `ChangeDetectionStrategy.OnPush`. Angular evalúa las tarjetas únicamente cuando cambian sus referencias de señal o se disparan eventos directos. La directiva nativa `@for (customer of paginatedCustomers(); track customer.id)` recicla quirúrgicamente los nodos del DOM por su clave única primaria inmutable `customer.id`.
+6. **Comparativa Técnica: CSS Containment vs. CDK Virtual Scroll:**
+   Para un grid multi-columna fluido responsive (`grid-template-columns: repeat(auto-fill, minmax(320px, 1fr))`), el uso de `cdk-virtual-scroll-viewport` es desaconsejable, ya que impone dimensiones de fila fijas en un único eje y fuerza un scroll contenedor artificial (*scroll-jacking*). La combinación de **Paginación Server-Side (12 elementos/página) + CSS `content-visibility: auto` + `ChangeDetectionStrategy.OnPush`** ofrece el máximo rendimiento posible con código nativo, limpio y 100% responsive.
+
+### 3.16 Ordenación Multi-Criterio Server-Side y Catálogo Maestro Inmutable de Jurisdicciones (SSOT)
+
+#### A. Necesidad Ineludible de Ordenación en la API
+1. **La Trampa del Sort en Cliente:**
+   En cualquier sistema con paginación server-side, ordenar en el navegador mediante `array.sort()` es un antipatrón grave: únicamente reorganiza los 12 elementos recibidos de la página activa, dejando fuera del ordenamiento al resto de registros de la base de datos.
+2. **Implementación en Base de Datos SQL (TypeORM):**
+   La API admite los parámetros de consulta `sortBy` (`companyName`, `createdAt`, `country`, `taxId`) y `order` (`ASC`, `DESC`). El adaptador de persistencia `CustomerPersistenceAdapter` traslada esta directiva a la cláusula `ORDER BY` de la consulta SQL:
+   ```typescript
+   const options: FindManyOptions<CustomerTypeOrmEntity> = {
+     order: { [activeSortField]: activeOrder },
+     skip: (page - 1) * limit,
+     take: limit,
+   };
+   ```
+   Esto asegura que la ordenación se aplique sobre el universo total de clientes antes de particionar por página (`LIMIT` y `OFFSET`).
+
+#### B. Erradicación del Antipatrón de Países Dinámicos (SSOT)
+1. **El Problema del Descubrimiento desde la Página Activa:**
+   Extraer países inspeccionando `response.items` de la llamada HTTP en cada carga (`new Set([...availableCountries(), ...response.items.map(c => c.country)])`) es una mala práctica: si un cliente de una jurisdicción específica reside en la página 4, el selector de filtros jamás la mostrará hasta que el usuario navegue a dicha página.
+2. **Catálogo Maestro Centralizado e Inmutable (`SUPPORTED_FISCAL_COUNTRIES`):**
+   Tanto en el frontend como en el backend se define una constante canónica inmutable (`SUPPORTED_FISCAL_COUNTRIES: readonly string[] = ['CH', 'DE', 'ES', 'FR', 'GB', 'IT', 'SE', 'US'] as const`). El selector `<mat-select>` se alimenta de forma pura y reactiva de esta constante única, eliminando mutaciones en caliente, estados inconsistentes y algoritmos innecesarios de ordenación ad-hoc en los componentes.
+
 ---
 
 ## 4. Estrategia de Testing y Aseguramiento de Calidad

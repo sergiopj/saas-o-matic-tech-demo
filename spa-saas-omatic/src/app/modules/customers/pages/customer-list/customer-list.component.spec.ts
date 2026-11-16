@@ -57,9 +57,11 @@ describe('CustomerListComponent', () => {
     fixture.detectChanges();
 
     // Flush initial GET /customers triggered by ngOnInit
-    const req = httpTesting.expectOne(`${environment.apiBaseUrl}/customers`);
+    const req = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+    );
     expect(req.request.method).toBe('GET');
-    req.flush(mockCustomers);
+    req.flush(mockCustomers, { headers: { 'x-total-count': '2' } });
 
     // Update DOM with flushed customers
     fixture.detectChanges();
@@ -86,10 +88,10 @@ describe('CustomerListComponent', () => {
     component.onSearchChange('Roams');
 
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?search=Roams`
+      `${environment.apiBaseUrl}/customers?search=Roams&page=1&limit=6&sortBy=createdAt&order=DESC`
     );
     expect(req.request.method).toBe('GET');
-    req.flush([mockCustomers[0]]);
+    req.flush([mockCustomers[0]], { headers: { 'x-total-count': '1' } });
     fixture.detectChanges();
 
     expect(component.customers().length).toBe(1);
@@ -100,9 +102,9 @@ describe('CustomerListComponent', () => {
     component.onSearchChange('NonExistent');
 
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?search=NonExistent`
+      `${environment.apiBaseUrl}/customers?search=NonExistent&page=1&limit=6&sortBy=createdAt&order=DESC`
     );
-    req.flush([]);
+    req.flush([], { headers: { 'x-total-count': '0' } });
     fixture.detectChanges();
 
     const emptyState = fixture.nativeElement.querySelector('.empty-state');
@@ -115,14 +117,16 @@ describe('CustomerListComponent', () => {
   it('should reset search and reload all customers when onClearSearch is called', () => {
     component.onSearchChange('NonExistent');
     const searchReq = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?search=NonExistent`
+      `${environment.apiBaseUrl}/customers?search=NonExistent&page=1&limit=6&sortBy=createdAt&order=DESC`
     );
-    searchReq.flush([]);
+    searchReq.flush([], { headers: { 'x-total-count': '0' } });
     fixture.detectChanges();
 
     component.onClearSearch();
-    const reloadReq = httpTesting.expectOne(`${environment.apiBaseUrl}/customers`);
-    reloadReq.flush(mockCustomers);
+    const reloadReq = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+    );
+    reloadReq.flush(mockCustomers, { headers: { 'x-total-count': '2' } });
     fixture.detectChanges();
 
     expect(component.searchTerm()).toBe('');
@@ -133,7 +137,7 @@ describe('CustomerListComponent', () => {
     component.onSearchChange('error-trigger');
 
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?search=error-trigger`
+      `${environment.apiBaseUrl}/customers?search=error-trigger&page=1&limit=6&sortBy=createdAt&order=DESC`
     );
     req.flush(
       { message: 'Database unreachable' },
@@ -155,10 +159,10 @@ describe('CustomerListComponent', () => {
     retryBtn.click();
 
     const retryReq = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?search=error-trigger`
+      `${environment.apiBaseUrl}/customers?search=error-trigger&page=1&limit=6&sortBy=createdAt&order=DESC`
     );
     expect(retryReq.request.method).toBe('GET');
-    retryReq.flush(mockCustomers);
+    retryReq.flush(mockCustomers, { headers: { 'x-total-count': '2' } });
     fixture.detectChanges();
 
     expect(component.customers().length).toBe(2);
@@ -166,10 +170,10 @@ describe('CustomerListComponent', () => {
 
   it('should compute country filter options dynamically from loaded customers', () => {
     const filters = component.countryFilters();
-    expect(filters.length).toBe(3); // ALL, ES, US
+    expect(filters.length).toBeGreaterThanOrEqual(3);
     expect(filters[0]).toEqual({ code: 'ALL', label: 'Todos los países' });
-    expect(filters[1]).toEqual({ code: 'ES', label: 'ES' });
-    expect(filters[2]).toEqual({ code: 'US', label: 'US' });
+    expect(filters.some((f) => f.code === 'ES')).toBe(true);
+    expect(filters.some((f) => f.code === 'US')).toBe(true);
   });
 
   it('should render the country filter mat-select field', () => {
@@ -180,9 +184,11 @@ describe('CustomerListComponent', () => {
   it('should trigger server-side query when country is selected', () => {
     component.selectCountry('ES');
 
-    const req = httpTesting.expectOne(`${environment.apiBaseUrl}/customers?country=ES`);
+    const req = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?country=ES&page=1&limit=6&sortBy=createdAt&order=DESC`
+    );
     expect(req.request.method).toBe('GET');
-    req.flush([mockCustomers[0]]);
+    req.flush([mockCustomers[0]], { headers: { 'x-total-count': '1' } });
     fixture.detectChanges();
 
     expect(component.customers().length).toBe(1);
@@ -192,10 +198,72 @@ describe('CustomerListComponent', () => {
     expect(cards.length).toBe(1);
 
     component.selectCountry('ALL');
-    const allReq = httpTesting.expectOne(`${environment.apiBaseUrl}/customers`);
-    allReq.flush(mockCustomers);
+    const allReq = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+    );
+    allReq.flush(mockCustomers, { headers: { 'x-total-count': '2' } });
     fixture.detectChanges();
 
     expect(component.customers().length).toBe(2);
+  });
+
+  it('should compute pagination properties and navigate between pages with pure server-side pagination', () => {
+    const manyCustomers: Customer[] = Array.from({ length: 6 }, (_, i) => ({
+      id: `cust-${i + 1}`,
+      companyName: `Company ${i + 1}`,
+      taxId: `B1234567${i % 10}`,
+      email: `contact${i + 1}@corp.es`,
+      country: 'ES',
+      selectedPlan: 'Pro',
+      createdAt: '2026-11-14T10:00:00.000Z',
+    }));
+
+    // Change page size to 6
+    component.onPageSizeChange(6);
+    const sizeReq = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+    );
+    sizeReq.flush(manyCustomers, { headers: { 'x-total-count': '15' } });
+    fixture.detectChanges();
+
+    expect(component.totalPages()).toBe(3);
+    expect(component.paginatedCustomers().length).toBe(6);
+    expect(component.displayedRange()).toEqual({ start: 1, end: 6, total: 15 });
+
+    // Go to page 2 (server query)
+    component.goToPage(2);
+    const page2Req = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?page=2&limit=6&sortBy=createdAt&order=DESC`
+    );
+    page2Req.flush(manyCustomers, { headers: { 'x-total-count': '15' } });
+    fixture.detectChanges();
+
+    expect(component.currentPage()).toBe(2);
+    expect(component.displayedRange()).toEqual({ start: 7, end: 12, total: 15 });
+
+    // Go to page 3 (server query with 3 items)
+    component.goToPage(3);
+    const page3Req = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?page=3&limit=6&sortBy=createdAt&order=DESC`
+    );
+    page3Req.flush(manyCustomers.slice(0, 3), { headers: { 'x-total-count': '15' } });
+    fixture.detectChanges();
+
+    expect(component.currentPage()).toBe(3);
+    expect(component.paginatedCustomers().length).toBe(3);
+    expect(component.displayedRange()).toEqual({ start: 13, end: 15, total: 15 });
+  });
+
+  it('should trigger server-side query with updated sorting when onSortChange is called', () => {
+    component.onSortChange('name_asc');
+
+    const req = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=companyName&order=ASC`
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush([mockCustomers[1], mockCustomers[0]], { headers: { 'x-total-count': '2' } });
+    fixture.detectChanges();
+
+    expect(component.activeSortKey()).toBe('name_asc');
   });
 });

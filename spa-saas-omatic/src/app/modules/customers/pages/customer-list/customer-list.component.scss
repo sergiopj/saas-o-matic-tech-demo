@@ -58,7 +58,7 @@
 
 .filter-select-wrapper {
   flex-shrink: 0;
-  min-width: 220px;
+  min-width: 200px;
 
   @media (max-width: 640px) {
     width: 100%;
@@ -69,6 +69,27 @@
 
     .filter-icon {
       color: var(--roams-teal);
+      margin-right: 8px;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.sort-select-wrapper {
+  flex-shrink: 0;
+  min-width: 190px;
+
+  @media (max-width: 640px) {
+    width: 100%;
+  }
+
+  .sort-filter-field {
+    width: 100%;
+
+    .sort-icon {
+      color: var(--roams-accent-blue);
       margin-right: 8px;
       font-size: 20px;
       width: 20px;
@@ -177,4 +198,92 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
+}
+
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--roams-bg-card);
+  border: 1px solid var(--roams-border);
+  border-radius: var(--roams-radius-lg);
+  margin-top: 1rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+  }
+}
+
+.pagination-info {
+  font-size: 0.875rem;
+  color: var(--roams-text-secondary);
+
+  strong {
+    color: var(--roams-text-primary);
+  }
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  .page-nav-btn {
+    color: var(--roams-text-secondary);
+    transition: all 0.2s ease;
+
+    &:not([disabled]):hover {
+      color: var(--roams-accent-blue);
+      background-color: var(--roams-bg-page);
+    }
+
+    &[disabled] {
+      opacity: 0.3;
+    }
+  }
+
+  .page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .page-num-btn {
+    min-width: 38px;
+    height: 38px;
+    padding: 0 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--roams-text-secondary);
+    border-radius: var(--roams-radius-md);
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: var(--roams-bg-page);
+      color: var(--roams-text-primary);
+    }
+
+    &.is-active {
+      background-color: var(--roams-accent-blue) !important;
+      color: var(--roams-text-inverse) !important;
+      font-weight: 700;
+      box-shadow: 0 2px 6px rgba(16, 97, 226, 0.25);
+    }
+  }
+}
+
+.pagination-size {
+  display: flex;
+  align-items: center;
+
+  .size-select-field {
+    width: 125px;
+    font-size: 0.85rem;
+  }
 }

@@ -1,4 +1,4 @@
-import { Component, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,6 +25,7 @@ import { CustomerEmailDialogComponent } from '../customer-email-dialog/customer-
   ],
   templateUrl: './customer-card.component.html',
   styleUrl: './customer-card.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerCardComponent {
   private readonly dialog = inject(MatDialog);

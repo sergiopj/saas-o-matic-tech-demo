@@ -30,12 +30,27 @@
           </mat-select>
         </mat-form-field>
       </div>
+
+      <div class="sort-select-wrapper">
+        <mat-form-field appearance="outline" class="sort-filter-field" subscriptSizing="dynamic">
+          <mat-label>{{ 'customers.sort.label' | translate }}</mat-label>
+          <mat-icon matPrefix class="sort-icon" aria-hidden="true">sort</mat-icon>
+          <mat-select [value]="activeSortKey()" (selectionChange)="onSortChange($event.value)"
+            [attr.aria-label]="'customers.sort.aria' | translate">
+            @for (opt of sortOptions; track opt.key) {
+            <mat-option [value]="opt.key">
+              {{ opt.labelKey | translate }}
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
       }
     </div>
 
-    @if (!initialLoading() && customers().length > 0) {
+    @if (!initialLoading() && totalCount() > 0) {
     <div class="results-meta">
-      <span class="count-badge">{{ filteredCustomers().length }}</span>
+      <span class="count-badge">{{ totalCount() }}</span>
       <span class="count-text">{{ 'customers.list.count' | translate }}</span>
       @if (selectedCountry() !== 'ALL') {
       <button type="button" class="reset-filter-link" (click)="selectCountry('ALL')">
@@ -49,36 +64,120 @@
   @if (initialLoading() || (customerApi.loading() && customers().length === 0)) {
   <app-loading-state [message]="'customers.list.loading' | translate" />
   } @else if (customers().length === 0) {
-  <div class="empty-state">
-    <div class="empty-icon-circle" aria-hidden="true">
-      <mat-icon class="empty-icon" aria-hidden="true">person_search</mat-icon>
+    @if (selectedCountry() !== 'ALL') {
+    <div class="empty-state country-empty-state">
+      <div class="empty-icon-circle" aria-hidden="true">
+        <mat-icon class="empty-icon" aria-hidden="true">public_off</mat-icon>
+      </div>
+      <h2 class="empty-title">{{ 'customers.filter.empty.title' | translate }}</h2>
+      <p class="empty-desc">{{ 'customers.filter.empty.desc' | translate }}</p>
+      <button mat-stroked-button class="reset-search-btn" (click)="selectCountry('ALL')">
+        <mat-icon aria-hidden="true">public</mat-icon>
+        <span>{{ 'customers.filter.reset' | translate }}</span>
+      </button>
     </div>
-    <h2 class="empty-title">{{ 'customers.list.empty.title' | translate }}</h2>
-    <p class="empty-desc">{{ 'customers.list.empty.desc' | translate }}</p>
-    @if (searchTerm()) {
-    <button mat-stroked-button class="reset-search-btn" (click)="onClearSearch()">
-      <mat-icon aria-hidden="true">restart_alt</mat-icon>
-      <span>{{ 'customers.list.empty.clearBtn' | translate }}</span>
-    </button>
+    } @else {
+    <div class="empty-state">
+      <div class="empty-icon-circle" aria-hidden="true">
+        <mat-icon class="empty-icon" aria-hidden="true">person_search</mat-icon>
+      </div>
+      <h2 class="empty-title">{{ 'customers.list.empty.title' | translate }}</h2>
+      <p class="empty-desc">{{ 'customers.list.empty.desc' | translate }}</p>
+      @if (searchTerm()) {
+      <button mat-stroked-button class="reset-search-btn" (click)="onClearSearch()">
+        <mat-icon aria-hidden="true">restart_alt</mat-icon>
+        <span>{{ 'customers.list.empty.clearBtn' | translate }}</span>
+      </button>
+      }
+    </div>
     }
-  </div>
-  } @else if (filteredCustomers().length === 0) {
-  <div class="empty-state country-empty-state">
-    <div class="empty-icon-circle" aria-hidden="true">
-      <mat-icon class="empty-icon" aria-hidden="true">public_off</mat-icon>
-    </div>
-    <h2 class="empty-title">{{ 'customers.filter.empty.title' | translate }}</h2>
-    <p class="empty-desc">{{ 'customers.filter.empty.desc' | translate }}</p>
-    <button mat-stroked-button class="reset-search-btn" (click)="selectCountry('ALL')">
-      <mat-icon aria-hidden="true">public</mat-icon>
-      <span>{{ 'customers.filter.reset' | translate }}</span>
-    </button>
-  </div>
   } @else {
   <main class="customers-grid" [class.is-searching]="customerApi.loading()" [attr.aria-busy]="customerApi.loading()">
-    @for (customer of filteredCustomers(); track customer.id) {
+    @for (customer of paginatedCustomers(); track customer.id) {
     <app-customer-card [customer]="customer" />
     }
   </main>
+
+  @if (totalPages() > 1 || totalFiltered() > 6) {
+  <nav class="pagination-container" aria-label="Paginación de clientes">
+    <div class="pagination-info">
+      <span class="range-text">
+        Mostrando <strong>{{ displayedRange().start }}–{{ displayedRange().end }}</strong> de <strong>{{ displayedRange().total }}</strong>
+      </span>
+    </div>
+
+    <div class="pagination-controls">
+      <button
+        mat-icon-button
+        type="button"
+        class="page-nav-btn"
+        [disabled]="currentPage() === 1"
+        (click)="goToPage(1)"
+        [attr.aria-label]="'pagination.first' | translate"
+      >
+        <mat-icon aria-hidden="true">first_page</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        type="button"
+        class="page-nav-btn"
+        [disabled]="currentPage() === 1"
+        (click)="goToPage(currentPage() - 1)"
+        [attr.aria-label]="'pagination.prev' | translate"
+      >
+        <mat-icon aria-hidden="true">chevron_left</mat-icon>
+      </button>
+
+      <div class="page-numbers">
+        @for (p of visiblePageNumbers(); track p) {
+        <button
+          mat-button
+          type="button"
+          class="page-num-btn"
+          [class.is-active]="p === currentPage()"
+          (click)="goToPage(p)"
+          [attr.aria-current]="p === currentPage() ? 'page' : null"
+        >
+          {{ p }}
+        </button>
+        }
+      </div>
+
+      <button
+        mat-icon-button
+        type="button"
+        class="page-nav-btn"
+        [disabled]="currentPage() === totalPages()"
+        (click)="goToPage(currentPage() + 1)"
+        [attr.aria-label]="'pagination.next' | translate"
+      >
+        <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        type="button"
+        class="page-nav-btn"
+        [disabled]="currentPage() === totalPages()"
+        (click)="goToPage(totalPages())"
+        [attr.aria-label]="'pagination.last' | translate"
+      >
+        <mat-icon aria-hidden="true">last_page</mat-icon>
+      </button>
+    </div>
+
+    <div class="pagination-size">
+      <mat-form-field appearance="outline" class="size-select-field" subscriptSizing="dynamic">
+        <mat-label>{{ 'pagination.pageSize' | translate }}</mat-label>
+        <mat-select [value]="pageSize()" (selectionChange)="onPageSizeChange($event.value)">
+          @for (size of pageSizeOptions; track size) {
+          <mat-option [value]="size">{{ size }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </nav>
+  }
   }
 </div>

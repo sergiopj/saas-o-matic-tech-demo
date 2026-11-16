@@ -26,20 +26,35 @@ describe('ListCustomersUseCase', () => {
       selectedPlan: 'Pro',
       createdAt: new Date(),
     });
-    mockRepository.search.mockResolvedValue([customer]);
+    mockRepository.search.mockResolvedValue({ items: [customer], total: 1 });
 
     const result = await useCase.execute();
 
-    expect(result).toHaveLength(1);
-    expect(result[0].getCompanyName()).toBe('Roams Corp');
-    expect(mockRepository.search).toHaveBeenCalledWith(undefined, undefined);
+    expect(result.items).toHaveLength(1);
+    expect(result.total).toBe(1);
+    expect(result.items[0].getCompanyName()).toBe('Roams Corp');
+    expect(mockRepository.search).toHaveBeenCalledWith(
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
   });
 
-  it('should pass search filter and country filter to the repository', async () => {
-    mockRepository.search.mockResolvedValue([]);
+  it('should pass search filter, country filter, pagination and sorting options to the repository', async () => {
+    mockRepository.search.mockResolvedValue({ items: [], total: 0 });
 
-    await useCase.execute('telecom', 'ES');
+    await useCase.execute('telecom', 'ES', 2, 10, 'companyName', 'ASC');
 
-    expect(mockRepository.search).toHaveBeenCalledWith('telecom', 'ES');
+    expect(mockRepository.search).toHaveBeenCalledWith(
+      'telecom',
+      'ES',
+      2,
+      10,
+      'companyName',
+      'ASC',
+    );
   });
 });

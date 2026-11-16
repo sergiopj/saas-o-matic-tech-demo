@@ -25,7 +25,7 @@ describe('CustomerController (Primary Adapter)', () => {
       execute: jest.fn().mockResolvedValue(sampleCustomer),
     };
     mockListCustomersUseCase = {
-      execute: jest.fn().mockResolvedValue([sampleCustomer]),
+      execute: jest.fn().mockResolvedValue({ items: [sampleCustomer], total: 1 }),
     };
     mockGetCustomerDetailUseCase = {
       execute: jest.fn().mockResolvedValue(sampleCustomer),
@@ -57,7 +57,55 @@ describe('CustomerController (Primary Adapter)', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('uuid-100');
-    expect(mockListCustomersUseCase.execute).toHaveBeenCalledWith('roams', 'ES');
+    expect(mockListCustomersUseCase.execute).toHaveBeenCalledWith(
+      'roams',
+      'ES',
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+  });
+
+  it('should support pagination and set response headers when res is provided', async () => {
+    const mockRes = {
+      setHeader: jest.fn(),
+    } as any;
+
+    const result = await controller.list(
+      undefined,
+      undefined,
+      '2',
+      '10',
+      mockRes,
+    );
+
+    expect(result).toHaveLength(1);
+    expect(mockRes.setHeader).toHaveBeenCalledWith('X-Total-Count', '1');
+    expect(mockRes.setHeader).toHaveBeenCalledWith('X-Page', '2');
+    expect(mockRes.setHeader).toHaveBeenCalledWith('X-Limit', '10');
+    expect(mockRes.setHeader).toHaveBeenCalledWith('X-Total-Pages', '1');
+  });
+
+  it('should pass validated sortBy and order parameters to use case', async () => {
+    await controller.list(
+      undefined,
+      undefined,
+      '1',
+      '10',
+      undefined,
+      'companyName',
+      'ASC',
+    );
+
+    expect(mockListCustomersUseCase.execute).toHaveBeenCalledWith(
+      undefined,
+      undefined,
+      1,
+      10,
+      'companyName',
+      'ASC',
+    );
   });
 
   it('should get customer detail by id as flat CustomerResponseDto', async () => {

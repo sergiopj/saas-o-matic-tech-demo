@@ -13,7 +13,7 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
     mockTypeOrmRepo = {
       save: jest.fn(),
       findOne: jest.fn(),
-      find: jest.fn(),
+      findAndCount: jest.fn(),
     };
     adapter = new CustomerPersistenceAdapter(
       mockTypeOrmRepo as Repository<CustomerTypeOrmEntity>,
@@ -69,21 +69,22 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
   });
 
   it('should return all customers ordered by createdAt DESC when no filters provided', async () => {
-    (mockTypeOrmRepo.find as jest.Mock).mockResolvedValue([]);
+    (mockTypeOrmRepo.findAndCount as jest.Mock).mockResolvedValue([[], 0]);
 
-    await adapter.search();
+    const result = await adapter.search();
 
-    expect(mockTypeOrmRepo.find).toHaveBeenCalledWith({
+    expect(result).toEqual({ items: [], total: 0 });
+    expect(mockTypeOrmRepo.findAndCount).toHaveBeenCalledWith({
       order: { createdAt: 'DESC' },
     });
   });
 
   it('should search with clean term for company, normalized term for taxId, and email', async () => {
-    (mockTypeOrmRepo.find as jest.Mock).mockResolvedValue([]);
+    (mockTypeOrmRepo.findAndCount as jest.Mock).mockResolvedValue([[], 0]);
 
     await adapter.search('  b - 1234  ');
 
-    expect(mockTypeOrmRepo.find).toHaveBeenCalledWith({
+    expect(mockTypeOrmRepo.findAndCount).toHaveBeenCalledWith({
       where: [
         { companyName: expect.anything() },
         { taxId: expect.anything() },
@@ -94,22 +95,22 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
   });
 
   it('should filter strictly by fiscal jurisdiction when only country is provided', async () => {
-    (mockTypeOrmRepo.find as jest.Mock).mockResolvedValue([]);
+    (mockTypeOrmRepo.findAndCount as jest.Mock).mockResolvedValue([[], 0]);
 
     await adapter.search(undefined, 'es');
 
-    expect(mockTypeOrmRepo.find).toHaveBeenCalledWith({
+    expect(mockTypeOrmRepo.findAndCount).toHaveBeenCalledWith({
       where: { country: 'ES' },
       order: { createdAt: 'DESC' },
     });
   });
 
   it('should combine text search and country filter in where conditions', async () => {
-    (mockTypeOrmRepo.find as jest.Mock).mockResolvedValue([]);
+    (mockTypeOrmRepo.findAndCount as jest.Mock).mockResolvedValue([[], 0]);
 
     await adapter.search('Roams', 'es');
 
-    expect(mockTypeOrmRepo.find).toHaveBeenCalledWith({
+    expect(mockTypeOrmRepo.findAndCount).toHaveBeenCalledWith({
       where: [
         { companyName: expect.anything(), country: 'ES' },
         { taxId: expect.anything(), country: 'ES' },
@@ -120,12 +121,25 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
   });
 
   it('should ignore country filter when country is ALL', async () => {
-    (mockTypeOrmRepo.find as jest.Mock).mockResolvedValue([]);
+    (mockTypeOrmRepo.findAndCount as jest.Mock).mockResolvedValue([[], 0]);
 
     await adapter.search(undefined, 'ALL');
 
-    expect(mockTypeOrmRepo.find).toHaveBeenCalledWith({
+    expect(mockTypeOrmRepo.findAndCount).toHaveBeenCalledWith({
       order: { createdAt: 'DESC' },
+    });
+  });
+
+  it('should apply pagination options with skip and take', async () => {
+    (mockTypeOrmRepo.findAndCount as jest.Mock).mockResolvedValue([[], 50]);
+
+    const result = await adapter.search(undefined, undefined, 3, 10);
+
+    expect(result.total).toBe(50);
+    expect(mockTypeOrmRepo.findAndCount).toHaveBeenCalledWith({
+      order: { createdAt: 'DESC' },
+      skip: 20,
+      take: 10,
     });
   });
 });

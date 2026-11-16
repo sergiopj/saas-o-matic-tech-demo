@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
-import type { CustomerRepositoryPort } from '../../../../application/ports/out/customer-repository.port';
+import { Repository, Like, FindManyOptions, FindOptionsWhere } from 'typeorm';
+import type {
+  CustomerRepositoryPort,
+  PaginatedResult,
+  CustomerSortField,
+  SortOrderDirection,
+} from '../../../../application/ports/out/customer-repository.port';
 import { Customer } from '../../../../domain/entities/customer.entity';
 import { normalizeTaxId } from '../../../../domain/value-objects/tax-id.vo';
 import { CustomerTypeOrmEntity } from './customer.typeorm-entity';
@@ -9,7 +14,8 @@ import { CustomerPersistenceMapper } from './customer-persistence.mapper';
 
 /**
  * Secondary persistence adapter implementing CustomerRepositoryPort using TypeORM and SQLite.
- * Fully supports multi-parameter server-side searching by company, taxId, email, and fiscal jurisdiction.
+ * Fully supports multi-parameter server-side searching by company, taxId, email, fiscal jurisdiction,
+ * and paginated queries with total counts.
  */
 @Injectable()
 export class CustomerPersistenceAdapter implements CustomerRepositoryPort {
@@ -34,49 +40,79 @@ export class CustomerPersistenceAdapter implements CustomerRepositoryPort {
     return found ? CustomerPersistenceMapper.toDomain(found) : null;
   }
 
-  async search(term?: string, country?: string): Promise<Customer[]> {
+  async search(
+    term?: string,
+    country?: string,
+    page?: number,
+    limit?: number,
+    sortBy?: CustomerSortField,
+    sortOrder?: SortOrderDirection,
+  ): Promise<PaginatedResult<Customer>> {
     const hasTerm = Boolean(term && term.trim());
     const normalizedCountry =
       country && country.trim() && country.trim().toUpperCase() !== 'ALL'
         ? country.trim().toUpperCase()
         : undefined;
 
-    // Case 1: No term and no country filter -> return all customers
+    let where:
+      | FindOptionsWhere<CustomerTypeOrmEntity>
+      | FindOptionsWhere<CustomerTypeOrmEntity>[]
+      | undefined;
+
     if (!hasTerm && !normalizedCountry) {
-      const all = await this.repository.find({ order: { createdAt: 'DESC' } });
-      return all.map(CustomerPersistenceMapper.toDomain);
+      where = undefined;
+    } else if (!hasTerm && normalizedCountry) {
+      where = { country: normalizedCountry };
+    } else {
+      const cleanTerm = `%${term!.trim()}%`;
+      const normalizedTaxTerm = `%${normalizeTaxId(term!)}%`;
+      where = normalizedCountry
+        ? [
+            { companyName: Like(cleanTerm), country: normalizedCountry },
+            { taxId: Like(normalizedTaxTerm), country: normalizedCountry },
+            { email: Like(cleanTerm), country: normalizedCountry },
+          ]
+        : [
+            { companyName: Like(cleanTerm) },
+            { taxId: Like(normalizedTaxTerm) },
+            { email: Like(cleanTerm) },
+          ];
     }
 
-    // Case 2: Only country filter -> filter strictly by fiscal jurisdiction
-    if (!hasTerm && normalizedCountry) {
-      const found = await this.repository.find({
-        where: { country: normalizedCountry },
-        order: { createdAt: 'DESC' },
-      });
-      return found.map(CustomerPersistenceMapper.toDomain);
+    const fieldMap: Record<CustomerSortField, keyof CustomerTypeOrmEntity> = {
+      companyName: 'companyName',
+      createdAt: 'createdAt',
+      country: 'country',
+      taxId: 'taxId',
+    };
+    const activeSortField =
+      sortBy && fieldMap[sortBy] ? fieldMap[sortBy] : 'createdAt';
+    const activeOrder: 'ASC' | 'DESC' =
+      sortOrder &&
+      (sortOrder.toUpperCase() === 'ASC' || sortOrder.toUpperCase() === 'DESC')
+        ? (sortOrder.toUpperCase() as 'ASC' | 'DESC')
+        : activeSortField === 'companyName'
+          ? 'ASC'
+          : 'DESC';
+
+    const options: FindManyOptions<CustomerTypeOrmEntity> = {
+      order: { [activeSortField]: activeOrder },
+    };
+
+    if (where) {
+      options.where = where;
     }
 
-    // Case 3: Search term present (optionally combined with country)
-    const cleanTerm = `%${term!.trim()}%`;
-    const normalizedTaxTerm = `%${normalizeTaxId(term!)}%`;
+    if (page && limit && page > 0 && limit > 0) {
+      options.skip = (page - 1) * limit;
+      options.take = limit;
+    }
 
-    const whereConditions = normalizedCountry
-      ? [
-          { companyName: Like(cleanTerm), country: normalizedCountry },
-          { taxId: Like(normalizedTaxTerm), country: normalizedCountry },
-          { email: Like(cleanTerm), country: normalizedCountry },
-        ]
-      : [
-          { companyName: Like(cleanTerm) },
-          { taxId: Like(normalizedTaxTerm) },
-          { email: Like(cleanTerm) },
-        ];
+    const [entities, total] = await this.repository.findAndCount(options);
 
-    const found = await this.repository.find({
-      where: whereConditions,
-      order: { createdAt: 'DESC' },
-    });
-
-    return found.map(CustomerPersistenceMapper.toDomain);
+    return {
+      items: entities.map(CustomerPersistenceMapper.toDomain),
+      total,
+    };
   }
 }

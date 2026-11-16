@@ -142,7 +142,11 @@ Los impuestos se determinan a partir del código de país (`country`) del client
 ### 3.1 Arquitectura de Componentes
 - **Tecnología:** Angular 21 (Standalone Components, Signals reactivos para estado local).
 - **Vistas y Componentes Clave:**
-  1. **Buscador y Dashboard:** Campo de búsqueda conectado a `GET /customers?search=...`, mostrando clientes coincidentes en tarjetas interactivas.
+  1. **Buscador, Filtro Jurisdiccional y Paginación Server-Side:**
+     - Campo de búsqueda reactivo con *debounce* (300 ms) conectado a `GET /customers?search=...&country=...&page=...&limit=...`.
+     - Selector de jurisdicción fiscal (`country`: ES, US, DE, FR, GB, IT, CH, SE) que filtra a nivel de base de datos SQL (`WHERE country = :country`).
+     - **Paginación Server-Side con Angular Material:** Controles de navegación de página (primera, anterior, números de página visibles con ventana deslizante $\pm 2$, siguiente, última) y selector configurable de tamaño de página (6, 12, 24 clientes por página).
+     - **Optimización de Renderizado en Scroll:** Las tarjetas de clientes aplican `content-visibility: auto` y `contain-intrinsic-size: auto 240px` (estándar W3C CSS Containment), evitando el coste de *layout* y *paint* en Chromium/Gecko de elementos fuera del *viewport*. La estrategia de detección de cambios `ChangeDetectionStrategy.OnPush` combinada con el bucle optimizado de Angular 19 `@for (...; track customer.id)` minimiza el consumo de memoria del DOM y elimina parpadeos durante el scroll o paginación.
   2. **Detalle del Cliente (Cards Responsive):**
      - Muestra datos fiscales, plan y país del cliente corporativo.
      - Historial con sus simulaciones guardadas ordenadas cronológicamente (`createdAt desc`).
@@ -199,13 +203,21 @@ Todas las respuestas con código de estado HTTP $\ge 400$ deben seguir estrictam
 Base URL: `http://localhost:3000` (sin prefijo `/api/v1` según especificación del reto).  
 Documentación interactiva (Swagger UI): `http://localhost:3000/docs`.
 
-| Método | Ruta | Descripción |
-| :--- | :--- | :--- |
-| `POST` | `/customers` | Registra un nuevo cliente corporativo validando su fiscalidad. |
-| `GET` | `/customers?search=` | Lista clientes con filtro opcional insensible a mayúsculas por nombre o taxId. |
-| `GET` | `/customers/{id}` | Obtiene los datos del cliente corporativo. |
-| `GET` | `/simulations?customerId=` | Lista el historial de simulaciones de un cliente ordenadas descendentemente por fecha. |
-| `POST` | `/simulations` | Registra y persiste una simulación calculando el coste por tramos e impuestos. |
+| Método | Ruta | Parámetros Query | Cabeceras de Respuesta | Descripción |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/customers` | Ninguno | Ninguna | Registra un nuevo cliente corporativo validando su fiscalidad. |
+| `GET` | `/customers` | `search` (opcional, string)<br>`country` (opcional, ISO-2)<br>`page` (opcional, entero $\ge 1$)<br>`limit` (opcional, entero $1..100$)<br>`sortBy` (opcional: `companyName`, `createdAt`, `country`, `taxId`)<br>`order` (opcional: `ASC`, `DESC`) | `X-Total-Count`<br>`X-Page`<br>`X-Limit`<br>`X-Total-Pages` | Lista clientes con búsqueda parcial, filtro de jurisdicción fiscal, ordenación SQL multi-criterio y paginación server-side. El cuerpo devuelve el array de clientes para mantener total compatibilidad hacia atrás. |
+| `GET` | `/customers/{id}` | Ninguno | Ninguna | Obtiene los datos del cliente corporativo. |
+| `GET` | `/simulations` | `customerId` (requerido, UUID) | Ninguna | Lista el historial de simulaciones de un cliente ordenadas descendentemente por fecha. |
+| `POST` | `/simulations` | Ninguno | Ninguna | Registra y persiste una simulación calculando el coste por tramos e impuestos. |
+
+#### Especificación de Cabeceras de Paginación RFC
+Cuando se consulta `GET /customers`, el controlador primario inyecta las siguientes cabeceras HTTP estándar (expuestas en CORS mediante `Access-Control-Expose-Headers`):
+- `X-Total-Count`: Número total de registros coincidentes en la base de datos tras aplicar filtros.
+- `X-Page`: Número de página devuelta (ej. `1`).
+- `X-Limit`: Límite de elementos por página solicitado o predeterminado.
+- `X-Total-Pages`: Total de páginas calculadas ($\lceil \text{total} / \text{limit} \rceil$).
+- **Cuerpo de Respuesta:** Array JSON `CustomerResponseDto[]` plano. Esta arquitectura desacopla el transporte HTTP de la capa de dominio y evita romper clientes o tests existentes que esperan un array (`Array.isArray(body)`).
 
 ---
 

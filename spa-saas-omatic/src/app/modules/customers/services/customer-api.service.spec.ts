@@ -50,28 +50,31 @@ describe('CustomerApiService', () => {
 
   describe('search', () => {
     it('should query customers with search term and update signals', () => {
-      let result: Customer[] = [];
+      let resultItems: Customer[] = [];
+      let resultTotal = 0;
 
-      service.search('Roams').subscribe((customers) => {
-        result = customers;
+      service.search('Roams').subscribe((response) => {
+        resultItems = response.items;
+        resultTotal = response.total;
       });
 
       expect(service.loading()).toBe(true);
 
       const req = httpTesting.expectOne(`${baseUrl}?search=Roams`);
       expect(req.request.method).toBe('GET');
-      req.flush([mockCustomer]);
+      req.flush([mockCustomer], { headers: { 'x-total-count': '1' } });
 
-      expect(result).toEqual([mockCustomer]);
+      expect(resultItems).toEqual([mockCustomer]);
+      expect(resultTotal).toBe(1);
       expect(service.loading()).toBe(false);
       expect(service.error()).toBeNull();
     });
 
     it('should query all customers when no search term is given', () => {
-      let result: Customer[] = [];
+      let resultItems: Customer[] = [];
 
-      service.search().subscribe((customers) => {
-        result = customers;
+      service.search().subscribe((response) => {
+        resultItems = response.items;
       });
 
       const req = httpTesting.expectOne(baseUrl);
@@ -80,21 +83,21 @@ describe('CustomerApiService', () => {
       expect(req.request.params.has('country')).toBe(false);
       req.flush([mockCustomer]);
 
-      expect(result).toEqual([mockCustomer]);
+      expect(resultItems).toEqual([mockCustomer]);
     });
 
     it('should query customers with country filter parameter', () => {
-      let result: Customer[] = [];
+      let resultItems: Customer[] = [];
 
-      service.search(undefined, 'ES').subscribe((customers) => {
-        result = customers;
+      service.search(undefined, 'ES').subscribe((response) => {
+        resultItems = response.items;
       });
 
       const req = httpTesting.expectOne(`${baseUrl}?country=ES`);
       expect(req.request.method).toBe('GET');
       req.flush([mockCustomer]);
 
-      expect(result).toEqual([mockCustomer]);
+      expect(resultItems).toEqual([mockCustomer]);
     });
 
     it('should combine search term and country filter in query params', () => {
@@ -102,6 +105,32 @@ describe('CustomerApiService', () => {
 
       const req = httpTesting.expectOne(`${baseUrl}?search=Roams&country=ES`);
       expect(req.request.method).toBe('GET');
+      req.flush([mockCustomer]);
+    });
+
+    it('should pass pagination parameters page and limit and read x-total-count header', () => {
+      let resultTotal = 0;
+
+      service.search(undefined, undefined, 2, 10).subscribe((response) => {
+        resultTotal = response.total;
+      });
+
+      const req = httpTesting.expectOne(`${baseUrl}?page=2&limit=10`);
+      expect(req.request.method).toBe('GET');
+      req.flush([mockCustomer], { headers: { 'x-total-count': '45' } });
+
+      expect(resultTotal).toBe(45);
+    });
+
+    it('should pass sortBy and order query parameters when provided', () => {
+      service.search('Roams', 'ES', 1, 12, 'companyName', 'ASC').subscribe();
+
+      const req = httpTesting.expectOne(
+        `${baseUrl}?search=Roams&country=ES&page=1&limit=12&sortBy=companyName&order=ASC`
+      );
+      expect(req.request.method).toBe('GET');
+      expect(req.request.params.get('sortBy')).toBe('companyName');
+      expect(req.request.params.get('order')).toBe('ASC');
       req.flush([mockCustomer]);
     });
 

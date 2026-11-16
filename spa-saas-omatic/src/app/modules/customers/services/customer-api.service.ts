@@ -1,14 +1,20 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, finalize, tap, throwError } from 'rxjs';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { Observable, catchError, finalize, map, tap, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Customer, CustomerCreate } from '../models/customer.model';
+import { Customer, CustomerCreate, CustomerSortBy, SortOrder } from '../models/customer.model';
 import { ProblemDetail } from '../../../core/errors/problem-detail.model';
 import { I18nService } from '../../../core/services/i18n.service';
 
+export interface CustomerListResponse {
+  items: Customer[];
+  total: number;
+}
+
 /**
  * Service orchestrating HTTP communication with the /customers backend API.
- * Encapsulates server-side searching, error normalization (RFC 7807), and reactive loading signals.
+ * Encapsulates server-side searching, RFC 7807 error normalization,
+ * and pure server-side pagination reading X-Total-Count headers.
  */
 @Injectable({
   providedIn: 'root',
@@ -36,10 +42,17 @@ export class CustomerApiService {
   }
 
   /**
-   * Queries customers using server-side filtering by partial company name / tax ID / email
-   * and strict ISO country jurisdiction.
+   * Queries customers using server-side filtering by partial company name / tax ID / email,
+   * strict ISO country jurisdiction, and server-side pagination with X-Total-Count header.
    */
-  search(term?: string, country?: string): Observable<Customer[]> {
+  search(
+    term?: string,
+    country?: string,
+    page?: number,
+    limit?: number,
+    sortBy?: CustomerSortBy,
+    order?: SortOrder,
+  ): Observable<CustomerListResponse> {
     this.loading.set(true);
     this.error.set(null);
 
@@ -50,16 +63,36 @@ export class CustomerApiService {
     if (country && country.trim() && country.trim().toUpperCase() !== 'ALL') {
       params = params.set('country', country.trim().toUpperCase());
     }
+    if (page && page > 0) {
+      params = params.set('page', page.toString());
+    }
+    if (limit && limit > 0) {
+      params = params.set('limit', limit.toString());
+    }
+    if (sortBy) {
+      params = params.set('sortBy', sortBy);
+    }
+    if (order) {
+      params = params.set('order', order);
+    }
 
-    return this.http.get<Customer[]>(this.baseUrl, { params }).pipe(
-      tap(() => this.error.set(null)),
-      catchError((err: unknown) => {
-        const problem = this.normalizeProblem(err);
-        this.error.set(problem);
-        return throwError(() => problem);
-      }),
-      finalize(() => this.loading.set(false))
-    );
+    return this.http
+      .get<Customer[]>(this.baseUrl, { params, observe: 'response' })
+      .pipe(
+        map((res: HttpResponse<Customer[]>) => {
+          const items = res.body ?? [];
+          const headerTotal = res.headers.get('x-total-count');
+          const total = headerTotal ? parseInt(headerTotal, 10) : items.length;
+          return { items, total };
+        }),
+        tap(() => this.error.set(null)),
+        catchError((err: unknown) => {
+          const problem = this.normalizeProblem(err);
+          this.error.set(problem);
+          return throwError(() => problem);
+        }),
+        finalize(() => this.loading.set(false))
+      );
   }
 
   getById(id: string): Observable<Customer> {

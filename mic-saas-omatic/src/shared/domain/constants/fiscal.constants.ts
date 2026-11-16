@@ -23,3 +23,11 @@ export const EU_COUNTRIES: ReadonlySet<string> = new Set([
     'GR', 'HU', 'HR', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL',
     'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE',
 ]);
+
+/**
+ * Supported corporate jurisdictions with fiscal validation rules in SaaS-O-Matic.
+ */
+export const SUPPORTED_FISCAL_COUNTRIES: readonly string[] = [
+    'CH', 'DE', 'ES', 'FR', 'GB', 'IT', 'SE', 'US',
+] as const;
+
