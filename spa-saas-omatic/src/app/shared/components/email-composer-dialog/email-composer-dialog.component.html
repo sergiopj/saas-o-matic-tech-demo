@@ -9,6 +9,10 @@
         <p class="dialog-subtitle">
           {{ data.recipientName }}{{ data.subtitle ? ' (' + data.subtitle + ')' : '' }}
         </p>
+      } @else if (recipient()) {
+        <p class="dialog-subtitle">
+          {{ recipient() }}
+        </p>
       }
     </div>
     <button
