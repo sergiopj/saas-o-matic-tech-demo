@@ -1,7 +1,7 @@
 @use '@angular/material' as mat;
 @use './styles/colors';
 @use './styles/variables';
-@import 'quill/dist/quill.snow.css';
+@use 'quill/dist/quill.snow.css';
 
 html {
   height: 100%;

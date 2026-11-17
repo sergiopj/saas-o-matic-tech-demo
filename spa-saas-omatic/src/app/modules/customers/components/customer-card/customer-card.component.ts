@@ -51,19 +51,19 @@ export class CustomerCardComponent {
   openEmailComposer(event: MouseEvent): void {
     event.stopPropagation();
     event.preventDefault();
-    const cust = this.customer();
+    const selectedCustomer = this.customer();
 
     const dialogRef = this.dialog.open(EmailComposerDialogComponent, {
       data: {
-        recipient: cust.email,
-        recipientName: cust.companyName,
-        subtitle: cust.country,
+        recipient: selectedCustomer.email,
+        recipientName: selectedCustomer.companyName,
+        subtitle: selectedCustomer.country,
         subject: this.i18n.t('customers.emailDialog.defaultSubject', {
-          company: cust.companyName,
+          company: selectedCustomer.companyName,
         }),
         body: this.i18n.t('customers.emailDialog.defaultBody', {
-          company: cust.companyName,
-          plan: cust.selectedPlan,
+          company: selectedCustomer.companyName,
+          plan: selectedCustomer.selectedPlan,
         }),
       },
       width: '640px',

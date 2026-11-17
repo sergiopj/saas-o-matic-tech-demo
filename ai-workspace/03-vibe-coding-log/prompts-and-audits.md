@@ -3778,3 +3778,32 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
 - **Valor para la evaluación:** Enfoque de diseño empático (*Human-Centered UX Writing*), erradicando tecnicismos y jergas innecesarias para usuarios comerciales en favor de mensajes de error con ejemplos prácticos y directos.
+
+---
+
+### 6.149. Limpieza de Redundancias en el Selector de Jurisdicción Fiscal (`CustomerCreateDialogComponent`)
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  En el selector desplegable de país / jurisdicción fiscal del modal de nuevo cliente, los textos de las opciones incluían innecesariamente el código ISO entre paréntesis tras el nombre del país (ej. `🇫🇷 France (FR)`, `🇩🇪 Deutschland (DE)`, `🇪🇸 España (AEAT)`). El usuario advirtió que el sufijo de código `(FR)` resultaba redundante teniendo ya la bandera y el nombre del país, solicitando su eliminación para limpiar la interfaz.
+- **Feedback Humano:**
+  > *"en el selector de jurisdiccion fiscal en el modal de nuevo cliente sale el texto asi
+  > creo que sobra por ejemplo el fr ese pegado a France
+  > 🇫🇷France (FR)"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Depuración de Etiquetas en `COUNTRY_OPTIONS`:*
+     - En [customer-create-dialog.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.ts), se retiraron todos los sufijos entre paréntesis de la propiedad `nameKey`:
+       - `España (AEAT)` $\rightarrow$ `España`
+       - `Deutschland (DE)` $\rightarrow$ `Deutschland`
+       - `France (FR)` $\rightarrow$ `France`
+       - `United Kingdom (GB)` $\rightarrow$ `United Kingdom`
+       - `United States (US)` $\rightarrow$ `United States`
+       - `Italia (IT)` $\rightarrow$ `Italia`
+       - `Schweiz (CH)` $\rightarrow$ `Schweiz`
+       - `Sverige (SE)` $\rightarrow$ `Sverige`
+     - Se mantiene el código ISO formal (`code: 'FR'`) exclusivamente como identificador de valor interno del `FormControl` y contrato con el backend, mostrando una tipografía limpia y natural (`🇫🇷 France`, `🇪🇸 España`).
+- **Resultados de Verificación:**
+  - Frontend Vitest: **249 pruebas unitarias pasando al 100%** (29 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+- **Valor para la evaluación:** Eliminación de sobrecarga visual en elementos de formulario, asegurando una presentación limpia, profesional y libre de duplicidades.

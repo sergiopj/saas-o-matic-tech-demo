@@ -35,14 +35,14 @@ export interface CountryOption {
 }
 
 export const COUNTRY_OPTIONS: CountryOption[] = [
-  { code: 'ES', nameKey: 'España (AEAT)', flag: '🇪🇸' },
-  { code: 'DE', nameKey: 'Deutschland (DE)', flag: '🇩🇪' },
-  { code: 'FR', nameKey: 'France (FR)', flag: '🇫🇷' },
-  { code: 'GB', nameKey: 'United Kingdom (GB)', flag: '🇬🇧' },
-  { code: 'US', nameKey: 'United States (US)', flag: '🇺🇸' },
-  { code: 'IT', nameKey: 'Italia (IT)', flag: '🇮🇹' },
-  { code: 'CH', nameKey: 'Schweiz (CH)', flag: '🇨🇭' },
-  { code: 'SE', nameKey: 'Sverige (SE)', flag: '🇸🇪' },
+  { code: 'ES', nameKey: 'España', flag: '🇪🇸' },
+  { code: 'DE', nameKey: 'Deutschland', flag: '🇩🇪' },
+  { code: 'FR', nameKey: 'France', flag: '🇫🇷' },
+  { code: 'GB', nameKey: 'United Kingdom', flag: '🇬🇧' },
+  { code: 'US', nameKey: 'United States', flag: '🇺🇸' },
+  { code: 'IT', nameKey: 'Italia', flag: '🇮🇹' },
+  { code: 'CH', nameKey: 'Schweiz', flag: '🇨🇭' },
+  { code: 'SE', nameKey: 'Sverige', flag: '🇸🇪' },
 ];
 
 export const PLAN_OPTIONS: string[] = [
