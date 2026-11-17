@@ -124,7 +124,23 @@
     } @else {
       <div class="recent-grid">
         @for (customer of recentCustomers(); track customer.id) {
-          <app-customer-card [customer]="customer" />
+          <article class="customer-lite-card">
+            <div class="lite-card-header">
+              <div class="lite-avatar">{{ customer.companyName.charAt(0).toUpperCase() }}</div>
+              <div class="lite-info">
+                <h3 class="lite-company" [title]="customer.companyName">{{ customer.companyName }}</h3>
+                <span class="country-badge">{{ customer.country }}</span>
+              </div>
+            </div>
+            <div class="lite-card-actions">
+              <a mat-flat-button [routerLink]="['/customers', customer.id]" class="lite-simulate-btn">
+                <span class="btn-inner">
+                  <mat-icon aria-hidden="true">calculate</mat-icon>
+                  <span>{{ 'home.recent.simulate' | translate }}</span>
+                </span>
+              </a>
+            </div>
+          </article>
         }
       </div>
     }

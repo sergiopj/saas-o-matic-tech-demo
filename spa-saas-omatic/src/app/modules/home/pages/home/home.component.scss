@@ -280,6 +280,95 @@
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.25rem;
   }
+
+  .customer-lite-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: var(--roams-surface);
+    border: 1px solid var(--roams-border);
+    border-radius: var(--roams-radius-md);
+    padding: 1.25rem;
+    box-shadow: var(--roams-shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    gap: 1.25rem;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--roams-shadow-md);
+    }
+
+    .lite-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+
+      .lite-avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: var(--roams-radius-sm);
+        background: linear-gradient(135deg, var(--roams-primary) 0%, var(--roams-primary-light) 100%);
+        color: var(--roams-text-inverse);
+        font-weight: 700;
+        font-size: 1.15rem;
+        flex-shrink: 0;
+      }
+
+      .lite-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        min-width: 0;
+
+        .lite-company {
+          margin: 0;
+          font-size: 1rem;
+          font-weight: 700;
+          color: var(--roams-primary);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .country-badge {
+          display: inline-flex;
+          align-items: center;
+          font-size: 0.725rem;
+          font-weight: 700;
+          color: var(--roams-accent-blue);
+          background-color: rgba(16, 97, 226, 0.08);
+          padding: 0.15rem 0.45rem;
+          border-radius: 4px;
+          width: fit-content;
+        }
+      }
+    }
+
+    .lite-card-actions {
+      .lite-simulate-btn {
+        width: 100%;
+        background-color: var(--roams-accent-blue);
+        color: var(--roams-text-inverse);
+        border-radius: var(--roams-radius-sm);
+        font-weight: 600;
+        transition: background-color 0.15s ease;
+
+        .btn-inner {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.45rem;
+        }
+
+        &:hover {
+          background-color: var(--roams-accent-blue-hover);
+        }
+      }
+    }
+  }
 }
 
 @media (max-width: 640px) {

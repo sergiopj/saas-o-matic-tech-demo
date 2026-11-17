@@ -15,6 +15,7 @@ import { ListCustomersUseCase } from '../../../../application/use-cases/list-cus
 import { GetCustomerDetailUseCase } from '../../../../application/use-cases/get-customer-detail.use-case';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
+import { CustomerLiteResponseDto } from './dto/customer-lite-response.dto';
 import type {
   CustomerSortField,
   SortOrderDirection,
@@ -51,7 +52,8 @@ export class CustomerController {
     @Query('sortBy') sortBy?: string,
     @Query('order') order?: string,
     @Query('sortOrder') sortOrder?: string,
-  ): Promise<CustomerResponseDto[]> {
+    @Query('fields') fields?: string,
+  ): Promise<CustomerResponseDto[] | CustomerLiteResponseDto[]> {
     const pageNum = page ? parseInt(page, 10) : undefined;
     const limitNum = limit ? parseInt(limit, 10) : undefined;
 
@@ -91,6 +93,10 @@ export class CustomerController {
           Math.max(1, Math.ceil(total / limitNum)).toString(),
         );
       }
+    }
+
+    if (fields === 'lite') {
+      return items.map((item) => CustomerLiteResponseDto.fromDomain(item));
     }
 
     return items.map((item) => CustomerResponseDto.fromDomain(item));

@@ -108,6 +108,29 @@ describe('CustomerController (Primary Adapter)', () => {
     );
   });
 
+  it('should return lightweight CustomerLiteResponseDto array when fields=lite is requested', async () => {
+    const result = await controller.list(
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'lite',
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual({
+      id: 'uuid-100',
+      companyName: 'Roams Corp',
+      country: 'ES',
+    });
+    expect((result[0] as any).taxId).toBeUndefined();
+    expect((result[0] as any).email).toBeUndefined();
+  });
+
   it('should get customer detail by id as flat CustomerResponseDto', async () => {
     const result = await controller.getById('uuid-100');
 

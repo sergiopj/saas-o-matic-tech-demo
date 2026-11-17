@@ -193,6 +193,17 @@ En sistemas empresariales escalables, el filtrado de entidades de negocio (**emp
    - **Use Case:** Orquesta la llamada pasando ambos criterios de forma desacoplada al puerto de salida.
    - **Outbound Persistence Adapter:** Compone dinámicamente las ramas `where` de TypeORM según los filtros activos (`ALL`, país específico, búsqueda textual o ambos combinados) ordenando por `createdAt DESC`.
 
+### 2.6 Proyecciones Ligeras de Lectura (Read-Model Projections / Sparse Fieldsets)
+
+Para evitar el anti-patrón de *Over-Fetching* (descarga masiva de atributos irrelevantes para una vista concreta) y acelerar los tiempos de respuesta:
+1. **Segregación por Caso de Uso (CQRS-Lite):**
+   - **Dashboard Ejecutivo (`/home`):** Demanda una visualización ágil de clientes recientes orientada a la acción inmediata (*Fast-Track Action*). Solo requiere identificar la empresa y su país para lanzar una simulación.
+   - **Directorio Completo (`/customers`):** Requiere la entidad enriquecida (`CustomerResponseDto` con NIF/CIF fiscal, email de contacto y plan asignado).
+2. **DTO Proyectado (`CustomerLiteResponseDto`):**
+   - El endpoint `GET /customers?fields=lite` devuelve exclusivamente `{ id, companyName, country }`.
+   - Reduce el tamaño del JSON en más de un **70%** (de ~250 B a ~65 B por cliente), agilizando el parsing del navegador y reduciendo drásticamente el consumo de datos móviles.
+   - Preserva la emisión de la cabecera `X-Total-Count`, permitiendo al frontend actualizar los contadores KPI y obtener los registros compactos en una sola petición HTTP.
+
 ---
 
 ## 3. Arquitectura del Frontend (Angular 22)

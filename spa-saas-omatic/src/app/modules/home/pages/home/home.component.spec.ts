@@ -5,31 +5,23 @@ import { provideRouter } from '@angular/router';
 import { HomeComponent } from './home.component';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { environment } from '../../../../../environments/environment';
-import { Customer } from '../../../customers/models/customer.model';
+import { CustomerLite } from '../../../customers/models/customer.model';
 
 describe('HomeComponent', () => {
   let fixture: ComponentFixture<HomeComponent>;
   let component: HomeComponent;
   let httpTesting: HttpTestingController;
 
-  const mockCustomers: Customer[] = [
+  const mockCustomers: CustomerLite[] = [
     {
       id: 'cust-1',
       companyName: 'Roams Corp',
-      taxId: 'B12345678',
-      email: 'corp@roams.es',
       country: 'ES',
-      selectedPlan: 'Enterprise',
-      createdAt: '2026-11-14T10:00:00.000Z',
     },
     {
       id: 'cust-2',
       companyName: 'Acme DE',
-      taxId: 'DE123456789',
-      email: 'contact@acme.de',
       country: 'DE',
-      selectedPlan: 'Pro',
-      createdAt: '2026-11-14T11:00:00.000Z',
     },
   ];
 
@@ -55,7 +47,7 @@ describe('HomeComponent', () => {
     fixture.detectChanges();
 
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?page=1&limit=4&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?page=1&limit=4&sortBy=createdAt&order=DESC&fields=lite`
     );
     req.flush(mockCustomers, { headers: { 'x-total-count': '25' } });
     fixture.detectChanges();
@@ -79,7 +71,11 @@ describe('HomeComponent', () => {
   });
 
   it('should render customer cards for recent customers', () => {
-    const cards = fixture.nativeElement.querySelectorAll('app-customer-card');
+    const cards = fixture.nativeElement.querySelectorAll('.customer-lite-card');
     expect(cards.length).toBe(2);
+    const company = fixture.nativeElement.querySelector('.lite-company');
+    expect(company.textContent.trim()).toBe('Roams Corp');
+    const simulateBtn = fixture.nativeElement.querySelector('.lite-simulate-btn');
+    expect(simulateBtn).toBeTruthy();
   });
 });

@@ -238,5 +238,28 @@ describe('CustomerApiService', () => {
       expect(service.error()?.type).toBe('about:blank');
       expect(service.loading()).toBe(false);
     });
+
+    it('should fetch lightweight read-model projections with fields=lite', () => {
+      const mockLiteList = [
+        { id: 'c1', companyName: 'Roams Corp', country: 'ES' },
+        { id: 'c2', companyName: 'Berlin Cloud', country: 'DE' },
+      ];
+
+      service.getRecentLite(2).subscribe((res) => {
+        expect(res.items).toEqual(mockLiteList);
+        expect(res.items[0].companyName).toBe('Roams Corp');
+      });
+
+      const req = httpTesting.expectOne(
+        (request) =>
+          request.url === baseUrl &&
+          request.params.get('fields') === 'lite' &&
+          request.params.get('limit') === '2' &&
+          request.params.get('sortBy') === 'createdAt' &&
+          request.params.get('order') === 'DESC'
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(mockLiteList, { headers: { 'x-total-count': '2' } });
+    });
   });
 });

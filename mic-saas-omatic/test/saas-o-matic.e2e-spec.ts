@@ -131,6 +131,22 @@ describe('SaaS-O-Matic E2E Integration Suite', () => {
       expect(response.body[0].taxId).toBe('B12345674');
     });
 
+    it('GET /customers?fields=lite - should return sparse read-model projection (id, companyName, country only)', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/customers?fields=lite')
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBeGreaterThanOrEqual(1);
+      const first = response.body[0];
+      expect(first).toHaveProperty('id');
+      expect(first).toHaveProperty('companyName');
+      expect(first).toHaveProperty('country');
+      expect(first.taxId).toBeUndefined();
+      expect(first.email).toBeUndefined();
+      expect(first.selectedPlan).toBeUndefined();
+    });
+
     it('GET /customers/:id - should return single customer detail by id', async () => {
       const response = await request(app.getHttpServer())
         .get(`/customers/${createdCustomerEsId}`)

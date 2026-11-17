@@ -25,6 +25,16 @@ export interface Customer {
     createdAt: string;
 }
 
+/**
+ * Lightweight Read-Model Projection for dashboards (e.g. Executive Home).
+ * Eliminates over-fetching by projecting only vital identity and jurisdictional attributes.
+ */
+export interface CustomerLite {
+    id: string;
+    companyName: string;
+    country: string;
+}
+
 export interface CustomerCreate {
     companyName: string;
     taxId: string;

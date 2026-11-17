@@ -6,9 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { CustomerApiService } from '../../../customers/services/customer-api.service';
 import { CurrencyService } from '../../../../core/services/currency.service';
-import { Customer } from '../../../customers/models/customer.model';
-import { SUPPORTED_FISCAL_COUNTRIES } from '../../../customers/models/customer.model';
-import { CustomerCardComponent } from '../../../customers/components/customer-card/customer-card.component';
+import { CustomerLite, SUPPORTED_FISCAL_COUNTRIES } from '../../../customers/models/customer.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { LoadingStateComponent } from '../../../../shared/components/loading-state/loading-state.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
@@ -25,7 +23,6 @@ import { ErrorBannerComponent } from '../../../../shared/components/error-banner
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
-    CustomerCardComponent,
     TranslatePipe,
     LoadingStateComponent,
     ErrorBannerComponent,
@@ -38,7 +35,7 @@ export class HomeComponent implements OnInit {
   readonly customerApi = inject(CustomerApiService);
   readonly currencyService = inject(CurrencyService);
 
-  readonly recentCustomers = signal<Customer[]>([]);
+  readonly recentCustomers = signal<CustomerLite[]>([]);
   readonly totalCustomers = signal<number>(0);
   readonly supportedCountriesCount = SUPPORTED_FISCAL_COUNTRIES.length;
 
@@ -47,7 +44,7 @@ export class HomeComponent implements OnInit {
   }
 
   loadRecentCustomers(): void {
-    this.customerApi.search(undefined, undefined, 1, 4, 'createdAt', 'DESC').subscribe({
+    this.customerApi.getRecentLite(4).subscribe({
       next: (res) => {
         this.recentCustomers.set(res.items);
         this.totalCustomers.set(res.total);

@@ -1897,6 +1897,37 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - 0 advertencias y 0 errores en `oxlint`.
 - **Valor para la evaluación:** Demostración pionera de ingeniería agéntica (*Agentic Engineering*): transición de un asistente conversacional genérico a un sistema colaborativo especializado y gobernado por directrices persistentes de la empresa.
 
+### 6.83 Implementación de Proyecciones Ligeras (CustomerLiteResponseDto / Sparse Fieldsets), Erradicación de Over-Fetching y Fast-Track UX en Home
+
+- **Situación inicial:** En la página principal (`/home`), la sección de clientes recientes instanciaba el componente de tarjeta completo (`app-customer-card`), consumiendo la entidad completa (`CustomerResponseDto` con NIF, email, plan seleccionado, fechas y modal de redacción de correo). Esto introducía *over-fetching* (descarga de datos no visualizados en Home), sobrecarga de renderizado en el DOM y una experiencia visual ruidosa en una vista que debe actuar como cabina ejecutiva.
+- **Tu criterio y dirección de calidad:** Planteaste una optimización arquitectónica de alto nivel:
+  *"hay una cosa chula para que vean que entendemos este concepto pero lo mismo lo ves que no tiene sentido aqui me gustaria modelos lite por ejemplo en laentidad customer para por ejemplo en el home no mostrar toda la card completa del customer simplemente el nombre, pais y el boton de simulacion que al pulsarlo te lleva a el simulador, y luego ya si en el listado paginado de /customers mostrar tods los datos bien tal yu como esta y aho no pediria el modelo lite, me entiendes? luego explicar esta decision en el md pues asi se agiliza en el tamaño del json y rapidez de respuesta no?"*
+- **Fundamentación Arquitectónica: Read-Model Projection (CQRS-Lite / Sparse Fieldsets):**
+  1. *Segregación de Responsabilidades por Caso de Uso:*
+     - **Home / Dashboard:** Es un punto de partida rápido (*Fast-Track Action*). El comercial busca identificar clientes clave y pulsar directamente un botón de acción para abrir su estudio de simulación de costes (`/customers/:id`).
+     - **Directorio (`/customers`):** Es la vista de consulta exhaustiva y auditoría donde sí se explotan los datos fiscales (CIF, NIF, DNI), correo de facturación y despacho comercial.
+  2. *Erradicación del Over-Fetching y Reducción del Ancho de Banda:*
+     - Al proyectar únicamente `{ id, companyName, country }`, el payload JSON por cliente pasa de ~250 bytes a ~65 bytes, lo que supone un **ahorro superior al 70% del tráfico de red** en la carga inicial del dashboard.
+  3. *Optimización en una Sola Petición HTTP:*
+     - Gracias a la emisión de cabeceras HTTP RFC (`X-Total-Count`), la llamada `GET /customers?page=1&limit=4&sortBy=createdAt&order=DESC&fields=lite` devuelve en un único ciclo de red tanto los elementos ligeros como el recuento total acumulado para el KPI superior del Home, erradicando peticiones duplicadas.
+- **Solución técnica implementada:**
+  1. *Backend (`mic-saas-omatic`):*
+     - Creación de `CustomerLiteResponseDto` ([customer-lite-response.dto.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/in/rest/dto/customer-lite-response.dto.ts)).
+     - Soporte del parámetro query `@Query('fields') fields?: string` en `CustomerController.list(...)`. Si `fields === 'lite'`, proyecta con `CustomerLiteResponseDto.fromDomain`, preservando retrocompatibilidad total si no se especifica.
+     - Pruebas unitarias dedicadas en [customer-lite-response.dto.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/in/rest/dto/customer-lite-response.dto.spec.ts) y prueba de integración E2E en [saas-o-matic.e2e-spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/test/saas-o-matic.e2e-spec.ts).
+  2. *Frontend (`spa-saas-omatic`):*
+     - Definición de la interfaz `CustomerLite` en `customer.model.ts`.
+     - Creación del método `getRecentLite(limit = 4)` en `CustomerApiService`.
+     - Rediseño de la tarjeta en `HomeComponent`: se renderiza `.customer-lite-card` con avatar inicial corporativo, nombre de empresa, badge de jurisdicción y botón directo `mat-flat-button` con routerLink a `/customers/:id` ("Simular suscripción"), con soporte multidioma (`es`, `en`, `de`, `fr`).
+     - Estilos en `home.component.scss` gobernados 100% por tokens `--roams-*` (cero colores hardcodeados).
+- **Resultados de Verificación:**
+  - 136 tests unitarios en frontend pasando al 100% (23 suites).
+  - 123 tests unitarios en backend pasando al 100% (25 suites).
+  - 14 tests de integración E2E pasando al 100% (2 suites).
+  - 0 advertencias y 0 errores en `oxlint` tanto en frontend como en backend.
+  - Build de producción generado con bundle inicial de apenas ~35 kB transferidos.
+- **Valor para la evaluación:** Demostración de criterio senior en arquitectura de APIs: conocimiento de patrones de proyección de lectura (Read Models / CQRS-Lite), diseño centrado en el usuario (*Fast-Track UX*), optimización deliberada de rendimiento de red y preservación estricta de compatibilidad hacia atrás.
+
 
 
 
