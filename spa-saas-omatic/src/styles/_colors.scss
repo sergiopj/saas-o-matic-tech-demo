@@ -21,6 +21,7 @@ $roams-bg-page: #f8fafc;           // Canvas background
 $roams-bg-card: #ffffff;           // Card surface
 $roams-surface: #ffffff;           // Surface alias
 $roams-bg-input-dark: rgba(255, 255, 255, 0.1); // Transparent input over dark navbar
+$roams-bg-backdrop: rgba(15, 23, 42, 0.45);      // Backdrop overlay for slide drawers and modals
 
 $roams-text-primary: #0f172a;      // Dark Charcoal for headers & body
 $roams-text-secondary: #64748b;    // Muted Slate for secondary text & hints
@@ -54,6 +55,7 @@ $roams-border-inverse: rgba(255, 255, 255, 0.2); // Subtle border for dark input
   --roams-bg-card: #{$roams-bg-card};
   --roams-surface: #{$roams-surface};
   --roams-bg-input-dark: #{$roams-bg-input-dark};
+  --roams-bg-backdrop: #{$roams-bg-backdrop};
 
   /* Typography Colors */
   --roams-text-primary: #{$roams-text-primary};

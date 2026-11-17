@@ -177,4 +177,38 @@ describe('CustomerDetailComponent', () => {
     component.openEmailComposer();
     expect(openSpy).toHaveBeenCalled();
   });
+
+  it('should toggle filter drawer and filter simulations by user volume', () => {
+    expect(component.isFilterDrawerOpen()).toBe(false);
+    component.openFilterDrawer();
+    expect(component.isFilterDrawerOpen()).toBe(true);
+
+    // Filter with minUsers = 30 (mock simulation has 25 users)
+    component.filterMinUsers.set(30);
+    expect(component.activeFiltersCount()).toBe(1);
+    expect(component.filteredSimulations().length).toBe(0);
+    expect(component.paginatedSimulations().length).toBe(0);
+
+    // Reset filters
+    component.resetFilters();
+    expect(component.activeFiltersCount()).toBe(0);
+    expect(component.filteredSimulations().length).toBe(1);
+    expect(component.paginatedSimulations().length).toBe(1);
+
+    component.closeFilterDrawer();
+    expect(component.isFilterDrawerOpen()).toBe(false);
+  });
+
+  it('should filter simulations by date range', () => {
+    // mockSimulations is at '2026-11-14T12:00:00.000Z'
+    // Filter for future dates (e.g. 2026-11-15 to 2026-11-20)
+    component.onDateFromChange(new Date('2026-11-15'));
+    component.onDateToChange(new Date('2026-11-20'));
+
+    expect(component.filteredSimulations().length).toBe(0);
+
+    // Expand range to cover 2026-11-14
+    component.onDateFromChange(new Date('2026-11-14'));
+    expect(component.filteredSimulations().length).toBe(1);
+  });
 });

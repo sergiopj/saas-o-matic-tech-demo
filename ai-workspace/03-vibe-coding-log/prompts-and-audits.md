@@ -2046,6 +2046,23 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - `vitest`: 141 pruebas unitarias pasando al 100% (23 suites).
   - Commit Git: `f63e362` (*"fix(ui): eliminate windows flag emoji glitch by displaying semantic translate icon and formatted ISO tags"*).
 - **Valor para la evaluación:** Atención al detalle multiplataforma y erradicación de comportamientos anómalos derivados de diferencias en subsistemas de fuentes tipográficas entre sistemas operativos.
+- **Situación inicial:** En sistemas Windows (10 y 11), la fuente nativa `Segoe UI Emoji` no renderiza glifos pictóricos para banderas nacionales de países, sino pares de letras de indicadores regionales (`ES`, `US`, `DE`, `FR`). En el selector de idioma de la cabecera, esto provocaba que la bandera y el texto se concatenaran visualmente como `ESeSPAÑOL`, degradando la estética de la interfaz.
+- **Tu criterio y dirección de calidad:** Identificaste el defecto visual en Windows solicitando una separación limpia y profesional:
+  *"por otro lado en el front en el selector de idioma al final me dijiste que mejor no poner la bandera? y ademas sale el texto asi ESeSPAÑOL TODO JUNTO, al menos mete un - ES-Español"*
+- **Solución técnica implementada:**
+  1. *Botón Principal (Trigger):* Sustitución del emoji por el icono semántico de Material Symbols `<mat-icon class="lang-icon">translate</mat-icon>` en color Cyan (`var(--roams-accent-cyan)`), garantizando consistencia idéntica en cualquier sistema operativo (Windows, macOS, Linux, Android, iOS).
+  2. *Desplegable de Idiomas (Menu):* Sustitución de los emojis por insignias tipográficas estructuradas con formato `[ ES ] - Español`, `[ EN ] - English`, `[ DE ] - Deutsch`, `[ FR ] - Français`.
+  3. *Persistencia y Auto-detección:* Sincronización en `localStorage` (`saas_omatic_lang`) con fallback al idioma preferido del navegador (`navigator.language`).
+- **Archivos modificados:**
+  - [language-selector.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/language-selector/language-selector.component.html): Estructura del botón con icono `translate` y menú con etiquetas ISO.
+  - [language-selector.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/language-selector/language-selector.component.scss): Estilos para `.item-code`, `.item-separator` y `.item-label` con tokens `--roams-*`.
+  - [language-selector.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/language-selector/language-selector.component.spec.ts): Prueba unitaria actualizada verificando icono semántico y etiquetas.
+  - [i18n.service.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/services/i18n.service.ts): Inicialización reactiva con `localStorage` y auto-detección del navegador.
+- **Resultados de Verificación:**
+  - `oxlint --type-aware src/`: 0 advertencias, 0 errores en 59 archivos de frontend.
+  - `vitest`: 141 pruebas unitarias pasando al 100% (23 suites).
+  - Commit Git: `f63e362` (*"fix(ui): eliminate windows flag emoji glitch by displaying semantic translate icon and formatted ISO tags"*).
+- **Valor para la evaluación:** Atención al detalle multiplataforma y erradicación de comportamientos anómalos derivados de diferencias en subsistemas de fuentes tipográficas entre sistemas operativos.
 
 ### 6.89 Ergonomía y DX para el Evaluador: Arranque y Verificación en 1 Solo Comando
 
@@ -2073,6 +2090,52 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - `npm run lint`: 0 errores, 0 advertencias en 129 archivos.
   - Commit Git: `b2ff1e9` (*"feat(dx): introduce 1-command startup, unified testing, and streamlined quickstart for technical evaluators"*).
 - **Valor para la evaluación:** Reduce a cero la fricción del entrevistador técnico, garantizando una primera impresión sobresaliente de madurez, orden y empatía con el revisor.
+
+### 6.90 Panel Lateral Deslizante Genérico (Slide-over Drawer), Paginación Reactiva y Filtros Multicriterio en el Historial de Simulaciones
+
+- **Situación inicial:** La sección "Historial de Simulaciones Guardadas" en la vista de detalle de cliente (`/customers/:id`) renderizaba una tabla plana con todas las simulaciones históricas registradas en SQLite. Al crecer el histórico, la vista se alargaba verticalmente y carecía de mecanismos para paginar o filtrar presupuestos por fecha, rango de usuarios o consumo de infraestructura (API / almacenamiento).
+- **Tu criterio y dirección de calidad:** Reclamaste paginación, filtros avanzados y una arquitectura limpia sin saturar la pantalla con inputs invasivos, enfatizando la reutilización genérica y el respeto estricto a los design tokens:
+  *"mete paginacion aqui Historial de Simulaciones Guardadas filtros para buscar por lo que se te ocurra, numero de iusuarios, fechas (mete un calendar chulo), api call con min y max etc? para no saturar la pantallña mete un slide lateral que ponga filtros de busqueda o algo asi y que al pulsar se abra ese modal lateral y esten los iunputs para filtrar, ojo esto todo que vaya despues a los mds correspondientes y cuidado con los colores de los scss que no vayan harcodeados, ademas el alide lateral de filtros ha de ser ser generico para usarse en cualquier parte d ela web y que cambien los filtros"*
+- **Solución técnica implementada:**
+  1. *Componente Genérico Reutilizable `SlideOverDrawerComponent`:*
+     - Creado en `src/app/shared/components/slide-over-drawer/` con slots semánticos de proyección de contenido:
+       - `<ng-content select="[drawer-header-actions]" />`: Insignias o botones de cabecera.
+       - `<ng-content />`: Cuerpo dinámico para albergar cualquier formulario o filtro.
+       - `<ng-content select="[drawer-footer]" />`: Pie fijo (*sticky footer*) para acciones de aplicar/limpiar.
+     - Accesibilidad W3C: `role="dialog"`, `aria-modal="true"`, cierre por tecla `Escape` (`@HostListener('keydown.escape')`) y clic en telón de fondo.
+     - Animación CSS acelerada por hardware con `will-change: transform` y curvas cúbicas suaves.
+     - Cumplimiento de design tokens: `--roams-bg-card`, `--roams-bg-backdrop`, `--roams-border`, `--roams-accent-blue` (cero hex hardcodeados).
+  2. *Componente Genérico Reutilizable `PaginatorComponent`:*
+     - Creado en `src/app/shared/components/paginator/` con *Two-Way Binding* de Angular 22 (`model<number>()`) para `currentPage` y `pageSize`.
+     - Indicador dinámico de rango (*"Mostrando X–Y de Z"*), selector de tamaño de página (5, 10, 20) y controles de navegación accesibles.
+  3. *Selector de Fechas con Calendario Interactivo (`MatDatepicker`):*
+     - Integración de `<mat-date-range-input>` y `<mat-date-range-picker>` asistido por `provideNativeDateAdapter()` en `app.config.ts`.
+  4. *Grafo de Filtrado Reactivo en Memoria (Angular Signals):*
+     - Señales reactivas para rango de fechas (`filterDateFrom`, `filterDateTo`), usuarios (`filterMinUsers`, `filterMaxUsers`), API (`filterMinApiCalls`, `filterMaxApiCalls`), almacenamiento (`filterMinStorage`, `filterMaxStorage`) y búsqueda textual (`filterSearchText`).
+     - Señal computada `filteredSimulations` para evaluación O(N) reactiva y `activeFiltersCount` para mostrar el badge en el botón de la cabecera.
+     - Señal derivada `paginatedSimulations` para paginación instantánea sin recarga.
+- **Archivos modificados y creados:**
+  - [slide-over-drawer.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/slide-over-drawer/slide-over-drawer.component.ts)
+  - [slide-over-drawer.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/slide-over-drawer/slide-over-drawer.component.html)
+  - [slide-over-drawer.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/slide-over-drawer/slide-over-drawer.component.scss)
+  - [slide-over-drawer.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/slide-over-drawer/slide-over-drawer.component.spec.ts)
+  - [paginator.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/paginator/paginator.component.ts)
+  - [paginator.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/paginator/paginator.component.html)
+  - [paginator.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/paginator/paginator.component.scss)
+  - [paginator.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/paginator/paginator.component.spec.ts)
+  - [customer-detail.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.ts)
+  - [customer-detail.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.html)
+  - [customer-detail.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.scss)
+  - [customer-detail.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.spec.ts)
+  - [translations.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/i18n/translations.ts)
+  - [_colors.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/styles/_colors.scss)
+  - [app.config.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/app.config.ts)
+- **Resultados de Verificación:**
+  - `oxlint --type-aware src/`: 0 advertencias, 0 errores en 70 archivos de backend y 63 archivos de frontend.
+  - `vitest`: 150 pruebas unitarias pasando al 100% (25 suites).
+  - `jest`: 123 pruebas unitarias de backend pasando al 100% (25 suites).
+  - Suite completa unificada: 273 pruebas pasando al 100%.
+- **Valor para la evaluación:** Ergonomía superior y escalabilidad B2B: pantalla despejada con panel offcanvas desplegable bajo demanda, componentes agnósticos reutilizables y reactividad pura con Signals.
 
 
 

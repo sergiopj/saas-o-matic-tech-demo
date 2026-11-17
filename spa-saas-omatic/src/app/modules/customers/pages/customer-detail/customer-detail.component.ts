@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSliderModule } from '@angular/material/slider';
@@ -17,6 +17,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { CustomerApiService } from '../../services/customer-api.service';
 import { SimulationApiService } from '../../../simulations/services/simulation-api.service';
 import { CurrencyService } from '../../../../core/services/currency.service';
@@ -28,12 +30,15 @@ import { LocalizedCurrencyPipe } from '../../../../shared/pipes/localized-curren
 import { LoadingStateComponent } from '../../../../shared/components/loading-state/loading-state.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
 import { EmailComposerDialogComponent } from '../../../../shared/components/email-composer-dialog/email-composer-dialog.component';
+import { SlideOverDrawerComponent } from '../../../../shared/components/slide-over-drawer/slide-over-drawer.component';
+import { PaginatorComponent } from '../../../../shared/components/paginator/paginator.component';
 import { I18nService } from '../../../../core/services/i18n.service';
 
 /**
  * Customer Detail view and Interactive Simulation Studio.
  * Allows corporate account inspection, real-time 60 FPS tiered pricing simulations
- * with live currency conversion, persistence to SQLite, and chronological simulation history.
+ * with live currency conversion, persistence to SQLite, and chronological simulation history
+ * with slide-over drawer filters and responsive pagination.
  */
 @Component({
   selector: 'app-customer-detail',
@@ -42,6 +47,7 @@ import { I18nService } from '../../../../core/services/i18n.service';
     RouterLink,
     FormsModule,
     DatePipe,
+    DecimalPipe,
     MatButtonModule,
     MatIconModule,
     MatSliderModule,
@@ -49,11 +55,15 @@ import { I18nService } from '../../../../core/services/i18n.service';
     MatInputModule,
     MatTooltipModule,
     MatSnackBarModule,
+    MatDatepickerModule,
     TranslatePipe,
     LocalizedCurrencyPipe,
     LoadingStateComponent,
     ErrorBannerComponent,
+    SlideOverDrawerComponent,
+    PaginatorComponent,
   ],
+  providers: [provideNativeDateAdapter()],
   templateUrl: './customer-detail.component.html',
   styleUrl: './customer-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -73,6 +83,91 @@ export class CustomerDetailComponent implements OnInit {
   readonly simulationsLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly saveSuccess = signal<boolean>(false);
+
+  // Slide-over Filter Drawer State & Signals
+  readonly isFilterDrawerOpen = signal<boolean>(false);
+  readonly filterDateFrom = signal<Date | null>(null);
+  readonly filterDateTo = signal<Date | null>(null);
+  readonly filterMinUsers = signal<number | null>(null);
+  readonly filterMaxUsers = signal<number | null>(null);
+  readonly filterMinStorage = signal<number | null>(null);
+  readonly filterMaxStorage = signal<number | null>(null);
+  readonly filterMinApiCalls = signal<number | null>(null);
+  readonly filterMaxApiCalls = signal<number | null>(null);
+  readonly filterSearchText = signal<string>('');
+
+  // Simulation History Pagination
+  readonly historyPage = signal<number>(1);
+  readonly historyPageSize = signal<number>(5);
+
+  readonly activeFiltersCount = computed<number>(() => {
+    let count = 0;
+    if (this.filterDateFrom() || this.filterDateTo()) count++;
+    if (this.filterMinUsers() !== null || this.filterMaxUsers() !== null) count++;
+    if (this.filterMinStorage() !== null || this.filterMaxStorage() !== null) count++;
+    if (this.filterMinApiCalls() !== null || this.filterMaxApiCalls() !== null) count++;
+    if (this.filterSearchText().trim()) count++;
+    return count;
+  });
+
+  readonly filteredSimulations = computed<Simulation[]>(() => {
+    const list = this.simulations();
+    const from = this.filterDateFrom();
+    const to = this.filterDateTo();
+    const minU = this.filterMinUsers();
+    const maxU = this.filterMaxUsers();
+    const minS = this.filterMinStorage();
+    const maxS = this.filterMaxStorage();
+    const minA = this.filterMinApiCalls();
+    const maxA = this.filterMaxApiCalls();
+    const search = this.filterSearchText().trim().toLowerCase();
+
+    return list.filter((sim) => {
+      // Date range filtering
+      if (from || to) {
+        const simTime = new Date(sim.createdAt).getTime();
+        if (from) {
+          const fromTime = new Date(from).setHours(0, 0, 0, 0);
+          if (simTime < fromTime) return false;
+        }
+        if (to) {
+          const toTime = new Date(to).setHours(23, 59, 59, 999);
+          if (simTime > toTime) return false;
+        }
+      }
+
+      // Users range
+      if (minU !== null && sim.activeUsers < minU) return false;
+      if (maxU !== null && sim.activeUsers > maxU) return false;
+
+      // Storage range
+      if (minS !== null && sim.storageGb < minS) return false;
+      if (maxS !== null && sim.storageGb > maxS) return false;
+
+      // API calls range
+      if (minA !== null && sim.apiCalls < minA) return false;
+      if (maxA !== null && sim.apiCalls > maxA) return false;
+
+      // Text search
+      if (search) {
+        const matchUsers = sim.activeUsers.toString().includes(search);
+        const matchStorage = sim.storageGb.toString().includes(search);
+        const matchApi = sim.apiCalls.toString().includes(search);
+        const matchCost = sim.totalCost.toString().includes(search);
+        if (!matchUsers && !matchStorage && !matchApi && !matchCost) return false;
+      }
+
+      return true;
+    });
+  });
+
+  readonly paginatedSimulations = computed<Simulation[]>(() => {
+    const items = this.filteredSimulations();
+    const page = this.historyPage();
+    const size = this.historyPageSize();
+    const start = (page - 1) * size;
+    return items.slice(start, start + size);
+  });
 
   // Interactive Simulation Controls
   readonly activeUsers = signal<number>(15);
@@ -260,5 +355,78 @@ export class CustomerDetailComponent implements OnInit {
         );
       }
     });
+  }
+
+  openFilterDrawer(): void {
+    this.isFilterDrawerOpen.set(true);
+  }
+
+  closeFilterDrawer(): void {
+    this.isFilterDrawerOpen.set(false);
+  }
+
+  resetFilters(): void {
+    this.filterDateFrom.set(null);
+    this.filterDateTo.set(null);
+    this.filterMinUsers.set(null);
+    this.filterMaxUsers.set(null);
+    this.filterMinStorage.set(null);
+    this.filterMaxStorage.set(null);
+    this.filterMinApiCalls.set(null);
+    this.filterMaxApiCalls.set(null);
+    this.filterSearchText.set('');
+    this.historyPage.set(1);
+  }
+
+  onDateFromChange(date: Date | null): void {
+    this.filterDateFrom.set(date);
+    this.historyPage.set(1);
+  }
+
+  onDateToChange(date: Date | null): void {
+    this.filterDateTo.set(date);
+    this.historyPage.set(1);
+  }
+
+  onMinUsersChange(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this.filterMinUsers.set(val === '' ? null : Number(val));
+    this.historyPage.set(1);
+  }
+
+  onMaxUsersChange(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this.filterMaxUsers.set(val === '' ? null : Number(val));
+    this.historyPage.set(1);
+  }
+
+  onMinStorageChange(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this.filterMinStorage.set(val === '' ? null : Number(val));
+    this.historyPage.set(1);
+  }
+
+  onMaxStorageChange(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this.filterMaxStorage.set(val === '' ? null : Number(val));
+    this.historyPage.set(1);
+  }
+
+  onMinApiCallsChange(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this.filterMinApiCalls.set(val === '' ? null : Number(val));
+    this.historyPage.set(1);
+  }
+
+  onMaxApiCallsChange(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this.filterMaxApiCalls.set(val === '' ? null : Number(val));
+    this.historyPage.set(1);
+  }
+
+  onSearchTextChange(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this.filterSearchText.set(val);
+    this.historyPage.set(1);
   }
 }

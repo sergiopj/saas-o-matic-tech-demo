@@ -659,6 +659,54 @@ flowchart LR
 
 ---
 
+### 3.19 Arquitectura de Componentes Genéricos: Panel Lateral Deslizante (`SlideOverDrawerComponent`), Paginación y Filtrado Multicriterio
+
+Para no saturar la vista comercial con controles invasivos ni degradar la ergonomía en pantallas densas, SaaS-O-Matic implementa un patrón de **Panel Lateral Deslizante Genérico (Slide-Over Drawer / Offcanvas)** y **Paginación Reactiva Desacoplada**:
+
+```mermaid
+flowchart TD
+    A["Historial de Simulaciones (History Card)"] -->|Click 'Filtros de búsqueda'| B["SlideOverDrawerComponent (Generic Offcanvas)"]
+    B --> C["Proyección de Contenido (ng-content): Formulario Dinámico"]
+    C --> C1["Date Range Picker (MatDatepicker con NativeDateAdapter)"]
+    C --> C2["Rango de Usuarios Activos (Min/Max)"]
+    C --> C3["Rango de Storage GB y API Calls (Min/Max)"]
+    C --> C4["Búsqueda de Texto Libre"]
+    B --> D["Pie del Drawer: Acciones 'Limpiar' y 'Aplicar'"]
+    C1 & C2 & C3 & C4 -->|Signals Reactivos| E["filteredSimulations = computed(...)"]
+    E --> F["PaginatorComponent (Generic Pagination Bar)"]
+    F -->|historyPage & historyPageSize| G["paginatedSimulations = computed(...) -> Render Tabla"]
+```
+
+#### A. Generic Slide-Over Drawer (`SlideOverDrawerComponent`)
+- **Diseño Reutilizable e Inversión de Control (Content Projection):**
+  - Implementado en `src/app/shared/components/slide-over-drawer/`.
+  - Puede emplearse en cualquier vista del sistema (filtros de clientes, auditorías, ajustes de usuario) sin duplicar lógica de modal ni de transiciones.
+  - Expone slots de proyección semánticos:
+    - `<ng-content select="[drawer-header-actions]" />`: Insignias o acciones de cabecera (ej. badge con el número de filtros activos).
+    - `<ng-content />`: Cuerpo scrollable para albergar formularios, controles interactivos o acordeones.
+    - `<ng-content select="[drawer-footer]" />`: Pie de acciones fijo (*sticky footer*) para botones como "Aplicar" o "Limpiar".
+- **Accesibilidad W3C y Control de Teclado:**
+  - Marcado semántico `role="dialog"`, `aria-modal="true"` y `aria-label`.
+  - Cierre automático al pulsar la tecla `Escape` (`@HostListener('keydown.escape')`).
+  - Cierre al hacer clic en el telón de fondo semitransparente (`drawer-backdrop`).
+- **Rendimiento Visual y Animación CSS Pura:**
+  - Transición acelerada por GPU con `will-change: transform` y curvas cúbicas suaves (`cubic-bezier(0.16, 1, 0.3, 1)`), eliminando librerías JS pesadas.
+  - Cumplimiento riguroso de design tokens: fondo `var(--roams-bg-card)`, telón `var(--roams-bg-backdrop)`, bordes `var(--roams-border)` y cero valores hexadecimales hardcodeados.
+
+#### B. Paginador Genérico Accesible (`PaginatorComponent`)
+- **Desacoplamiento Presentacional:**
+  - Implementado en `src/app/shared/components/paginator/`.
+  - Enlaza mediante *Two-Way Binding* de Angular 22 (`model<number>()`) con `currentPage` y `pageSize`, recalculando reactivamente `totalPages` y `displayedRange` (*"Mostrando X–Y de Z"*).
+  - Incluye selector de tamaño de página (5, 10, 20 registros) y navegación accesible (`first_page`, `chevron_left`, números de página, `chevron_right`, `last_page`).
+
+#### C. Pipeline de Filtrado Reactivo en Memoria con Angular Signals
+- Al encadenar filtros (Rango de fechas con selector de calendario `MatDatepicker`, usuarios activos, llamadas a API, almacenamiento y texto libre), la señal computada `filteredSimulations()` evalúa la condición de filtrado O(N) sin llamadas redundantes al servidor.
+- La paginación (`paginatedSimulations`) se calcula dinámicamente como slice de la lista filtrada, reseteando la página activa a 1 ante cualquier cambio de filtro para evitar estados de índice fuera de rango.
+
+---
+
+---
+
 ## 4. Estrategia de Testing y Aseguramiento de Calidad
 
 ### 4.1 Pirámide de Pruebas

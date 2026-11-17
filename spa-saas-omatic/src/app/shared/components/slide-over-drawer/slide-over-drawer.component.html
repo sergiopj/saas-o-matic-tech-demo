@@ -1,0 +1,56 @@
+@if (hasBackdrop()) {
+  <div
+    class="drawer-backdrop"
+    [class.is-visible]="isOpen()"
+    (click)="onBackdropClick()"
+    aria-hidden="true"
+  ></div>
+}
+
+<aside
+  class="drawer-panel"
+  [class.is-open]="isOpen()"
+  [class.position-left]="position() === 'left'"
+  [style.width]="width()"
+  role="dialog"
+  [attr.aria-modal]="isOpen()"
+  [attr.aria-label]="title()"
+  [attr.aria-hidden]="!isOpen()"
+>
+  <header class="drawer-header">
+    <div class="header-main">
+      @if (icon()) {
+        <div class="icon-badge">
+          <mat-icon class="header-icon" aria-hidden="true">{{ icon() }}</mat-icon>
+        </div>
+      }
+      <div class="header-text-group">
+        <h2 class="drawer-title">{{ title() }}</h2>
+        @if (subtitle()) {
+          <p class="drawer-subtitle">{{ subtitle() }}</p>
+        }
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <ng-content select="[drawer-header-actions]" />
+      <button
+        type="button"
+        mat-icon-button
+        class="close-btn"
+        (click)="close()"
+        aria-label="Cerrar panel"
+      >
+        <mat-icon aria-hidden="true">close</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <div class="drawer-body">
+    <ng-content />
+  </div>
+
+  <footer class="drawer-footer">
+    <ng-content select="[drawer-footer]" />
+  </footer>
+</aside>

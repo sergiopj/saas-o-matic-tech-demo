@@ -1,0 +1,89 @@
+@if (totalPages() > 1 || totalItems() > pageSizeOptions()[0]) {
+  <nav class="pagination-container" [attr.aria-label]="ariaLabel()">
+    <div class="pagination-info">
+      <span class="range-text">
+        {{ 'pagination.showing' | translate }}
+        <strong>{{ displayedRange().start }}–{{ displayedRange().end }}</strong>
+        {{ 'pagination.of' | translate }}
+        <strong>{{ displayedRange().total }}</strong>
+      </span>
+    </div>
+
+    <div class="pagination-controls">
+      <button
+        mat-icon-button
+        type="button"
+        class="page-nav-btn"
+        [disabled]="disabled() || currentPage() === 1"
+        (click)="goToPage(1)"
+        [attr.aria-label]="'pagination.first' | translate"
+      >
+        <mat-icon aria-hidden="true">first_page</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        type="button"
+        class="page-nav-btn"
+        [disabled]="disabled() || currentPage() === 1"
+        (click)="goToPage(currentPage() - 1)"
+        [attr.aria-label]="'pagination.prev' | translate"
+      >
+        <mat-icon aria-hidden="true">chevron_left</mat-icon>
+      </button>
+
+      <div class="page-numbers">
+        @for (p of visiblePageNumbers(); track p) {
+          <button
+            mat-button
+            type="button"
+            class="page-num-btn"
+            [class.is-active]="p === currentPage()"
+            [disabled]="disabled()"
+            (click)="goToPage(p)"
+            [attr.aria-current]="p === currentPage() ? 'page' : null"
+          >
+            {{ p }}
+          </button>
+        }
+      </div>
+
+      <button
+        mat-icon-button
+        type="button"
+        class="page-nav-btn"
+        [disabled]="disabled() || currentPage() === totalPages()"
+        (click)="goToPage(currentPage() + 1)"
+        [attr.aria-label]="'pagination.next' | translate"
+      >
+        <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        type="button"
+        class="page-nav-btn"
+        [disabled]="disabled() || currentPage() === totalPages()"
+        (click)="goToPage(totalPages())"
+        [attr.aria-label]="'pagination.last' | translate"
+      >
+        <mat-icon aria-hidden="true">last_page</mat-icon>
+      </button>
+    </div>
+
+    <div class="pagination-size">
+      <mat-form-field appearance="outline" class="size-select-field" subscriptSizing="dynamic">
+        <mat-label>{{ 'pagination.pageSize' | translate }}</mat-label>
+        <mat-select
+          [value]="pageSize()"
+          [disabled]="disabled()"
+          (selectionChange)="onPageSizeChange($event.value)"
+        >
+          @for (size of pageSizeOptions(); track size) {
+            <mat-option [value]="size">{{ size }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </nav>
+}
