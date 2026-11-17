@@ -35,10 +35,10 @@
     }
 
     @if (sendSuccess()) {
-      <div class="success-banner" role="status">
+      <output class="success-banner">
         <mat-icon>check_circle</mat-icon>
         <span>{{ 'customers.emailDialog.sentSuccess' | translate }}</span>
-      </div>
+      </output>
     }
 
     <mat-form-field appearance="outline" class="form-field full-width">
@@ -50,7 +50,6 @@
         type="email"
         [value]="recipient()"
         (input)="recipient.set($any($event.target).value)"
-        readonly
       />
       <mat-icon matPrefix class="field-icon" aria-hidden="true">contact_mail</mat-icon>
     </mat-form-field>
@@ -69,8 +68,11 @@
     </mat-form-field>
 
     <div class="quill-wrapper">
-      <label class="quill-label">{{ 'customers.emailDialog.body' | translate }}</label>
+      <label id="body-label" for="email-body" class="quill-label">{{ 'customers.emailDialog.body' | translate }}</label>
       <quill-editor
+        id="email-body"
+        aria-labelledby="body-label"
+        theme="snow"
         [modules]="quillModules"
         [ngModel]="htmlBody()"
         (ngModelChange)="htmlBody.set($event)"

@@ -72,7 +72,7 @@ export class EmailComposerDialogComponent {
     if (this.data.body) {
       return this.data.body
         .split('\n\n')
-        .map((p) => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+        .map((p) => `<p>${p.replaceAll('\n', '<br>')}</p>`)
         .join('');
     }
     return '';
@@ -118,7 +118,7 @@ export class EmailComposerDialogComponent {
   }
 
   async copyTemplate(): Promise<void> {
-    const plainText = `Subject: ${this.subject()}\n\n${this.htmlBody().replace(/<[^>]*>/g, '')}`;
+    const plainText = `Subject: ${this.subject()}\n\n${this.htmlBody().replace(/<[^<>]*>/g, '')}`;
 
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       await navigator.clipboard.writeText(plainText);
