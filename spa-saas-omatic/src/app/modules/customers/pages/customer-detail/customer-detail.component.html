@@ -139,10 +139,10 @@
         </div>
 
         @if (saveSuccess()) {
-          <div class="save-success-banner" role="status">
+          <output class="save-success-banner">
             <mat-icon aria-hidden="true">check_circle</mat-icon>
             <span>{{ 'simulation.form.savedSuccess' | translate }}</span>
-          </div>
+          </output>
         }
 
         <button

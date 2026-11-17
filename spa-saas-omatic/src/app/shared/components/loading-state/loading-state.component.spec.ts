@@ -19,10 +19,10 @@ describe('LoadingStateComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render mat-spinner with default diameter 44 and a11y status role', () => {
+  it('should render mat-spinner with default diameter 44 as semantic output', () => {
     const wrapper = fixture.nativeElement.querySelector('.loading-state-wrapper');
     expect(wrapper).toBeTruthy();
-    expect(wrapper.getAttribute('role')).toBe('status');
+    expect(wrapper.tagName.toLowerCase()).toBe('output');
     expect(wrapper.getAttribute('aria-live')).toBe('polite');
 
     const spinner = fixture.nativeElement.querySelector('mat-spinner');
