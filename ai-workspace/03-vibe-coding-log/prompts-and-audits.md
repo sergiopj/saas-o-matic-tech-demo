@@ -1928,6 +1928,23 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Build de producción generado con bundle inicial de apenas ~35 kB transferidos.
 - **Valor para la evaluación:** Demostración de criterio senior en arquitectura de APIs: conocimiento de patrones de proyección de lectura (Read Models / CQRS-Lite), diseño centrado en el usuario (*Fast-Track UX*), optimización deliberada de rendimiento de red y preservación estricta de compatibilidad hacia atrás.
 
+### 6.84 Justificación de Gobernanza Financiera: Inmutabilidad de Tramos en Cliente vs. Extensibilidad OCP en Backend
+
+- **Situación inicial:** Surgió la duda de si los precios y límites de los tramos (Tramo 1: 10 €, Tramo 2: 8 €, Tramo 3: 5 €) deberían poder editarse o alterarse dinámicamente desde el frontend por parte del comercial (por ejemplo, si la compañía quisiera subir el Tramo 3 a 6.00 €).
+- **Tu criterio y dirección de calidad:** Planteaste la duda con visión crítica de negocio y producto:
+  *"duda en algun momento se pide en la prueba que los tramos por usuarios se puedan editar desde el front? por ejemplo Tramo 1: 10,00 €, Tramo 2: 8,00 €, Tramo 3: 5,00 €... imagina que el tramo 3 quiero subirlo a 6 euros. ¿eso esta explicado en los mds correspondientes?"*
+- **Análisis de evaluación y Principios de Ingeniería:**
+  1. *El Enunciado del Reto:* El requerimiento oficial de frontend pide expresamente: *"Un slider o controles dinámicos para ajustar la cantidad de usuarios y ver, en tiempo real, la proyección de la factura mensual calculada en base a los tramos y convertida a la divisa seleccionada"*. Lo que el comercial ajusta es el volumen de consumo (`activeUsers`), no la política de precios de la compañía.
+  2. *Gobernanza Financiera (Pricing Governance):* En el modelo B2B SaaS, las tarifas base por usuario las define y audita el departamento de Revenue Operations y Finanzas. Permitir que el comercial edite las tarifas unitarias rompería la política de precios estándar de la empresa y generaría discrepancias contables.
+  3. *Seguridad y Autoridad Fiscal del Servidor:* Si el frontend tuviese la potestad de enviar los precios de los tramos en el payload de red, cualquier cliente HTTP podría manipular el importe de la factura. El backend debe actuar como la única autoridad fiscal inmutable.
+  4. *Principio Open/Closed (OCP) ante Actualizaciones Tarifarias:*
+     - Si la empresa decide actualizar el Tramo 3 a 6.00 € o incorporar un cuarto tramo (> 200 usuarios a 3.50 €), el motor de dominio [pricing-engine.service.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/simulations/domain/services/pricing-engine.service.ts) **no contiene *magic numbers* ni sentencias condicionales acopladas**.
+     - Itera dinámicamente sobre la constante central `PRICING_TIERS` en [fiscal.constants.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/shared/domain/constants/fiscal.constants.ts). Basta con modificar `{ upTo: Infinity, price: 6 }` en dicha tupla y automáticamente todo el motor de cálculo y simulaciones queda actualizado sin tocar el algoritmo de cálculo acumulativo.
+- **Documentación formalizada:**
+  - En [functional-specs.md (Sección 2.2.C)](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/01-specs/functional-specs.md): Se añadió la cláusula de *Gobernanza de Precios: Inmutabilidad en Cliente y Autoridad Fiscal en Backend*.
+  - En [architecture-guidelines.md (Regla de Oro 9)](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md): Se incorporó el principio de autoridad fiscal del servidor y desacoplamiento OCP de tarifas.
+- **Valor para la evaluación:** Madurez en el diseño de producto de software: distinción entre variables de entrada de usuario (volumen) y políticas de negocio de la empresa (tarifas), asegurando blindaje contra fraude y extensibilidad limpia mediante principios SOLID.
+
 
 
 

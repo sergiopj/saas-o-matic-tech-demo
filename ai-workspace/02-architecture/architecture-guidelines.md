@@ -25,6 +25,9 @@ Para garantizar mantenibilidad, testabilidad y aislamiento estricto de las regla
    - Las entidades de dominio originan y gobiernan sus propios timestamps (`createdAt: new Date()`). En infraestructura, TypeORM utiliza `@Column('datetime')` en lugar de `@CreateDateColumn` para no sobrescribir ni desincronizar los ciclos de vida del dominio.
    - Todo importe monetario se persiste con `@Column('decimal', { precision: 10, scale: 2 })` (y `scale: 4` en tasas) para prevenir errores de coma flotante IEEE 754 de los tipos `float`.
 8. **Concurrencia de Base de Datos en Modo WAL (Write-Ahead Logging):** Para garantizar alto rendimiento y evitar contención en SQLite, la persistencia se configura con `enableWAL: true`. En modo WAL, las lecturas no bloquean a las escrituras y las escrituras no bloquean a las lecturas, permitiendo que múltiples usuarios consulten clientes mientras se registran simulaciones concurrentes.
+9. **Autoridad Fiscal del Servidor y Principio Open/Closed en Tarifas (Pricing Governance):**
+   - El frontend comercial solo tiene potestad para manipular variables de volumen (`activeUsers`, `storageGb`, `apiCalls`). Las tarifas y límites de los tramos (10 €, 8 €, 5 €) son inmutables en cliente y se gobiernan de forma autoritativa en el backend para prevenir manipulaciones de precios y garantizar coherencia con la política financiera de la compañía.
+   - El motor de tarificación (`calculateTieredPrice`) desacopla el algoritmo acumulativo de la matriz de precios (`PRICING_TIERS`), cumpliendo el principio **Open/Closed (OCP)**: si en el futuro la empresa modifica una tarifa (ej. subir el Tramo 3 de 5 € a 6 €) o añade un cuarto tramo corporativo, el motor no requiere reescritura de código, sino únicamente actualizar la tupla central de configuración fiscal.
 
 
 ---

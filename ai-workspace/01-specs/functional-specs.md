@@ -121,7 +121,15 @@ u \times 10 & \text{si } 1 \le u \le 10 \\
 - $u = 50 \implies 100 + (40 \times 8) = \mathbf{420.00\text{ €}}$
 - $u = 60 \implies 420 + (10 \times 5) = \mathbf{470.00\text{ €}}$
 
-#### B. Tabla de Impuestos por Jurisdicción
+#### C. Gobernanza de Precios: Inmutabilidad en Cliente y Autoridad Fiscal en Backend
+- **¿Por qué los precios y límites de los tramos no son editables desde el frontend?**
+  1. **Gobernanza de Precios y Políticas de Empresa (*Pricing Governance*):** En una compañía B2B SaaS, los precios unitarios por tramo los establece la dirección financiera y de Revenue Operations. La herramienta comercial permite al asesor simular y proyectar el impacto económico ajustando las variables de volumen (`activeUsers`, `storageGb`, `apiCalls`), pero nunca alterar las tarifas base aprobadas.
+  2. **Integridad Transaccional y Prevención de Manipulación:** Permitir que el cliente HTTP envíe los precios unitarios al servidor supondría una vulnerabilidad crítica, ya que cualquier usuario podría alterar los valores en el payload de `POST /simulations`. El backend actúa como la única autoridad fiscal y de cálculo.
+- **Principio Open/Closed (OCP) ante variaciones de tarifas (ej. subir Tramo 3 de 5.00 € a 6.00 €):**
+  - La función de cálculo `calculateTieredPrice` desacopla por completo la estructura matemática de los datos tarifarios, iterando dinámicamente sobre la tupla inmutable `PRICING_TIERS` en `fiscal.constants.ts`.
+  - Si la compañía decide actualizar el precio del Tramo 3 (ej. a 6.00 €) o incorporar un Tramo 4 para grandes cuentas (> 200 usuarios a 3.50 €), únicamente se actualiza la tupla de configuración, manteniéndose el motor de cálculo, las entidades y las interfaces cerradas a modificaciones de código pero abiertas a extensión.
+
+#### D. Tabla de Impuestos por Jurisdicción
 Los impuestos se determinan a partir del código de país (`country`) del cliente:
 
 | País / Jurisdicción | Tipo Impositivo (`taxRate`) | Porcentaje | Motivo / Regla Fiscal |
