@@ -3005,6 +3005,34 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: **0 errores y 0 advertencias** en los 140 archivos inspeccionados.
 - **Valor para la evaluación:** Criterio senior de arquitectura visual frontend: saber escuchar el feedback sutil de proporción espacial, combinando compacidad vertical para usabilidad con amplitud horizontal para jerarquía y aplomo visual.
 
+---
+
+### 6.125. Guía Arquitectónica de Evolución de Esquemas, Migraciones DDL y Compatibilidad hacia Atrás en Base de Datos
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Surgió la necesidad de documentar formalmente cómo debe gestionarse la evolución del modelo de datos relacional ante futuros cambios en entidades (renombrado de columnas, alteración de tipos de datos de tarifas o adición de restricciones `NOT NULL`), detallando los mecanismos que garantizan que los datos persistidos sigan siendo compatibles y cómo transicionar de forma segura desde el entorno de evaluación local hacia producción.
+- **Feedback Humano (Tu criterio de gobierno de datos y ciclo de vida de persistencia):**
+  > *"por otro lado hace falta explicar el sistema de migraciones en la bd en algun md? por si cambiar columnas o tipos de datos en algunas de las entidades, y que los datos que ya tengamos sean compatibles etc"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Análisis Técnico del Motor Relacional (SQLite WAL vs. PostgreSQL/MySQL):*
+     - Se documentaron las restricciones históricas de SQLite ante operaciones `ALTER TABLE` complejas y la técnica estándar de recreación temporal con transacciones atómicas (`CREATE TABLE _backup ... INSERT ... DROP ... RENAME`).
+     - Se explicó por qué en la prueba técnica local `synchronize: true` con `enableWAL: true` y un seeder idempotente es la estrategia óptima para una evaluación de cero fricción (*Out-of-the-Box*).
+  2. *Reglas de Oro para Compatibilidad con Datos Existentes:*
+     - Cualquier columna que se añada al esquema debe declararse como `@Column({ nullable: true })` o con un valor predeterminado seguro `@Column({ default: '...' })`. Esto asegura que TypeORM emita `ALTER TABLE ADD COLUMN` sin romper las filas históricas existentes ni arrojar errores de integridad.
+  3. *El Patrón Expand / Contract (Evolución de Esquema sin Downtime):*
+     - Se incorporó un diagrama de flujo arquitectónico documentando las tres fases de despliegue continuo (Expand -> Backfill -> Contract), evitando la rotura de clientes HTTP o de versiones previas del microservicio.
+  4. *Pipeline Formal de Migraciones en Producción (TypeORM CLI):*
+     - Se especificó el archivo `src/data-source.ts` y los comandos de la CLI (`migration:generate`, `migration:run` y `migration:revert`) para canalizaciones de CI/CD.
+  5. *Sincronización Documental Transversal:*
+     - Registrado detalladamente en [architecture-guidelines.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md#L248) (Sección 2.8.C), [mic-saas-omatic/README.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/README.md#L27) y [functional-specs.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/01-specs/functional-specs.md#L273).
+- **Resultados de Verificación:**
+  - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Oxlint: **0 errores y 0 advertencias** en los 140 archivos inspeccionados.
+- **Valor para la evaluación:** Visión completa del ciclo de vida del dato empresarial, demostrando cómo prevenir *Data Loss* y garantizar la continuidad operacional ante la evolución natural del producto SaaS.
+
+
 
 
 

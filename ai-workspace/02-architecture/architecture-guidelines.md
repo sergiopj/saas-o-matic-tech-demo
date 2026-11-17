@@ -249,6 +249,67 @@ flowchart TD
 - En entornos con bases de datos como PostgreSQL o MySQL en clúster, `synchronize: true` está terminantemente prohibido porque podría alterar tablas con millones de transacciones.
 - Las migraciones explícitas versionadas (`typeorm migration:generate` y `typeorm migration:run`) permiten auditoría de cambios DDL en Git, control granular de índices y ejecución de scripts de reversión (*rollback*) ante incidencias en despliegues automatizados.
 
+#### C. Guía de Evolución de Esquemas, Migraciones y Compatibilidad hacia Atrás (Data Compatibility)
+
+Cuando un sistema SaaS evoluciona (modificación de nombres de columnas, alteración de tipos de datos, o adición de nuevas restricciones fiscales), surge la necesidad crítica de preservar la integridad y compatibilidad de los datos ya persistidos:
+
+```mermaid
+flowchart TD
+    subgraph Phase1["1. Fase EXPAND (Compatible hacia Atrás)"]
+        A["Entidad cambia de esquema"] --> B["Nueva columna NULLABLE o con DEFAULT"]
+        B --> C["El código v1 y v2 pueden leer y escribir sin romper datos previos"]
+    end
+
+    subgraph Phase2["2. Fase MIGRATE / BACKFILL"]
+        C --> D["Script de migración rellena registros históricos antiguos"]
+        D --> E["Verificación de integridad transaccional"]
+    end
+
+    subgraph Phase3["3. Fase CONTRACT (Consolidación)"]
+        E --> F["La columna pasa a NOT NULL (si aplica)"]
+        F --> G["En el siguiente release se retira la columna obsoleta (DROP COLUMN)"]
+    end
+```
+
+1. **Particularidades del Motor SQLite frente a RDBMS Tradicionales:**
+   - Motores como PostgreSQL o MySQL soportan operaciones DDL avanzadas (`ALTER TABLE ... ALTER COLUMN TYPE ...`).
+   - SQLite, por su arquitectura embebida y tipado dinámico (*type affinity*), tiene restricciones históricas sobre `ALTER TABLE`. Aunque versiones modernas (SQLite $\ge$ 3.25 / 3.35) soportan `RENAME COLUMN` y `DROP COLUMN`, cambios complejos en tipos de datos requieren la técnica canónica:
+     - Crear tabla temporal con el nuevo esquema (`CREATE TABLE customers_backup (...)`).
+     - Copiar los datos transformados (`INSERT INTO customers_backup SELECT ... FROM customers`).
+     - Eliminar la tabla antigua (`DROP TABLE customers`).
+     - Renombrar la tabla temporal (`ALTER TABLE customers_backup RENAME TO customers`).
+     - Recrear índices y triggers en una única transacción atómica (`BEGIN TRANSACTION ... COMMIT`).
+
+2. **Comportamiento en Desarrollo Local con TypeORM (`synchronize: true`):**
+   - En desarrollo y en esta tech demo, `synchronize: true` compara las entidades ORM (`CustomerOrmEntity`, `SimulationOrmEntity`) contra el archivo SQLite en disco.
+   - **Adición de Columnas:** Si se añade una columna `@Column({ nullable: true })` o `@Column({ default: 'STANDARD' })`, TypeORM emite automáticamente un `ALTER TABLE ADD COLUMN`, preservando intactos todos los clientes y simulaciones ya guardados.
+   - **Regla de Oro:** Para mantener compatibilidad con los datos existentes en SQLite, **nunca debe añadirse una columna `NOT NULL` sin un valor `default`**, ya que de lo contrario SQLite rechazaría la inserción sobre filas preexistentes.
+
+3. **Arquitectura Formal de Migraciones para Producción (Enterprise Pipeline):**
+   Para entornos productivos con PostgreSQL/MySQL, el microservicio define la infraestructura necesaria mediante TypeORM CLI:
+   - **Configuración de DataSource (`src/data-source.ts`):** Centraliza la conexión, entidades y el array de migraciones en `src/infrastructure/adapters/out/persistence/migrations/*.ts`.
+   - **Flujo de Comandos Canónico:**
+     ```bash
+     # 1. Generar automáticamente una migración diferencial detectando cambios en entidades:
+     npx typeorm-ts-node-commonjs migration:generate src/infrastructure/adapters/out/persistence/migrations/UpdateCustomerFiscalData -d src/data-source.ts
+     
+     # 2. Ejecutar las migraciones pendientes en la canalización CI/CD de despliegue:
+     npx typeorm-ts-node-commonjs migration:run -d src/data-source.ts
+     
+     # 3. Revertir la última migración ante una incidencia operacional:
+     npx typeorm-ts-node-commonjs migration:revert -d src/data-source.ts
+     ```
+
+4. **El Patrón Expand / Contract (Zero-Downtime Schema Evolution):**
+   - En despliegues continuos (Blue/Green o Canary), durante unos minutos conviven instancias del servidor con la versión anterior del código (v1) y la nueva versión (v2).
+   - Aplicar el patrón **Expand/Contract** garantiza que:
+     - Ninguna fila existente sufra pérdida de datos (*Data Loss*).
+     - La versión v1 pueda seguir operando sin lanzar excepciones de columna inexistente.
+     - Los clientes antiguos se migren progresivamente sin interrumpir el servicio comercial.
+
+5. **Mecanismo de Reseteo Rápido en Tech Demo:**
+   - Si durante pruebas locales el evaluador desea forzar un borrado completo del esquema para probar el seeder desde cero, basta con ejecutar `npm --prefix mic-saas-omatic run seed` o eliminar el archivo `saas_o_matic.sqlite`. En el siguiente arranque (`npm start`), `DatabaseSeederService` re-creará las tablas e inyectará los 18 clientes corporativos con CIFs válidos.
+
 ---
 
 ## 3. Arquitectura del Frontend (Angular 22)

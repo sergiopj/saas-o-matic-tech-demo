@@ -22,7 +22,20 @@ El microservicio implementa **Arquitectura Hexagonal (Puertos y Adaptadores)** e
 ### 🗄️ Estrategia de Persistencia: SQLite WAL + Seeder Idempotente vs. Migraciones
 - **Modo WAL (`enableWAL: true`):** SQLite opera en modo Write-Ahead Logging, permitiendo lecturas concurrentes sin bloquear escrituras.
 - **Auto-Seeder Idempotente:** En el arranque local (`npm start`), `DatabaseSeederService` verifica si la base de datos está vacía y puebla automáticamente 18 clientes corporativos y sus simulaciones sin pasos manuales.
-- **¿Por qué no migraciones en esta tech demo?** Las migraciones DDL (`typeorm migration:run`) son esenciales en entornos productivos multi-desarrollador con PostgreSQL o MySQL para auditar cambios de esquema. En una prueba técnica local, obligar al evaluador a ejecutar comandos de migración añadiría fricción innecesaria; la combinación de `synchronize: true` + SQLite WAL + Seeder Idempotente proporciona la experiencia de evaluación inmediata y robusta (*Frictionless DX*).
+- **¿Por qué no migraciones manuales en esta tech demo?** Las migraciones DDL (`typeorm migration:run`) son esenciales en entornos productivos multi-desarrollador con PostgreSQL o MySQL para auditar cambios de esquema. En una prueba técnica local, obligar al evaluador a ejecutar comandos de migración añadiría fricción innecesaria; la combinación de `synchronize: true` + SQLite WAL + Seeder Idempotente proporciona la experiencia de evaluación inmediata y robusta (*Frictionless DX*).
+
+### 📦 Evolución de Esquemas y Compatibilidad de Datos
+- **Compatibilidad con Datos Existentes:** Para garantizar que los datos ya persistidos en SQLite sigan siendo válidos ante la evolución de entidades (nuevos campos o atributos), las columnas nuevas deben declararse siempre como `@Column({ nullable: true })` o con un `@Column({ default: ... })`. Esto evita errores de integridad relacional en SQLite ante filas previas.
+- **Patrón Expand/Contract:** En despliegues empresariales continuos (Blue/Green), los cambios de esquema se ejecutan en dos fases: primero se añade la columna compatible (Expand) para que convivan versiones v1 y v2 del software, y posteriormente se migran los datos históricos y se consolidan las restricciones (Contract).
+- **Flujo de Migraciones en Producción (TypeORM CLI):**
+  ```bash
+  # Generar migración diferencial:
+  npx typeorm-ts-node-commonjs migration:generate src/infrastructure/adapters/out/persistence/migrations/UpdateSchema -d src/data-source.ts
+  # Aplicar migraciones:
+  npx typeorm-ts-node-commonjs migration:run -d src/data-source.ts
+  # Revertir última migración:
+  npx typeorm-ts-node-commonjs migration:revert -d src/data-source.ts
+  ```
 
 Para ver las directrices completas, consulta [`../ai-workspace/02-architecture/architecture-guidelines.md`](../ai-workspace/02-architecture/architecture-guidelines.md).
 
