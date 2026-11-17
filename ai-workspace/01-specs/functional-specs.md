@@ -180,7 +180,7 @@ Los impuestos se determinan a partir del código de país (`country`) del client
    6. **Despacho Comercial y Redacción de Email con Notificación Toast (`MatSnackBar`):**
       - Modal corporativo de redacción enriquecida WYSIWYG (`EmailComposerDialogComponent`) para emitir propuestas comerciales personalizadas directamente al backend `POST /emails/send`.
       - **Cierre Inmediato y Feedback Asíncrono no Obstructivo:** Al pulsar *"Enviar email"*, una vez validado y despachado con éxito por el servidor, el diálogo se cierra de forma inmediata (sin tiempos de espera residuales ni banners transitorios dentro del modal).
-      - Tras el cierre, se emite una notificación accesible en pantalla mediante `MatSnackBar` (*"Correo electrónico enviado y registrado con éxito en el servidor"*) visible durante 4 segundos en la vista principal donde permanece el usuario comercial.
+      - Tras el cierre, se emite una notificación accesible en pantalla mediante `MatSnackBar` (*"Correo enviado con éxito."*) visible durante 4 segundos en la vista principal donde permanece el usuario comercial.
 
 ### 3.2 Suite Visual 3D Táctil (Warm Product & Isometric Design) y Política de Anclaje Visual
 Para dotar a la plataforma de una identidad visual acogedora, moderna y profesional, alejándose radicalmente tanto de las figuras humanas antropomórficas como de la estética fría, oscura o de neones cibernéticos tipo Tron:
@@ -207,6 +207,19 @@ Para plasmar visualmente el impacto del coste por usuario y el ahorro escalonado
   - Implementado exclusivamente mediante CSS Grid/Flexbox y aceleración por GPU (`transform`, `will-change`), sin librerías JS externas ni coste en runtime.
   - Tokens SSOT en `src/styles/_colors.scss` (`--roams-coin-gold`, `--roams-coin-gold-light`, `--roams-coin-gold-dark`, `--roams-coin-gold-rim`, `--roams-accent-blue`, `--roams-status-success`, `--roams-status-warning`) sin hardcodeo de colores.
   - Respeto a la accesibilidad W3C: marcado con `aria-hidden="true"` y desactivación automática de la animación ante `@media (prefers-reduced-motion: reduce)`.
+
+### 3.4 Contadores Dinámicos Count-Up y Diales de Barrido Radial Conic Clock Sweep en KPIs de `/home`
+Para enriquecer la experiencia analítica en el panel ejecutivo comercial:
+- **Conteo Ascendente Interpolado (*Count-Up*):** Los indicadores numéricos parten de `0` y ascienden hasta sus valores objetivo mediante Angular Signals y `requestAnimationFrame` con una curva de deceleración cúbica suave (*cubic ease-out*: $1 - (1 - p)^3$) en un intervalo calibrado de 1400 ms:
+  - Clientes Registrados: de `0` al total consolidado por la API (`totalCustomers`).
+  - Jurisdicciones Fiscales: de `0` a `8` (`supportedCountriesCount`).
+  - Tramos de Tarificación: de `0` a `3`.
+- **Barrido Radial Cónico (*Conic Clock Sweep*):**
+  - Los contenedores de icono se transforman en diales circulares (`border-radius: 50%`) gobernados por `conic-gradient(from 0deg at 50% 50%, ...)`.
+  - El gradiente comienza a las 12 en punto (`0deg`) y rota en sentido horario emulando las agujas de un reloj.
+  - El fondo base al 10% es cubierto progresivamente por un tono más saturado y oscuro al 26% de opacidad generado con `color-mix(in srgb, var(--kpi-theme-color) 26%, transparent)`.
+- **Sincronización Matemática Estricta:** Al derivar tanto el número como el ángulo de giro ($\theta \in [0^\circ, 360^\circ]$) del mismo factor de interpolación $p$, el dial completa su rotación de $360^\circ$ exactamente en el mismo instante en que el contador alcanza su cifra final.
+- **Accesibilidad y Rendimiento:** Bypass instantáneo sin animación bajo `prefers-reduced-motion: reduce`, diales marcados con `aria-hidden="true"` y cancelación de frames en `ngOnDestroy`.
 
 ---
 

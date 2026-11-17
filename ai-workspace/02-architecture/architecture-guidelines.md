@@ -621,10 +621,22 @@ Para garantizar que fallos en elementos cosméticos o de micro-interacción (spi
   1. **Edición Libre con Validación Reactiva en Caliente (RFC 5322):** El campo de correo implementa un `FormControl` reactivo con `ShowOnDirtyErrorStateMatcher` de Angular Material. Evalúa el formato en tiempo real mientras el usuario escribe (`control.dirty`), contrastando contra la expresión regular RFC 5322 (local-part, `@`, dominio y TLD de al menos 2 caracteres). Proyecta un `<mat-error>` traducido multidioma y desactiva el botón de envío si el valor es inválido o está vacío, eliminando errores antes de emitir la petición HTTP.
   2. **Indicador de Carga Transaccional:** El botón de confirmación muestra un spinner (`<mat-spinner diameter="18">`) y bloquea pulsaciones duplicadas mientras la petición HTTP está en tránsito.
   3. **Tratamiento de Errores RFC 7807:** Si el backend rechaza la petición (ej. error de validación o caída de pasarela), el diálogo despliega un banner de alerta inline (`.error-banner`) con el detalle del problema sin cerrar la ventana para evitar la pérdida del texto redactado.
-  4. **Confirmación y Cierre Automático:** Al confirmarse el despacho (`201 Created`), el botón conmuta a estado exitoso con icono de verificación y el diálogo se cierra tras 800 ms, emitiendo una notificación toast accesible (`MatSnackBar`) en la vista emisora (`CustomerCardComponent` o `CustomerDetailComponent`) identificando explícitamente el email destinatario remitido.
+  4. **Confirmación y Cierre Automático sin Fricción:** Al confirmarse el despacho (`201 Created`), el diálogo se cierra de forma inmediata (sin temporizadores residuales ni banners intermedios en el modal), emitiendo una notificación toast accesible (`MatSnackBar`) con el mensaje *"Correo enviado con éxito."* durante 4 segundos en la vista emisora (`CustomerCardComponent` o `CustomerDetailComponent`).
   5. **Mecanismo de Respaldo ("Copiar plantilla"):** Se mantiene la utilidad para copiar el texto plano al portapapeles (`navigator.clipboard`) con confirmación temporal de 2.5 segundos.
 
-### 3.13 Regla de Oro: "Code in English, documentation in Spanish"
+### 3.13 Diales KPI Reactivos con Conic Gradient Clock Sweep y Contadores Count-Up
+
+- **Interpolación Cinemática Hardware-Friendly (Angular Signals + `requestAnimationFrame`):**
+  - Los indicadores clave de rendimiento (KPIs) en `HomeComponent` ([home.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.ts)) implementan una animación de ascenso numérico (*count-up*) interpolada mediante `requestAnimationFrame` con una curva de deceleración cúbica suave (*cubic ease-out*: $1 - (1 - p)^3$) en un intervalo de 1400 ms.
+  - Sincronización 1:1 con el barrido del fondo del icono: en cada fotograma, el número y el ángulo de cobertura ($\theta \in [0^\circ, 360^\circ]$) derivan del mismo factor de interpolación $p$, garantizando que el dial alcanza los $360^\circ$ exactamente en el instante en que el contador alcanza su valor final.
+- **Barrido Radial Cónico (*Conic Clock Sweep*):**
+  - Implementado mediante `conic-gradient(from 0deg at 50% 50%, ...)` en diales circulares (`border-radius: 50%`). La orientación `from 0deg` sitúa el inicio a las 12 en punto y barre en sentido horario como las agujas de un reloj.
+  - El fondo base al 10% de opacidad (`--kpi-fill-base`) es gradualmente sustituido por el color más saturado y oscuro al 26% (`--kpi-fill-dark`) calculado con `color-mix(in srgb, var(--kpi-theme-color) 26%, transparent)` usando Design Tokens de Roams.
+- **Higiene de Ciclo de Vida y Accesibilidad (A11y):**
+  - Cancelación preventiva de identificadores con `cancelAnimationFrame` en el hook `ngOnDestroy()` para blindar la aplicación frente a fugas de memoria.
+  - Soporte nativo para usuarios con sensibilidad al movimiento mediante bypass instantáneo bajo `@media (prefers-reduced-motion: reduce)`.
+
+### 3.14 Regla de Oro: "Code in English, documentation in Spanish"
 
 - **Prohibición Estricta de Castellano en Código Fuente:**
   Todas las declaraciones de variables, nombres de métodos, interfaces, tipos, selectores de componentes, estilos CSS y comentarios JSDoc (`/** ... */`) dentro de los ficheros de código (`.ts`, `.html`, `.scss`, `.js`) deben redactarse exclusivamente en **inglés**.
