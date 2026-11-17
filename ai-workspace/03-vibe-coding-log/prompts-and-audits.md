@@ -2732,6 +2732,36 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: 0 errores y 0 advertencias.
 - **Valor para la evaluación:** Experiencia de producto cohesiva, atractiva e intuitiva en los dos pilares clave de la aplicación: el panel ejecutivo y el estudio de simulación comercial.
 
+---
+
+### 6.116. Enriquecimiento Visual del Catálogo de Clientes Corporativos (`/customers`): Medallón 3D de Empresa B2B Integrado en el Encabezado
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  En la pantalla principal del catálogo de clientes ([customer-list.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-list/customer-list.component.html)), el encabezado mostraba los textos "Clientes Corporativos" y "Selecciona un cliente para simular tramos, proyectar costes y emitir presupuestos SaaS." de forma puramente tipográfica junto al botón de creación.
+- **Feedback Humano (Tu criterio estético de composición compacta):**
+  > *"justo al ladito una imagen que represente a un cliente corporativo y que sea no muy grande y las esquias redonditas, aprovecha el mismo hueco Clientes Corporativos Selecciona un cliente para simular tramos, proyectar costes y emitir presupuestos SaaS."*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Generación de Ilustración 3D de Medallón Corporativo (`image-generator`):*
+     - Se orquestó la creación de un emblema/medallón 3D glassmorphic que representa una sede empresarial de alta tecnología:
+       - Rascacielos corporativo de cristal con aristas brillantes en cian neón (`#0ea5e9`) y azul real (`#1061e2`).
+       - Aro halo exterior brillante y nodos de red interconectados con un escudo de seguridad empresarial.
+       - Fondo azul marino profundo idéntico al tema Roams.
+     - Imagen optimizada y guardada en `public/images/corporate-customer-badge.jpg`.
+  2. *Integración en el Mismo Hueco del Header ([customer-list.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-list/customer-list.component.html)):*
+     - Se agrupó la imagen junto a los títulos dentro de un contenedor flex `.header-titles-group`.
+     - Tamaño compacto de 64x64px en desktop (y 52x52px en móvil), aprovechando de forma natural el hueco horizontal a la izquierda de los textos.
+     - Esquinas redondeadas suaves mediante `border-radius: var(--roams-radius-md)`.
+  3. *Estilos y Responsive Design ([customer-list.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-list/customer-list.component.scss)):*
+     - Alineación vertical centrada de los tres elementos (medallón, textos y botón de nuevo cliente).
+     - Borde sutil `var(--roams-border)`, sombra `var(--roams-shadow-sm)` y micro-interacción *hover scale* (1.04).
+     - 100% tokens de diseño `--roams-*`, cero hex hardcodeados, cero Tailwind.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Oxlint: 0 errores y 0 advertencias.
+- **Valor para la evaluación:** Armonía y consistencia visual entre las tres vistas fundamentales del sistema (Home, Simulador y Catálogo de Clientes), manteniendo la densidad de información y la pulcritud corporativa.
+
 
 
 
