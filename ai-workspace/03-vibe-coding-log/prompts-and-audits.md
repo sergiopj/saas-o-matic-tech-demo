@@ -2366,6 +2366,31 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: 0 errores y 0 advertencias.
 - **Valor para la evaluación:** Excelencia en Responsive Design, ergonomía Mobile-First real y consistencia conceptual de dominio.
 
+---
+
+### 6.99 Refinamiento de Identidad Operativa en Sidebar: Adopción de 'COMMERCIAL OPTIMIZER PANEL' e Internacionalización
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Tras sustituir el badge anterior `"ROAMS CRM"`, el usuario propuso una denominación más alineada con la función operativa del panel de navegación lateral: `"COMMERCIAL OPTIMIZER PANEL"`. Esta designación define el menú lateral como el panel de optimización comercial sin duplicar el título general del producto (`SaaS-O-Matic`) ya visible en el navbar superior.
+- **Feedback Humano:**
+  *"lo veo mejor como cOMERCIAL OPTIMEZER PANEL O ALGO ASI"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Internacionalización Reactiva (`translations.ts`):*
+     - En lugar de fijar una cadena estática en la vista, se integró la clave `'sidebar.brandTag'` en el diccionario de traducciones (`es`, `en`, `de`, `fr`): `'COMMERCIAL OPTIMIZER PANEL'`.
+  2. *Enlace Declarativo en Template (`SidebarComponent`):*
+     - En [sidebar.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/sidebar/sidebar.component.html), se implementó `<span class="brand-tag">{{ 'sidebar.brandTag' | translate }}</span>`.
+  3. *Tipografía y Blindaje CSS (`SidebarComponent`):*
+     - En [sidebar.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/sidebar/sidebar.component.scss), se optimizó el badge con `font-size: 0.6875rem; letter-spacing: 0.04em; padding: 0.25rem 0.55rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;` dentro de `.brand-mini` con `min-width: 0; flex: 1;`. Esto garantiza que encaje en una única línea de 11px sin empujar el botón de colapso ni desbordar la cabecera de 250px.
+  4. *Ampliación de Cobertura de Tests:*
+     - En [sidebar.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/sidebar/sidebar.component.spec.ts), se añadió una prueba unitaria que verifica que el tag renderiza el texto traducido esperado cuando el sidebar está expandido y desaparece cuando el sidebar se colapsa.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **162 pruebas unitarias pasando al 100%**.
+  - Backend Jest: **123 pruebas unitarias pasando al 100%**.
+  - Monorepo total: **285 pruebas unitarias pasando al 100%**.
+  - Oxlint: 0 errores y 0 advertencias.
+- **Valor para la evaluación:** Refinamiento semántico del producto guiado por el evaluador, desacoplamiento lingüístico con el sistema de i18n y robustez de maquetación CSS.
+
 
 
 

@@ -46,4 +46,15 @@ describe('SidebarComponent', () => {
     expect(linkEl.textContent).toContain(`${new Date().getFullYear()}`);
     expect(linkEl.textContent).toContain('Roams');
   });
+
+  it('should render the commercial optimizer brand tag when expanded and hide it when collapsed', () => {
+    const brandTag = fixture.nativeElement.querySelector('.brand-tag');
+    expect(brandTag).toBeTruthy();
+    expect(brandTag.textContent.trim()).toBe('COMMERCIAL OPTIMIZER PANEL');
+
+    component.toggleCollapse();
+    fixture.detectChanges();
+    const brandTagCollapsed = fixture.nativeElement.querySelector('.brand-tag');
+    expect(brandTagCollapsed).toBeNull();
+  });
 });
