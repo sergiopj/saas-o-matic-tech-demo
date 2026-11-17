@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
+import { CommonModule, DatePipe, DecimalPipe, PercentPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSliderModule } from '@angular/material/slider';
@@ -48,6 +48,7 @@ import { I18nService } from '../../../../core/services/i18n.service';
     FormsModule,
     DatePipe,
     DecimalPipe,
+    PercentPipe,
     MatButtonModule,
     MatIconModule,
     MatSliderModule,
@@ -200,6 +201,11 @@ export class CustomerDetailComponent implements OnInit {
 
   readonly tier3Users = computed(() => Math.max(0, this.activeUsers() - 50));
   readonly tier3Cost = computed(() => this.tier3Users() * 5);
+
+  /** Formatted tax percentage for active customer projection */
+  readonly taxPercentage = computed<number>(() =>
+    Math.round(this.projection().taxRate * 100)
+  );
 
   ngOnInit(): void {
     const customerId = this.route.snapshot.paramMap.get('id');

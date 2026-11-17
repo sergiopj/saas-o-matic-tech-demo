@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -37,6 +37,16 @@ export class CustomerCardComponent {
 
   readonly customer = input.required<Customer>();
   readonly selectCustomer = output<Customer>();
+
+  /** Memoized avatar initial (pure computed signal) */
+  readonly avatarInitial = computed(() =>
+    this.customer().companyName.charAt(0).toUpperCase()
+  );
+
+  /** Memoized CSS plan modifier class (pure computed signal) */
+  readonly planClass = computed(
+    () => 'plan-' + this.customer().selectedPlan.toLowerCase()
+  );
 
   onSimulate(): void {
     this.selectCustomer.emit(this.customer());

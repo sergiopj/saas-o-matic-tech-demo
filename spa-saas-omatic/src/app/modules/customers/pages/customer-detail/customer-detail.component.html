@@ -215,7 +215,7 @@
           <div class="breakdown-row tax-row">
             <span>
               {{ 'simulation.breakdown.tax' | translate }}
-              ({{ (projection().taxRate * 100).toFixed(0) }}% {{ customer()!.country }})
+              ({{ taxPercentage() }}% {{ customer()?.country }})
             </span>
             <strong>+{{ projection().taxAmountEur | localizedCurrency:'EUR' }}</strong>
           </div>
@@ -332,7 +332,7 @@
                   <td>{{ sim.monthlyBaseCost | localizedCurrency:'EUR' }}</td>
                   <td class="tax-cell">
                     {{ sim.taxAmount | localizedCurrency:'EUR' }}
-                    <span class="tax-rate-sub">({{ (sim.taxRate * 100).toFixed(0) }}%)</span>
+                    <span class="tax-rate-sub">({{ sim.taxRate | percent:'1.0-0' }})</span>
                   </td>
                   <td class="total-eur-cell">
                     <strong>{{ sim.totalCost | localizedCurrency:'EUR' }}</strong>
