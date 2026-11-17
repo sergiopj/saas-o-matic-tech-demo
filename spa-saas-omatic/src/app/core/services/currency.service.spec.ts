@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { vi } from 'vitest';
 import { CurrencyService } from './currency.service';
-import { ExchangeRateApiResponse } from '../models/currency.model';
+import { ExchangeRateApiResponse, DEFAULT_FALLBACK_RATES } from '../models/currency.model';
 import { environment } from '../../../environments/environment';
 
 describe('CurrencyService', () => {
@@ -66,8 +66,9 @@ describe('CurrencyService', () => {
     const req = httpTesting.expectOne(environment.currencyApiUrl);
     req.error(new ProgressEvent('error'), { status: 0, statusText: 'Network Error' });
 
+    expect(service.rates()).toEqual(DEFAULT_FALLBACK_RATES);
     expect(service.rates()['EUR']).toBe(1.0);
-    expect(service.rates()['USD']).toBeGreaterThan(0);
+    expect(service.rates()['USD']).toBe(1.08);
     expect(service.error()).toBeTruthy();
     expect(service.loading()).toBe(false);
     expect(warnSpy).toHaveBeenCalled();

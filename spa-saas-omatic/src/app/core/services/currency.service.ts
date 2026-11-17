@@ -7,16 +7,8 @@ import {
   ExchangeRateApiResponse,
   SUPPORTED_CURRENCIES,
   CURRENCY_METADATA,
+  DEFAULT_FALLBACK_RATES,
 } from '../models/currency.model';
-
-const DEFAULT_FALLBACK_RATES: Record<CurrencyCode, number> = {
-  EUR: 1.00,
-  USD: 1.08,
-  GBP: 0.85,
-  CHF: 0.95,
-  CAD: 1.45,
-  JPY: 162.50,
-};
 
 @Injectable({
   providedIn: 'root',
@@ -57,7 +49,7 @@ export class CurrencyService {
 
     this.http.get<ExchangeRateApiResponse>(this.apiUrl).subscribe({
       next: (response) => {
-        if (response && response.rates) {
+        if (response?.rates) {
           this.rates.set({
             ...DEFAULT_FALLBACK_RATES,
             ...response.rates,

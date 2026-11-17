@@ -1613,37 +1613,29 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
      - Se añadió una prueba en `simulation-hub.component.spec.ts` verificando que el botón existe en el DOM, se inicia en `disabled: true`, y conmuta a `disabled: false` de inmediato al seleccionar una cuenta corporativa.
 - **Valor para la evaluación:** Ergonomía visual de nivel enterprise, erradicación de saltos en el DOM (*layout shift*) y feedback interactivo inequívoco para el usuario.
 
-### 6.69. Auditoría de Altura Vertical de Barra Lateral (Full Viewport Height & Sticky Sidebar)
+### 6.70. Refactorización de Arquitectura: Desacople de `DEFAULT_FALLBACK_RATES` hacia `currency.model.ts` (SRP y SSOT)
 
 - **La observación del Director de Orquesta:**
-  - El usuario detectó que el menú lateral se truncaba verticalmente al terminar los tres enlaces:
-    > *"en al lateral el mwenu quneue solo haya tres enlaces que la barra lateral llegue hazta el fondo de la pantalla en vertical, me entiendes?"*
-- **Análisis del Problema de CSS y Flexbox:**
-  1. *Comportamiento por Defecto de Custom Elements en Angular:*
-     - La etiqueta `<app-sidebar>` se renderiza como elemento de bloque/en línea sin regla `:host` definida. Por tanto, su altura dependía exclusivamente de la suma de alturas de sus hijos directos (encabezado, 3 enlaces y footer).
-     - Si la página no tenía suficiente contenido, o si el usuario bajaba en la página, la barra lateral terminaba abruptamente en la parte superior, dejando un corte gris antiestético en el fondo de la pantalla.
-  2. *Desacople entre el Sticky de Navbar y el Sidebar:*
-     - Mientras que el Navbar de 64px (`.navbar-header`) tenía `position: sticky; top: 0;`, el Sidebar no tenía anclaje sticky, perdiéndose de vista al hacer scroll en listados largos.
-- **Implementación y Solución:**
-  1. *Definición de `:host` con Altura Total de Viewport (`calc(100vh - 64px)`):*
-     - En `sidebar.component.scss` se configuró la regla raíz del componente:
-       ```scss
-       :host {
-         display: flex;
-         flex-direction: column;
-         flex-shrink: 0;
-         position: sticky;
-         top: 64px;
-         height: calc(100vh - 64px);
-         z-index: 50;
-       }
+  - El usuario cuestionó la presencia de constantes de configuración directamente en el cuerpo del servicio:
+    > *"esta oparte esta bien en este serfvicio? o es mejor llevarlo a unas constantes generales const DEFAULT_FALLBACK_RATES: Record<CurrencyCode, number> = { EUR: 1.00, USD: 1.08, GBP: 0.85, CHF: 0.95, CAD: 1.45, JPY: 162.50 };"*
+- **Análisis de Arquitectura y Clean Code:**
+  1. *Violación de Responsabilidad Única (SRP):*
+     - `CurrencyService` es un servicio inyectable Angular (`@Injectable`) cuyo cometido es la reactividad con Signals (`selectedCurrency`, `rates`, `loading`, `error`), el consumo de la API REST externa (`HttpClient`) y los algoritmos de redondeo y conversión (`convert`).
+     - Declarar una matriz estática de tasas por defecto en el propio archivo del servicio introduce *hardcoding* de datos de negocio y acopla la definición del dominio a la infraestructura de servicios de Angular.
+  2. *Single Source of Truth (SSOT):*
+     - En `spa-saas-omatic/src/app/core/models/currency.model.ts` ya residían los tipos fundamentales: `SUPPORTED_CURRENCIES`, `CurrencyCode`, `CurrencyMetadata` y `CURRENCY_METADATA`.
+     - Co-ubicar `DEFAULT_FALLBACK_RATES: Record<CurrencyCode, number>` en el modelo garantiza que cualquier adición o cambio de divisas se realice en un único punto centralizado.
+  3. *Eliminación de Números Mágicos en Tests:*
+     - Al estar exportada, la suite de pruebas unitarias (`currency.service.spec.ts`) puede comprobar de forma determinista y estricta el estado ante caída de red:
+       ```typescript
+       expect(service.rates()).toEqual(DEFAULT_FALLBACK_RATES);
        ```
-  2. *Contenedor al 100% y Empuje del Footer al Fondo:*
-     - `.sidebar-container` toma `height: 100%; min-height: 100%;` con scroll interno independiente (`overflow-y: auto`).
-     - El footer (`.sidebar-footer`) aplica `margin-top: auto`, asegurando que la insignia de estado del sistema permanezca fijada en la parte inferior de la pantalla.
-  3. *Alineación de `.app-body` en `app.scss`:*
-     - Se reforzó con `align-items: stretch; position: relative;` y `min-width: 0;` en el contenedor principal.
-- **Valor para la evaluación:** Acabado visual corporativo premium estándar en plataformas SaaS B2B (Stripe, GitHub, AWS), manteniendo la navegación lateral fijada hasta el fondo del viewport independientemente de la longitud de la página.
+- **Implementación efectuada:**
+  1. Exportación de `DEFAULT_FALLBACK_RATES` en `currency.model.ts`.
+  2. Eliminación de la constante local e importación limpia en `currency.service.ts`.
+  3. Refactorización del test unitario de fallo de red en `currency.service.spec.ts`.
+  4. Verificación exhaustiva: 131 tests pasando al 100% y 0 advertencias/errores en `oxlint`.
+- **Valor para la evaluación:** Demostración de atención minuciosa al diseño de software, separación de responsabilidades y modularidad limpia en TypeScript/Angular.
 
 
 

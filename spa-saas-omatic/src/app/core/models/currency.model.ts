@@ -18,6 +18,15 @@ export const CURRENCY_METADATA: Record<CurrencyCode, CurrencyMetadata> = {
     JPY: { label: 'Japanese Yen', symbol: '¥', locale: 'ja-JP', decimals: 0 },
 };
 
+export const DEFAULT_FALLBACK_RATES: Record<CurrencyCode, number> = {
+    EUR: 1.00,
+    USD: 1.08,
+    GBP: 0.85,
+    CHF: 0.95,
+    CAD: 1.45,
+    JPY: 162.50,
+};
+
 export interface CurrencyOption {
     code: CurrencyCode;
     label: string;

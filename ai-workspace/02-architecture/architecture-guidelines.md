@@ -210,7 +210,7 @@ spa-saas-omatic/
 │   │   │   ├── i18n/
 │   │   │   │   └── translations.ts                          # Catálogo de traducciones bilingüe (es/en) fuertemente tipado
 │   │   │   ├── models/
-│   │   │   │   └── currency.model.ts                        # CurrencyCode (as const), CurrencyOption y ExchangeRateApiResponse
+│   │   │   │   └── currency.model.ts                        # CurrencyCode (as const), CURRENCY_METADATA, DEFAULT_FALLBACK_RATES y ExchangeRateApiResponse (SSOT)
 │   │   │   └── services/
 │   │   │       ├── currency.service.ts                      # Integración open.er-api.com, caché en memoria y Signals
 │   │   │       └── i18n.service.ts                          # Servicio reactivo de localización con Signals y detección de navegador
