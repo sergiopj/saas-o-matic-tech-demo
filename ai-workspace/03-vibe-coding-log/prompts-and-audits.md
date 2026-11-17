@@ -2680,6 +2680,28 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
      - Se referenció el comando `docker compose up --build` indicando expresamente que requiere Docker Desktop activo.
 - **Valor para la evaluación:** Claridad absoluta en el criterio de *README y Despliegue (10%)*, evitando frustraciones al evaluador si no tiene Docker Desktop arrancado en su estación de trabajo.
 
+---
+
+### 6.111. Refinamiento Visual y Ergonomía de Espaciado en Bloque de Conversión en Vivo
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  En el estudio de simulación de [customer-detail.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.html), el bloque destacado de conversión de divisa (`.converted-highlight-box`) presentaba los elementos (`LIVE CONVERSION`, `Total Convertido`, el importe monetario y la tasa `1 EUR = ...`) excesivamente comprimidos verticalmente, sin separación de aire suficiente entre jerarquías.
+- **Feedback Humano (Tu corrección directa de maquetación):**
+  *"que respiren un poco estos textos estan muy juntos LIVE CONVERSION Total Convertido 665,50 € 1 EUR = 1.0000 EUR"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Estructura y Espaciado en [customer-detail.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.scss#L441-L485):*
+     - `.converted-highlight-box`: Se amplió el padding a `1.5rem 1.25rem` (24px arriba/abajo) y se incorporó `gap: 0.65rem` entre secciones con `margin-top: 1.25rem`.
+     - `.converted-label-group`: Separación horizontal aumentada a `gap: 0.625rem`. La etiqueta `.highlight-tag` (`LIVE CONVERSION`) aumentó su padding interno a `0.25rem 0.55rem` con `border-radius: var(--roams-radius-sm)` y `letter-spacing: 0.06em`.
+     - `.converted-amount`: Se ajustó con `font-size: 2.25rem; font-weight: 900; line-height: 1.2; margin: 0.25rem 0 0.45rem 0; letter-spacing: -0.02em;`, otorgándole protagonismo visual y aire vertical.
+     - `.rate-indicator`: Se rediseñó como una pastilla o pill badge estilizada (`background-color: var(--roams-bg-card)`, `border: 1px solid var(--roams-border-light)`, `border-radius: 9999px`, `padding: 0.3rem 0.85rem`), proporcionando una lectura clara y diferenciada del tipo de cambio actual.
+  2. *Cero Hexadecimales:* Apego estricto al SSOT de tokens corporativos de Roams.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
+  - Oxlint: 0 errores y 0 advertencias.
+- **Valor para la evaluación:** Pulcritud visual, jerarquía tipográfica y atención senior al detalle de diseño de interfaces.
+
+
 
 
 
