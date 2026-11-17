@@ -230,6 +230,10 @@ Al tratarse SaaS-O-Matic de un **panel de trabajo operativo diario (*workstation
 
 **Especificaciones Técnicas del Conmutador:**
 - **Interruptor Transversal Accesible (`ThemeToggleComponent`):** Ubicado en la barra superior de navegación (`NavbarComponent`), arriba a la izquierda junto a la identidad corporativa de SaaS-O-Matic.
+- **Bocadillo de Cómic para Onboarding Visual (*Comic Speech Bubble Callout*):** Al iniciar la aplicación, se presenta un bocadillo estilo cómic con cola apuntando directamente al interruptor (`.comic-speech-bubble`), sombra sólida pop (`box-shadow: 3px 3px 0 var(--roams-border-inverse)`), micro-animación de entrada elástica (`comicPopIn`) y texto internacionalizado indicativo (`theme.toggle.comicHint`).
+  - *Desvanecimiento Automático:* A los 4.5 segundos inicia una transición de opacidad y a los 5 segundos se retira del DOM.
+  - *Descarte Inmediato:* Si el usuario hace clic en el interruptor de tema, en el propio bocadillo o en su botón de cierre (`&times;`), se cancelan los temporizadores y se oculta de forma instantánea.
+  - *Accesibilidad W3C Estricta:* Implementado sobre un elemento HTML5 nativo `<output class="comic-speech-bubble" aria-live="polite">` (evitando `role="status"` sobre `<div>` genérico conforme a la regla SonarQube `Web:S6819`).
 - **Conmutación Reactiva mediante Angular Signals:** Gestionado a través de `ThemeService`, conmutando atómicamente entre `'light'` y `'dark'`.
 - **Persistencia y Detección Automática:** Detección de la preferencia nativa del sistema operativo mediante `window.matchMedia('(prefers-color-scheme: dark)')` y persistencia de la selección del usuario en `localStorage` (`roams_theme`).
 - **Adaptabilidad Integral de Componentes:** Todas las superficies de tarjetas, lienzos, formularios, diálogos modales, menús flotantes, tablas y el editor enriquecido Quill Snow se adaptan instantáneamente a los tokens de contraste corporativo en modo oscuro.

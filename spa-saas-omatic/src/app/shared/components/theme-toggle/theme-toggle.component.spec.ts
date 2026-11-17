@@ -9,6 +9,7 @@ describe('ThemeToggleComponent', () => {
   let themeService: ThemeService;
 
   beforeEach(async () => {
+    vi.useFakeTimers();
     localStorage.removeItem(THEME_STORAGE_KEY);
     document.documentElement.removeAttribute('data-theme');
     document.documentElement.classList.remove('dark-theme');
@@ -28,6 +29,8 @@ describe('ThemeToggleComponent', () => {
   });
 
   afterEach(() => {
+    component.ngOnDestroy();
+    vi.useRealTimers();
     localStorage.removeItem(THEME_STORAGE_KEY);
     document.documentElement.removeAttribute('data-theme');
     document.documentElement.classList.remove('dark-theme');
@@ -70,5 +73,44 @@ describe('ThemeToggleComponent', () => {
     themeService.setTheme('dark');
     fixture.detectChanges();
     expect(component.tooltipText()).toBe('Cambiar a modo claro');
+  });
+
+  it('should render comic speech bubble on init and auto-dismiss after 5 seconds', () => {
+    expect(component.showComicBubble()).toBe(true);
+    let bubble = fixture.nativeElement.querySelector('.comic-speech-bubble');
+    expect(bubble).toBeTruthy();
+    expect(bubble.textContent).toContain('¡Prueba el modo oscuro o claro aquí! 🌓');
+
+    // Advance 4500ms to trigger fading
+    vi.advanceTimersByTime(4500);
+    expect(component.isBubbleFading()).toBe(true);
+
+    // Advance remaining 500ms to dismiss
+    vi.advanceTimersByTime(500);
+    fixture.detectChanges();
+    expect(component.showComicBubble()).toBe(false);
+    bubble = fixture.nativeElement.querySelector('.comic-speech-bubble');
+    expect(bubble).toBeNull();
+  });
+
+  it('should dismiss comic speech bubble immediately when toggle() is called', () => {
+    expect(component.showComicBubble()).toBe(true);
+    const btn = fixture.nativeElement.querySelector('button.theme-switch-btn');
+    btn.click();
+    fixture.detectChanges();
+
+    expect(component.showComicBubble()).toBe(false);
+    const bubble = fixture.nativeElement.querySelector('.comic-speech-bubble');
+    expect(bubble).toBeNull();
+  });
+
+  it('should dismiss comic speech bubble when close button is clicked', () => {
+    expect(component.showComicBubble()).toBe(true);
+    const closeBtn = fixture.nativeElement.querySelector('.bubble-close-btn');
+    expect(closeBtn).toBeTruthy();
+    closeBtn.click();
+    fixture.detectChanges();
+
+    expect(component.showComicBubble()).toBe(false);
   });
 });

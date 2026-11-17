@@ -1006,6 +1006,16 @@ Al basar todo el sistema de diseño en tokens CSS (`var(--roams-*)`), la conmuta
 - **Efecto Reactivo de Reflexión al DOM:** Un `effect()` sincroniza automáticamente el atributo `data-theme` y las clases `.dark-theme` en la raíz del documento.
 - **Persistencia y Resiliencia:** Guarda la elección en `localStorage` (`roams_theme`) y respeta las preferencias del sistema operativo (`window.matchMedia('(prefers-color-scheme: dark)')`).
 
+#### E. Onboarding Visual y Microinteracción: Bocadillo de Cómic Efímero
+Para señalizar el interruptor de tema al usuario novel sin recurrir a modales invasivos o tutoriales pesados:
+1. **Patrón Comic Speech Bubble:** Un elemento `<output class="comic-speech-bubble" aria-live="polite">` decorativo con cola puntiaguda hacia el interruptor, borde de 2px en `--roams-accent-blue` y sombra dura pop (`3px 3px 0 var(--roams-border-inverse)`).
+2. **Ciclo de Vida Efímero (5 segundos):**
+   - Entrada elástica con `@keyframes comicPopIn`.
+   - Inicio de desvanecimiento a los 4.5 segundos (`isBubbleFading = true`).
+   - Retirada completa del árbol del DOM a los 5.0 segundos (`showComicBubble = false`).
+   - Cancelación defensiva de temporizadores en `ngOnDestroy()`.
+3. **Interacción Anticipatoria:** Si el usuario interactúa antes con el switch (`toggle()`), hace clic en el bocadillo o pulsa el botón de cierre (`&times;`), el componente descarta el bocadillo de forma inmediata.
+
 ---
 
 ### 3.25 Paginación Armónica en Cuadrículas Responsivas (Harmonic Grid Pagination) y Directrices de Código Limpio

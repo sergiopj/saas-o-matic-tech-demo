@@ -2,6 +2,13 @@
   display: inline-flex;
   align-items: center;
   vertical-align: middle;
+  position: relative;
+}
+
+.theme-toggle-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 }
 
 .theme-switch-btn {
@@ -96,5 +103,127 @@
         color: var(--roams-text-inverse);
       }
     }
+  }
+}
+
+.comic-speech-bubble {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1050;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.75rem 0.45rem 0.85rem;
+  background-color: var(--roams-surface);
+  color: var(--roams-text-primary);
+  border: 2px solid var(--roams-accent-blue);
+  border-radius: var(--roams-radius-md);
+  box-shadow: 3px 3px 0 var(--roams-border-inverse), var(--roams-shadow-md);
+  white-space: nowrap;
+  cursor: pointer;
+  animation: comicPopIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+  user-select: none;
+
+  &.fading-out {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px) scale(0.94);
+    pointer-events: none;
+  }
+
+  .bubble-tail {
+    position: absolute;
+    top: -9px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 9px solid var(--roams-accent-blue);
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: -6px;
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 7px solid var(--roams-surface);
+    }
+  }
+
+  .bubble-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .bubble-icon {
+    font-size: 0.875rem;
+    line-height: 1;
+  }
+
+  .bubble-text {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--roams-text-primary);
+  }
+
+  .bubble-close-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--roams-text-muted);
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0 0 0 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s ease, transform 0.15s ease;
+
+    &:hover {
+      color: var(--roams-status-error);
+      transform: scale(1.2);
+    }
+
+    &:focus-visible {
+      outline: 1px solid var(--roams-accent-blue);
+      border-radius: 2px;
+    }
+  }
+
+  @media (max-width: 540px) {
+    left: 0;
+    transform: none;
+
+    &.fading-out {
+      transform: translateY(4px) scale(0.94);
+    }
+
+    .bubble-tail {
+      left: 28px;
+      transform: none;
+    }
+  }
+}
+
+@keyframes comicPopIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.6) translateY(-8px);
+  }
+  70% {
+    transform: translateX(-50%) scale(1.06) translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1) translateY(0);
   }
 }

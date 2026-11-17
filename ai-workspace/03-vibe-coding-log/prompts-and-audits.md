@@ -3692,3 +3692,38 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
 - **Valor para la evaluación:** Refinamiento ergonómico de microinteracciones en componentes de navegación, eliminando fricción cognitiva mediante paginación por lotes cohesivos en componentes de carrusel continuo.
+
+---
+
+### 6.146. Bocadillo de Cómic (*Comic Speech Bubble Callout*) para Onboarding Visual del Conmutador de Tema con Auto-Desvanecimiento a los 5 Segundos
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Para aumentar el descubrimiento intuitivo del conmutador de tema Claro/Oscuro en la barra superior de navegación, el usuario solicita un indicador estilo bocadillo de cómic que señale el switch al cargar la interfaz y se oculte automáticamente a los 5 segundos.
+- **Feedback Humano:**
+  > *"toolkit estilo bocaddilo de comic para señalar el switch de thema que ese toolkit se quite en unos segundos 5 o asi no?"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Marcado Semántico Accesible (W3C A11y & SonarQube `Web:S6819`):*
+     - En [theme-toggle.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/theme-toggle/theme-toggle.component.html), se implementó el bocadillo mediante un elemento nativo `<output class="comic-speech-bubble" aria-live="polite">` en lugar de un `div` con `role="status"`.
+     - Contiene una cola con pseudoelementos (`.bubble-tail`), icono brillante, texto traducido (`theme.toggle.comicHint`) y botón de descarte accesible (`.bubble-close-btn`).
+  2. *Estilo de Cómic con Design Tokens SSOT:*
+     - En [theme-toggle.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/theme-toggle/theme-toggle.component.scss), se definió la estética de cómic sin valores hexadecimales hardcodeados:
+       - Borde contrastado de 2px en `var(--roams-accent-blue)`.
+       - Sombra sólida pop estilo viñeta: `box-shadow: 3px 3px 0 var(--roams-border-inverse), var(--roams-shadow-md)`.
+       - Animación de entrada elástica con rebote (`comicPopIn` con `cubic-bezier(0.175, 0.885, 0.32, 1.275)`).
+       - Desvanecimiento suave mediante clase `.fading-out` (`opacity: 0; transform: translateY(4px) scale(0.94)`).
+  3. *Temporizador Efímero de 5 Segundos y Cancelación Defensiva:*
+     - En [theme-toggle.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/theme-toggle/theme-toggle.component.ts), se orquestó un temporizador de doble fase:
+       - A los 4.5 segundos (`4500 ms`): se activa la señal `isBubbleFading = true` para iniciar la transición CSS.
+       - A los 5.0 segundos (`5000 ms`): se commuta `showComicBubble = false` retirando el nodo del DOM.
+       - Descarte anticipado: Si el usuario pulsa el switch (`toggle()`), hace clic en el bocadillo o pulsa el aspa `&times;`, se cancelan inmediatamente los temporizadores y se oculta.
+       - Limpieza en `ngOnDestroy()` previniendo fugas de memoria.
+  4. *Soporte Multilingüe Completo (es, en, de, fr):*
+     - Claves agregadas en [translations.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/i18n/translations.ts): `theme.toggle.comicHint` y `theme.toggle.closeHint`.
+  5. *Batería de Pruebas Unitarias con Fake Timers:*
+     - En [theme-toggle.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/theme-toggle/theme-toggle.component.spec.ts), se añadieron 3 nuevas pruebas unitarias con `vi.useFakeTimers()` verificando renderizado, auto-dismiss a los 5s, descarte al hacer clic en el switch y descarte por botón de cierre.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **248 pruebas unitarias pasando al 100%** (29 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+- **Valor para la evaluación:** Demostración de microinteracciones refinadas orientadas al descubrimiento de funcionalidades (*product discovery*), combinando animación CSS lúdica y ligera con accesibilidad W3C e higiene de código sin librerías externas pesadas.
