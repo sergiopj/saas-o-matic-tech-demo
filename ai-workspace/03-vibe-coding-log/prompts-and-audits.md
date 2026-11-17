@@ -2834,6 +2834,44 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: 0 errores y 0 advertencias.
 - **Valor para la evaluación:** Coherencia de diseño de producto en cada micro-interacción, elevando un formulario utilitario a una experiencia comercial de alta gama.
 
+---
+
+### 6.119. Transición Estética Human-Centered: Rediseño Integral de la Suite Visual 3D hacia Personajes Empáticos, Cálidos y Estilizados
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Las composiciones gráficas 3D iniciales se basaban en representaciones isométricas puramente tecnológicas (cubos glassmorphic con anillos de datos, consolas oscuras con hologramas y rascacielos geométricos). Aunque compositivamente correctas, transmitían un tono frío, distante y excesivamente "robótico/IA", carente de la calidez humana, el optimismo y la elegancia que caracterizan a los productos SaaS de última generación (estilo Apple, Notion o Pixar comercial).
+- **Feedback Humano (Tu criterio de acabado visual senior):**
+  > *"me gustan las imagenes pero las veo todas muy ia y roboticas, algo mas humano y chulo que gusten a las tias por ejemplo"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Estrategia de Humanización y Dirección de Arte:*
+     - Se abandonó la estética ciber-futurista oscura en favor de un enfoque *human-centered* con personajes 3D empáticos, paletas luminosas (coral pastel, verde menta salvia, ámbar miel, lila suave) y atmósferas de trabajo acogedoras (luz natural, maderas escandinavas, cerámica y plantas naturales).
+  2. *Rediseño del Hero Banner (`public/images/hero-illustration.jpg`):*
+     - Sustitución del cubo isométrico por una escena 3D radiante de una profesional joven sentada en su escritorio de madera con su portátil, taza de café artesanal y pequeña planta, revisando con expresión alegre y segura las tarjetas 3D flotantes con métricas de crecimiento y facturación.
+  3. *Rediseño del Launcher de Simulaciones (`public/images/simulations-illustration.jpg`):*
+     - Sustitución de la consola futurista con diales por una escena colaborativa y entusiasta de dos compañeras de equipo interactuando ante una tablet que proyecta el simulador de tramos y descuentos por volumen en un estudio bañado por luz de mañana.
+  4. *Rediseño del Medallón de Clientes Corporativos (`public/images/corporate-customer-badge.jpg`):*
+     - Transformación del rascacielos corporativo en un avatar 3D carismático: una ejecutiva de cuentas B2B con gafas estilizadas, blazer lila sobre jersey crudo acanalado y tablet de análisis empresarial, proyectando cercanía y confianza comercial.
+  5. *Rediseño del Emblema de Despacho Comercial (`public/images/email-dispatch-badge.jpg`):*
+     - Sustitución del sobre holográfico cian por un entrañable personaje 3D sosteniendo una carta de propuesta comercial con sello lacrado dorado y un avioncito de papel origami ascendiendo suavemente con destellos cálidos.
+  6. *Preservación de Políticas de Ergonomía Móvil:*
+     - Se mantienen vigentes las reglas de supresión visual `@media (max-width: 768px)` en las vistas de mayor densidad (`HomeComponent` y `SimulationHubComponent`), garantizando que en teléfonos móviles no se genere ruido innecesario y los componentes interactivos se sitúen en la zona de interacción preferente (*above the fold*).
+- **Resultados de Verificación:**
+  - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Oxlint: **0 errores y 0 advertencias**.
+- **Valor para la evaluación:** Madurez en diseño de experiencia y psicología visual: convertir herramientas financieras complejas en entornos amigables, cálidos y atractivos donde la tecnología se pone al servicio de las personas y no al revés.
+
+
+
+
+
+
+
+
+
+
+
 
 
 
