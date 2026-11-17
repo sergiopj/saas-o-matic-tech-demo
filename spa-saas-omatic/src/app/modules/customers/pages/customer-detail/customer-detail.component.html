@@ -112,7 +112,7 @@
         </div>
 
         <div class="metrics-row">
-          <mat-form-field appearance="outline" class="metric-field" subscriptSizing="dynamic">
+          <mat-form-field appearance="outline" class="metric-field">
             <mat-label>{{ 'simulation.form.storage' | translate }}</mat-label>
             <mat-icon matPrefix>cloud</mat-icon>
             <input
@@ -122,9 +122,10 @@
               [value]="storageGb()"
               (input)="onStorageChange(+$any($event.target).value)"
             />
+            <mat-hint>{{ 'simulation.form.storageHint' | translate }}</mat-hint>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="metric-field" subscriptSizing="dynamic">
+          <mat-form-field appearance="outline" class="metric-field">
             <mat-label>{{ 'simulation.form.apiCalls' | translate }}</mat-label>
             <mat-icon matPrefix>api</mat-icon>
             <input
@@ -135,6 +136,7 @@
               [value]="apiCalls()"
               (input)="onApiCallsChange(+$any($event.target).value)"
             />
+            <mat-hint>{{ 'simulation.form.apiCallsHint' | translate }}</mat-hint>
           </mat-form-field>
         </div>
 
@@ -192,6 +194,15 @@
               <span class="tier-calc">({{ tier3Users() }} × 5 €)</span>
             </div>
             <strong class="breakdown-val">{{ tier3Cost() | localizedCurrency:'EUR' }}</strong>
+          </div>
+
+          <div class="breakdown-row tier-row capacity-tier-row">
+            <div class="breakdown-label">
+              <span class="tier-tag cap">INFRA</span>
+              <span>{{ 'simulation.breakdown.capacity' | translate }}</span>
+              <span class="tier-calc">({{ storageGb() }} GB • {{ apiCalls() | number }} calls)</span>
+            </div>
+            <span class="capacity-badge">{{ 'simulation.breakdown.included' | translate }}</span>
           </div>
 
           <div class="divider"></div>
