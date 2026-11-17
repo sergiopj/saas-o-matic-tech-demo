@@ -165,7 +165,21 @@
     flex: 1;
   }
 
+  .gmail-btn {
+    color: #ea4335;
+    border-color: rgba(234, 67, 53, 0.4);
+    gap: 0.4rem;
+
+    &:hover {
+      background: rgba(234, 67, 53, 0.06);
+      border-color: #ea4335;
+    }
+  }
+
   .dispatch-btn {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
     background-color: var(--roams-primary, #2563eb);
     color: #ffffff;
     gap: 0.5rem;

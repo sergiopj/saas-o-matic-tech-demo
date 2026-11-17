@@ -145,18 +145,29 @@
 
     <div class="actions-divider"></div>
 
+    <button
+      type="button"
+      mat-stroked-button
+      class="gmail-btn"
+      (click)="openGmailWeb()"
+      [matTooltip]="'customers.emailDialog.openGmail' | translate"
+    >
+      <mat-icon aria-hidden="true">open_in_new</mat-icon>
+      <span>Gmail Web</span>
+    </button>
+
     <button type="button" mat-stroked-button (click)="close()">
       {{ 'customers.emailDialog.cancel' | translate }}
     </button>
 
-    <button
-      type="button"
+    <a
       mat-flat-button
       class="dispatch-btn"
-      (click)="openMailClient()"
+      [href]="mailtoUri()"
+      (click)="onMailtoDispatch()"
     >
       <mat-icon aria-hidden="true">send</mat-icon>
       <span>{{ 'customers.emailDialog.openClient' | translate }}</span>
-    </button>
+    </a>
   </mat-dialog-actions>
 </div>

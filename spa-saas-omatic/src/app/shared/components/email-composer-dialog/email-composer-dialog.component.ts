@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   ViewChild,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -135,14 +136,49 @@ export class EmailComposerDialogComponent implements AfterViewInit {
     }
   }
 
-  openMailClient(): void {
-    const to = encodeURIComponent(this.recipient());
+  readonly mailtoUri = computed(() => {
+    const to = this.recipient().trim();
     const subjectParam = encodeURIComponent(this.subject());
-    const bodyParam = encodeURIComponent(this.getPlainText());
-    const mailtoUri = `mailto:${to}?subject=${subjectParam}&body=${bodyParam}`;
+    const plain = this.getPlainText()
+      .replace(/\r\n/g, '\n')
+      .replace(/\n/g, '\r\n');
+    const bodyParam = encodeURIComponent(plain);
+    return `mailto:${to}?subject=${subjectParam}&body=${bodyParam}`;
+  });
+
+  onMailtoDispatch(): void {
+    setTimeout(() => {
+      this.dialogRef.close('dispatched');
+    }, 400);
+  }
+
+  openMailClient(): void {
+    const uri = this.mailtoUri();
+
+    if (typeof document !== 'undefined') {
+      const link = document.createElement('a');
+      link.href = uri;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else if (typeof window !== 'undefined') {
+      window.location.href = uri;
+    }
+
+    setTimeout(() => {
+      this.dialogRef.close('dispatched');
+    }, 400);
+  }
+
+  openGmailWeb(): void {
+    const to = encodeURIComponent(this.recipient().trim());
+    const su = encodeURIComponent(this.subject());
+    const body = encodeURIComponent(this.getPlainText());
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${su}&body=${body}`;
 
     if (typeof window !== 'undefined') {
-      window.location.href = mailtoUri;
+      window.open(gmailUrl, '_blank', 'noopener,noreferrer');
     }
 
     this.dialogRef.close('dispatched');

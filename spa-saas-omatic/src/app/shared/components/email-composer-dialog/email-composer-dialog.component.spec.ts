@@ -77,10 +77,37 @@ describe('EmailComposerDialogComponent', () => {
     expect(component.copied()).toBe(true);
   });
 
-  it('should dispatch mailto URI on openMailClient and close dialog', () => {
+  it('should compute well-formed mailto URI adhering to RFC 6068 without %40 in recipient', () => {
+    const uri = component.mailtoUri();
+
+    expect(uri).toContain('mailto:corporate@acme.com?');
+    expect(uri).not.toContain('mailto:corporate%40acme.com');
+    expect(uri).toContain('subject=SaaS-O-Matic%20Proposal');
+    expect(uri).toContain('body=');
+  });
+
+  it('should open Gmail Web in a new tab on openGmailWeb', () => {
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+
+    component.openGmailWeb();
+
+    expect(openSpy).toHaveBeenCalledWith(
+      expect.stringContaining('mail.google.com/mail/?view=cm'),
+      '_blank',
+      'noopener,noreferrer'
+    );
+    expect(mockDialogRef.close).toHaveBeenCalledWith('dispatched');
+    openSpy.mockRestore();
+  });
+
+  it('should dispatch mailto URI on openMailClient and close dialog after timeout', () => {
+    vi.useFakeTimers();
     component.openMailClient();
 
+    vi.advanceTimersByTime(400);
+
     expect(mockDialogRef.close).toHaveBeenCalledWith('dispatched');
+    vi.useRealTimers();
   });
 
   it('should close dialog when cancel/close is called', () => {
