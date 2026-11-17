@@ -17,7 +17,7 @@ El proyecto sigue una convención corporativa de microservicio y single-page app
 > [!NOTE]
 > **🖥️ Recomendación de Visualización (Desktop Optimizado / 100% Responsive):**  
 > Al tratarse de una herramienta comercial interna orientada a la analítica de consumo, simulación interactiva de tramos en tiempo real, tablas de histórico denso y composición de propuestas, **se recomienda su uso en pantallas de escritorio (Desktop $\ge$ 1024px)** para maximizar la productividad y ergonomía del comercial. No obstante, la plataforma es **100% responsive** y está completamente adaptada para tablets y móviles (navbar en 2 filas, sidebar colapsable, drawer de filtros táctil y grids fluidos).  
-> **Anclaje Visual en Desktop vs. Cero Ruido en Smartphones:** Las ilustraciones 3D *human-centered* aportan un alto valor de anclaje visual cálido para reconocer cada sección de un vistazo en desktop y tablets; en smartphones ($\le$ 768px), estas imágenes tipo banner se ocultan de forma selectiva para erradicar el ruido visual y garantizar que los formularios interactivos y métricas queden visibles *above the fold*.
+> **Anclaje Visual en Desktop vs. Cero Ruido en Smartphones:** Las ilustraciones 3D de producto y arquitectura (*warm isometric design*) aportan un anclaje visual cálido y reconocible para identificar cada sección de un vistazo en desktop y tablets sin necesidad de figuras humanas ni elementos cibernéticos oscuros; en smartphones ($\le$ 768px), estas imágenes tipo banner se ocultan de forma selectiva para erradicar el ruido visual y garantizar que los formularios interactivos y métricas queden visibles *above the fold*.
 
 ---
 

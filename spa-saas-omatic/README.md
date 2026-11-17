@@ -6,17 +6,17 @@ Dashboard Comercial interactivo para la optimización y presupuestado dinámico 
 > **💻 Recomendación de Entorno (Desktop Optimizado & 100% Responsive):**  
 > Al tratarse de un panel operativo corporativo para el equipo comercial (diseñado para la simulación interactiva de tramos, análisis de métricas, filtros avanzados, tablas de histórico denso y composición de presupuestos), **la experiencia de uso óptima está recomendada en pantallas de escritorio (Desktop $\ge$ 1024px)** para maximizar la productividad visual.  
 > No obstante, la plataforma es **100% responsive** y está completamente adaptada para tablets y smartphones (navbar dinámico en 2 filas en pantallas $\le$ 640px, sidebar colapsable, drawer deslizante de filtros con botones táctiles y tarjetas reorganizables).  
-> **Anclaje Visual en Desktop vs. Cero Ruido en Smartphones:** Las ilustraciones 3D *human-centered* aportan un alto valor de anclaje visual cálido para reconocer cada sección de un vistazo en desktop y tablets; en smartphones ($\le$ 768px), las imágenes tipo banner se ocultan de forma selectiva para erradicar el ruido visual y garantizar que los formularios interactivos y métricas queden visibles *above the fold*.
+> **Anclaje Visual en Desktop vs. Cero Ruido en Smartphones:** Las ilustraciones 3D de producto y arquitectura (*warm isometric design*) aportan un anclaje visual cálido y reconocible para identificar cada sección de un vistazo en desktop y tablets sin necesidad de figuras humanas ni elementos cibernéticos oscuros; en smartphones ($\le$ 768px), las imágenes tipo banner se ocultan de forma selectiva para erradicar el ruido visual y garantizar que los formularios interactivos y métricas queden visibles *above the fold*.
 
 ---
 
-## 🎨 Suite Visual 3D Human-Centered y Ergonomía de Diseño
+## 🎨 Suite Visual 3D Táctil (Warm Product Design) y Ergonomía
 
-La interfaz gráfica incorpora una suite visual basada en personajes 3D empáticos, cálidos y de estética comercial cuidada (estilo Apple, Notion o Pixar), reemplazando composiciones geométricas frías o robóticas:
-1. **Hero Banner (`/home` - `hero-illustration.jpg`):** Profesional joven revisando analíticas de facturación en su portátil con luz natural y plantas de interior.
-2. **Estudio de Simulaciones (`/simulations` - `simulations-illustration.jpg`):** Dos compañeras de equipo colaborando sobre una tablet con el simulador interactivo de tramos y descuentos.
-3. **Medallón de Clientes Corporativos (`/customers` - `corporate-customer-badge.jpg`):** Avatar 3D de ejecutiva de cuentas en blazer lila sobre jersey crudo con tablet analítica.
-4. **Despacho Comercial (`email-composer-dialog` - `email-dispatch-badge.jpg`):** Emblema en el diálogo de emisión de presupuestos, con una propuesta lacrada en oro y un avioncito de papel origami ascendente.
+La interfaz gráfica incorpora una suite visual de diseño 3D cálido y táctil (estilo Apple, Stripe y Notion), descartando tanto figuras humanas como estéticas frías o de neón tipo Tron:
+1. **Hero Banner (`/home` - `hero-illustration.jpg`):** Puesto de trabajo escandinavo bañado por luz matinal natural, con portátil mostrando el panel de facturación, taza cerámica, planta suculenta, tablet y tarjetas *frosted glass* con curvas de ingresos y divisas (€, $, £).
+2. **Estudio de Simulaciones (`/simulations` - `simulations-illustration.jpg`):** Taller de simulación 3D con mesa de madera clara, tablet con sliders interactivos de precios y barras de comparación por volumen, bloques geométricos físicos en tonos pastel (salvia, coral, ámbar), fichas de descuento (-10%, -20%), planta monstera y paneles flotantes de cristal esmerilado con fórmulas de cálculo.
+3. **Medallón de Clientes Corporativos (`/customers` - `corporate-customer-badge.jpg`):** Maqueta arquitectónica 3D de una sede corporativa contemporánea y eco-friendly con madera de cedro, grandes ventanales, jardín en la azotea y un maletín ejecutivo de cuero tostado con herrajes dorados.
+4. **Despacho Comercial (`email-composer-dialog` - `email-dispatch-badge.jpg`):** Emblema en el diálogo de emisión de presupuestos con un sobre de gruesa textura crema, sello lacrado en oro en relieve, documento de propuesta y un avión de papel origami pastel ascendiendo con destellos dorados.
 
 ### Ergonomía de Controles y Micro-tipografía:
 - **Navbar Armonizado:** El selector de divisas (`CurrencySelectorComponent`) comparte dimensiones idénticas con el selector de idioma (`LanguageSelectorComponent`), con esquinas redondeadas estilo píldora (`--roams-radius-md`) y glifo de moneda (`monetization_on`).

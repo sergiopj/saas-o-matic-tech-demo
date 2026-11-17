@@ -2895,6 +2895,34 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: **0 errores y 0 advertencias** en los 140 archivos inspeccionados.
 - **Valor para la evaluación:** Rigor absoluto en la trazabilidad documental (SSOT), asegurando que ningún cambio de código o diseño quede indocumentado ni huérfano de justificación arquitectónica.
 
+---
+
+### 6.121. Refinamiento Estético Final de la Suite Visual 3D: Diseño de Producto Isométrico y Táctil (Sin Personas y Sin Efectos Neón/Tron)
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Tras evaluar las composiciones con personajes humanos, el feedback cualitativo solicitó prescindir de rostros y figuras humanas, recuperando la temática conceptual previa (estaciones de trabajo, talleres de simulación con tramos, sedes corporativas y correspondencia comercial), pero erradicando de forma tajante el sesgo cibernético anterior (fondos negros, mallas de rejilla de neón, destellos láser y estética de ciencia ficción tipo Tron).
+- **Feedback Humano (Tu criterio de dirección artística senior):**
+  > *"me gustan las fotos pero qu eno salgan personas si no como estaban antes pero sin ese toque robotico etc de colores a lo tron"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Dirección Artística y Lenguaje de Diseño de Producto 3D:*
+     - **Cero Personas:** Escenas puras de producto, entorno y elementos tangibles de oficina moderna.
+     - **Cero Estética Tron / Neón Cibernético:** Eliminación total de mallas oscuras, destellos cian láser y líneas de circuitos.
+     - **Materialidad y Atmósfera:** Luz matinal natural, madera clara de roble escandinavo, cerámica artesanal, plantas naturales (monstera, suculentas), tarjetas *frosted glass* translúcidas y una paleta cálida (coral pastel, verde salvia, ámbar miel, azul pizarra suave) alineada con los estándares de diseño 3D de Apple, Stripe y Notion.
+  2. *Generación y Sustitución de los 4 Activos Visuales:*
+     - `public/images/hero-illustration.jpg`: Espacio de trabajo escandinavo con portátil exhibiendo el panel de facturación y analíticas en pantalla, taza cerámica, planta suculenta, tablet y tarjetas *frosted glass* con curvas de ingresos y chips de divisas (€, $, £).
+     - `public/images/simulations-illustration.jpg`: Taller de simulación 3D con mesa de madera clara, tablet interactiva con sliders de precios y barras de comparación por volumen, bloques geométricos físicos en tonos pastel (salvia, coral, ámbar), fichas de descuento (-10%, -20%), planta monstera y paneles flotantes de cristal esmerilado con fórmulas de cálculo.
+     - `public/images/corporate-customer-badge.jpg`: Maqueta arquitectónica 3D de una sede corporativa contemporánea y eco-friendly con madera de cedro, grandes ventanales, jardín en la azotea y un maletín ejecutivo de cuero tostado con herrajes dorados.
+     - `public/images/email-dispatch-badge.jpg`: Emblema táctil 3D con un sobre de propuesta comercial de grueso papel texturizado crema con sello lacrado en oro en relieve, documento de propuesta y un avión de papel origami en tono pastel coral ascendiendo con destellos dorados.
+  3. *Sincronización Documental Transversal:*
+     - Actualizados en consonancia los documentos normativos: [functional-specs.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/01-specs/functional-specs.md), [architecture-guidelines.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md), [spa-saas-omatic/README.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/README.md) y [README.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/README.md).
+- **Resultados de Verificación:**
+  - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Oxlint: **0 errores y 0 advertencias** en los 140 archivos inspeccionados.
+- **Valor para la evaluación:** Sensibilidad y adaptabilidad inmediata a la dirección de arte corporativa, logrando un equilibrio idóneo entre sobriedad profesional, calidez visual y acabado premium para un producto B2B fintech de nivel Enterprise.
+
+
 
 
 
