@@ -2033,9 +2033,18 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
 - **Tu criterio y dirección de calidad:** Identificaste el defecto visual en Windows solicitando una separación limpia y profesional:
   *"por otro lado en el front en el selector de idioma al final me dijiste que mejor no poner la bandera? y ademas sale el texto asi ESeSPAÑOL TODO JUNTO, al menos mete un - ES-Español"*
 - **Solución técnica implementada:**
-  1. *Botón Principal (Trigger):* Sustitución del emoji por el icono semántico de Material Symbols `<mat-icon>translate</mat-icon>`, garantizando consistencia idéntica en cualquier sistema operativo (Windows, macOS, Linux, Android, iOS).
+  1. *Botón Principal (Trigger):* Sustitución del emoji por el icono semántico de Material Symbols `<mat-icon class="lang-icon">translate</mat-icon>` en color Cyan (`var(--roams-accent-cyan)`), garantizando consistencia idéntica en cualquier sistema operativo (Windows, macOS, Linux, Android, iOS).
   2. *Desplegable de Idiomas (Menu):* Sustitución de los emojis por insignias tipográficas estructuradas con formato `[ ES ] - Español`, `[ EN ] - English`, `[ DE ] - Deutsch`, `[ FR ] - Français`.
   3. *Persistencia y Auto-detección:* Sincronización en `localStorage` (`saas_omatic_lang`) con fallback al idioma preferido del navegador (`navigator.language`).
+- **Archivos modificados:**
+  - [language-selector.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/language-selector/language-selector.component.html): Estructura del botón con icono `translate` y menú con etiquetas ISO.
+  - [language-selector.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/language-selector/language-selector.component.scss): Estilos para `.item-code`, `.item-separator` y `.item-label` con tokens `--roams-*`.
+  - [language-selector.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/language-selector/language-selector.component.spec.ts): Prueba unitaria actualizada verificando icono semántico y etiquetas.
+  - [i18n.service.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/services/i18n.service.ts): Inicialización reactiva con `localStorage` y auto-detección del navegador.
+- **Resultados de Verificación:**
+  - `oxlint --type-aware src/`: 0 advertencias, 0 errores en 59 archivos de frontend.
+  - `vitest`: 141 pruebas unitarias pasando al 100% (23 suites).
+  - Commit Git: `f63e362` (*"fix(ui): eliminate windows flag emoji glitch by displaying semantic translate icon and formatted ISO tags"*).
 - **Valor para la evaluación:** Atención al detalle multiplataforma y erradicación de comportamientos anómalos derivados de diferencias en subsistemas de fuentes tipográficas entre sistemas operativos.
 
 ### 6.89 Ergonomía y DX para el Evaluador: Arranque y Verificación en 1 Solo Comando
@@ -2056,6 +2065,13 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
      - Requisitos previos claros (Node.js >= 20.x/22.x LTS, npm >= 10.x, SQLite embebido sin dependencias externas).
      - Puesta en marcha rápida en 3 pasos con 1 solo comando por paso.
      - Tabla de flujos alternativos para terminales separadas o Docker Compose.
+- **Archivos modificados:**
+  - [package.json](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/package.json): Orquestador monorepo con `concurrently`, `postinstall` y comandos unificados.
+  - [README.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/README.md): Guía de puesta en marcha rápida en 1 paso para el evaluador.
+- **Resultados de Verificación:**
+  - `npm test`: 264 pruebas unitarias e integración pasando al 100% (123 backend Jest + 141 frontend Vitest).
+  - `npm run lint`: 0 errores, 0 advertencias en 129 archivos.
+  - Commit Git: `b2ff1e9` (*"feat(dx): introduce 1-command startup, unified testing, and streamlined quickstart for technical evaluators"*).
 - **Valor para la evaluación:** Reduce a cero la fricción del entrevistador técnico, garantizando una primera impresión sobresaliente de madurez, orden y empatía con el revisor.
 
 
