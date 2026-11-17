@@ -161,8 +161,81 @@
         }
       }
 
-      button[data-tooltip],
-      .ql-picker-label[data-tooltip] {
+      .ql-picker.ql-header {
+        width: 112px;
+
+        .ql-picker-label {
+          color: var(--roams-text-primary);
+          font-size: 0.85rem;
+          font-weight: 500;
+          height: 28px;
+          padding: 2px 8px;
+          border-radius: var(--roams-radius-sm);
+          border: 1px solid var(--roams-border-light);
+          background-color: var(--roams-surface);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          &::before {
+            color: var(--roams-text-primary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            line-height: 24px;
+          }
+
+          svg {
+            width: 14px;
+            height: 14px;
+            color: var(--roams-text-secondary);
+            stroke: var(--roams-text-secondary);
+          }
+
+          &:hover {
+            border-color: var(--roams-accent-blue);
+            background-color: color-mix(in srgb, var(--roams-accent-blue) 6%, transparent);
+          }
+        }
+
+        .ql-picker-options {
+          background-color: var(--roams-surface);
+          border: 1px solid var(--roams-border);
+          border-radius: var(--roams-radius-md);
+          box-shadow: var(--roams-shadow-md);
+          padding: 4px;
+          z-index: 100;
+
+          .ql-picker-item {
+            color: var(--roams-text-primary);
+            font-size: 0.85rem;
+            padding: 5px 8px;
+            border-radius: var(--roams-radius-sm);
+            transition: all 0.15s ease;
+
+            &::before {
+              color: var(--roams-text-primary);
+            }
+
+            &:hover,
+            &.ql-selected {
+              color: var(--roams-accent-blue);
+              background-color: color-mix(in srgb, var(--roams-accent-blue) 10%, transparent);
+
+              &::before {
+                color: var(--roams-accent-blue);
+              }
+            }
+          }
+        }
+
+        &.ql-expanded {
+          .ql-picker-label {
+            border-color: var(--roams-accent-blue);
+          }
+        }
+      }
+
+      button[data-tooltip] {
         &::after {
           content: attr(data-tooltip);
           position: absolute;
@@ -216,11 +289,6 @@
           opacity: 1;
           visibility: visible;
         }
-      }
-
-      .ql-picker.ql-expanded .ql-picker-label[data-tooltip]::after,
-      .ql-picker.ql-expanded .ql-picker-label[data-tooltip]::before {
-        display: none;
       }
     }
 

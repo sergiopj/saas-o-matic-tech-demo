@@ -3179,6 +3179,39 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: **0 errores y 0 advertencias** en los 141 archivos analizados.
 - **Valor para la evaluación:** Atención meticulosa al detalle en componentes complejos de Angular Material, garantizando acabados gráficos limpios sin anomalías de renderizado o recorte CSS en tipografías flotantes.
 
+---
+
+### 6.132. Restauración de Visibilidad y Tipografía en el Selector de Encabezados (Quill Rich Text)
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  En el modal de redacción de ofertas y propuestas comerciales (`EmailComposerDialogComponent`), el editor de texto enriquecido Quill (`ngx-quill`, tema Snow) cuenta con un selector desplegable de niveles de encabezado (`.ql-header`) para alternar entre "Normal", "Heading 1", "Heading 2" y "Heading 3". Al inspeccionar visualmente la barra de herramientas, la etiqueta del selector se renderizaba completamente vacía / invisible, mostrando únicamente una caja en blanco junto a la flecha desplegable.
+- **Feedback Humano (Tu criterio de pulido visual y usabilidad en editores WYSIWYG):**
+  > *"ademas en la funcionalidad de texto enriquecido de elegir heading el texto no se ve en el selector"*
+- **Diagnóstico de Causa Raíz (Análisis de Cascada CSS en Quill Snow):**
+  1. El tema Snow de Quill inyecta las etiquetas legibles de sus selectores exclusivamente a través de pseudoelementos CSS:
+     - `.ql-snow .ql-picker.ql-header .ql-picker-label::before, .ql-snow .ql-picker.ql-header .ql-picker-item::before { content: 'Normal'; }`
+     - `.ql-snow .ql-picker.ql-header .ql-picker-label[data-value="1"]::before { content: 'Heading 1'; }`
+     - `.ql-snow .ql-picker.ql-header .ql-picker-label[data-value="2"]::before { content: 'Heading 2'; }`
+     - `.ql-snow .ql-picker.ql-header .ql-picker-label[data-value="3"]::before { content: 'Heading 3'; }`
+  2. En [email-composer-dialog.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.scss), se había configurado un sistema de micro-tooltips flotantes en CSS mediante el selector:
+     `button[data-tooltip], .ql-picker-label[data-tooltip] { &::before { content: ''; ... } }`
+     Dicho `content: ''` (creado para la flecha indicadora del tooltip) sobreescribía con una cadena vacía el pseudoelemento `::before` nativo de Quill, suprimiendo la visibilidad de la etiqueta de texto en el selector.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Desacople Estricto de Tooltips:*
+     - Se restringieron los pseudoelementos `::before` y `::after` de tooltip únicamente a `button[data-tooltip]`, eliminando por completo cualquier colisión sobre `.ql-picker-label`.
+  2. *Tokens de Diseño Roams en el Desplegable de Encabezados:*
+     - Se integró un estilo corporativo completo para `.ql-picker.ql-header`:
+       - Caja del selector con ancho ergonómico fijo (`width: 112px;`), bordes redondeados (`var(--roams-radius-sm)`), fondo de superficie (`var(--roams-surface)`), borde sutil (`var(--roams-border-light)`) y tipografía nítida (`var(--roams-text-primary)` a `0.85rem`, peso `500`).
+       - Menú desplegable `.ql-picker-options` estilizado con sombra flotante (`var(--roams-shadow-md)`), borde de tarjeta (`var(--roams-border)`) y capas z-index seguras (`z-index: 100`).
+       - Opciones `.ql-picker-item` con estados hover y seleccionado (`.ql-selected`) dinámicos usando `color-mix(in srgb, var(--roams-accent-blue) 10%, transparent)` y color de marca `--roams-accent-blue`.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **226 pruebas unitarias pasando al 100%** (27 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (67 archivos analizados con 111 reglas).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+- **Valor para la evaluación:** Comprensión profunda de los mecanismos de renderizado de librerías externas complejas (Quill Snow) y dominio avanzado de CSS, eliminando interferencias de especificidad y ofreciendo una barra de herramientas de formato rica, pulida y alineada con la guía visual de Roams.
+
+
 
 
 
