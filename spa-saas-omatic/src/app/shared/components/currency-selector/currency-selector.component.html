@@ -1,20 +1,34 @@
 <div class="currency-selector-wrapper">
-  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="currency-field">
-    <mat-select
-      [value]="selectedCurrency()"
-      (valueChange)="onCurrencyChange($event)"
-      [attr.aria-label]="'currency.selector.aria' | translate"
-    >
-      @for (option of options(); track option.code) {
-        <mat-option [value]="option.code">
-          <span class="currency-option-content">
-            <strong class="currency-code">{{ option.code }}</strong>
-            <span class="currency-symbol">({{ option.symbol }})</span>
-          </span>
-        </mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+  <button
+    type="button"
+    mat-button
+    class="currency-menu-trigger"
+    [matMenuTriggerFor]="currencyMenu"
+    [attr.aria-label]="'currency.selector.aria' | translate"
+  >
+    <mat-icon class="currency-icon" aria-hidden="true">paid</mat-icon>
+    <span class="current-code">{{ selectedCurrency() }}</span>
+    <mat-icon class="dropdown-arrow" aria-hidden="true">arrow_drop_down</mat-icon>
+  </button>
+
+  <mat-menu #currencyMenu="matMenu" class="currency-menu-panel" xPosition="before">
+    @for (option of options(); track option.code) {
+      <button
+        mat-menu-item
+        class="currency-menu-item"
+        [class.active-item]="selectedCurrency() === option.code"
+        (click)="onCurrencyChange(option.code)"
+      >
+        <span class="item-code">{{ option.code }}</span>
+        <span class="item-separator" aria-hidden="true">-</span>
+        <span class="item-symbol">({{ option.symbol }})</span>
+        <span class="item-label">{{ option.label }}</span>
+        @if (selectedCurrency() === option.code) {
+          <mat-icon class="item-check" aria-hidden="true">check</mat-icon>
+        }
+      </button>
+    }
+  </mat-menu>
 
   <span
     class="status-indicator"

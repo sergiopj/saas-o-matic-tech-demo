@@ -2701,6 +2701,35 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: 0 errores y 0 advertencias.
 - **Valor para la evaluación:** Pulcritud visual, jerarquía tipográfica y atención senior al detalle de diseño de interfaces.
 
+---
+
+### 6.112. Homogeneización Visual y Simetría de Controles en Navbar: Rediseño del Selector de Divisa con Disparador Simétrico e Icono de Moneda (`paid`)
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  En la barra de navegación superior ([navbar.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/navbar/navbar.component.html)), el selector de idioma utilizaba un botón disparador estilizado (`.lang-menu-trigger`) con altura de 40px, esquinas redondeadas (`--roams-radius-md`), fondo oscuro (`--roams-bg-input-dark`), borde sutil (`--roams-border-inverse`), icono temático en cian y panel desplegable `mat-menu`. Por contra, el selector de divisa utilizaba un `<mat-form-field appearance="outline">` con un `<mat-select>` que visualmente difería en altura, radio de esquinas y espaciado, rompiendo la simetría de los controles de cabecera.
+- **Feedback Humano (Tu sentido estético y de simetría UI):**
+  *"en el navbar me gustaria que el selecytor de currency sea igual de tamaño al del idioma y igual de forma de esquinitas redondas etc y que le ponga sun iconito tambien estilo al de languaje pero una moneda"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Refactor del Template ([currency-selector.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/currency-selector/currency-selector.component.html)):*
+     - Sustitución de `<mat-form-field>` por un botón disparador `<button mat-button class="currency-menu-trigger" [matMenuTriggerFor]="currencyMenu">`.
+     - Incorporación del icono oficial de moneda de Material: `<mat-icon class="currency-icon" aria-hidden="true">paid</mat-icon>`.
+     - Muestra del código ISO actual en mayúsculas (`{{ selectedCurrency() }}`) flanqueado por el icono y la flecha de despliegue (`arrow_drop_down`).
+     - Despliegue de un menú contextual `<mat-menu>` que detalla el código ISO, separador, símbolo (ej. `(€)`, `($)`) y nombre de la divisa, con checkmark en la divisa activa.
+     - Conservación del indicador de sincronización en vivo (`status-indicator`), manteniendo intacta la monitorización de salud de la API pública de divisas.
+  2. *Simetría en SCSS ([currency-selector.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/currency-selector/currency-selector.component.scss)):*
+     - Altura idéntica de 40px (`height: 40px !important`).
+     - Mismo radio de esquinas redondeadas (`border-radius: var(--roams-radius-md) !important`).
+     - Mismo fondo, borde e interacciones hover (`background-color: var(--roams-bg-input-dark)`, `border: 1px solid var(--roams-border-inverse)`).
+     - Icono de moneda `.currency-icon` coloreado en `var(--roams-accent-cyan)`, creando una pareja visualmente equilibrada con el selector de idioma.
+  3. *Eliminación de Módulos No Utilizados ([currency-selector.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/currency-selector/currency-selector.component.ts)):*
+     - Sustitución de `MatFormFieldModule` y `MatSelectModule` por `MatButtonModule` y `MatMenuModule`, aligerando el árbol de dependencias.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
+  - Oxlint: 0 errores y 0 advertencias.
+- **Valor para la evaluación:** Coherencia de diseño de producto, simetría en el sistema de diseño y acabado visual de nivel corporativo.
+
+
 
 
 

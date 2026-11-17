@@ -1,6 +1,6 @@
 import { Component, inject, computed } from '@angular/core';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CurrencyService } from '../../../core/services/currency.service';
@@ -11,8 +11,8 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-currency-selector',
   imports: [
-    MatFormFieldModule,
-    MatSelectModule,
+    MatButtonModule,
+    MatMenuModule,
     MatIconModule,
     MatTooltipModule,
     TranslatePipe,
