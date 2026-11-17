@@ -2703,39 +2703,35 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
 
 ---
 
-### 6.114. Enriquecimiento Visual del Dashboard Home: Generación de Ilustración 3D Glassmorphism por IA y Análisis de Migraciones en SQLite
+### 6.115. Generación de Ilustración 3D para el Simulador de Facturación Dinámica (`/simulations`) y Layout Bifocal del Launcher
 
 - **Fecha:** 17 de noviembre de 2026.
 - **Contexto / Desafío:**
-  1. *Análisis Arquitectónico de Base de Datos y Migraciones:*
-     El usuario planteó si el error previo de UUIDs denotaba la necesidad de incorporar un sistema formal de migraciones de base de datos en SQLite.
-  2. *Experiencia de Usuario en la Landing Page:*
-     La sección principal (*hero banner*) de la página de inicio ([home.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.html)) presentaba una estética excesivamente esquemática y tipográfica (gradiente CSS puro sin apoyo visual), restándole dinamismo y cercanía para perfiles comerciales y evaluadores de producto.
-- **Feedback Humano (Tu criterio de diseño y arquitectura):**
-  > *"customerId must be a valid UUID v4 esto creo que pasa por antiguo formato o no se, harian falta sistema de migraciones en la bd? en sqlite???"*
-  > *"a ver me gusta mucho el home y lo veo funcional pero pondrias una imagen asi chula por ia? para que no sea tan robotico?"*
-- **Análisis de Arquitectura (Migraciones en SQLite vs. Modo Tech Demo):**
-  - *Causa del Error de UUID:* No se debió a un cambio de esquema en la base de datos (SQLite almacena texto sin restringir variantes de UUID), sino a la colisión entre el seed manual inicial (que incrementó artificialmente dígitos de variante como `0d01` o `2f23`) y el decorador restrictivo `@IsUUID('4')` en el DTO.
-  - *¿Cuándo son necesarias las migraciones?:*
-    - En producción/staging con bases de datos relacionales (Postgres/MySQL) y datos reales persistentes, `synchronize: true` está prohibido para prevenir pérdidas de columnas al refactorizar entidades. Las migraciones versionadas (`typeorm migration:generate`) garantizan trazabilidad, *rollback* y seguridad en CI/CD.
-    - En esta Tech Demo y entorno de evaluación con SQLite WAL, `synchronize: true` junto con el servicio de seeding idempotente (`DatabaseSeederService`) es la solución idónea: no requiere pasos manuales de configuración (`npm run migrate`), garantiza arranque instantáneo en local y Docker, y asegura datos homogéneos para cualquier evaluador.
-- **Implementación de la Solución Visual:**
+  La pantalla del Centro de Simulaciones ([simulation-hub.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/simulations/pages/simulation-hub/simulation-hub.component.html)) presentaba una tarjeta lanzadora funcional pero visualmente plana, con un selector de cliente y botón que carecían del dinamismo visual del nuevo Home.
+- **Feedback Humano (Tu sentido estético y de producto):**
+  *"me encanta una imagencita apropiada tambien para la pantalla de simulaciones http://localhost:4200/simulations"*
+- **Decisión de Arquitectura y Solución Aplicada:**
   1. *Generación de Ilustración 3D con Subagente de IA (`image-generator`):*
-     - Se orquestó la generación de una pieza visual en estética *3D glassmorphic fintech*: tarjetas de analítica translúcidas flotantes, gráficos de crecimiento en cian y azul real (`#00c5e0`, `#0052cc`), capas de suscripción por tramos y tokens holográficos de divisas (€, $, £) sobre una atmósfera azul marino oscura idéntica a la paleta corporativa de Roams (`--roams-primary`).
-     - Imagen alojada en `public/images/hero-illustration.jpg`.
-  2. *Integración en el Layout del Hero ([home.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.html)):*
-     - Reestructuración a layout bifocal (contenido a la izquierda, arte visual a la derecha).
-     - Incorporación de accesos directos de acción rápida (*Quick Actions*): botón primario hacia el catálogo de clientes (`/customers`) y botón secundario hacia el simulador de tarifas (`/simulations`).
-  3. *Estilos y Responsive Design ([home.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.scss)):*
-     - Uso estricto de tokens corporativos (`--roams-*`), sin códigos hexadecimales ni *fallbacks*.
-     - Borde sutil `var(--roams-border-inverse)` y sombreado `var(--roams-shadow-lg)`.
-     - Efecto micro-interactivo *hover lift* con transición suave.
-     - Adaptación responsive en pantallas móviles/tablets (reorganización vertical y escalado proporcional de la imagen).
+     - Se orquestó la creación de una consola isométrica 3D frosted-glass fintech específicamente alegórica a algoritmos de tarificación:
+       - 3 cubos volumétricos elevados que representan visualmente los 3 tramos de precios (*Tier 1, Tier 2, Tier 3*).
+       - Nodos de cálculo con núcleo de sumatorio ($\Sigma$) y circuitos ópticos en cian y esmeralda (`#0ea5e9`, `#10b981`).
+       - Pantalla holográfica flotante de proyección financiera con curvas de costes en tiempo real.
+       - Deslizadores (*sliders*) interactivos y atmósfera azul marino (`--roams-primary`).
+     - Imagen guardada en `public/images/simulations-illustration.jpg`.
+  2. *Reestructuración a Layout Bifocal en la Tarjeta Lanzadora ([simulation-hub.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/simulations/pages/simulation-hub/simulation-hub.component.html)):*
+     - A la izquierda: badge de motor de facturación (`simulations.hub.launcherBadge`), título, texto descriptivo internacionalizado (`simulations.hub.launcherDesc`), selector de clientes y botón `.launch-btn`.
+     - A la derecha: la consola 3D con borde sutil, elevación y efecto *hover lift*.
+  3. *Estilos y Diseño Responsivo ([simulation-hub.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/simulations/pages/simulation-hub/simulation-hub.component.scss)):*
+     - Cumplimiento riguroso de reglas: 100% tokens corporativos `--roams-*`, 0 hex, 0 fallbacks, 0 Tailwind.
+     - Adaptación responsive para pantallas `<= 960px` con disposición en columna invertida para mantener el formulario accesible en cabecera móvil.
+  4. *Internacionalización (i18n):*
+     - Nuevas claves añadidas en [translations.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/i18n/translations.ts) para `es`, `en`, `de`, `fr`.
 - **Resultados de Verificación:**
   - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
   - Oxlint: 0 errores y 0 advertencias.
-- **Valor para la evaluación:** Transforma la primera impresión del evaluador de un panel austero a un producto SaaS B2B moderno, pulido y de alta gama visual.
+- **Valor para la evaluación:** Experiencia de producto cohesiva, atractiva e intuitiva en los dos pilares clave de la aplicación: el panel ejecutivo y el estudio de simulación comercial.
+
 
 
 

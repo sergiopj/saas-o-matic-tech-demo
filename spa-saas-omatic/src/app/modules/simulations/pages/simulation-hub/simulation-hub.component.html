@@ -9,49 +9,66 @@
     </div>
   </header>
 
-  <!-- Quick Account Launcher Card -->
+  <!-- Quick Account Launcher Card with 3D Studio Illustration -->
   <section class="launcher-card">
     <div class="launcher-content">
-      <mat-icon class="launcher-icon" aria-hidden="true">domain</mat-icon>
-      <div class="launcher-form">
-        <div class="select-action-row">
-          <mat-form-field appearance="outline" class="customer-picker-field" subscriptSizing="dynamic">
-            <mat-label>{{ 'simulations.hub.selectCustomer' | translate }}</mat-label>
-            <mat-select
-              id="hub-customer-select"
-              [value]="selectedCustomerId()"
-              [disabled]="customerApi.loading()"
-              (selectionChange)="onSelectCustomer($event.value)"
-            >
-              <mat-option [value]="''">
-                -- {{ 'simulations.hub.selectCustomer' | translate }} --
-              </mat-option>
-              @for (c of customers(); track c.id) {
-                <mat-option [value]="c.id">
-                  {{ c.companyName }} ({{ c.country }} - {{ c.taxId }})
-                </mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-
-          <button
-            mat-flat-button
-            type="button"
-            class="launch-btn"
-            [disabled]="!selectedCustomerId() || customerApi.loading()"
-            (click)="goToSimulation()"
-          >
-            <mat-icon aria-hidden="true">tune</mat-icon>
-            <span>{{ 'simulations.hub.startBtn' | translate }}</span>
-          </button>
+      <div class="launcher-info-column">
+        <div class="launcher-badge">
+          <mat-icon aria-hidden="true">tune</mat-icon>
+          <span>{{ 'simulations.hub.launcherBadge' | translate }}</span>
         </div>
+        <h2 class="launcher-title">{{ 'simulations.hub.selectCustomer' | translate }}</h2>
+        <p class="launcher-desc">{{ 'simulations.hub.launcherDesc' | translate }}</p>
 
-        @if (customerApi.loading() && customers().length === 0) {
-          <div class="launcher-loading-hint">
-            <mat-icon class="spin-icon" aria-hidden="true">sync</mat-icon>
-            <span>{{ 'customers.list.loading' | translate }}</span>
+        <div class="launcher-form">
+          <div class="select-action-row">
+            <mat-form-field appearance="outline" class="customer-picker-field" subscriptSizing="dynamic">
+              <mat-label>{{ 'simulations.hub.selectCustomer' | translate }}</mat-label>
+              <mat-select
+                id="hub-customer-select"
+                [value]="selectedCustomerId()"
+                [disabled]="customerApi.loading()"
+                (selectionChange)="onSelectCustomer($event.value)"
+              >
+                <mat-option [value]="''">
+                  -- {{ 'simulations.hub.selectCustomer' | translate }} --
+                </mat-option>
+                @for (c of customers(); track c.id) {
+                  <mat-option [value]="c.id">
+                    {{ c.companyName }} ({{ c.country }} - {{ c.taxId }})
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <button
+              mat-flat-button
+              type="button"
+              class="launch-btn"
+              [disabled]="!selectedCustomerId() || customerApi.loading()"
+              (click)="goToSimulation()"
+            >
+              <mat-icon aria-hidden="true">tune</mat-icon>
+              <span>{{ 'simulations.hub.startBtn' | translate }}</span>
+            </button>
           </div>
-        }
+
+          @if (customerApi.loading() && customers().length === 0) {
+            <div class="launcher-loading-hint">
+              <mat-icon class="spin-icon" aria-hidden="true">sync</mat-icon>
+              <span>{{ 'customers.list.loading' | translate }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="launcher-visual-column">
+        <img
+          src="images/simulations-illustration.jpg"
+          alt="SaaS Dynamic Billing Algorithm Simulator"
+          class="simulations-illustration"
+          loading="eager"
+        />
       </div>
     </div>
   </section>

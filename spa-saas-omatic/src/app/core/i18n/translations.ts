@@ -196,6 +196,8 @@ export const TRANSLATIONS = {
     'simulations.hub.subtitle': 'Selecciona un cliente corporativo para iniciar una simulación personalizada con tramos y conversión de divisa.',
     'simulations.hub.selectCustomer': 'Seleccionar cliente corporativo',
     'simulations.hub.startBtn': 'Abrir Simulador',
+    'simulations.hub.launcherBadge': 'Motor de Facturación Dinámica',
+    'simulations.hub.launcherDesc': 'Accede a la consola de simulación interactiva, ajusta volumen de usuarios, almacenamiento y llamadas API, y proyecta costes con impuestos y tasas en tiempo real.',
   },
   en: {
     'currency.selector.aria': 'Select display currency',
@@ -394,6 +396,8 @@ export const TRANSLATIONS = {
     'simulations.hub.subtitle': 'Select a corporate customer to start a personalized simulation with tiers and currency conversion.',
     'simulations.hub.selectCustomer': 'Select corporate customer',
     'simulations.hub.startBtn': 'Open Simulator',
+    'simulations.hub.launcherBadge': 'Dynamic Billing Engine',
+    'simulations.hub.launcherDesc': 'Access the interactive simulation console, configure active users, cloud storage, and API calls, and calculate costs with live tax rates and currency conversion.',
   },
   de: {
     'currency.selector.aria': 'Währungsauswahl anzeigen',
@@ -592,6 +596,8 @@ export const TRANSLATIONS = {
     'simulations.hub.subtitle': 'Wählen Sie einen Geschäftskunden aus, um eine personalisierte Simulation zu starten.',
     'simulations.hub.selectCustomer': 'Geschäftskunden auswählen',
     'simulations.hub.startBtn': 'Simulator öffnen',
+    'simulations.hub.launcherBadge': 'Dynamische Abrechnungs-Engine',
+    'simulations.hub.launcherDesc': 'Greifen Sie auf die interaktive Simulationskonsole zu, konfigurieren Sie Benutzer, Speicher und API-Aufrufe und berechnen Sie Kosten in Echtzeit.',
   },
   fr: {
     'currency.selector.aria': "Sélectionner la devise d'affichage",
@@ -790,6 +796,8 @@ export const TRANSLATIONS = {
     'simulations.hub.subtitle': 'Sélectionnez un client entreprise pour démarrer une simulation personnalisée avec paliers et conversion de devise.',
     'simulations.hub.selectCustomer': 'Sélectionner un client entreprise',
     'simulations.hub.startBtn': 'Ouvrir le Simulateur',
+    'simulations.hub.launcherBadge': 'Moteur de Facturation Dynamique',
+    'simulations.hub.launcherDesc': 'Accédez à la console de simulation interactive, configurez les utilisateurs, le stockage et les appels API, et calculez les coûts en temps réel.',
   },
 } as const;
 

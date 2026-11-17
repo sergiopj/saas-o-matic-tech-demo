@@ -49,82 +49,169 @@
 }
 
 .launcher-card {
-  background: linear-gradient(135deg, var(--roams-bg-page) 0%, rgba(16, 97, 226, 0.05) 100%);
+  background-color: var(--roams-surface);
   border: 1px solid var(--roams-border);
   border-radius: var(--roams-radius-lg);
-  padding: 2rem;
+  padding: 2rem 2.25rem;
+  box-shadow: var(--roams-shadow-sm);
 
   .launcher-content {
     display: flex;
-    align-items: flex-start;
-    gap: 1.5rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
 
-    .launcher-icon {
-      font-size: 2.5rem;
-      width: 2.5rem;
-      height: 2.5rem;
-      color: var(--roams-accent-blue);
-      margin-top: 0.5rem;
-    }
+    .launcher-info-column {
+      flex: 1 1 58%;
+      max-width: 640px;
 
-    .launcher-form {
-      flex: 1;
-
-      .select-action-row {
-        display: flex;
+      .launcher-badge {
+        display: inline-flex;
         align-items: center;
-        gap: 1rem;
-        flex-wrap: wrap;
+        gap: 0.4rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        background-color: rgba(16, 97, 226, 0.1);
+        color: var(--roams-accent-blue);
+        padding: 0.35rem 0.75rem;
+        border-radius: 9999px;
+        margin-bottom: 0.85rem;
 
-        .customer-picker-field {
-          flex: 1;
-          min-width: 300px;
+        mat-icon {
+          font-size: 1rem;
+          width: 1rem;
+          height: 1rem;
         }
+      }
 
-        .launch-btn {
-          height: 52px;
-          padding: 0 1.5rem;
-          background-color: var(--roams-accent-blue);
-          color: var(--roams-text-inverse);
-          font-weight: 600;
-          font-size: 0.95rem;
-          border-radius: 10px;
-          gap: 0.5rem;
-          transition: all 0.2s ease-in-out;
+      .launcher-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--roams-primary);
+        margin: 0 0 0.5rem 0;
+        letter-spacing: -0.01em;
+      }
 
-          &:hover:not(:disabled) {
-            background-color: var(--roams-accent-blue-hover);
+      .launcher-desc {
+        font-size: 0.95rem;
+        color: var(--roams-text-secondary);
+        line-height: 1.55;
+        margin: 0 0 1.5rem 0;
+      }
+
+      .launcher-form {
+        .select-action-row {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          flex-wrap: wrap;
+
+          .customer-picker-field {
+            flex: 1;
+            min-width: 280px;
           }
 
-          &:disabled,
-          &[disabled] {
-            background-color: var(--roams-border) !important;
-            color: var(--roams-text-muted) !important;
-            cursor: not-allowed !important;
-            box-shadow: none !important;
-            opacity: 0.75;
+          .launch-btn {
+            height: 52px;
+            padding: 0 1.5rem;
+            background-color: var(--roams-accent-blue);
+            color: var(--roams-text-inverse);
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 10px;
+            gap: 0.5rem;
+            transition: all 0.2s ease-in-out;
 
-            mat-icon {
-              color: var(--roams-text-muted) !important;
+            &:hover:not(:disabled) {
+              background-color: var(--roams-accent-blue-hover);
+              transform: translateY(-1px);
             }
+
+            &:disabled,
+            &[disabled] {
+              background-color: var(--roams-border) !important;
+              color: var(--roams-text-muted) !important;
+              cursor: not-allowed !important;
+              box-shadow: none !important;
+              opacity: 0.75;
+
+              mat-icon {
+                color: var(--roams-text-muted) !important;
+              }
+            }
+          }
+        }
+
+        .launcher-loading-hint {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.825rem;
+          color: var(--roams-text-secondary);
+          margin-top: 0.5rem;
+
+          .spin-icon {
+            font-size: 1rem;
+            width: 1rem;
+            height: 1rem;
+            animation: spin 1s linear infinite;
+          }
+        }
+      }
+    }
+
+    .launcher-visual-column {
+      flex: 1 1 42%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      max-width: 440px;
+
+      .simulations-illustration {
+        width: 100%;
+        height: auto;
+        max-height: 250px;
+        object-fit: cover;
+        border-radius: var(--roams-radius-md);
+        border: 1px solid var(--roams-border);
+        box-shadow: var(--roams-shadow-lg);
+        transition: transform 0.3s ease;
+
+        &:hover {
+          transform: translateY(-3px) scale(1.02);
+        }
+      }
+    }
+  }
+
+  @media (max-width: 960px) {
+    padding: 1.5rem;
+
+    .launcher-content {
+      flex-direction: column-reverse;
+      text-align: center;
+
+      .launcher-info-column {
+        max-width: 100%;
+
+        .launcher-form .select-action-row {
+          justify-content: center;
+
+          .customer-picker-field {
+            width: 100%;
+          }
+
+          .launch-btn {
+            width: 100%;
           }
         }
       }
 
-      .launcher-loading-hint {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.825rem;
-        color: var(--roams-text-secondary);
-        margin-top: 0.5rem;
-
-        .spin-icon {
-          font-size: 1rem;
-          width: 1rem;
-          height: 1rem;
-          animation: spin 1s linear infinite;
-        }
+      .launcher-visual-column {
+        max-width: 300px;
+        margin-bottom: 0.5rem;
       }
     }
   }
