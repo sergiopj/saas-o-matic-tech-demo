@@ -13,6 +13,10 @@
     "test": "npm run test:backend && npm run test:frontend",
     "test:backend": "npm --prefix mic-saas-omatic test",
     "test:frontend": "npm --prefix spa-saas-omatic test",
+    "test:coverage": "npm run test:coverage:backend && npm run test:coverage:frontend",
+    "test:coverage:backend": "npm --prefix mic-saas-omatic run test:coverage",
+    "test:coverage:frontend": "npm --prefix spa-saas-omatic run test:coverage",
+    "test:cov": "npm run test:coverage",
     "lint": "npm --prefix mic-saas-omatic run lint && npm --prefix spa-saas-omatic run lint",
     "build": "npm --prefix mic-saas-omatic run build && npm --prefix spa-saas-omatic run build"
   },

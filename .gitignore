@@ -24,6 +24,10 @@ yarn-error.log*
 .env
 .env.local
 
+# Coverage reports
+coverage/
+*/coverage/
+
 # OS & Editor
 .DS_Store
 Thumbs.db

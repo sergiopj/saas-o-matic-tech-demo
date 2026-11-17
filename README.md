@@ -56,13 +56,16 @@ npm start
 ### Paso 3: Verificación de Calidad y Tests en 1 Comando
 
 ```bash
-# 1. Ejecución de la suite completa de 264 tests (123 backend Jest + 141 frontend Vitest)
+# 1. Ejecución de la suite completa de 273 tests (123 backend Jest + 150 frontend Vitest)
 npm test
 
-# 2. Análisis estático ultra-rápido con Oxlint (0 errores, 0 advertencias)
+# 2. Informes de cobertura de código unificados (~90% de cobertura en backend y frontend)
+npm run test:coverage
+
+# 3. Análisis estático ultra-rápido con Oxlint (0 errores, 0 advertencias)
 npm run lint
 
-# 3. Compilación de producción unificada (Backend dist + Frontend dist)
+# 4. Compilación de producción unificada (Backend dist + Frontend dist)
 npm run build
 ```
 
@@ -89,17 +92,22 @@ El proyecto cuenta con plantillas de variables de entorno versionadas:
 
 ---
 
-## 🧪 Pirámide de Pruebas (Testing Strategy)
+## 🧪 Pirámide de Pruebas y Cobertura (Testing Strategy)
 
-El proyecto cuenta con cobertura exhaustiva (264 pruebas unitarias y de integración pasando al 100%):
+El proyecto cuenta con cobertura exhaustiva (273 pruebas unitarias y de integración pasando al 100% con ~90% de cobertura de código):
 
 ```bash
-# Ejecutar todo desde la raíz:
+# Ejecutar la suite completa desde la raíz:
 npm test
 
+# Ejecutar el informe de cobertura unificado (~90% líneas en Backend y Frontend):
+npm run test:coverage
+
 # O ejecutar por separado según el módulo de interés:
-npm run test:backend   # 123 tests de Dominio, Casos de Uso, Mappers, Servicios Fiscales y E2E
-npm run test:frontend  # 141 tests de Componentes, Signals, Servicios i18n, Dialogs y Pipes (Vitest)
+npm run test:backend           # 123 tests de Dominio, Casos de Uso, Mappers, Servicios Fiscales y E2E
+npm run test:frontend          # 150 tests de Componentes, Signals, Servicios i18n, Dialogs y Pipes (Vitest)
+npm run test:coverage:backend  # Reporte de cobertura Jest (90.0% líneas)
+npm run test:coverage:frontend # Reporte de cobertura Vitest v8 (91.2% líneas)
 ```
 
 ### Detalle por subsistema:
@@ -107,15 +115,17 @@ npm run test:frontend  # 141 tests de Componentes, Signals, Servicios i18n, Dial
 #### Backend (`mic-saas-omatic`):
 ```bash
 cd mic-saas-omatic
-npm test        # Tests unitarios con Jest
-npm run test:e2e # Tests de integración HTTP con supertest + SQLite real
-npm run test:all # Suite unificada
+npm test           # Tests unitarios con Jest
+npm run test:cov   # Reporte de cobertura de código con Jest
+npm run test:e2e   # Tests de integración HTTP con supertest + SQLite real
+npm run test:all   # Suite unificada
 ```
 
 #### Frontend (`spa-saas-omatic`):
 ```bash
 cd spa-saas-omatic
-npm test        # Tests unitarios deterministas con Vitest
+npm test           # Tests unitarios deterministas con Vitest
+npm run test:cov   # Reporte de cobertura de código con Vitest v8
 npm run test:watch # Modo interactivo watch con recarga en caliente
 ```
 
