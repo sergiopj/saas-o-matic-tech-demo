@@ -26,6 +26,8 @@ describe('HomeComponent', () => {
   ];
 
   beforeEach(async () => {
+    vi.useFakeTimers();
+
     await TestBed.configureTestingModule({
       imports: [HomeComponent],
       providers: [
@@ -50,10 +52,14 @@ describe('HomeComponent', () => {
       `${environment.apiBaseUrl}/customers?page=1&limit=4&sortBy=createdAt&order=DESC&fields=lite`
     );
     req.flush(mockCustomers, { headers: { 'x-total-count': '25' } });
+
+    // Advance fake timers to allow count-up and radial clock-sweep animations to complete
+    vi.advanceTimersByTime(1500);
     fixture.detectChanges();
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     httpTesting.verify();
   });
 
@@ -83,5 +89,50 @@ describe('HomeComponent', () => {
     const customerKpiLink: HTMLAnchorElement | null = fixture.nativeElement.querySelector('a.kpi-card.clickable');
     expect(customerKpiLink).toBeTruthy();
     expect(customerKpiLink?.getAttribute('href') || customerKpiLink?.getAttribute('ng-reflect-router-link')).toContain('/customers');
+  });
+
+  it('should synchronize numeric count-up and radial sweep angle to 360 degrees', () => {
+    expect(component.displayedCustomers()).toBe(25);
+    expect(component.customersFillAngle()).toBe(360);
+    expect(component.displayedCountries()).toBe(8);
+    expect(component.countriesFillAngle()).toBe(360);
+    expect(component.displayedTiers()).toBe(3);
+    expect(component.tiersFillAngle()).toBe(360);
+
+    const blueCircle: HTMLElement | null = fixture.nativeElement.querySelector('.kpi-icon-circle.blue');
+    expect(blueCircle?.style.getPropertyValue('--fill-angle')).toBe('360deg');
+  });
+
+  it('should accurately interpolate synchronized steps during animateKpi', () => {
+    let capturedVal = 0;
+    let capturedAngle = 0;
+
+    component.animateKpi(
+      100,
+      (val) => { capturedVal = val; },
+      (deg) => { capturedAngle = deg; },
+      1000
+    );
+
+    // Initial instant step
+    expect(capturedVal).toBeGreaterThanOrEqual(0);
+    expect(capturedAngle).toBeGreaterThanOrEqual(0);
+
+    // Advance halfway
+    vi.advanceTimersByTime(500);
+    expect(capturedVal).toBeGreaterThan(0);
+    expect(capturedAngle).toBeGreaterThan(0);
+    expect(capturedAngle).toBeLessThanOrEqual(360);
+
+    // Complete animation
+    vi.advanceTimersByTime(600);
+    expect(capturedVal).toBe(100);
+    expect(capturedAngle).toBe(360);
+  });
+
+  it('should cancel active animation frame requests on ngOnDestroy', () => {
+    const cancelSpy = vi.spyOn(window, 'cancelAnimationFrame');
+    component.ngOnDestroy();
+    expect(cancelSpy).toHaveBeenCalled();
   });
 });

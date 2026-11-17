@@ -3211,6 +3211,46 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
 - **Valor para la evaluación:** Comprensión profunda de los mecanismos de renderizado de librerías externas complejas (Quill Snow) y dominio avanzado de CSS, eliminando interferencias de especificidad y ofreciendo una barra de herramientas de formato rica, pulida y alineada con la guía visual de Roams.
 
+---
+
+### 6.133. Contadores Dinámicos Count-Up y Barrido Radial Sincronizado en Diales KPI (Conic Clock Sweep)
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Las tarjetas superiores de métricas ejecutivas en la página de inicio ([home.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.html)) mostraban valores numéricos estáticos directos (clientes registrados, 8 jurisdicciones fiscales y 3 tramos de precios) sobre fondos de iconos con tintes fijos. El usuario solicitó dotar a estos tres indicadores de una experiencia visual viva y de vanguardia: un incremento numérico gradual desde cero hasta el valor final sincronizado a la milésima con un barrido circular en el sentido de las agujas del reloj, cubriendo gradualmente el fondo del icono con un tono más oscuro hasta quedar completamente pleno al alcanzar la cifra definitiva.
+- **Feedback Humano (Tu criterio de diseño interactivo de alta fidelidad y sincronización cinemática):**
+  > *"molaria que estois contadores sea dinamicos que vayan de 0 al valor subiendo y que ademas el fondo se cubra del icono con un color mas oscurito un poco en oplan agujas de un rejoj y que justo se cubra entero cuando el contador llegue al tope asi estan sincronizados el contador y el relleno del fondo de los tres iconos*  
+  > *8Jurisdicciones Fiscales*  
+  > *3Tramos de Tarificaci"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Contadores Interpolados Hardware-Friendly (Angular Signals + `requestAnimationFrame`):*
+     - En [home.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.ts#L49), se crearon Signals reactivas para los valores numéricos visibles (`displayedCustomers`, `displayedCountries`, `displayedTiers`) y para los ángulos de cobertura en grados (`customersFillAngle`, `countriesFillAngle`, `tiersFillAngle`).
+     - Se implementó el motor de interpolación `animateKpi(targetVal, setValue, setAngle, durationMs = 1400)` gobernado por una curva de desaceleración suave (*cubic ease-out*: $1 - (1 - p)^3$).
+  2. *Barrido Radial Cónico Conic-Gradient ("En plan agujas de un reloj"):*
+     - En [home.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.scss#L219), se transformaron los iconos en diales circulares (`border-radius: 50%`) gobernados por la propiedad nativa `conic-gradient`:
+       ```scss
+       background: conic-gradient(
+         from 0deg at 50% 50%,
+         var(--kpi-fill-dark) 0deg,
+         var(--kpi-fill-dark) var(--fill-angle, 0deg),
+         var(--kpi-fill-base) var(--fill-angle, 0deg),
+         var(--kpi-fill-base) 360deg
+       );
+       ```
+     - La orientación `from 0deg` sitúa el inicio a las 12 en punto y barre en sentido horario. El color base al 10% de opacidad (`--kpi-fill-base`) es gradualmente sustituido por el color más oscuro y saturado al 26% (`--kpi-fill-dark`) generado dinámicamente con `color-mix(in srgb, var(--kpi-theme-color) 26%, transparent)` usando los Design Tokens corporativos (`--roams-accent-blue`, `--roams-status-success`, `--roams-status-warning`).
+     - Al estar matemáticamente vinculados al mismo factor de progreso $p$, cuando el contador numérico alcanza su valor tope, el ángulo del gradiente alcanza exactamente $360^\circ$, logrando una sincronización visual impecable.
+  3. *Higiene de Ciclo de Vida y Accesibilidad (A11y):*
+     - Limpieza rigurosa con `cancelAnimationFrame` en el hook `ngOnDestroy` para prevenir cualquier fuga de memoria.
+     - Soporte completo de accesibilidad mediante bypass instantáneo sin animación bajo `prefers-reduced-motion: reduce`.
+  4. *Ampliación de la Suite de Pruebas:*
+     - En [home.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.spec.ts), se incorporó el soporte para timers falsos (`vi.useFakeTimers()`) y se añadieron pruebas unitarias para validar la sincronización angular, el tope de $360^\circ$ y la cancelación de frames al destruir el componente (elevando la suite de 4 a 7 tests unitarios en verde).
+- **Resultados de Verificación:**
+  - Frontend Vitest: **229 pruebas unitarias pasando al 100%** (27 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (67 archivos analizados con 111 reglas).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+- **Valor para la evaluación:** Ilustración ejemplar del rol de Director de Orquesta y desarrollo centrado en el usuario, combinando matemáticas de animación, APIs web modernas y diseño corporativo de alta gama para elevar la percepción de calidad del producto técnico.
+
+
 
 
 

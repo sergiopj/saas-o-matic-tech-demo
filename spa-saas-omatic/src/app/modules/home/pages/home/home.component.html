@@ -43,38 +43,50 @@
       class="kpi-card clickable"
       [attr.aria-label]="'home.kpi.customersLinkAria' | translate"
     >
-      <div class="kpi-icon-circle blue">
+      <div
+        class="kpi-icon-circle blue"
+        [style.--fill-angle]="customersFillAngle() + 'deg'"
+        aria-hidden="true"
+      >
         <mat-icon aria-hidden="true">groups</mat-icon>
       </div>
       <div class="kpi-details">
-        <span class="kpi-value">{{ totalCustomers() }}</span>
+        <span class="kpi-value">{{ displayedCustomers() }}</span>
         <span class="kpi-label">{{ 'home.kpi.customers' | translate }}</span>
       </div>
       <mat-icon class="kpi-arrow" aria-hidden="true">arrow_forward</mat-icon>
     </a>
 
     <div class="kpi-card">
-      <div class="kpi-icon-circle emerald">
+      <div
+        class="kpi-icon-circle emerald"
+        [style.--fill-angle]="countriesFillAngle() + 'deg'"
+        aria-hidden="true"
+      >
         <mat-icon aria-hidden="true">public</mat-icon>
       </div>
       <div class="kpi-details">
-        <span class="kpi-value">{{ supportedCountriesCount }}</span>
+        <span class="kpi-value">{{ displayedCountries() }}</span>
         <span class="kpi-label">{{ 'home.kpi.countries' | translate }}</span>
       </div>
     </div>
 
     <div class="kpi-card">
-      <div class="kpi-icon-circle amber">
+      <div
+        class="kpi-icon-circle amber"
+        [style.--fill-angle]="tiersFillAngle() + 'deg'"
+        aria-hidden="true"
+      >
         <mat-icon aria-hidden="true">layers</mat-icon>
       </div>
       <div class="kpi-details">
-        <span class="kpi-value">3</span>
+        <span class="kpi-value">{{ displayedTiers() }}</span>
         <span class="kpi-label">{{ 'home.kpi.tiers' | translate }}</span>
       </div>
     </div>
 
     <div class="kpi-card">
-      <div class="kpi-icon-circle purple">
+      <div class="kpi-icon-circle purple" aria-hidden="true">
         <mat-icon aria-hidden="true">payments</mat-icon>
       </div>
       <div class="kpi-details">
