@@ -16,19 +16,24 @@
 .dialog-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.85rem;
   margin-bottom: 1.25rem;
   position: relative;
 
-  .header-icon-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
+  .header-email-badge {
+    width: 48px;
+    height: 48px;
     border-radius: var(--roams-radius-md);
-    background: rgba(16, 97, 226, 0.08);
-    color: var(--roams-accent-blue);
+    object-fit: cover;
+    border: 1px solid var(--roams-border);
+    box-shadow: var(--roams-shadow-sm);
+    flex-shrink: 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: scale(1.06);
+      box-shadow: var(--roams-shadow-md);
+    }
   }
 
   .header-text {

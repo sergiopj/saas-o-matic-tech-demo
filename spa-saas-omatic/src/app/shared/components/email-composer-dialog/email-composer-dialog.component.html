@@ -1,8 +1,13 @@
 <div class="email-dialog-container">
   <div class="dialog-header">
-    <div class="header-icon-box" aria-hidden="true">
-      <mat-icon>mail</mat-icon>
-    </div>
+    <img
+      src="images/email-dispatch-badge.jpg"
+      alt="Redactar Correo Comercial"
+      class="header-email-badge"
+      width="48"
+      height="48"
+      loading="eager"
+    />
     <div class="header-text">
       <h2 mat-dialog-title class="dialog-title">{{ 'customers.emailDialog.title' | translate }}</h2>
       @if (data.recipientName || data.subtitle) {

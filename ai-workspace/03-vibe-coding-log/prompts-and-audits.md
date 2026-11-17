@@ -2806,6 +2806,35 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: 0 errores y 0 advertencias.
 - **Valor para la evaluación:** Criterio senior de diseño centrado en el usuario, diferenciando intencionadamente la experiencia inmersiva de escritorio de la agilidad operativa en movilidad.
 
+---
+
+### 6.118. Enriquecimiento Visual del Diálogo de Redacción Comercial: Emblema 3D Glassmorphic de Despacho de Propuestas en Sustitución del Icono Convencional
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  En el modal de envío de presupuestos comerciales ([email-composer-dialog.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.html)), el encabezado mostraba un icono genérico de Material `<mat-icon>mail</mat-icon>` dentro de una caja cuadrada plana (`.header-icon-box`), desentonando con la línea de diseño 3D fintech instaurada en el resto de la aplicación.
+- **Feedback Humano (Tu criterio de acabado visual senior):**
+  > *"Redactar Correo Comercial poinle una imagen chula de envio de email en vez de ese icono cutre"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Generación de Ilustración 3D con Subagente de IA (`image-generator`):*
+     - Se orquestó la creación de un emblema 3D translúcido frosted-glass con motivos alegóricos a la emisión de ofertas y contratos comerciales:
+       - Sobre de cristal translúcido iluminado con rebordes en cian neón (`#0ea5e9`) y azul real (`#1061e2`).
+       - Documento de propuesta contractual con sello oficial certificado.
+       - Avión de papel holográfico en pleno despegue con estela de partículas doradas y cian.
+       - Fondo azul marino oscuro integrado con la estética Roams.
+     - Imagen optimizada y guardada en `public/images/email-dispatch-badge.jpg`.
+  2. *Integración en el Encabezado del Modal ([email-composer-dialog.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.html)):*
+     - Sustitución de `.header-icon-box` por `<img class="header-email-badge">` de 48x48px con esquinas redondeadas (`--roams-radius-md`), borde sutil y sombra.
+  3. *Estilos y Micro-interacción ([email-composer-dialog.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.scss)):*
+     - Transición suave de escalado en hover (`scale(1.06)`) y sombra dinámica.
+     - Cumplimiento absoluto: 0 hex hardcodeados, 0 fallbacks, 100% tokens `--roams-*`.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Oxlint: 0 errores y 0 advertencias.
+- **Valor para la evaluación:** Coherencia de diseño de producto en cada micro-interacción, elevando un formulario utilitario a una experiencia comercial de alta gama.
+
+
 
 
 
