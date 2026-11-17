@@ -228,6 +228,16 @@ Para proporcionar comodidad visual y adaptabilidad ergonómica en jornadas de us
 - **Persistencia y Detección Automática:** Detección de la preferencia nativa del sistema operativo mediante `window.matchMedia('(prefers-color-scheme: dark)')` y persistencia de la selección del usuario en `localStorage` (`roams_theme`).
 - **Adaptabilidad Integral de Componentes:** Todas las superficies de tarjetas, lienzos, formularios, diálogos modales, menús flotantes, tablas y el editor enriquecido Quill Snow se adaptan instantáneamente a los tokens de contraste corporativo en modo oscuro.
 
+### 3.6 Carrusel de Últimos Clientes en `/home`: Navegación Flanqueante y Gestual Omnicanal (Swipe Móvil, Clic y Arrastre en Escritorio)
+Para optimizar el escaneo de clientes recién incorporados en una sola fila compacta y sin sobrecarga cognitiva:
+- **Disposición en Fila Única sin Contador Numérico:** Se elimina el indicador de página numérico (`1 / 6`), mostrando una única fila fluida de tarjetas de cliente que no satura el layout.
+- **Botones Flanqueantes a Izquierda y Derecha (`.carousel-arrow-btn`):** Dos botones circulares elevados situados a ambos lados de la fila de tarjetas permiten avanzar y retroceder con un solo clic/tap, deshabilitándose de forma reactiva en los extremos (`index === 0` o `index >= maxSlideIndex`).
+- **Navegación Gestual Tri-modal:**
+  1. *Pulsación de Botones:* En móvil y escritorio, con retroalimentación visual al hover (`scale(1.08)`).
+  2. *Swipe Táctil en Móvil:* Eventos `touchstart` y `touchend` con umbral de 40px para avanzar o retroceder con el dedo.
+  3. *Arrastre con Ratón en Escritorio:* Detección de `mousedown`, `mousemove`, `mouseup` y `mouseleave` con cursor `grab` / `grabbing` y `user-select: none;`, permitiendo arrastrar las tarjetas con el ratón de forma natural.
+- **Responsividad Dinámica:** Presenta 3 tarjetas simultáneas en pantallas de escritorio ($> 1024\text{px}$), 2 tarjetas en tablets ($640\text{px} - 1024\text{px}$) y 1 tarjeta completa en smartphones ($< 640\text{px}$).
+
 ---
 
 ## 4. Estándar de Gestión de Errores (RFC 7807)

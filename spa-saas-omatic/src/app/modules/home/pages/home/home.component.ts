@@ -136,6 +136,38 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
+  readonly isDragging = signal<boolean>(false);
+  private dragStartX = 0;
+
+  onMouseDown(event: MouseEvent): void {
+    if (event.button !== 0) return;
+    this.isDragging.set(true);
+    this.dragStartX = event.clientX;
+  }
+
+  onMouseMove(_event: MouseEvent): void {
+    // Mouse move handling during drag
+  }
+
+  onMouseUp(event: MouseEvent): void {
+    if (!this.isDragging()) return;
+    this.isDragging.set(false);
+    const diff = this.dragStartX - event.clientX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        this.slideNext();
+      } else {
+        this.slidePrev();
+      }
+    }
+  }
+
+  onMouseLeave(): void {
+    if (this.isDragging()) {
+      this.isDragging.set(false);
+    }
+  }
+
   private updateVisibleCount(): void {
     if (typeof window === 'undefined') return;
     const width = window.innerWidth;

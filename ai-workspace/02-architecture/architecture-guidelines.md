@@ -442,6 +442,12 @@ spa-saas-omatic/
   - Mediante señales computadas (`countryFilters = computed(...)` y `filteredCustomers = computed(...)`), los países presentes en el catálogo y sus recuentos se derivan reactivamente en memoria, permitiendo al comercial aislar clientes por jurisdicción fiscal de forma instantánea sin peticiones HTTP redundantes a la base de datos.
   - Accesibilidad semántica: implementado con `role="radiogroup"` y `role="radio"` con `aria-checked` para lectores de pantalla.
 
+- **Carrusel Flanqueante y Motor Gestual Híbrido en `/home` (Signals + Touch Swipe + Desktop Mouse Drag):**
+  - Para presentar los clientes corporativos recientes en una fila única horizontal sin romper el ritmo visual ni añadir librerías externas de carrusel (Swiper, Slick), se diseñó un motor reactivo puro en Angular 22:
+    - *Estructura Flanqueante:* Un contenedor flexbox `.carousel-outer-wrapper` sitúa los botones de flecha circular (`.carousel-arrow-btn.prev` y `.next`) directamente en los extremos laterales del viewport de tarjetas, suprimiendo cualquier indicador o contador numérico de página.
+    - *Señales de Posicionamiento:* `currentSlideIndex` y `visibleCardsCount` orquestan el desplazamiento en CSS mediante traslación de transformador: `translateX(calc(-1 * var(--slider-index) * (var(--card-width) + var(--slider-gap))))` con aceleración `cubic-bezier(0.25, 1, 0.5, 1)`.
+    - *Máquina de Estados Gestual Tri-modal:* Unifica eventos táctiles (`touchstart`, `touchend`) y eventos de puntero de ratón (`mousedown`, `mousemove`, `mouseup`, `mouseleave`) bajo un umbral cinemático común de $40\text{px}$, activando cursor `grab` en reposo y `grabbing` con `user-select: none;` durante el arrastre activo.
+
 ### 3.3 Estrategia de Divisas y Escalabilidad (Open/Closed Principle)
 
 - **Caché Completa de la API:** La API externa (`https://open.er-api.com/v6/latest/EUR`) devuelve más de 160 tipos de cambio. `CurrencyService` almacena el diccionario completo en memoria (`rates`), por lo que la aplicación ya dispone de las tasas de cualquier divisa mundial sin peticiones HTTP adicionales.

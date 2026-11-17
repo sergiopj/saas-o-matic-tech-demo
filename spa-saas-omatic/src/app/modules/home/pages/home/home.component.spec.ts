@@ -192,4 +192,57 @@ describe('HomeComponent', () => {
     component.onTouchEnd({ changedTouches: [{ clientX: 180 }] } as unknown as TouchEvent);
     expect(component.currentSlideIndex()).toBe(0);
   });
+
+  it('should handle desktop mouse drag navigation events', () => {
+    component.recentCustomers.set([
+      { id: 'c1', companyName: 'Company 1', country: 'ES' },
+      { id: 'c2', companyName: 'Company 2', country: 'DE' },
+      { id: 'c3', companyName: 'Company 3', country: 'FR' },
+      { id: 'c4', companyName: 'Company 4', country: 'IT' },
+    ]);
+    component.visibleCardsCount.set(2);
+    fixture.detectChanges();
+
+    // Mouse drag left (diff > 40 -> next)
+    component.onMouseDown({ button: 0, clientX: 200 } as MouseEvent);
+    expect(component.isDragging()).toBe(true);
+    component.onMouseMove({ clientX: 150 } as MouseEvent);
+    component.onMouseUp({ clientX: 120 } as MouseEvent);
+    expect(component.isDragging()).toBe(false);
+    expect(component.currentSlideIndex()).toBe(1);
+
+    // Mouse drag right (diff < -40 -> prev)
+    component.onMouseDown({ button: 0, clientX: 100 } as MouseEvent);
+    expect(component.isDragging()).toBe(true);
+    component.onMouseUp({ clientX: 180 } as MouseEvent);
+    expect(component.isDragging()).toBe(false);
+    expect(component.currentSlideIndex()).toBe(0);
+
+    // Mouse leave cancels dragging
+    component.onMouseDown({ button: 0, clientX: 100 } as MouseEvent);
+    expect(component.isDragging()).toBe(true);
+    component.onMouseLeave();
+    expect(component.isDragging()).toBe(false);
+
+    // Non-primary mouse button ignored
+    component.onMouseDown({ button: 2, clientX: 100 } as MouseEvent);
+    expect(component.isDragging()).toBe(false);
+  });
+
+  it('should render flanking arrow buttons and no numeric counter indicator', () => {
+    component.recentCustomers.set([
+      { id: 'c1', companyName: 'Company 1', country: 'ES' },
+      { id: 'c2', companyName: 'Company 2', country: 'DE' },
+      { id: 'c3', companyName: 'Company 3', country: 'FR' },
+    ]);
+    fixture.detectChanges();
+
+    const prevBtn = fixture.nativeElement.querySelector('.carousel-arrow-btn.prev');
+    const nextBtn = fixture.nativeElement.querySelector('.carousel-arrow-btn.next');
+    const indicator = fixture.nativeElement.querySelector('.slider-indicator');
+
+    expect(prevBtn).toBeTruthy();
+    expect(nextBtn).toBeTruthy();
+    expect(indicator).toBeNull();
+  });
 });

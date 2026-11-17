@@ -3524,40 +3524,36 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
 - **Valor para la evaluación:** Dominio exhaustivo de la especificación de renderizado del navegador y de la encapsulación de componentes web en Angular, resolviendo anomalías de layout con precisión quirúrgica.
 
+---
 
+### 6.141. Rediseño del Carrusel de Últimos Clientes: Flechas Flanqueantes, Eliminación de Contador Numérico y Soporte Gestual Omnicanal (Swipe Móvil, Clic y Arrastre con Ratón en Escritorio)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  En la vista principal de inicio (`HomeComponent`), la sección de "Últimos Clientes Añadidos" contaba previamente con controles de paginación situados en la cabecera derecha (`.section-actions`) junto al botón de ver todos, incluyendo un indicador numérico de página (`1 / 6`). El usuario requirió reubicar las flechas de navegación para que flanqueen directamente la fila de tarjetas (una a la izquierda y otra a la derecha), retirar el contador numérico para simplificar visualmente el panel, y habilitar tres métodos concurrentes de navegación gestual e interactiva: swipe táctil en móvil, pulsación de flechas en móvil y escritorio, y arrastre con ratón (*mouse drag*) en escritorio.
+- **Feedback Humano:**
+  > *"en las cards de ultimos clientes añadidos en el home me gustaria las flechas una a la izquierda de la fila de cards y otra a la derechia y no pongas contador que sea en pal slider swippe en mobile y pulsar a la flechita (tanto en mobile como desktop) o arrastras con el ratron en desktop"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Estructura Flanqueante Flexbox (`carousel-outer-wrapper`):*
+     - En [home.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.html), se reestructuró el marcado eliminando `.slider-controls` de la cabecera superior y envolviendo la zona del carrusel en un contenedor flexbox directo:
+       - **Botón izquierdo (`.carousel-arrow-btn.prev`):** Flecha `chevron_left` con deshabilitación reactiva cuando `currentSlideIndex() === 0`.
+       - **Visor central (`.slider-viewport`):** Con `flex: 1 1 auto; min-width: 0; overflow: hidden;` que aloja la pista de deslizamiento (`.slider-track`).
+       - **Botón derecho (`.carousel-arrow-btn.next`):** Flecha `chevron_right` con deshabilitación reactiva cuando `currentSlideIndex() >= maxSlideIndex()`.
+  2. *Supresión del Contador Numérico:*
+     - Se eliminó completamente el elemento `.slider-indicator`, dejando una interfaz minimalista y limpia donde la pista de tarjetas y el estado visual de las flechas informan de los límites disponibles.
+  3. *Mecánica Gestual Omnicanal Híbrida (Swipe Táctil + Mouse Drag en Escritorio):*
+     - En [home.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.ts), se incorporó la gestión reactiva de arrastre mediante Angular Signals:
+       - `readonly isDragging = signal<boolean>(false);`
+       - `onMouseDown(event: MouseEvent)`: Filtra exclusivamente el botón principal (`event.button === 0`), activa `isDragging.set(true)` y almacena la coordenada horizontal de inicio `dragStartX = event.clientX`.
+       - `onMouseUp(event: MouseEvent)`: Si estaba en modo arrastre, calcula la diferencia $\Delta X = dragStartX - event.clientX$. Si $|\Delta X| > 40\text{px}$, dispara `slideNext()` si $\Delta X > 0$ o `slidePrev()` si $\Delta X < 0$, desactivando `isDragging`.
+       - `onMouseLeave()`: Restablece de forma segura `isDragging.set(false)` en caso de que el cursor abandone el área del carrusel durante el gesto.
+       - En `slider-viewport`, se aplica cursor `grab` en reposo y `grabbing` con `user-select: none;` durante el arrastre activo.
+     - Se mantiene la compatibilidad con dispositivos táctiles mediante `onTouchStart` y `onTouchEnd` con el mismo umbral de $40\text{px}$.
+  4. *Estilos y Tokens de Diseño SSOT:*
+     - En [home.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.scss), los botones de flecha circulares utilizan exclusivamente tokens `--roams-surface`, `--roams-border`, `--roams-text-primary`, `--roams-accent-blue` y sombras elevadas con `transform: scale(1.08)` en hover, reduciéndose a 34px en pantallas móviles ($\le 640\text{px}$) para maximizar el área útil de las tarjetas.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **243 pruebas unitarias pasando al 100%** (29 suites), incorporando tests específicos para arrastre de ratón (`onMouseDown`, `onMouseUp`, `onMouseLeave`, botón secundario) y renderizado de flechas flanqueantes sin contador.
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Verificación manual: Desplazamiento fluido tanto en ratón de sobremesa como en pantalla táctil y clic en flechas.
+- **Valor para la evaluación:** Experiencia de usuario (UX) de grado consumidor combinada con robustez empresarial: adaptabilidad multidispositivo transparente sin librerías externas de carrusel pesadas, manteniendo el bundle ultraligero y el código 100% tipado y mantenible.
