@@ -368,6 +368,58 @@
         margin-top: 0.15rem;
       }
     }
+
+    .coin-stack {
+      margin-left: auto;
+      display: inline-flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      position: relative;
+      width: 22px;
+      padding-top: 3px;
+
+      .coin {
+        display: block;
+        width: 19px;
+        height: 5.5px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--roams-coin-gold-light) 0%, var(--roams-coin-gold) 60%, var(--roams-coin-gold-dark) 100%);
+        box-shadow:
+          0 1px 0 var(--roams-coin-gold-dark),
+          0 1.5px 0 var(--roams-coin-gold-rim),
+          0 1.5px 2px rgba(15, 23, 42, 0.2);
+        margin-top: -3px;
+        position: relative;
+        transform-origin: center bottom;
+        animation: coinDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+
+        &::after {
+          content: '';
+          position: absolute;
+          inset: 1px;
+          border-radius: 50%;
+          border: 0.5px solid rgba(255, 255, 255, 0.45);
+          background: radial-gradient(ellipse at 40% 30%, rgba(255, 255, 255, 0.35), transparent 70%);
+        }
+
+        &.c1 { animation-delay: 0.10s; }
+        &.c2 { animation-delay: 0.22s; }
+        &.c3 { animation-delay: 0.34s; }
+        &.c4 { animation-delay: 0.46s; }
+        &.c5 { animation-delay: 0.58s; }
+      }
+    }
+
+    &:hover {
+      border-color: var(--roams-accent-blue);
+      transform: translateY(-1px);
+      transition: all 0.2s ease;
+
+      .coin-stack .coin:last-child {
+        transform: translateY(-3px);
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+    }
   }
 
   .pricing-tax-note {
@@ -525,5 +577,29 @@
     .hero-title {
       font-size: 1.4rem;
     }
+  }
+}
+
+@keyframes coinDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(-38px) scale(0.85);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(2px) scale(1.05);
+  }
+  85% {
+    transform: translateY(-1px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coin-stack .coin {
+    animation: none !important;
   }
 }

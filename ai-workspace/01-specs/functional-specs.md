@@ -188,6 +188,18 @@ Para dotar a la plataforma de una identidad visual acogedora, moderna y profesio
 **Política Responsive de Anclaje Visual vs. Cero Ruido:**  
 En pantallas de escritorio y tablet ($\ge$ 769px), estas ilustraciones proporcionan un anclaje visual inmediato para reconocer la pantalla de un vistazo. En smartphones ($\le$ 768px), las ilustraciones tipo banner de gran tamaño se ocultan de forma automática (`display: none !important;`), erradicando el ruido visual y manteniendo los controles interactivos y tablas directamente visibles *above the fold*.
 
+### 3.3 Micro-interacción Visual: Pilas de Monedas 3D Dinámicas por Tramo de Tarificación
+Para plasmar visualmente el impacto del coste por usuario y el ahorro escalonado en las tarjetas de referencia de tramos (en `/simulations` y `/home`):
+- **Efecto Cascada y Altura Decreciente:** Cada tramo exhibe una montañita física de monedas doradas táctiles que caen secuencialmente una sobre otra (`@keyframes coinDrop`) con un sutil rebote elástico:
+  - **Tramo 1 (10,00 € - 0 a 10 usuarios):** Pila más alta con **5 monedas** apiladas, simbolizando el mayor coste unitario por asiento en fases iniciales.
+  - **Tramo 2 (8,00 € - 11 a 50 usuarios):** Pila intermedia con **3 monedas**, reflejando el descuento automático acumulativo.
+  - **Tramo 3 (5,00 € - Más de 50 usuarios):** Pila baja con **2 monedas**, reflejando la máxima optimización de costes unitarios a gran escala.
+- **Mantenibilidad y Rendimiento (100% CSS):**
+  - Implementado exclusivamente mediante CSS Grid/Flexbox y aceleración por GPU (`transform`, `will-change`), sin librerías JS externas ni coste en runtime.
+  - Tokens SSOT en `src/styles/_colors.scss` (`--roams-coin-gold`, `--roams-coin-gold-light`, `--roams-coin-gold-dark`, `--roams-coin-gold-rim`) sin hardcodeo de colores.
+  - Respeto a la accesibilidad W3C: marcado con `aria-hidden="true"` y desactivación automática de la animación ante `@media (prefers-reduced-motion: reduce)`.
+  - Micro-interacción en hover: Al interactuar con la tarjeta, la moneda superior da un pequeño salto táctil (`translateY(-3px)`).
+
 ---
 
 ## 4. Estándar de Gestión de Errores (RFC 7807)

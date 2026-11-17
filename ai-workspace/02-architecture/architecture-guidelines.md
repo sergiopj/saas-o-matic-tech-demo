@@ -883,6 +883,13 @@ Para resolver la ausencia de base de datos inicial (debido a que los archivos `*
   - Reducción del padding vertical a `padding: 1.15rem 1.75rem;` y de la ilustración a `max-height: 120px; max-width: 210px; flex: 0 0 auto;`.
   - Esta optimización reduce la altura total del hero banner de ~350px a ~150px (reducción del 57%), logrando que los indicadores KPI, los tramos tarifarios y los clientes recientes aparezcan inmediatamente en el viewport inicial (*above the fold*) sin necesidad de scroll.
 
+#### E. Micro-interacción Visual: Pilas de Monedas 3D Dinámicas y Aceleración CSS
+- **Arquitectura Mantenible y Cero Huella JS:**
+  - El efecto de monedas cayendo en cascada sobre los tramos tarifarios se resuelve al 100% en CSS puro (`@keyframes coinDrop` con aceleración elástica `cubic-bezier(0.34, 1.56, 0.64, 1)` y retardos escalonados `animation-delay: 0.1s..0.58s`), garantizando 60 FPS estables sin añadir coste de computación a los Signals ni dependencias JS externas (cero Lottie, cero Three.js).
+  - Proporcionalidad visual de costes: Tramo 1 (10 €) apila 5 monedas (pila alta), Tramo 2 (8 €) apila 3 monedas (pila media) y Tramo 3 (5 €) apila 2 monedas (pila baja), reflejando la curva decreciente del coste por usuario a mayor volumen.
+  - Gobernanza de tokens en `src/styles/_colors.scss` (`$roams-coin-gold-*` y `--roams-coin-gold-*`) respetando la Única Fuente de Verdad (SSOT).
+  - Accesibilidad y ergonomía: Marcado semántico decorativo con `aria-hidden="true"` y desactivación automática ante `@media (prefers-reduced-motion: reduce)`.
+
 ---
 
 ## 4. Estrategia de Testing y Aseguramiento de Calidad

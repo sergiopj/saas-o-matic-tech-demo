@@ -17,6 +17,12 @@ $roams-status-warning: #f59e0b;    // Amber / Contingency / Alert
 $roams-status-error: #ef4444;      // Red / Validation Error
 $roams-status-info: #0ea5e9;       // Cyan / Live Sync
 
+// Tactile Coin Tokens (for animated pricing stacks)
+$roams-coin-gold: #f59e0b;
+$roams-coin-gold-light: #fde68a;
+$roams-coin-gold-dark: #b45309;
+$roams-coin-gold-rim: #78350f;
+
 $roams-bg-page: #f8fafc;           // Canvas background
 $roams-bg-card: #ffffff;           // Card surface
 $roams-surface: #ffffff;           // Surface alias
@@ -49,6 +55,12 @@ $roams-border-inverse: rgba(255, 255, 255, 0.2); // Subtle border for dark input
   --roams-status-warning: #{$roams-status-warning};
   --roams-status-error: #{$roams-status-error};
   --roams-status-info: #{$roams-status-info};
+
+  /* Tactile Coin Visual Tokens */
+  --roams-coin-gold: #{$roams-coin-gold};
+  --roams-coin-gold-light: #{$roams-coin-gold-light};
+  --roams-coin-gold-dark: #{$roams-coin-gold-dark};
+  --roams-coin-gold-rim: #{$roams-coin-gold-rim};
 
   /* Surfaces & Backgrounds */
   --roams-bg-page: #{$roams-bg-page};

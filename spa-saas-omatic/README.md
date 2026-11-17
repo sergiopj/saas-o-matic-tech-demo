@@ -22,6 +22,7 @@ La interfaz gráfica incorpora una suite visual de diseño 3D cálido y táctil 
 - **Hero Banner Compacto (Above-the-Fold en `/home`):** Ancho contenido (`max-width: 960px; margin: 0 auto;`) y altura reducida en más de un 55% (`padding: 1.15rem 1.75rem`, imagen a 120px) para que las métricas KPI, tramos y clientes recientes aparezcan inmediatamente en el viewport inicial sin exigir scroll.
 - **Navbar Armonizado:** El selector de divisas (`CurrencySelectorComponent`) comparte dimensiones idénticas con el selector de idioma (`LanguageSelectorComponent`), con esquinas redondeadas estilo píldora (`--roams-radius-md`) y glifo de moneda (`monetization_on`).
 - **Live Conversion Respirable:** El bloque de conversión en vivo aplica espaciado generoso (`padding: 1rem 1.25rem; gap: 0.5rem; letter-spacing: 0.05em;`), erradicando la aglomeración visual de importes y tipos de cambio.
+- **Pilas de Monedas 3D Dinámicas por Tramo:** Micro-interacción en CSS puro (`@keyframes coinDrop`) con monedas doradas cayendo en cascada sobre los tramos tarifarios (5 monedas en T1 a 10 €, 3 en T2 a 8 €, 2 en T3 a 5 €), con soporte de accesibilidad `prefers-reduced-motion` y cero coste en JS.
 - **Ocultación Selectiva Móvil:** En pantallas $\le$ 768px, los banners decorativos se ocultan (`display: none !important;`) preservando el área táctil y la visibilidad de métricas clave sobre el pliegue.
 
 ---

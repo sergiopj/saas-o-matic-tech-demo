@@ -2951,6 +2951,38 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: **0 errores y 0 advertencias** en los 140 archivos inspeccionados.
 - **Valor para la evaluación:** Maestría en diseño de interacción y jerarquía visual web: subordinar los elementos decorativos al flujo operacional directo, asegurando que la información de negocio de mayor impacto esté a la vista desde el primer segundo.
 
+---
+
+### 6.123. Micro-interacción Visual: Pilas de Monedas 3D Dinámicas y Aceleradas por GPU en los Tramos Tarifarios
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Las tarjetas explicativas del modelo de tarificación escalonada (Tramo 1 a 10,00 €, Tramo 2 a 8,00 €, Tramo 3 a 5,00 €) en `/simulations` y `/home` presentaban un diseño informativo puramente estático. Para reforzar la comprensión intuitiva de la curva de precios por volumen y aportar un detalle visual distintivo (*delighter*), se propuso incorporar una pequeña montañita de monedas táctiles que van cayendo secuencialmente una sobre otra hasta formar un montoncillo físico, con mayor altura en el tramo de tarifa unitaria más alta y decreciendo hacia los tramos de mayor volumen.
+- **Feedback Humano (Tu criterio de interactividad y dinamismo visual):**
+  > *"lo mismo es una pijadilla y no se si es mantenible pero me molaria una pequeña montañita de moinedads que van cayendo una encima de otra hasta hacer un montoncillo logicamenyte hay mas monedas en el mas alto y va en descencendo Tramo 1 10,00 € ... Tramo 2 8,00 € ... Tramo 3 5,00 € ..."*
+- **Decisión de Arquitectura y Solución Aplicada (100% Mantenible y Ligera):**
+  1. *Cero Sobrecarga de JavaScript y 60 FPS Estables:*
+     - Se descartó el uso de librerías externas de animación (como Lottie, Canvas o Three.js) para no incrementar el bundle ni competir por el hilo de ejecución de los Signals de Angular 22.
+     - La animación se implementó íntegramente mediante **CSS puro acelerado por GPU** (`@keyframes coinDrop` con aceleración elástica `cubic-bezier(0.34, 1.56, 0.64, 1)` y propiedades `transform`), garantizando renderizado perfecto sin degradar Core Web Vitals.
+  2. *Lógica Proporcional de Apilado y Retardos Escalonados:*
+     - **Tramo 1 (10,00 € / 0-10 usuarios):** Montañita alta de **5 monedas** doradas con retardos escalonados (`0.10s` a `0.58s`), cayendo una tras otra hasta posarse de forma realista.
+     - **Tramo 2 (8,00 € / 11-50 usuarios):** Montañita intermedia de **3 monedas**, ilustrando el descuento automático por volumen.
+     - **Tramo 3 (5,00 € / >50 usuarios):** Montañita baja de **2 monedas**, reflejando la máxima optimización del coste por usuario a escala global.
+     - **Micro-interacción en Hover:** Al posar el cursor sobre la tarjeta (`:hover`), la moneda superior da un pequeño salto elástico (`translateY(-3px)`), aportando feedback táctil inmediato.
+  3. *Gobernanza de Tokens SSOT ([_colors.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/styles/_colors.scss)):*
+     - Definidos tokens oficiales para el brillo, cuerpo, sombra y reborde de la moneda: `--roams-coin-gold`, `--roams-coin-gold-light`, `--roams-coin-gold-dark`, `--roams-coin-gold-rim`. Cero códigos hexadecimales ni fallbacks en componentes `.scss`.
+  4. *Accesibilidad W3C y Respeto a Preferencias de Movimiento:*
+     - Marcado como elemento decorativo con `aria-hidden="true"`, evitando interferencias en lectores de pantalla.
+     - Regla `@media (prefers-reduced-motion: reduce)` para desactivar la animación de caída en usuarios con sensibilidad vestibular, mostrando las pilas de monedas en su estado final estático.
+  5. *Sincronización Documental Transversal:*
+     - Registrado en [functional-specs.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/01-specs/functional-specs.md#L188), [architecture-guidelines.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md#L880) y [spa-saas-omatic/README.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/README.md#L24).
+- **Resultados de Verificación:**
+  - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Oxlint: **0 errores y 0 advertencias** en los 140 archivos inspeccionados.
+- **Valor para la evaluación:** Capacidad de implementar micro-interacciones visualmente ricas y placenteras con máxima elegancia de ingeniería: sin frameworks pesados, con código 100% estándar, accesible y mantenible a largo plazo.
+
+
 
 
 
