@@ -533,5 +533,30 @@
     .converted-val {
       color: var(--roams-accent-blue);
     }
+
+    tbody tr.history-row {
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background-color: var(--roams-bg-page);
+      }
+    }
+
+    .actions-col,
+    .actions-cell {
+      text-align: right;
+      width: 48px;
+    }
+
+    .load-sim-btn {
+      color: var(--roams-accent-blue);
+      transition: transform 0.2s ease, color 0.15s ease;
+
+      &:hover {
+        color: var(--roams-accent-blue-hover);
+        transform: rotate(-45deg);
+      }
+    }
   }
 }

@@ -264,11 +264,12 @@
                 <th>{{ 'simulation.history.tax' | translate }}</th>
                 <th>{{ 'simulation.history.total' | translate }}</th>
                 <th>{{ 'simulation.history.converted' | translate }}</th>
+                <th class="actions-col">{{ 'simulation.history.actions' | translate }}</th>
               </tr>
             </thead>
             <tbody>
               @for (sim of simulations(); track sim.id) {
-                <tr>
+                <tr class="history-row" (click)="loadSimulationIntoStudio(sim)" [attr.title]="'simulation.history.loadBtn' | translate">
                   <td class="date-cell">{{ sim.createdAt | date:'short' }}</td>
                   <td class="users-cell">
                     <span class="users-badge">{{ sim.activeUsers }} u</span>
@@ -286,6 +287,18 @@
                     <strong class="converted-val">
                       {{ sim.totalCost | localizedCurrency }}
                     </strong>
+                  </td>
+                  <td class="actions-cell" (click)="$event.stopPropagation()">
+                    <button
+                      type="button"
+                      mat-icon-button
+                      class="load-sim-btn"
+                      (click)="loadSimulationIntoStudio(sim)"
+                      [attr.aria-label]="'simulation.history.loadBtn' | translate"
+                      [matTooltip]="'simulation.history.loadBtn' | translate"
+                    >
+                      <mat-icon aria-hidden="true">settings_backup_restore</mat-icon>
+                    </button>
                   </td>
                 </tr>
               }

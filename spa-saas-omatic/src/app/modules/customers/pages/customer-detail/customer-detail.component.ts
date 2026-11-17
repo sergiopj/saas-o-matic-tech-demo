@@ -127,6 +127,8 @@ export class CustomerDetailComponent implements OnInit {
     });
   }
 
+  private hasUserInteracted = false;
+
   loadSimulationsHistory(customerId: string): void {
     this.simulationsLoading.set(true);
     this.simulationApi.findByCustomer(customerId).subscribe({
@@ -137,6 +139,15 @@ export class CustomerDetailComponent implements OnInit {
         );
         this.simulations.set(sorted);
         this.simulationsLoading.set(false);
+
+        // Pre-populate interactive controls with customer's latest saved simulation if available
+        // and user has not actively adjusted controls during this session
+        if (sorted.length > 0 && !this.hasUserInteracted) {
+          const latest = sorted[0];
+          this.activeUsers.set(latest.activeUsers);
+          this.storageGb.set(latest.storageGb);
+          this.apiCalls.set(latest.apiCalls);
+        }
       },
       error: () => {
         this.simulationsLoading.set(false);
@@ -145,6 +156,7 @@ export class CustomerDetailComponent implements OnInit {
   }
 
   onUsersSliderChange(event: Event): void {
+    this.hasUserInteracted = true;
     const value = Number((event.target as HTMLInputElement).value);
     if (!isNaN(value) && value >= 0) {
       this.activeUsers.set(Math.floor(value));
@@ -153,21 +165,40 @@ export class CustomerDetailComponent implements OnInit {
   }
 
   onUsersInputChange(value: number): void {
+    this.hasUserInteracted = true;
     const safe = Math.max(0, Math.floor(value || 0));
     this.activeUsers.set(safe);
     this.saveSuccess.set(false);
   }
 
   onStorageChange(value: number): void {
+    this.hasUserInteracted = true;
     const safe = Math.max(0, Number(value) || 0);
     this.storageGb.set(safe);
     this.saveSuccess.set(false);
   }
 
   onApiCallsChange(value: number): void {
+    this.hasUserInteracted = true;
     const safe = Math.max(0, Math.floor(Number(value) || 0));
     this.apiCalls.set(safe);
     this.saveSuccess.set(false);
+  }
+
+  loadSimulationIntoStudio(sim: Simulation): void {
+    this.activeUsers.set(sim.activeUsers);
+    this.storageGb.set(sim.storageGb);
+    this.apiCalls.set(sim.apiCalls);
+    this.saveSuccess.set(false);
+    this.hasUserInteracted = true;
+
+    this.snackBar.open(
+      this.i18n.t('simulation.history.loadedNotification', {
+        users: sim.activeUsers,
+      }),
+      'OK',
+      { duration: 3000 }
+    );
   }
 
   saveSimulation(): void {
@@ -188,6 +219,8 @@ export class CustomerDetailComponent implements OnInit {
         next: () => {
           this.isSaving.set(false);
           this.saveSuccess.set(true);
+          // Allow newly saved simulation to become the persisted reference
+          this.hasUserInteracted = false;
           this.loadSimulationsHistory(cust.id);
         },
         error: () => {

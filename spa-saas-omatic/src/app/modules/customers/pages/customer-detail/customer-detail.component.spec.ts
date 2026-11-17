@@ -93,6 +93,27 @@ describe('CustomerDetailComponent', () => {
     expect(component).toBeTruthy();
     expect(component.customer()?.companyName).toBe('Acme Iberia');
     expect(component.simulations().length).toBe(1);
+    expect(component.activeUsers()).toBe(25);
+  });
+
+  it('should load a historical simulation into the studio controls', () => {
+    component.loadSimulationIntoStudio({
+      id: 'sim-past',
+      customerId: 'cust-123',
+      activeUsers: 85,
+      storageGb: 120,
+      apiCalls: 45000,
+      monthlyBaseCost: 595,
+      taxRate: 0.21,
+      taxAmount: 124.95,
+      totalCost: 719.95,
+      currency: 'EUR',
+      createdAt: '2026-11-12T10:00:00.000Z',
+    });
+
+    expect(component.activeUsers()).toBe(85);
+    expect(component.storageGb()).toBe(120);
+    expect(component.apiCalls()).toBe(45000);
   });
 
   it('should compute tiered pricing projection dynamically for 15 users (ES 21%)', () => {

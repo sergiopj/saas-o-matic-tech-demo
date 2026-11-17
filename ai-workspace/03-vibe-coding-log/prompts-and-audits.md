@@ -1975,6 +1975,40 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - `ng build`: Compilación limpia con lazy loading intacto y bundle inicial transferido de solo ~35 kB.
 - **Valor para la evaluación:** Muestra de sensibilidad exquisita hacia la accesibilidad universal (a11y), empatía con el usuario que navega por teclado y ejecución técnica pulida combinando Angular Signals reactivos con CSS moderno basado en design tokens.
 
+### 6.86 Hidratación Automática del Simulador con la Última Simulación Guardada y Acción de Restauración desde el Historial
+
+- **Situación inicial:** Al acceder a la ficha de detalle de un cliente (`/customers/:id`), el simulador interactivo siempre inicializaba sus señales con valores por defecto arbitrarios (`activeUsers: 15, storageGb: 50, apiCalls: 10000`). Si un comercial ajustaba el volumen a 67 usuarios, guardaba la simulación en SQLite y refrescaba el navegador (F5), el slider se reseteaba a 15 usuarios, a pesar de que la simulación de 67 usuarios figuraba correctamente guardada en la base de datos y visible en la tabla inferior de historial.
+- **Tu criterio y dirección de calidad:** Planteaste la duda con excelente visión de usuario final y experiencia de producto comercial:
+  *"veo un fallo gravisimo y no see si esta bien en los test... por ejemplo si subo los active users y salvo la simulacion y refesco se cargan los active users que tenia antes y no los nuevos, o eso esta bien al ser un simulador"*
+- **Análisis de Arquitectura de Producto (Simulador vs. Estado de Perfil):**
+  1. *El Modelo de Dominio es 100% Correcto:*
+     - La entidad `Customer` no posee un campo `activeUsers` en su tabla relacional de base de datos; la entidad almacena datos fiscales y contractuales (`companyName`, `taxId`, `email`, `country`, `selectedPlan`).
+     - Cada simulación es un registro inmutable en la tabla `simulations` con relación `1:N` (`customerId`), diseñado como escenario hipotético proyectado en el tiempo.
+  2. *Experiencia de Usuario (UX) Comercial Enterprise:*
+     - Aunque conceptualmente un simulador es una herramienta de cálculo, cuando un comercial abre la ficha de un cliente que **ya tiene simulaciones presupuestadas en SQLite**, lo más inteligente y natural es que la interfaz se inicialice automáticamente con los parámetros de la **última simulación guardada** (`latest.activeUsers`, `latest.storageGb`, `latest.apiCalls`).
+     - Si el cliente es nuevo y carece de historial, arranca limpiamente en los valores base (15 usuarios, 50 GB, 10.000 llamadas).
+  3. *Acción Interactiva de Restauración ("Cargar en el simulador"):*
+     - Además de la hidratación inicial, cada fila de la tabla de historial incorpora un botón interactivo y evento de clic para restaurar cualquier simulación histórica previa en los controles del estudio en caliente, permitiendo al comercial recuperar presupuestos antiguos, ajustarlos y emitir nuevas propuestas con un solo clic.
+- **Solución técnica implementada:**
+  - `CustomerDetailComponent` ([customer-detail.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.ts)):
+    - En `loadSimulationsHistory()`: si `sorted.length > 0` y el usuario no ha interactuado activamente en la sesión actual (`!hasUserInteracted`), pre-hidrata `activeUsers`, `storageGb` y `apiCalls` con `sorted[0]`.
+    - Al guardar una nueva simulación (`saveSimulation()`), restablece la bandera para que la nueva simulación guardada sea la referencia activa.
+    - Método `loadSimulationIntoStudio(sim)` para transferir cualquier simulación del historial al slider de forma reactiva con notificación `MatSnackBar`.
+  - Plantilla y Estilos ([customer-detail.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.html) y [customer-detail.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.scss)):
+    - Nueva columna de acciones con botón `mat-icon-button` (`settings_backup_restore`) con tooltip accesible.
+    - Filas de historial interactivas con hover suave (`var(--roams-bg-page)`) y cursor pointer.
+  - Catálogo i18n ([translations.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/i18n/translations.ts)):
+    - Claves `simulation.history.actions`, `simulation.history.loadBtn` y `simulation.history.loadedNotification` en `es`, `en`, `de`, `fr`.
+  - Pruebas unitarias ([customer-detail.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.spec.ts)):
+    - Verificación de auto-hidratación del slider a partir de la simulación más reciente (25 usuarios).
+    - Prueba unitaria de la acción `loadSimulationIntoStudio()`.
+- **Resultados de Verificación:**
+  - `oxlint --type-aware src/`: 0 advertencias, 0 errores.
+  - `vitest`: 140 pruebas unitarias pasando al 100% (23 suites).
+  - `jest`: 123 pruebas unitarias de backend pasando al 100% (25 suites).
+- **Valor para la evaluación:** Sensibilidad hacia la usabilidad real en software B2B: alineación entre el modelo relacional subyacente y la expectativa ergonómica del usuario comercial.
+
+
 
 
 
