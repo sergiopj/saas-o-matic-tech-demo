@@ -448,17 +448,16 @@ Para garantizar que fallos en elementos cosméticos o de micro-interacción (spi
   3. **Lista Desplegable Scrollable:** El panel desplegable de opciones maneja decenas de países con scroll fluido sin alterar el DOM de la página principal.
   4. **Identificación Limpia y Textual:** Cada opción expone el código ISO en texto claro junto a la insignia de recuento numérico (`ES (1)`, `US (1)`), evitando dependencias de emojis y garantizando máxima legibilidad.
 
-### 3.12 Componente Universal de Redacción y Editor de Texto Enriquecido Nativo (`EmailComposerDialogComponent`)
+### 3.12 Componente Universal de Redacción de Correo Comercial (`EmailComposerDialogComponent`)
 
 - **Evolución Modular hacia `src/app/shared/components/email-composer-dialog/`:**
-  Inicialmente acoplado al módulo de clientes, el diálogo de redacción se generalizó como un componente transversal en `shared` con contrato agnóstico (`EmailComposerDialogData { recipient, recipientName?, subtitle?, subject?, body?, bodyHtml? }`), permitiendo que cualquier pantalla (Clientes, Simulaciones, Facturación o Notificaciones) pueda disparar comunicaciones comerciales o de soporte sin duplicidad de código.
-- **Editor de Texto Enriquecido Nativo (HTML5 `contenteditable` vs. Quill):**
-  - *Decisión de Arquitectura y Rendimiento:* Se descartó Quill / `ngx-quill` para evitar incompatibilidades de dependencias en **Angular 22** (`peerDependencies` bloqueadas en versiones anteriores) y evitar sobrecargar el bundle con +200 KB innecesarios.
-  - *Barra de Herramientas Estilo Gmail:* Integra una barra de herramientas compacta con diseño de Angular Material (Negrita, Cursiva, Subrayado, Lista con viñetas, Lista numerada y Limpiar formato).
-- **Estrategia Multi-MIME para Portapapeles y Resiliencia `mailto:`:**
-  1. *Portapapeles Multi-MIME (`ClipboardItem`):* Al copiar, inyecta simultáneamente `text/html` y `text/plain`. Al pegar en clientes modernos (Gmail web, Outlook, Word), el texto conserva el formato enriquecido intacto.
-  2. *Despacho Estándar RFC 6068 (`mailto:`):* Dado que el protocolo `mailto:` por especificación de sistemas operativos solo soporta texto plano, el componente extrae reactivamente la versión en texto plano saneada (`getPlainText()`) para no renderizar etiquetas HTML crudas en el cliente de correo de escritorio.
-  3. *Interpolación Dinámica Multidioma:* Soporta la precarga de plantillas parametrizadas por idioma (`es`, `en`, `de`, `fr`) inyectando variables de contexto.
+  Inicialmente acoplado al módulo de clientes, el diálogo de redacción se generalizó como un componente transversal en `shared` con contrato agnóstico (`EmailComposerDialogData { recipient, recipientName?, subtitle?, subject?, body? }`), permitiendo que cualquier pantalla (Clientes, Simulaciones, Facturación o Notificaciones) pueda disparar comunicaciones comerciales o de soporte sin duplicidad de código.
+- **Flujo Robusto de Despacho Nativo (RFC 6068 `mailto:`):**
+  - *Filosofía UX KISS (Keep It Simple & Solid):* Se evita la sobreingeniería de editores pesados o dependencias hacia proveedores web concretos (ej. Gmail). La interfaz se mantiene limpia con dos acciones nítidas y complementarias:
+    1. **"Abrir en gestor de correo":** Dispara la URI estándar `mailto:` al gestor predeterminado del sistema operativo mediante `window.location.href = mailtoUri` con cierre fluido del diálogo modal.
+    2. **"Copiar plantilla":** Copia el mensaje completo al portapapeles mediante la API nativa `navigator.clipboard` con confirmación visual reactiva (`copied`), ofreciendo un respaldo inmediato si el usuario prefiere pegar el texto en su webmail.
+- **Interpolación Dinámica Multidioma:**
+  Soporta la precarga de plantillas parametrizadas por idioma (`es`, `en`, `de`, `fr`) inyectando variables de contexto (`{{company}}`, `{{plan}}`).
 
 ### 3.13 Regla de Oro: "Code in English, documentation in Spanish"
 

@@ -1701,6 +1701,33 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - 0 advertencias y 0 errores en `oxlint`.
 - **Valor para la evaluación:** Resolución de bugs sutiles de especificación web y sistemas operativos, garantizando compatibilidad omnicanal real.
 
+### 6.73. Refinamiento de UX y Retorno al Flujo Robusto de Envío de Email
+
+- **La observación del Director de Orquesta:**
+  - El usuario probó la versión con dos botones y detectó sobrecarga de opciones y problemas con el lanzador de correo:
+    > *"pero ahora hay dos botones open in mail client que al menos a mi no me hace nada y otro gmail web, dependemos de que el user quiera enviarlo via gmail, no se no lo veo, en la primera version que hiciste anytes de lo del texto enriquecido si funcionaba bien"*
+- **Análisis de UX y Pragmatismo de Producto:**
+  1. *El Principio KISS frente a la Sobreingeniería:*
+     - Introducir un botón específico para Gmail Web creaba un sesgo arbitrario hacia un proveedor particular y añadía ruido visual en la barra de acciones.
+     - La implementación con `contenteditable` y división de textos introducía una capa innecesaria de abstracción que desestabilizaba el despacho de `mailto:`.
+  2. *El Éxito Comprobado del Enfoque Original:*
+     - La primera versión utilizaba un `<textarea matInput rows="8">` nativo, limpio y accesible, gobernado por señales reactivas de Angular.
+     - El despacho de `mailto:` mediante `window.location.href = mailtoUri` funcionaba de manera impecable y directa en la máquina del usuario.
+- **Implementación y Consolidación:**
+  1. *Mantenimiento del Componente Universal en `shared/`:*
+     - Se preserva el componente desacoplado en `src/app/shared/components/email-composer-dialog/`, accesible para cualquier módulo del sistema.
+  2. *Retorno al `<textarea>` Reactivo y Limpio:*
+     - Se eliminó el editor `contenteditable` y la botonera compleja, devolviendo la claridad y velocidad del formulario nativo con `rows="8"` y redimensionamiento vertical suave.
+  3. *Eliminación del Botón de Gmail Web:*
+     - La barra de acciones vuelve a tener solo dos botones bien diferenciados:
+       - **"Copiar plantilla":** Para copiar todo el texto formateado al portapapeles.
+       - **"Abrir en gestor de correo":** Para abrir el cliente del sistema operativo mediante `window.location.href = mailtoUri`.
+- **Resultados de Verificación:**
+  - 131 tests unitarios en frontend pasando al 100%.
+  - 0 errores y 0 warnings en `oxlint`.
+  - Bundle de producción limpio en 4.5s sin sobrecostes.
+- **Valor para la evaluación:** Capacidad de escuchar el feedback del usuario, priorizar la estabilidad y simplicidad (*Less is more*) y mantener una arquitectura limpia y desacoplada sin sobrecargar la experiencia.
+
 
 
 

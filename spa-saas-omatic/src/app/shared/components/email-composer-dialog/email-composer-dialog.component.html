@@ -32,6 +32,7 @@
         type="email"
         [value]="recipient()"
         (input)="recipient.set($any($event.target).value)"
+        readonly
       />
       <mat-icon matPrefix class="field-icon" aria-hidden="true">contact_mail</mat-icon>
     </mat-form-field>
@@ -49,86 +50,18 @@
       <mat-icon matPrefix class="field-icon" aria-hidden="true">subject</mat-icon>
     </mat-form-field>
 
-    <div class="rich-editor-wrapper">
-      <div class="rich-toolbar" role="toolbar" aria-label="Format toolbar">
-        <button
-          type="button"
-          mat-icon-button
-          class="toolbar-btn"
-          (click)="format('bold')"
-          [matTooltip]="'emailComposer.bold' | translate"
-          aria-label="Bold"
-        >
-          <mat-icon>format_bold</mat-icon>
-        </button>
-        <button
-          type="button"
-          mat-icon-button
-          class="toolbar-btn"
-          (click)="format('italic')"
-          [matTooltip]="'emailComposer.italic' | translate"
-          aria-label="Italic"
-        >
-          <mat-icon>format_italic</mat-icon>
-        </button>
-        <button
-          type="button"
-          mat-icon-button
-          class="toolbar-btn"
-          (click)="format('underline')"
-          [matTooltip]="'emailComposer.underline' | translate"
-          aria-label="Underline"
-        >
-          <mat-icon>format_underlined</mat-icon>
-        </button>
-
-        <span class="toolbar-separator" aria-hidden="true"></span>
-
-        <button
-          type="button"
-          mat-icon-button
-          class="toolbar-btn"
-          (click)="format('insertUnorderedList')"
-          [matTooltip]="'emailComposer.bulletList' | translate"
-          aria-label="Bullet list"
-        >
-          <mat-icon>format_list_bulleted</mat-icon>
-        </button>
-        <button
-          type="button"
-          mat-icon-button
-          class="toolbar-btn"
-          (click)="format('insertOrderedList')"
-          [matTooltip]="'emailComposer.numberList' | translate"
-          aria-label="Numbered list"
-        >
-          <mat-icon>format_list_numbered</mat-icon>
-        </button>
-
-        <span class="toolbar-separator" aria-hidden="true"></span>
-
-        <button
-          type="button"
-          mat-icon-button
-          class="toolbar-btn"
-          (click)="format('removeFormat')"
-          [matTooltip]="'emailComposer.clear' | translate"
-          aria-label="Clear formatting"
-        >
-          <mat-icon>format_clear</mat-icon>
-        </button>
-      </div>
-
-      <div
-        #editorRef
-        class="rich-editor-area"
-        contenteditable="true"
-        role="textbox"
-        aria-multiline="true"
-        (input)="onEditorInput()"
-        [attr.data-placeholder]="'emailComposer.placeholder' | translate"
-      ></div>
-    </div>
+    <mat-form-field appearance="outline" class="form-field full-width message-field">
+      <mat-label id="body-label">{{ 'customers.emailDialog.body' | translate }}</mat-label>
+      <textarea
+        matInput
+        id="body"
+        aria-labelledby="body-label"
+        rows="8"
+        [value]="body()"
+        (input)="body.set($any($event.target).value)"
+      ></textarea>
+      <mat-icon matPrefix class="field-icon textarea-icon" aria-hidden="true">edit_note</mat-icon>
+    </mat-form-field>
   </mat-dialog-content>
 
   <mat-dialog-actions class="dialog-actions" align="end">
@@ -145,29 +78,18 @@
 
     <div class="actions-divider"></div>
 
-    <button
-      type="button"
-      mat-stroked-button
-      class="gmail-btn"
-      (click)="openGmailWeb()"
-      [matTooltip]="'customers.emailDialog.openGmail' | translate"
-    >
-      <mat-icon aria-hidden="true">open_in_new</mat-icon>
-      <span>Gmail Web</span>
-    </button>
-
     <button type="button" mat-stroked-button (click)="close()">
       {{ 'customers.emailDialog.cancel' | translate }}
     </button>
 
-    <a
+    <button
+      type="button"
       mat-flat-button
       class="dispatch-btn"
-      [href]="mailtoUri()"
-      (click)="onMailtoDispatch()"
+      (click)="openMailClient()"
     >
       <mat-icon aria-hidden="true">send</mat-icon>
       <span>{{ 'customers.emailDialog.openClient' | translate }}</span>
-    </a>
+    </button>
   </mat-dialog-actions>
 </div>
