@@ -86,6 +86,7 @@
         [modules]="quillModules"
         [ngModel]="htmlBody()"
         (ngModelChange)="htmlBody.set($event)"
+        (onEditorCreated)="onEditorCreated($event)"
         placeholder="..."
       ></quill-editor>
     </div>

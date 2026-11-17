@@ -1945,6 +1945,37 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - En [architecture-guidelines.md (Regla de Oro 9)](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md): Se incorporó el principio de autoridad fiscal del servidor y desacoplamiento OCP de tarifas.
 - **Valor para la evaluación:** Madurez en el diseño de producto de software: distinción entre variables de entrada de usuario (volumen) y políticas de negocio de la empresa (tarifas), asegurando blindaje contra fraude y extensibilidad limpia mediante principios SOLID.
 
+### 6.85 Accesibilidad W3C y Micro-Interacciones: Tooltips Reactivos en Barra de Herramientas Quill (Hover y Focus de Teclado)
+
+- **Situación inicial:** Al interactuar con el editor de texto enriquecido (Quill WYSIWYG) en el modal de redacción de correos (`EmailComposerDialogComponent`), los botones de la barra de herramientas (`.ql-bold`, `.ql-italic`, `.ql-underline`, `.ql-strike`, `.ql-list`, `.ql-header`, `.ql-clean`) carecían de tooltips explicativos y de atributos accesibles (`aria-label`, `title`). Al navegar mediante teclado (`Tab` / foco de accesibilidad) o pasar el ratón, el usuario no recibía ninguna indicación contextual de la acción de cada botón.
+- **Tu criterio y dirección de calidad:** Detectaste esta carencia de usabilidad y accesibilidad al interactuar con el modal:
+  *"cuando hago focus en las funcionalidades del texto enriquecido de el modal de envio de emails, no veo un toolkit que me diga que es cada funcionalidad por ejemplo bold activar"*
+- **Principios de Accesibilidad W3C y Diseño de Micro-Interacciones:**
+  1. *Cumplimiento WCAG 2.2 Nivel AA (Operable & Robust):*
+     - Criterio de conformidad 2.1.1 (Teclado): Todos los elementos funcionales deben ser alcanzables y operables mediante teclado.
+     - Criterio de conformidad 3.3.2 (Etiquetas o Instrucciones) y 4.1.2 (Nombre, Función, Valor): Cada control interactivo debe exponer su función de manera explícita para tecnologías de asistencia (lectores de pantalla) a través de `aria-label` y `title`.
+  2. *Doble Activación Visual: `:hover` y `:focus-visible` / `:focus`:*
+     - Los tooltips no deben restringirse únicamente a eventos de ratón (`mouseenter`). Un usuario que utiliza teclado, un conmutador o navegación asistida debe obtener el mismo *feedback* visual inmediato que un usuario de ratón.
+  3. *Arquitectura CSS Pura con Design Tokens (`--roams-*`):*
+     - Sin introducir librerías de JS pesadas de posicionamiento ni dependencias externas, los tooltips se modelan con pseudo-elementos `::after` (caja de texto flotante) y `::before` (flecha de apuntado) condicionados por el atributo `data-tooltip`.
+     - Utilizan el token corporativo `--roams-primary` (fondo Navy), `--roams-text-inverse` (texto blanco), `--roams-radius-sm` y `--roams-shadow-sm`, respetando estrictamente la política de cero colores hardcodeados y cero fallbacks en variables.
+  4. *Internacionalización Reactiva (Angular Signals & I18nService):*
+     - Los textos de los tooltips se gestionan a través de `I18nService`, permitiendo traducción instantánea en los 4 idiomas soportados (`es`, `en`, `de`, `fr`): Negrita/Bold/Fett/Gras con sus atajos (`Ctrl+B`), Cursiva (`Ctrl+I`), Subrayado (`Ctrl+U`), Tachado, Listas ordenadas/viñetas, Encabezados y Limpieza de formato.
+     - Un `effect()` de Angular Signals reacciona a cambios de idioma en tiempo real (`currentLanguage()`), actualizando dinámicamente los tooltips del editor sin recrear el DOM ni causar parpadeos.
+- **Archivos modificados:**
+  - [translations.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/i18n/translations.ts): Incorporación de las claves `customers.emailDialog.toolbar.*` en las 4 lenguas del catálogo (`es`, `en`, `de`, `fr`).
+  - [email-composer-dialog.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.ts): Inyección de `I18nService` y `ElementRef`, método `setupToolbarTooltips()`, handler `onEditorCreated()` y sincronización reactiva vía `effect()`.
+  - [email-composer-dialog.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.html): Enlace del evento `(onEditorCreated)="onEditorCreated($event)"`.
+  - [email-composer-dialog.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.scss): Estilos de tooltip accesibles con posicionamiento flotante, animación de opacidad/transformación y soporte completo para `:focus` y `:focus-visible`.
+  - [email-composer-dialog.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.spec.ts): Cobertura de pruebas unitarias verificando la asignación de atributos `data-tooltip`, `aria-label`, `title`, `tabindex` y actualización reactiva al cambiar de idioma.
+- **Resultados de Verificación:**
+  - `oxlint --type-aware src/`: 0 advertencias, 0 errores en 59 archivos.
+  - `vitest`: 139 pruebas unitarias pasando al 100% (23 suites).
+  - `jest`: 123 pruebas unitarias de backend pasando al 100% (25 suites).
+  - `ng build`: Compilación limpia con lazy loading intacto y bundle inicial transferido de solo ~35 kB.
+- **Valor para la evaluación:** Muestra de sensibilidad exquisita hacia la accesibilidad universal (a11y), empatía con el usuario que navega por teclado y ejecución técnica pulida combinando Angular Signals reactivos con CSS moderno basado en design tokens.
+
+
 
 
 

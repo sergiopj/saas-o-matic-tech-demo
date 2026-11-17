@@ -114,15 +114,30 @@
       background: var(--roams-bg-page);
       padding: 8px;
       font-family: inherit;
+      position: relative;
+      z-index: 5;
+      overflow: visible;
 
       .ql-formats {
         margin-right: 12px;
+      }
+
+      button,
+      .ql-picker-label {
+        position: relative;
       }
 
       button {
         width: 28px;
         height: 28px;
         padding: 3px 5px;
+        border-radius: 4px;
+        transition: background-color 0.15s ease, color 0.15s ease;
+
+        &:focus-visible {
+          outline: 2px solid var(--roams-accent-blue);
+          outline-offset: 1px;
+        }
 
         svg {
           width: 16px;
@@ -131,10 +146,80 @@
       }
 
       .ql-picker-label {
+        border-radius: 4px;
+        transition: background-color 0.15s ease, color 0.15s ease;
+
+        &:focus-visible {
+          outline: 2px solid var(--roams-accent-blue);
+          outline-offset: 1px;
+        }
+
         svg {
           width: 14px;
           height: 14px;
         }
+      }
+
+      button[data-tooltip],
+      .ql-picker-label[data-tooltip] {
+        &::after {
+          content: attr(data-tooltip);
+          position: absolute;
+          top: calc(100% + 7px);
+          left: 50%;
+          transform: translateX(-50%) translateY(-2px);
+          padding: 4px 8px;
+          background: var(--roams-primary);
+          color: var(--roams-text-inverse);
+          font-size: 0.725rem;
+          font-weight: 500;
+          font-family: inherit;
+          line-height: 1.2;
+          white-space: nowrap;
+          border-radius: var(--roams-radius-sm);
+          box-shadow: var(--roams-shadow-sm);
+          pointer-events: none;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+          z-index: 50;
+        }
+
+        &::before {
+          content: '';
+          position: absolute;
+          top: calc(100% + 2px);
+          left: 50%;
+          transform: translateX(-50%);
+          border-width: 0 5px 5px 5px;
+          border-style: solid;
+          border-color: transparent transparent var(--roams-primary) transparent;
+          pointer-events: none;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.15s ease, visibility 0.15s ease;
+          z-index: 50;
+        }
+
+        &:hover::after,
+        &:focus::after,
+        &:focus-visible::after {
+          opacity: 1;
+          visibility: visible;
+          transform: translateX(-50%) translateY(0);
+        }
+
+        &:hover::before,
+        &:focus::before,
+        &:focus-visible::before {
+          opacity: 1;
+          visibility: visible;
+        }
+      }
+
+      .ql-picker.ql-expanded .ql-picker-label[data-tooltip]::after,
+      .ql-picker.ql-expanded .ql-picker-label[data-tooltip]::before {
+        display: none;
       }
     }
 

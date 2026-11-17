@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ElementRef, effect, inject, signal } from '@angular/core';
 import {
   FormControl,
   FormsModule,
@@ -19,6 +19,8 @@ import { ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { QuillEditorComponent } from 'ngx-quill';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { EmailApiService } from '../../../core/services/email-api.service';
+import { I18nService } from '../../../core/services/i18n.service';
+import { TranslationKey } from '../../../core/i18n/translations';
 
 export interface EmailComposerDialogData {
   recipient: string;
@@ -54,6 +56,8 @@ export class EmailComposerDialogComponent {
   readonly data = inject<EmailComposerDialogData>(MAT_DIALOG_DATA);
   readonly dialogRef = inject(MatDialogRef<EmailComposerDialogComponent>);
   private readonly emailApi = inject(EmailApiService);
+  private readonly i18n = inject(I18nService);
+  private readonly elementRef = inject(ElementRef);
 
   readonly errorMatcher = new ShowOnDirtyErrorStateMatcher();
 
@@ -78,6 +82,8 @@ export class EmailComposerDialogComponent {
   readonly errorMessage = signal<string | null>(null);
   readonly copied = signal<boolean>(false);
 
+  private quillInstance: unknown = null;
+
   readonly quillModules = {
     toolbar: [
       ['bold', 'italic', 'underline', 'strike'],
@@ -91,6 +97,59 @@ export class EmailComposerDialogComponent {
     this.recipientControl.valueChanges.subscribe((value) => {
       this.recipient.set(value);
     });
+
+    effect(() => {
+      this.i18n.currentLanguage();
+      if (this.quillInstance) {
+        this.setupToolbarTooltips(this.quillInstance);
+      }
+    });
+  }
+
+  onEditorCreated(quill: unknown): void {
+    this.quillInstance = quill;
+    this.setupToolbarTooltips(quill);
+  }
+
+  setupToolbarTooltips(quill?: unknown): void {
+    const host = this.elementRef.nativeElement as HTMLElement;
+    const q = quill as {
+      container?: HTMLElement;
+      getModule?: (name: string) => { container?: HTMLElement };
+    } | null | undefined;
+
+    const toolbarEl =
+      q?.container?.parentElement?.querySelector<HTMLElement>('.ql-toolbar') ??
+      q?.getModule?.('toolbar')?.container ??
+      host.querySelector<HTMLElement>('.ql-toolbar');
+
+    if (!toolbarEl) {
+      return;
+    }
+
+    const toolbarItems: Array<{ selector: string; key: TranslationKey }> = [
+      { selector: 'button.ql-bold', key: 'customers.emailDialog.toolbar.bold' },
+      { selector: 'button.ql-italic', key: 'customers.emailDialog.toolbar.italic' },
+      { selector: 'button.ql-underline', key: 'customers.emailDialog.toolbar.underline' },
+      { selector: 'button.ql-strike', key: 'customers.emailDialog.toolbar.strike' },
+      { selector: 'button.ql-list[value="ordered"]', key: 'customers.emailDialog.toolbar.orderedList' },
+      { selector: 'button.ql-list[value="bullet"]', key: 'customers.emailDialog.toolbar.bulletList' },
+      { selector: '.ql-header .ql-picker-label, select.ql-header', key: 'customers.emailDialog.toolbar.heading' },
+      { selector: 'button.ql-clean', key: 'customers.emailDialog.toolbar.clean' },
+    ];
+
+    for (const item of toolbarItems) {
+      const el = toolbarEl.querySelector<HTMLElement>(item.selector);
+      if (el) {
+        const tooltip = this.i18n.t(item.key);
+        el.setAttribute('data-tooltip', tooltip);
+        el.setAttribute('title', tooltip);
+        el.setAttribute('aria-label', tooltip);
+        if (!el.hasAttribute('tabindex')) {
+          el.setAttribute('tabindex', '0');
+        }
+      }
+    }
   }
 
   private initHtmlBody(): string {

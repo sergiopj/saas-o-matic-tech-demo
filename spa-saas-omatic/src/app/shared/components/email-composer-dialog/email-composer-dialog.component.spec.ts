@@ -7,6 +7,7 @@ import {
   EmailComposerDialogData,
 } from './email-composer-dialog.component';
 import { EmailApiService } from '../../../core/services/email-api.service';
+import { I18nService } from '../../../core/services/i18n.service';
 
 describe('EmailComposerDialogComponent', () => {
   let component: EmailComposerDialogComponent;
@@ -40,6 +41,9 @@ describe('EmailComposerDialogComponent', () => {
         { provide: EmailApiService, useValue: mockEmailApi },
       ],
     }).compileComponents();
+
+    const i18n = TestBed.inject(I18nService);
+    i18n.setLanguage('es');
 
     fixture = TestBed.createComponent(EmailComposerDialogComponent);
     component = fixture.componentInstance;
@@ -142,5 +146,78 @@ describe('EmailComposerDialogComponent', () => {
 
     expect(mockEmailApi.sendEmail).not.toHaveBeenCalled();
     expect(component.isSending()).toBe(false);
+  });
+
+  it('should configure tooltips and aria-labels for toolbar buttons on editor created', () => {
+    const toolbar = document.createElement('div');
+    toolbar.className = 'ql-toolbar';
+    const boldBtn = document.createElement('button');
+    boldBtn.className = 'ql-bold';
+    const italicBtn = document.createElement('button');
+    italicBtn.className = 'ql-italic';
+    const orderedListBtn = document.createElement('button');
+    orderedListBtn.className = 'ql-list';
+    orderedListBtn.setAttribute('value', 'ordered');
+    const headerPicker = document.createElement('span');
+    headerPicker.className = 'ql-header';
+    const headerLabel = document.createElement('span');
+    headerLabel.className = 'ql-picker-label';
+    headerPicker.appendChild(headerLabel);
+
+    toolbar.appendChild(boldBtn);
+    toolbar.appendChild(italicBtn);
+    toolbar.appendChild(orderedListBtn);
+    toolbar.appendChild(headerPicker);
+
+    const mockQuill = {
+      container: {
+        parentElement: {
+          querySelector: vi.fn((sel: string) => (sel === '.ql-toolbar' ? toolbar : null)),
+        },
+      },
+    };
+
+    component.onEditorCreated(mockQuill);
+
+    expect(boldBtn.getAttribute('data-tooltip')).toBe('Negrita (Ctrl+B)');
+    expect(boldBtn.getAttribute('aria-label')).toBe('Negrita (Ctrl+B)');
+    expect(boldBtn.getAttribute('title')).toBe('Negrita (Ctrl+B)');
+    expect(boldBtn.getAttribute('tabindex')).toBe('0');
+
+    expect(italicBtn.getAttribute('data-tooltip')).toBe('Cursiva (Ctrl+I)');
+    expect(orderedListBtn.getAttribute('data-tooltip')).toBe('Lista numerada');
+    expect(headerLabel.getAttribute('data-tooltip')).toBe('Encabezado');
+  });
+
+  it('should safely handle null or missing toolbar without throwing errors', () => {
+    expect(() => component.setupToolbarTooltips(null)).not.toThrow();
+    expect(() => component.setupToolbarTooltips(undefined)).not.toThrow();
+    expect(() => component.setupToolbarTooltips({})).not.toThrow();
+  });
+
+  it('should update toolbar tooltips when active language changes', () => {
+    const i18n = TestBed.inject(I18nService);
+    const toolbar = document.createElement('div');
+    toolbar.className = 'ql-toolbar';
+    const boldBtn = document.createElement('button');
+    boldBtn.className = 'ql-bold';
+    toolbar.appendChild(boldBtn);
+
+    const mockQuill = {
+      container: {
+        parentElement: {
+          querySelector: vi.fn(() => toolbar),
+        },
+      },
+    };
+
+    component.onEditorCreated(mockQuill);
+    expect(boldBtn.getAttribute('data-tooltip')).toBe('Negrita (Ctrl+B)');
+
+    i18n.setLanguage('en');
+    fixture.detectChanges();
+
+    expect(boldBtn.getAttribute('data-tooltip')).toBe('Bold (Ctrl+B)');
+    expect(boldBtn.getAttribute('aria-label')).toBe('Bold (Ctrl+B)');
   });
 });
