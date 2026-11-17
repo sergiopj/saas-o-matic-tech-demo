@@ -62,7 +62,7 @@ export class Customer {
     }
 
     const trimmedEmail = (payload.email || '').trim().toLowerCase();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
     if (!emailRegex.test(trimmedEmail)) {
       throw new DomainError(`Invalid email address format '${payload.email}'.`);
     }

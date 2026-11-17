@@ -277,9 +277,25 @@
     color: var(--roams-text-inverse);
     gap: 0.5rem;
     min-width: 130px;
+    border: 1px solid transparent;
+    transition: background-color 0.2s ease, opacity 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 
     &:hover:not(:disabled) {
       background-color: var(--roams-accent-blue-hover);
+    }
+
+    &:disabled,
+    &[disabled] {
+      background-color: var(--roams-bg-card) !important;
+      color: var(--roams-text-muted) !important;
+      border: 1px solid var(--roams-border) !important;
+      opacity: 0.65;
+      cursor: not-allowed !important;
+      pointer-events: auto !important;
+
+      mat-icon {
+        color: var(--roams-text-muted);
+      }
     }
 
     .btn-spinner ::ng-deep circle {

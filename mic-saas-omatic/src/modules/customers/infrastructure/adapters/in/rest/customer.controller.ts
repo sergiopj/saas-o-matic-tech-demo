@@ -44,18 +44,23 @@ export class CustomerController {
 
   @Get()
   async list(
-    @Query('search') search?: string,
-    @Query('country') country?: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
+    @Query()
+    query: {
+      search?: string;
+      country?: string;
+      page?: string;
+      limit?: string;
+      sortBy?: string;
+      order?: string;
+      sortOrder?: string;
+      fields?: string;
+    },
     @Res({ passthrough: true }) res?: Response,
-    @Query('sortBy') sortBy?: string,
-    @Query('order') order?: string,
-    @Query('sortOrder') sortOrder?: string,
-    @Query('fields') fields?: string,
   ): Promise<CustomerResponseDto[] | CustomerLiteResponseDto[]> {
-    const pageNum = page ? parseInt(page, 10) : undefined;
-    const limitNum = limit ? parseInt(limit, 10) : undefined;
+    const { search, country, page, limit, sortBy, order, sortOrder, fields } =
+      query;
+    const pageNum = page ? Number.parseInt(page, 10) : undefined;
+    const limitNum = limit ? Number.parseInt(limit, 10) : undefined;
 
     const validSortFields: CustomerSortField[] = [
       'companyName',

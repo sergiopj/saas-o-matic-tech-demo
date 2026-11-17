@@ -20,7 +20,11 @@
 
   <!-- KPI Metrics Grid -->
   <section class="kpis-grid">
-    <div class="kpi-card">
+    <a
+      routerLink="/customers"
+      class="kpi-card clickable"
+      [attr.aria-label]="'home.kpi.customersLinkAria' | translate"
+    >
       <div class="kpi-icon-circle blue">
         <mat-icon aria-hidden="true">groups</mat-icon>
       </div>
@@ -28,7 +32,8 @@
         <span class="kpi-value">{{ totalCustomers() }}</span>
         <span class="kpi-label">{{ 'home.kpi.customers' | translate }}</span>
       </div>
-    </div>
+      <mat-icon class="kpi-arrow" aria-hidden="true">arrow_forward</mat-icon>
+    </a>
 
     <div class="kpi-card">
       <div class="kpi-icon-circle emerald">

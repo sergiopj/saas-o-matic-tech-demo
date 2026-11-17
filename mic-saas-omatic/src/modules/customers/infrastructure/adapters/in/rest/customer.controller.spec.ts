@@ -53,7 +53,7 @@ describe('CustomerController (Primary Adapter)', () => {
   });
 
   it('should list customers by search term and country, returning CustomerResponseDto array', async () => {
-    const result = await controller.list('roams', 'ES');
+    const result = await controller.list({ search: 'roams', country: 'ES' });
 
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('uuid-100');
@@ -73,10 +73,7 @@ describe('CustomerController (Primary Adapter)', () => {
     } as any;
 
     const result = await controller.list(
-      undefined,
-      undefined,
-      '2',
-      '10',
+      { page: '2', limit: '10' },
       mockRes,
     );
 
@@ -88,15 +85,12 @@ describe('CustomerController (Primary Adapter)', () => {
   });
 
   it('should pass validated sortBy and order parameters to use case', async () => {
-    await controller.list(
-      undefined,
-      undefined,
-      '1',
-      '10',
-      undefined,
-      'companyName',
-      'ASC',
-    );
+    await controller.list({
+      page: '1',
+      limit: '10',
+      sortBy: 'companyName',
+      order: 'ASC',
+    });
 
     expect(mockListCustomersUseCase.execute).toHaveBeenCalledWith(
       undefined,
@@ -109,17 +103,7 @@ describe('CustomerController (Primary Adapter)', () => {
   });
 
   it('should return lightweight CustomerLiteResponseDto array when fields=lite is requested', async () => {
-    const result = await controller.list(
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      'lite',
-    );
+    const result = await controller.list({ fields: 'lite' });
 
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({

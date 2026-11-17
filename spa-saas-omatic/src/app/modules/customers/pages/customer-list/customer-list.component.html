@@ -4,6 +4,19 @@
       <h1 class="page-title">{{ 'customers.list.title' | translate }}</h1>
       <p class="page-subtitle">{{ 'customers.list.subtitle' | translate }}</p>
     </div>
+    <div class="header-actions">
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        class="create-customer-btn"
+        (click)="openCreateCustomerDialog()"
+        [attr.aria-label]="'customers.create.btn' | translate"
+      >
+        <mat-icon>add_business</mat-icon>
+        <span>{{ 'customers.create.btn' | translate }}</span>
+      </button>
+    </div>
   </header>
 
   <app-error-banner [problem]="customerApi.error()" [retryable]="true" (retry)="loadCustomers()"

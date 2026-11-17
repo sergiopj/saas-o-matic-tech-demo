@@ -147,6 +147,10 @@ Los impuestos se determinan a partir del código de país (`country`) del client
 
 ## 3. Especificaciones del Frontend y Experiencia de Usuario (Dashboard)
 
+> [!NOTE]
+> **Recomendación de Entorno de Uso (Desktop Optimizado & 100% Responsive):**  
+> Al tratarse de una herramienta analítica y operativa para el equipo comercial (con matrices de tramos, tablas de histórico denso, simulación interactiva a 60 FPS, filtros avanzados y composición de presupuestos), **la experiencia de uso óptima está diseñada para pantallas de escritorio (Desktop $\ge$ 1024px)**. No obstante, la plataforma es **100% responsive** y cuenta con adaptaciones específicas para tablets y smartphones (navbar en dos filas en $\le$ 640px, sidebar colapsable, drawer de filtros táctil y tarjetas reordenables).
+
 ### 3.1 Arquitectura de Componentes
 - **Tecnología:** Angular 21 (Standalone Components, Signals reactivos para estado local).
 - **Vistas y Componentes Clave:**

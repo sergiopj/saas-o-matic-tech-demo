@@ -1,0 +1,162 @@
+<div class="customer-dialog-container">
+  <header class="dialog-header">
+    <div class="header-icon-badge" aria-hidden="true">
+      <mat-icon>add_business</mat-icon>
+    </div>
+    <div class="header-text">
+      <h2 mat-dialog-title class="dialog-title">
+        {{ 'customers.create.dialogTitle' | translate }}
+      </h2>
+      <p class="dialog-subtitle">
+        {{ 'customers.create.dialogSubtitle' | translate }}
+      </p>
+    </div>
+    <button mat-icon-button type="button" class="close-btn" (click)="onCancel()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  @if (errorMessage()) {
+    <output class="form-alert error-alert" aria-live="polite">
+      <mat-icon class="alert-icon">error_outline</mat-icon>
+      <span class="alert-text">{{ errorMessage() }}</span>
+    </output>
+  }
+
+  @if (success()) {
+    <output class="form-alert success-alert" aria-live="polite">
+      <mat-icon class="alert-icon">check_circle</mat-icon>
+      <span class="alert-text">{{ 'customers.create.success' | translate }}</span>
+    </output>
+  }
+
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" id="customer-create-form" class="customer-form" novalidate>
+      <div class="form-row full-width">
+        <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+          <mat-label>{{ 'customers.create.companyName' | translate }}</mat-label>
+          <input
+            matInput
+            type="text"
+            formControlName="companyName"
+            [errorStateMatcher]="matcher"
+            [placeholder]="'customers.create.companyNamePlaceholder' | translate"
+            autocomplete="organization"
+            required
+          />
+          <mat-icon matPrefix class="field-icon">business</mat-icon>
+          @if (form.get('companyName')?.hasError('required')) {
+            <mat-error>{{ 'customers.create.errRequired' | translate }}</mat-error>
+          } @else if (form.get('companyName')?.hasError('minlength')) {
+            <mat-error>{{ 'customers.create.errMinLength' | translate }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-row two-columns">
+        <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+          <mat-label>{{ 'customers.create.country' | translate }}</mat-label>
+          <mat-select formControlName="country" [errorStateMatcher]="matcher" required>
+            @for (c of countries; track c.code) {
+              <mat-option [value]="c.code">
+                <span class="option-flag">{{ c.flag }}</span>
+                <span>{{ c.nameKey }}</span>
+              </mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix class="field-icon">public</mat-icon>
+          @if (form.get('country')?.hasError('required')) {
+            <mat-error>{{ 'customers.create.errRequired' | translate }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+          <mat-label>{{ 'customers.create.taxId' | translate }}</mat-label>
+          <input
+            matInput
+            type="text"
+            formControlName="taxId"
+            [errorStateMatcher]="matcher"
+            [placeholder]="'customers.create.taxIdPlaceholder' | translate"
+            autocomplete="off"
+            required
+          />
+          <mat-icon matPrefix class="field-icon">badge</mat-icon>
+          @if (form.get('taxId')?.hasError('required')) {
+            <mat-error>{{ 'customers.create.errRequired' | translate }}</mat-error>
+          } @else if (form.get('taxId')?.hasError('invalidTaxId')) {
+            <mat-error>{{ 'customers.create.errTaxId' | translate }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-row two-columns">
+        <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+          <mat-label>{{ 'customers.create.email' | translate }}</mat-label>
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            [errorStateMatcher]="matcher"
+            [placeholder]="'customers.create.emailPlaceholder' | translate"
+            autocomplete="email"
+            required
+          />
+          <mat-icon matPrefix class="field-icon">mail</mat-icon>
+          @if (form.get('email')?.hasError('required')) {
+            <mat-error>{{ 'customers.create.errRequired' | translate }}</mat-error>
+          } @else if (form.get('email')?.hasError('invalidEmailFormat')) {
+            <mat-error>{{ 'customers.create.errEmail' | translate }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+          <mat-label>{{ 'customers.create.plan' | translate }}</mat-label>
+          <mat-select formControlName="selectedPlan" [errorStateMatcher]="matcher" required>
+            @for (plan of plans; track plan) {
+              <mat-option [value]="plan">
+                {{ plan }}
+              </mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix class="field-icon">stars</mat-icon>
+          @if (form.get('selectedPlan')?.hasError('required')) {
+            <mat-error>{{ 'customers.create.errRequired' | translate }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button
+      mat-button
+      type="button"
+      class="action-btn cancel-btn"
+      (click)="onCancel()"
+      [disabled]="submitting()"
+    >
+      {{ 'customers.create.cancel' | translate }}
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      type="submit"
+      form="customer-create-form"
+      class="action-btn submit-btn"
+      [disabled]="submitting() || form.invalid || success()"
+      [attr.aria-disabled]="submitting() || form.invalid || success()"
+      [attr.title]="(submitting() || form.invalid || success()) ? ('customers.create.disabledHint' | translate) : null"
+    >
+      @if (submitting()) {
+        <mat-spinner diameter="18" class="spinner-inline" />
+        <span>{{ 'customers.create.submitting' | translate }}</span>
+      } @else {
+        <span class="btn-content">
+          <mat-icon>save</mat-icon>
+          <span>{{ 'customers.create.submit' | translate }}</span>
+        </span>
+      }
+    </button>
+  </mat-dialog-actions>
+</div>

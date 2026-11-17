@@ -10,6 +10,54 @@
 .page-header {
   border-bottom: 1px solid var(--roams-border);
   padding-bottom: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+
+  @media (max-width: 640px) {
+    width: 100%;
+  }
+}
+
+.create-customer-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  min-height: 42px;
+  padding: 0 1.25rem;
+  border-radius: var(--roams-radius-md);
+  background-color: var(--roams-primary);
+  color: var(--roams-text-inverse);
+  flex-shrink: 0;
+  transition: background-color 0.15s ease-in-out;
+
+  &:hover {
+    background-color: var(--roams-primary-dark);
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  @media (max-width: 640px) {
+    width: 100%;
+  }
 }
 
 .header-titles {

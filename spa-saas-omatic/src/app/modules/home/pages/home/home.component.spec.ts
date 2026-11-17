@@ -78,4 +78,10 @@ describe('HomeComponent', () => {
     const simulateBtn = fixture.nativeElement.querySelector('.lite-simulate-btn');
     expect(simulateBtn).toBeTruthy();
   });
+
+  it('should render registered customers KPI card as a link navigating to /customers', () => {
+    const customerKpiLink: HTMLAnchorElement | null = fixture.nativeElement.querySelector('a.kpi-card.clickable');
+    expect(customerKpiLink).toBeTruthy();
+    expect(customerKpiLink?.getAttribute('href') || customerKpiLink?.getAttribute('ng-reflect-router-link')).toContain('/customers');
+  });
 });

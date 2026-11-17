@@ -119,6 +119,7 @@
       class="dispatch-btn"
       (click)="sendEmail()"
       [disabled]="isSending() || sendSuccess() || recipientControl.invalid || !subject()"
+      [attr.aria-disabled]="isSending() || sendSuccess() || recipientControl.invalid || !subject()"
     >
       <span class="btn-inner">
         @if (isSending()) {

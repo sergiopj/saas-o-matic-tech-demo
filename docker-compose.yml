@@ -1,0 +1,38 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: mic-saas-omatic/Dockerfile
+    container_name: saas-omatic-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_NAME=/app/data/saas_o_matic.sqlite
+    volumes:
+      - sqlite-data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000/customers?limit=1', (res) => process.exit(res.statusCode === 200 ? 0 : 1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  frontend:
+    build:
+      context: ./spa-saas-omatic
+      dockerfile: Dockerfile
+    container_name: saas-omatic-frontend
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  sqlite-data:
+    driver: local

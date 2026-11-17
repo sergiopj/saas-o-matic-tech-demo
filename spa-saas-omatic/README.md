@@ -1,6 +1,11 @@
 # 🎨 spa-saas-omatic — Frontend Dashboard
 
-Dashboard Comercial interactivo para la optimización y presupuestado dinámico de suscripciones SaaS multi-divisa, desarrollado bajo metodología **Mobile-First** con **Angular 22**, **Standalone Components**, **Signals reactivos**, **Built-in Control Flow (`@if`, `@for`)** y **Angular Material** personalizado.
+Dashboard Comercial interactivo para la optimización y presupuestado dinámico de suscripciones SaaS multi-divisa, desarrollado con **Angular 22**, **Standalone Components**, **Signals reactivos**, **Built-in Control Flow (`@if`, `@for`)** y **Angular Material** personalizado con la identidad visual corporativa de Roams.
+
+> [!TIP]
+> **💻 Recomendación de Entorno (Desktop Optimizado & 100% Responsive):**  
+> Al tratarse de un panel operativo corporativo para el equipo comercial (diseñado para la simulación interactiva de tramos, análisis de métricas, filtros avanzados, tablas de histórico denso y composición de presupuestos), **la experiencia de uso óptima está recomendada en pantallas de escritorio (Desktop $\ge$ 1024px)** para maximizar la productividad visual.  
+> No obstante, la plataforma es **100% responsive** y está completamente adaptada para tablets y smartphones (navbar dinámico en 2 filas en pantallas $\le$ 640px, sidebar colapsable, drawer deslizante de filtros con botones táctiles y tarjetas reorganizables).
 
 ---
 
@@ -48,6 +53,10 @@ npm run build
 
 # 4. Pasar el linter estático (Oxlint con soporte Type-Aware)
 npm run lint
+
+# 5. Despliegue containerizado con Docker (orquestado desde la raíz del proyecto):
+# Requiere tener Docker Desktop instalado y en ejecución:
+docker compose up --build
 ```
 
 ---

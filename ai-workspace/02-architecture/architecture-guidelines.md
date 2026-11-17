@@ -707,7 +707,11 @@ flowchart TD
 - Al encadenar filtros (Rango de fechas con selector de calendario `MatDatepicker`, usuarios activos, llamadas a API, almacenamiento y texto libre), la señal computada `filteredSimulations()` evalúa la condición de filtrado O(N) sin llamadas redundantes al servidor.
 - La paginación (`paginatedSimulations`) se calcula dinámicamente como slice de la lista filtrada, reseteando la página activa a 1 ante cualquier cambio de filtro para evitar estados de índice fuera de rango.
 
-### 3.20 Arquitectura Adaptativa Mobile-First: Menú Superior Desplegable y Blindaje de Viewport para Modales y Drawers
+### 3.20 Estrategia de Dispositivos: Recomendación Operativa en Desktop (>= 1024px) y Blindaje 100% Responsive
+
+- **Criterio de Diseño y Recomendación de Entorno:**
+  Al tratarse de una herramienta analítica y operativa para el equipo comercial (que maneja matrices de tarificación por tramos, proyección simultánea de consumos, tablas de histórico denso, filtros multicriterio y redacción de propuestas), **la experiencia de uso óptima está recomendada en pantallas de escritorio (Desktop $\ge$ 1024px)** para maximizar la productividad y ergonomía visual del comercial.
+  No obstante, para garantizar la máxima portabilidad durante visitas a clientes o reuniones comerciales desde cualquier dispositivo, la arquitectura es **100% responsive** y está blindada ante viewports reducidos (tablets y smartphones):
 
 - **El Problema del Espacio en Dispositivos Móviles (Viewports <= 768px):**
   Mantener una barra de navegación lateral fija (`app-sidebar`) en dispositivos móviles sustraía 64px de ancho de pantalla crítico, dejando el contenido de tablas, tarjetas y formularios constreñido. Además, al abrir un panel lateral deslizante (*slide-over drawer* de filtros) configurado con un ancho fijo (ej. 460px), se solapaba o desbordaba el viewport, comiéndose el lateral derecho de la interfaz.
@@ -732,6 +736,78 @@ flowchart TD
      En `@media (max-width: 480px)`, el contenedor `.drawer-footer-content` conmuta a `flex-direction: column-reverse; gap: 0.65rem;`. Los botones "Aplicar filtros (X)" y "Limpiar filtros" pasan a tener `width: 100%` y altura táctil optimizada (`min-height: 42px`), ofreciendo una zona de toque confortable para el pulgar y evitando colisiones de texto.
   6. **Cumplimiento de Design Tokens:**
      Uso estricto de tokens oficiales `--roams-*` (`--roams-surface`, `--roams-border`, `--roams-accent-blue`, `--roams-bg-backdrop`, `--roams-border-inverse`), sin códigos hexadecimales directos ni fallbacks en variables CSS.
+
+### 3.21 Arquitectura de Seguridad Empresarial: RBAC (Roles) y Aislamiento Multi-Tenant (Roadmap)
+
+En una solución corporativa B2B de optimización y tarificación SaaS, coexisten dos dimensiones de seguridad y gobernanza fundamentales: **Control de Acceso Basado en Roles (RBAC)** y **Aislamiento Multi-Tenant (Tenant Isolation)**:
+
+```mermaid
+flowchart TD
+    subgraph Gateway["Identity & Access Gateway (OIDC / OAuth2 JWT)"]
+        Token["Bearer JWT Token (sub, role, tenant_id)"]
+    end
+
+    subgraph RBAC["Role-Based Access Control (RBAC)"]
+        Token --> Commercial["Rol: COMMERCIAL (Account Executive)<br>• Búsqueda y cartera de clientes<br>• Alta de prospecto corporativo (+ Registrar Cliente)<br>• Simulación interactiva con slider<br>• Despacho de propuestas por email"]
+        Token --> Admin["Rol: ADMIN (Finanzas / Operaciones SaaS)<br>• Configuración de tramos de precios (10€, 8€, 5€)<br>• Costes base de almacenamiento (€/GB) y API<br>• Mantenimiento del catálogo fiscal de IVA<br>• Auditoría global, bajas y contratos"]
+    end
+
+    subgraph MultiTenant["Multi-Tenant Isolation Strategy"]
+        Commercial --> TenantScope["Row-Level Security (PostgreSQL / TypeORM)<br>WHERE tenant_id = :currentTenant<br>Aislamiento estricto de clientes y presupuestos"]
+        Admin --> GlobalScope["Scope Global o Multi-Organización"]
+    end
+```
+
+#### A. Decisión para la Prueba Técnica (Frictionless Developer Experience - Criterio 10% Despliegue)
+- **Acceso Directo sin Fricción:** El evaluador asume el rol operacional de **Comercial / Gestor de Cuentas interno** con todas las capacidades habilitadas directamente desde la UI (`http://localhost:4200`).
+- No se interpone un muro de login ni credenciales bloqueantes en el README para que la revisión sea instantánea y sin fricción (*Out-of-the-Box*).
+
+#### B. Separación de Responsabilidades en Producción (Admin vs. Comercial):
+1. **Comercial (Sales Rep / Account Executive):**
+   - Búsqueda de empresas clientes y revisión de historial de consumos.
+   - Alta de nuevos prospectos corporativos mediante el modal `CustomerCreateDialogComponent` con validación matemática de CIF/NIF.
+   - Simulación de presupuestos y emisión transaccional de propuestas comerciales (`POST /emails`).
+2. **Administrador (Finanzas / DevOps):**
+   - Configuración centralizada de las constantes de negocio: tramos acumulativos de tarificación (`PRICING_TIERS`), ratio de almacenamiento (€/GB) y llamadas a la API (€/10k).
+   - Mantenimiento de la matriz impositiva por país (`TAX_RATES`).
+   - Acceso a métricas globales de facturación y logs de auditoría transaccional.
+
+#### C. Estrategia de Aislamiento Multi-Tenant (Tenant Isolation):
+1. **Opción A (Shared Database with Row-Level Security - Recomendada para SaaS B2B):**
+   - Inclusión de la columna `tenant_id` en las entidades `CustomerTypeOrmEntity` y `SimulationTypeOrmEntity`.
+   - Interceptor TypeORM / Políticas RLS de base de datos que inyectan automáticamente el predicado `tenant_id = :ctx.tenantId`, imposibilitando fugas de datos entre corporaciones competidoras.
+2. **Opción B (Database-per-Tenant):**
+   - Pool de conexiones dinámico (`TenancyConnectionManager`) para clientes Enterprise con exigencias regulatorias de aislamiento físico de datos (ej. banca o salud).
+
+---
+
+### 3.22 Auto-Seeding Idempotente en Arranque y Formulario de Alta con Validación Algorítmica AEAT
+
+Para resolver la ausencia de base de datos inicial (debido a que los archivos `*.sqlite` están ignorados en `.gitignore` por higiene de repositorio):
+
+#### A. Auto-Seeder Inteligente en Arranque (`DatabaseSeederService`)
+1. **Detección Automática de Base de Datos Vacía:**
+   - Durante el ciclo de vida `OnApplicationBootstrap` de NestJS (`src/shared/infrastructure/persistence/database-seeder.service.ts`), el servicio consulta `customerRepository.search()`.
+   - Si detecta 0 clientes (ej. primera clonación en limpio por el evaluador), puebla automáticamente **18 clientes corporativos internacionales** (Telefónica, Inditex, Mercadona, SEAT, Santander, Celonis, Doctolib, Snowflake...) y sus correspondientes simulaciones históricas pre-calculadas por tramos.
+   - Si la base de datos ya contiene datos, omite el proceso sin demoras en el arranque (`Database already populated. Skipping auto-seed.`).
+2. **Script Manual de Reseteo (`npm run seed`):**
+   - En `mic-saas-omatic/package.json` se dispone el comando `npm run seed` (ejecutando `src/seed.ts`) para restablecer los datos de fábrica en cualquier momento con logging estructurado.
+
+#### B. Formulario de Alta en Frontend (`CustomerCreateDialogComponent`)
+1. **Validación Algorítmica Oficial en Tiempo Real:**
+   - Implementado en `src/app/core/validators/fiscal.validator.ts`: valida DNI, NIE y CIF español con el algoritmo matemático oficial de control de la AEAT (módulo 23, suma ponderada de posiciones pares e impares, y discriminación estricta de letras/dígitos de control según tipo societario).
+   - Se adapta dinámicamente según la jurisdicción fiscal seleccionada (validación estricta AEAT para España; alfanumérico limpio de 5 a 20 caracteres para Alemania, Francia, EE.UU., etc.).
+2. **Validación de Email RFC 5322 e Instant Dirty Matching:**
+   - Valida el formato de correo electrónico corporativo con TLD de al menos 2 caracteres.
+   - Implementa `ShowOnDirtyErrorStateMatcher` para feedback visual instantáneo mientras el usuario escribe (`control.dirty`).
+3. **Accesibilidad W3C y Tokens Roams:**
+   - `<output class="..." aria-live="polite">` para mensajes de estado sin violar `Web:S6819`.
+   - Cero códigos hexadecimales ni fallbacks en SCSS; uso exclusivo de tokens `--roams-*`.
+4. **Ergonomía de Formularios y Accesibilidad del Botón de Envío:**
+   - Botón de envío permanentemente visible en el DOM para evitar desorientación del usuario, pero protegido en estado `disabled` (`[disabled]="submitting() || form.invalid || success()"`) con `[attr.aria-disabled]` y tooltip accesible `[attr.title]` con feedback explicativo sobre los requisitos pendientes.
+5. **Dimensionamiento Dinámico y Prevención de Solapamiento Visual:**
+   - Atributo `subscriptSizing="dynamic"` en todos los `<mat-form-field>` y alineación `align-items: flex-start` en `.form-row`.
+   - El `.mat-mdc-form-field-subscript-wrapper` se redimensiona reactivamente en el flujo del documento (`height: auto !important; position: relative !important; gap: 1.25rem`), garantizando que los mensajes de error multilínea empujen la interfaz hacia abajo con holgura y sin deformar a los campos contiguos.
 
 ---
 
@@ -776,7 +852,7 @@ Para optimizar los tiempos de respuesta durante el desarrollo y asegurar la máx
 | :--- | :--- | :--- | :--- |
 | `npm test` | **Pase Único (Vitest)** | Ejecución determinista de una pasada (`ng test --watch=false`). Diseñado para evaluación y pipelines de CI/CD. | ~1-2 segundos |
 | `npm run test:watch` | **Modo Interactivo** | Recarga en caliente ante cambios de código para desarrollo local. | Continuo |
-| `npm run test:coverage` | **Cobertura de Código (v8)** | Análisis exhaustivo de cobertura de líneas, ramas y funciones en Vitest con v8 (**95.77% líneas**, **92.15% ramas**, 197 tests). | ~10-12 segundos |
+| `npm run test:coverage` | **Cobertura de Código (v8)** | Análisis exhaustivo de cobertura de líneas, ramas y funciones en Vitest con v8 (**95.8% líneas**, **92.2% ramas**, 223 tests). | ~10-12 segundos |
 | `npm run lint` | **Análisis Estático (Oxlint)** | Linter Rust ultrarrápido (`oxlint --type-aware src/`). Muestra diagnósticos de advertencias y errores con ruta de fichero, número de línea y fragmento visual de código. | ~250 ms |
 
 ---

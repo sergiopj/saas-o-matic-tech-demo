@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
 import { CustomerListComponent } from './customer-list.component';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { errorInterceptor } from '../../../../core/errors/error.interceptor';
@@ -430,5 +431,33 @@ describe('CustomerListComponent', () => {
       );
       req.flush(mockCustomers, { headers: { 'x-total-count': '24' } });
     }
+  });
+
+  it('should open CustomerCreateDialogComponent when create-customer-btn is clicked', () => {
+    const dialog = (component as any).dialog;
+    const dialogSpy = vi.spyOn(dialog, 'open').mockReturnValue({
+      afterClosed: () => of(undefined),
+    } as any);
+
+    const btn: HTMLButtonElement | null = fixture.nativeElement.querySelector('.create-customer-btn');
+    expect(btn).toBeTruthy();
+    btn?.click();
+
+    expect(dialogSpy).toHaveBeenCalled();
+  });
+
+  it('should reload customers on page 1 when CustomerCreateDialogComponent returns newly created customer', () => {
+    const dialog = (component as any).dialog;
+    vi.spyOn(dialog, 'open').mockReturnValue({
+      afterClosed: () => of(mockCustomers[0]),
+    } as any);
+
+    component.openCreateCustomerDialog();
+
+    const req = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+    );
+    req.flush(mockCustomers, { headers: { 'x-total-count': '2' } });
+    expect(component.customers().length).toBe(2);
   });
 });

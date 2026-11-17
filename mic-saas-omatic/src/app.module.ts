@@ -6,6 +6,7 @@ import { SimulationsModule } from './modules/simulations/simulations.module';
 import { EmailsModule } from './modules/emails/emails.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { DatabaseSeederService } from './shared/infrastructure/persistence/database-seeder.service';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AppService } from './app.service';
     EmailsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, DatabaseSeederService],
 })
 export class AppModule {}
+

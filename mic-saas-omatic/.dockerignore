@@ -1,0 +1,12 @@
+node_modules
+dist
+test
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+.git
+.vscode
+.idea
+*.log
+npm-debug.log*

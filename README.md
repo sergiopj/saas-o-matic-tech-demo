@@ -14,15 +14,27 @@ El proyecto sigue una convención corporativa de microservicio y single-page app
 - **`spa-saas-omatic/`**: Frontend Dashboard Comercial desarrollado con **Angular 22** (Standalone Components y Signals reactivos).
 - **`ai-workspace/`**: Espacio de trabajo y auditoría del proceso de ingeniería con IA (especificaciones, arquitectura y bitácora de vibe coding).
 
+> [!NOTE]
+> **🖥️ Recomendación de Visualización (Desktop Optimizado / 100% Responsive):**  
+> Al tratarse de una herramienta comercial interna orientada a la analítica de consumo, simulación interactiva de tramos en tiempo real, tablas de histórico denso y composición de propuestas, **se recomienda su uso en pantallas de escritorio (Desktop $\ge$ 1024px)** para maximizar la productividad y ergonomía del comercial. No obstante, la plataforma es **100% responsive** y está completamente adaptada para tablets y móviles (navbar en 2 filas, sidebar colapsable, drawer de filtros táctil y grids fluidos).
+
 ---
 
 ## 📋 Requisitos Previos
 
+Dependiendo de cómo prefiera evaluar el proyecto:
+
+### Opción A (Recomendada / Nativa — Sin Docker):
 - **Node.js**: `>= 20.x` o `>= 22.x LTS` (probado y validado en Node v22.14.0+)
 - **npm**: `>= 10.x`
 - **Git**: Para clonación e inspección del histórico
-- **Docker & Docker Compose**: *(Opcional, para ejecución 100% containerizada)*
 - *(Cero configuración de bases de datos externas: utiliza SQLite embebido en disco con WAL mode y auto-migración al arrancar)*.
+
+### Opción B (Containerizada con Docker):
+- **Docker Desktop** (Windows/macOS) o **Docker Engine + Docker Compose** (Linux) con versión Docker `>= 24.x`.
+- El daemon/servicio de Docker Desktop debe estar **iniciado y en ejecución en segundo plano** antes de lanzar `docker compose up`.
+- En Windows requiere WSL 2 (Windows Subsystem for Linux) o Hyper-V habilitado.
+- *(No requiere tener Node.js ni npm instalados en la máquina anfitriona, todo se compila dentro de los contenedores)*.
 
 ---
 
@@ -56,10 +68,10 @@ npm start
 ### Paso 3: Verificación de Calidad y Tests en 1 Comando
 
 ```bash
-# 1. Ejecución de la suite completa de 284 tests (123 backend Jest + 161 frontend Vitest)
+# 1. Ejecución de la suite completa de 351 tests unitarios (127 backend Jest + 224 frontend Vitest)
 npm test
 
-# 2. Informes de cobertura de código unificados (90% en backend y 93% en frontend)
+# 2. Informes de cobertura de código unificados (> 90% en backend y > 95% en frontend)
 npm run test:coverage
 
 # 3. Análisis estático ultra-rápido con Oxlint (0 errores, 0 advertencias)
@@ -71,6 +83,21 @@ npm run build
 
 ---
 
+## 🗄️ Carga de Datos y Seeder (Facilidad de Evaluación)
+
+Como los archivos `*.sqlite` están excluidos del repositorio por higiene de Git, el proyecto incorpora mecanismos para garantizar una experiencia de evaluación inmediata y rica en datos:
+
+1. **Auto-Seeder Inteligente en Primer Arranque:** Al arrancar el backend (`npm start`), el servicio `DatabaseSeederService` verifica si la tabla `customers` está vacía. Si detecta 0 clientes, puebla automáticamente **18 corporaciones internacionales** (Telefónica, Inditex, Mercadona, SEAT, Santander, Celonis, Doctolib, Snowflake...) con **CIFs/NIFs 100% matemáticamente válidos** según el algoritmo de control de la AEAT y sus simulaciones históricas pre-calculadas.
+2. **Script Manual de Reseteo (`npm run seed`):**
+   ```bash
+   npm --prefix mic-saas-omatic run seed
+   ```
+   Restaura de fábrica el catálogo completo de clientes y simulaciones con logs estructurados en consola.
+3. **Formulario de Alta con Validación Algorítmica AEAT en Tiempo Real (`+ Registrar Cliente`):**
+   En la interfaz web (`/customers`), el botón destacado `+ Registrar Cliente` abre un diálogo modal reactivo donde el evaluador puede comprobar la validación matemática en vivo: teclear un CIF inventado erróneo (ej. `B12345678`) mostrará el error al vuelo; un CIF válido (ej. `B85638641`) permitirá el alta inmediata y el cliente aparecerá al instante en el listado y en el selector de simulaciones.
+
+---
+
 ## 🖥️ Flujo de Trabajo Alternativo (Terminales Separadas)
 
 Si el evaluador prefiere monitorizar los servicios en pestañas de terminal independientes:
@@ -79,6 +106,42 @@ Si el evaluador prefiere monitorizar los servicios en pestañas de terminal inde
 | :--- | :--- | :--- | :--- |
 | **Backend (NestJS)** | `npm run start:backend` | `cd mic-saas-omatic && npm run start:dev` | `http://localhost:3000` (`/docs`) |
 | **Frontend (Angular)** | `npm run start:frontend` | `cd spa-saas-omatic && npm start` | `http://localhost:4200` |
+
+---
+
+## 🐳 Despliegue Containerizado con Docker (Opción 100% Aislada)
+
+Para evaluadores que prefieran levantar todo el ecosistema de forma aislada sin requerir Node.js ni npm instalados en su máquina anfitriona, el repositorio incluye soporte completo de **Docker & Docker Compose**:
+
+> [!IMPORTANT]
+> **Requisitos para esta opción:**
+> 1. Requiere tener instalado **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** (Windows / macOS) o **Docker Engine + Docker Compose** (Linux).
+> 2. El servicio de Docker Desktop debe estar **abierto y en ejecución en segundo plano** antes de lanzar el comando.
+> 3. En Windows, Docker Desktop requiere tener habilitado el backend WSL 2 (Windows Subsystem for Linux) o Hyper-V.
+> 
+> *💡 Si en tu terminal ves `'docker' no se reconoce como un comando`, significa que no tienes Docker Desktop instalado o configurado en el PATH. En ese caso, utiliza la **Opción Rápida con `npm start`**, que no requiere Docker.*
+
+```bash
+# Compilar y arrancar ambos contenedores en una red aislada:
+docker compose up --build
+```
+
+### Arquitectura de Contenedores:
+1. **Backend (`saas-omatic-backend`):**
+   - Construcción multi-stage en `node:22-slim` con compilación nativa de `better-sqlite3`.
+   - Purga de dependencias de desarrollo (`--omit=dev`) y herramientas de compilación para una imagen ultra-ligera y segura.
+   - Volumen persistente Docker (`sqlite-data`) montado en `/app/data/saas_o_matic.sqlite` con modo WAL.
+   - Healthcheck nativo en Node.js que valida la disponibilidad de la API antes de permitir tráfico.
+   - Expuesto en **`http://localhost:3000`** (con Swagger UI en `/docs`).
+2. **Frontend (`saas-omatic-frontend`):**
+   - Construcción multi-stage: compilación de producción de Angular 22 en Node 22 y servido en servidor web **Nginx 1.27 Alpine**.
+   - Configuración `nginx.conf` con compresión gzip, cabeceras de seguridad OWASP y soporte de enrutamiento HTML5 pushState (`try_files $uri $uri/ /index.html;`).
+   - Reverse proxy interno hacia el contenedor backend para las rutas `/customers`, `/simulations`, `/emails` y `/docs`.
+   - Expuesto en **`http://localhost:4200`** (y también en puerto HTTP estándar **`http://localhost:80`**).
+3. **Parada limpia de contenedores:**
+   ```bash
+   docker compose down
+   ```
 
 ---
 

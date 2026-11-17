@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CustomerApiService } from '../../services/customer-api.service';
 import {
   Customer,
@@ -13,6 +14,7 @@ import {
 } from '../../models/customer.model';
 import { CustomerSearchBarComponent } from '../../components/customer-search-bar/customer-search-bar.component';
 import { CustomerCardComponent } from '../../components/customer-card/customer-card.component';
+import { CustomerCreateDialogComponent } from '../../components/customer-create-dialog/customer-create-dialog.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
 import { LoadingStateComponent } from '../../../../shared/components/loading-state/loading-state.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
@@ -69,6 +71,7 @@ export const CUSTOMER_SORT_OPTIONS: readonly SortOptionItem[] = [
     ErrorBannerComponent,
     LoadingStateComponent,
     MatButtonModule,
+    MatDialogModule,
     MatIconModule,
     MatFormFieldModule,
     MatSelectModule,
@@ -81,6 +84,7 @@ export const CUSTOMER_SORT_OPTIONS: readonly SortOptionItem[] = [
 })
 export class CustomerListComponent implements OnInit {
   readonly customerApi = inject(CustomerApiService);
+  private readonly dialog = inject(MatDialog);
   private readonly i18n = inject(I18nService);
 
   readonly customers = signal<Customer[]>([]);
@@ -251,6 +255,19 @@ export class CustomerListComponent implements OnInit {
         this.selectedCountry(),
       );
     }
+  }
+
+  openCreateCustomerDialog(): void {
+    const dialogRef = this.dialog.open(CustomerCreateDialogComponent, {
+      width: '580px',
+      maxWidth: '95vw',
+    });
+
+    dialogRef.afterClosed().subscribe((createdCustomer: Customer | undefined) => {
+      if (createdCustomer) {
+        this.loadCustomers(1);
+      }
+    });
   }
 
   onPageSizeChange(newSize: number): void {
