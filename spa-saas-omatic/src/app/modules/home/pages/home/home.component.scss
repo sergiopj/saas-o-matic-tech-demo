@@ -288,7 +288,7 @@
     .kpi-value {
       font-size: 1.75rem;
       font-weight: 800;
-      color: var(--roams-primary);
+      color: var(--roams-text-primary);
       line-height: 1.1;
     }
 
@@ -329,7 +329,7 @@
       .pricing-title {
         font-size: 1.15rem;
         font-weight: 700;
-        color: var(--roams-primary);
+        color: var(--roams-text-primary);
         margin: 0;
       }
     }
@@ -392,7 +392,7 @@
       .tier-name {
         font-size: 0.875rem;
         font-weight: 600;
-        color: var(--roams-primary);
+        color: var(--roams-text-primary);
       }
 
       .tier-desc {
@@ -569,7 +569,7 @@
     .section-title {
       font-size: 1.35rem;
       font-weight: 700;
-      color: var(--roams-primary);
+      color: var(--roams-text-primary);
       margin: 0;
     }
 
@@ -602,7 +602,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        color: var(--roams-primary);
+        color: var(--roams-text-primary);
         border-radius: var(--roams-radius-sm);
         transition: background-color 0.15s ease, color 0.15s ease;
 
@@ -723,7 +723,7 @@
           margin: 0;
           font-size: 1rem;
           font-weight: 700;
-          color: var(--roams-primary);
+          color: var(--roams-text-primary);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;

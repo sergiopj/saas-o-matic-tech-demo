@@ -27,7 +27,13 @@
 .navbar-brand-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+}
+
+.navbar-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
 }
 
 .mobile-menu-btn {
@@ -57,7 +63,7 @@
 }
 
 .brand-logo-badge {
-  background-color: var(--roams-surface);
+  background-color: var(--roams-logo-badge-bg, var(--roams-surface));
   padding: 4px 10px;
   border-radius: var(--roams-radius-md);
   display: flex;
@@ -219,7 +225,8 @@
 
   .navbar-brand-group {
     width: 100%;
-    justify-content: flex-start;
+    justify-content: space-between;
+    align-items: center;
     gap: 8px;
   }
 

@@ -62,6 +62,11 @@ describe('NavbarComponent', () => {
     expect(compiled.querySelector('app-language-selector')).toBeTruthy();
   });
 
+  it('should render the embedded theme toggle switch in the navbar brand group', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('app-theme-toggle')).toBeTruthy();
+  });
+
   it('should toggle mobile menu when hamburger button is clicked', () => {
     expect(component.isMobileMenuOpen()).toBe(false);
     expect(fixture.nativeElement.querySelector('.mobile-nav-panel')).toBeNull();

@@ -66,6 +66,7 @@ $roams-border-inverse: rgba(255, 255, 255, 0.2); // Subtle border for dark input
   --roams-bg-page: #{$roams-bg-page};
   --roams-bg-card: #{$roams-bg-card};
   --roams-surface: #{$roams-surface};
+  --roams-logo-badge-bg: #ffffff;
   --roams-bg-input-dark: #{$roams-bg-input-dark};
   --roams-bg-backdrop: #{$roams-bg-backdrop};
 
@@ -80,4 +81,49 @@ $roams-border-inverse: rgba(255, 255, 255, 0.2); // Subtle border for dark input
   --roams-border: #{$roams-border};
   --roams-border-light: #{$roams-border-light};
   --roams-border-inverse: #{$roams-border-inverse};
+}
+
+// Dark Mode Overrides (SSOT Dynamic Theming via CSS Custom Properties)
+:root[data-theme='dark'],
+body.dark-theme {
+  /* Surfaces & Backgrounds */
+  --roams-bg-page: #090d16;
+  --roams-bg-card: #131b2e;
+  --roams-surface: #131b2e;
+  --roams-logo-badge-bg: #ffffff;
+  --roams-bg-input-dark: rgba(255, 255, 255, 0.08);
+  --roams-bg-backdrop: rgba(0, 0, 0, 0.75);
+
+  /* Typography Colors */
+  --roams-text-primary: #f8fafc;
+  --roams-text-secondary: #94a3b8;
+  --roams-text-muted: #64748b;
+  --roams-text-inverse: #ffffff;
+  --roams-text-inverse-muted: rgba(255, 255, 255, 0.7);
+
+  /* Borders & Dividers */
+  --roams-border: #1e293b;
+  --roams-border-light: #223049;
+  --roams-border-inverse: rgba(255, 255, 255, 0.15);
+
+  /* Brand Colors in Dark Canvas */
+  --roams-primary: #0b1120;
+  --roams-primary-light: #162036;
+  --roams-primary-dark: #050811;
+  --roams-accent-blue: #3b82f6;
+  --roams-accent-blue-hover: #60a5fa;
+  --roams-accent-cyan: #38bdf8;
+  --roams-accent-purple: #a78bfa;
+
+  /* Status Colors (Optimized for Dark Canvas Contrast) */
+  --roams-status-success: #34d399;
+  --roams-status-warning: #fbbf24;
+  --roams-status-error: #f87171;
+  --roams-status-info: #38bdf8;
+
+  /* Tactile Coin Visual Tokens */
+  --roams-coin-gold: #fbbf24;
+  --roams-coin-gold-light: #fef08a;
+  --roams-coin-gold-dark: #d97706;
+  --roams-coin-gold-rim: #92400e;
 }

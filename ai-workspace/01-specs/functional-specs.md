@@ -221,6 +221,13 @@ Para enriquecer la experiencia analítica en el panel ejecutivo comercial:
 - **Sincronización Matemática Estricta:** Al derivar tanto el número como el ángulo de giro ($\theta \in [0^\circ, 360^\circ]$) del mismo factor de interpolación $p$, el dial completa su rotación de $360^\circ$ exactamente en el mismo instante en que el contador alcanza su cifra final.
 - **Accesibilidad y Rendimiento:** Bypass instantáneo sin animación bajo `prefers-reduced-motion: reduce`, diales marcados con `aria-hidden="true"` y cancelación de frames en `ngOnDestroy`.
 
+### 3.5 Selector Transversal de Tema Claro / Oscuro (Light / Dark Mode)
+Para proporcionar comodidad visual y adaptabilidad ergonómica en jornadas de uso intensivo del panel comercial:
+- **Interruptor Transversal Accesible (`ThemeToggleComponent`):** Ubicado en la barra superior de navegación (`NavbarComponent`), arriba a la izquierda junto a la identidad corporativa de SaaS-O-Matic.
+- **Conmutación Reactiva mediante Angular Signals:** Gestionado a través de `ThemeService`, conmutando atómicamente entre `'light'` y `'dark'`.
+- **Persistencia y Detección Automática:** Detección de la preferencia nativa del sistema operativo mediante `window.matchMedia('(prefers-color-scheme: dark)')` y persistencia de la selección del usuario en `localStorage` (`roams_theme`).
+- **Adaptabilidad Integral de Componentes:** Todas las superficies de tarjetas, lienzos, formularios, diálogos modales, menús flotantes, tablas y el editor enriquecido Quill Snow se adaptan instantáneamente a los tokens de contraste corporativo en modo oscuro.
+
 ---
 
 ## 4. Estándar de Gestión de Errores (RFC 7807)

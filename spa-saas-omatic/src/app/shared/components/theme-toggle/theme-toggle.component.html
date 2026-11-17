@@ -1,0 +1,19 @@
+<button
+  type="button"
+  role="switch"
+  class="theme-switch-btn"
+  [class.is-dark]="isDark()"
+  [attr.aria-checked]="isDark()"
+  [attr.aria-label]="tooltipText()"
+  [matTooltip]="tooltipText()"
+  matTooltipPosition="below"
+  (click)="toggle()"
+>
+  <span class="switch-track" aria-hidden="true">
+    <mat-icon class="track-icon sun-icon">wb_sunny</mat-icon>
+    <mat-icon class="track-icon moon-icon">dark_mode</mat-icon>
+    <span class="switch-thumb">
+      <mat-icon class="thumb-icon">{{ isDark() ? 'dark_mode' : 'wb_sunny' }}</mat-icon>
+    </span>
+  </span>
+</button>

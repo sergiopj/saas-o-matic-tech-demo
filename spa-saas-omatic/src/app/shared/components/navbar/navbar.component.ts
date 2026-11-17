@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { CurrencySelectorComponent } from '../currency-selector/currency-selector.component';
 import { LanguageSelectorComponent } from '../language-selector/language-selector.component';
+import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { APP_NAV_ITEMS } from '../sidebar/sidebar.component';
 
@@ -25,6 +26,7 @@ import { APP_NAV_ITEMS } from '../sidebar/sidebar.component';
     MatButtonModule,
     CurrencySelectorComponent,
     LanguageSelectorComponent,
+    ThemeToggleComponent,
     TranslatePipe,
   ],
   templateUrl: './navbar.component.html',

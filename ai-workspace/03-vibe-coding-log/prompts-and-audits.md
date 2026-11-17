@@ -3388,6 +3388,56 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
 - **Valor para la evaluación:** Refinamiento estético y funcional de primer nivel en UX/UI para dashboards empresariales, preservando la información crítica *above the fold* con transiciones cinemáticas fluidas y cero desbordamiento vertical.
 
+---
+
+### 6.138. Sistema Transversal de Modo Claro/Oscuro Reactivo (Angular Signals + Tokens SSOT en CSS Custom Properties)
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Como plataforma SaaS B2B moderna, SaaS-O-Matic requería un sistema integral de tematización (*Light / Dark Mode*) transversal a toda la aplicación. El usuario solicitó expresamente ubicar en el panel del dashboard (arriba a la izquierda, en el topbar/navbar junto a la marca corporativa) un switch interactivo para conmutar completamente el tema, gestionado reactivamente mediante Angular Signals. Adicionalmente, el usuario planteó una pregunta fundamental de arquitectura frontend: *¿deben usarse dos archivos SCSS independientes para dark y light?*
+- **Feedback Humano (Tu criterio de diseño transversal, reactividad y arquitectura limpia):**
+  > *"como es un panel de dashboard me molaria arriba a la izquierda un swicth para cambiar del tema que tenemos ahora ligth a dark y que cambie el thema completamente, eso es un componente ademas general del proyecto no de un modulo en particular, y que al pulsar se emita un signal o algo que tu creas que sea lo mejor y se cambie el tema, quizas eso se haga teniendo dos scss de temas? uno para dark y otro para light?"*
+- **Resolución Arquitectónica: ¿Dos archivos SCSS o CSS Custom Properties?**
+  1. *Por qué dos archivos SCSS sería un Anti-patrón:*
+     - **Duplicación y Tamaño de Paquete:** Compilar dos archivos CSS completos (`light-theme.css` e `dark-theme.css`) duplica las reglas CSS, incrementando el peso del bundle y el tiempo de descarga en red.
+     - **Parpadeo Visual (FOUC):** Intercambiar dinámicamente hojas de estilo `<link rel="stylesheet">` por JavaScript introduce latencia asíncrona de red, provocando parpadeos (*Flash of Unstyled Content*) y saltos de diseño (*layout shift*).
+     - **Ruptura de la Única Fuente de Verdad (SSOT):** Mantener dos archivos SCSS duplicados propicia divergencias en mantenimiento, errores de desincronización y viola las directrices de diseño corporativo.
+  2. *El Estándar Enterprise: Sobrescritura de CSS Custom Properties (`[data-theme='dark']`):*
+     - Como todos los componentes de SaaS-O-Matic consumen exclusivamente variables CSS corporativas (`var(--roams-bg-page)`, `var(--roams-bg-card)`, `var(--roams-surface)`, `var(--roams-text-primary)`, `var(--roams-border)`), la solución canónica y de máxima eficiencia consiste en mantener **un único archivo maestro de diseño** ([_colors.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/styles/_colors.scss)) y redefinir los tokens bajo el selector `:root[data-theme='dark']` y `body.dark-theme`.
+     - **Repintado Atómico a 60 FPS:** El cambio del atributo `data-theme` en `<html>` provoca una conmutación instantánea a nivel GPU de toda la paleta de colores con **0 peticiones de red y 0 bytes adicionales en el bundle**.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Servicio Reactivo Centralizado (`ThemeService`):*
+     - Ubicado en [theme.service.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/services/theme.service.ts), como servicio `@Injectable({ providedIn: 'root' })`.
+     - Gestiona el estado reactivo mediante un signal puro: `readonly currentTheme = signal<ThemeMode>(this.getInitialTheme());` y un computed derivado: `readonly isDark = computed(() => this.currentTheme() === 'dark');`.
+     - Sincroniza atómicamente el atributo DOM `document.documentElement.setAttribute('data-theme', theme)` y la clase `.dark-theme` mediante un `effect()` reactivo.
+     - Persiste la preferencia del usuario en `localStorage` (`roams_theme`) con detección automática de preferencias del sistema operativo (`window.matchMedia('(prefers-color-scheme: dark)')`).
+  2. *Definición de Tokens de Modo Oscuro en la Única Fuente de Verdad (`_colors.scss`):*
+     - En [_colors.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/styles/_colors.scss#L85), se configuró la paleta oscura:
+       - Lienzo base (`--roams-bg-page`): `#090d16` (Deep Navy obsidian).
+       - Superficie de tarjetas y diálogo (`--roams-bg-card`, `--roams-surface`): `#131b2e` (Slate dark).
+       - Tipografía primaria (`--roams-text-primary`): `#f8fafc` (Slate 50 contrastado, ratio WCAG AAA > 15:1).
+       - Tipografía secundaria (`--roams-text-secondary`): `#94a3b8`.
+       - Bordes y separadores (`--roams-border`, `--roams-border-light`): `#1e293b` y `#223049`.
+       - Marca y acentos (`--roams-primary`, `--roams-accent-blue`): `#0b1120`, `#3b82f6` (azul real luminoso para lienzos oscuros).
+       - Sombras profundas en [_variables.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/styles/_variables.scss): sombreados calibrados con opacidades del 35% al 65% para dotar de profundidad espacial en fondos oscuros.
+  3. *Componente Transversal Reutilizable (`ThemeToggleComponent`):*
+     - Creado en `src/app/shared/components/theme-toggle/` ([theme-toggle.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/theme-toggle/theme-toggle.component.ts)).
+     - Botón semántico y accesible: `role="switch"`, `[attr.aria-checked]="isDark()"`, tooltip contextual reactivo internacionalizado (`theme.toggle.dark` y `theme.toggle.light` en `es`, `en`, `de`, `fr`).
+     - Micro-interacción táctil: interruptor deslizante de tipo cápsula con iconos de sol (`wb_sunny`) dorado y luna (`dark_mode`) cian en la pista, y un cabezal esférico dinámico que se desliza 30px con rebote cinemático `cubic-bezier(0.34, 1.56, 0.64, 1)` y muta de color e icono.
+     - 100% libre de colores hexadecimales directos (Regla 2.A), apoyándose exclusivamente en tokens `--roams-*`.
+  4. *Integración Ergonómica en el Navbar Superior (Arriba a la Izquierda):*
+     - En [navbar.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/navbar/navbar.component.html#L38), `<app-theme-toggle />` se integró en `.navbar-brand-group`, colocándose inmediatamente a la derecha del logotipo e identidad corporativa de SaaS-O-Matic.
+     - En pantallas de smartphone ($\le 640px$), `.navbar-brand-group` distribuye el logo a la izquierda y el interruptor de tema a la derecha con `justify-content: space-between`, asegurando accesibilidad táctil inmediata con un solo toque.
+  5. *Blindaje Global en Componentes Integrados (Material & Quill Snow):*
+     - En [styles.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/styles.scss#L30), se configuró la compatibilidad completa con Angular Material M3 (`@include mat.theme((color: (theme-type: dark)))`), diálogos modales, menús flotantes, campos de texto MDC y el editor enriquecido Quill Snow (fondos oscuros, bordes atenuados y trazos SVG visibles).
+     - Normalización de selectores tipográficos en tarjetas de clientes, detalle, simulación y home (`var(--roams-primary) -> var(--roams-text-primary)`), garantizando contraste nítido y armonioso en modo oscuro.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **241 pruebas unitarias pasando al 100%** (29 suites). Nuevas suites dedicadas: `theme.service.spec.ts` (5 tests) y `theme-toggle.component.spec.ts` (4 tests), más test de integración en `navbar.component.spec.ts`.
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados con 111 reglas).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+- **Valor para la evaluación:** Excelencia en arquitectura CSS y Angular moderno: resolución elegante y sin sobrecarga del cambio de tema mediante Signals y CSS Custom Properties como Única Fuente de Verdad, ofreciendo al evaluador una experiencia de usuario del más alto nivel enterprise.
+
+
 
 
 

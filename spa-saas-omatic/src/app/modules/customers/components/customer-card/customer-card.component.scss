@@ -143,9 +143,9 @@
   border: 1px solid rgba(16, 97, 226, 0.2);
 
   &.plan-enterprise {
-    background-color: rgba(15, 23, 42, 0.08);
-    color: var(--roams-primary);
-    border-color: rgba(15, 23, 42, 0.2);
+    background-color: var(--roams-bg-input-dark);
+    color: var(--roams-text-primary);
+    border-color: var(--roams-border);
   }
 
   &.plan-starter {
