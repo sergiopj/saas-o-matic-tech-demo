@@ -1,0 +1,22 @@
+{
+  "name": "saas-o-matic",
+  "version": "1.0.0",
+  "description": "SaaS-O-Matic - Dynamic Billing & Subscription Optimizer (Roams Tech Demo)",
+  "private": true,
+  "scripts": {
+    "install:all": "npm --prefix mic-saas-omatic install && npm --prefix spa-saas-omatic install",
+    "postinstall": "npm run install:all",
+    "start": "concurrently -n \"API,SPA\" -c \"blue,magenta\" --kill-others-on-fail \"npm --prefix mic-saas-omatic run start:dev\" \"npm --prefix spa-saas-omatic start\"",
+    "dev": "npm start",
+    "start:backend": "npm --prefix mic-saas-omatic run start:dev",
+    "start:frontend": "npm --prefix spa-saas-omatic start",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "npm --prefix mic-saas-omatic test",
+    "test:frontend": "npm --prefix spa-saas-omatic test",
+    "lint": "npm --prefix mic-saas-omatic run lint && npm --prefix spa-saas-omatic run lint",
+    "build": "npm --prefix mic-saas-omatic run build && npm --prefix spa-saas-omatic run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

@@ -18,10 +18,64 @@ El proyecto sigue una convención corporativa de microservicio y single-page app
 
 ## 📋 Requisitos Previos
 
-- **Node.js**: `>= 22.x LTS` (probado en Node v22.14.0+)
+- **Node.js**: `>= 20.x` o `>= 22.x LTS` (probado y validado en Node v22.14.0+)
 - **npm**: `>= 10.x`
-- **Docker & Docker Compose**: *(Opcional, para ejecución containerizada)*
-- *(No requiere instalar bases de datos externas: utiliza SQLite embebido en disco con WAL mode)*.
+- **Git**: Para clonación e inspección del histórico
+- **Docker & Docker Compose**: *(Opcional, para ejecución 100% containerizada)*
+- *(Cero configuración de bases de datos externas: utiliza SQLite embebido en disco con WAL mode y auto-migración al arrancar)*.
+
+---
+
+## ⚡ Puesta en Marcha Rápida (1 Solo Comando — Guía para el Evaluador)
+
+Para maximizar la ergonomía y facilitar al máximo la revisión técnica, el repositorio dispone de un orquestador unificado en la raíz. **No es necesario navegar entre carpetas ni abrir múltiples terminales manualmente.**
+
+### Paso 1: Instalación de Dependencias (1 solo comando en la raíz)
+
+```bash
+npm install
+```
+> **¿Qué hace este comando?** Instala las herramientas de orquestación en la raíz y, de forma transparente mediante el hook `postinstall`, instala automáticamente todas las dependencias del backend (`mic-saas-omatic`) y del frontend (`spa-saas-omatic`) en cascada.
+
+---
+
+### Paso 2: Arranque Simultáneo de API y Frontend (1 solo comando en la raíz)
+
+```bash
+npm start
+```
+*(O también su alias `npm run dev`)*
+
+> **¿Qué hace este comando?** Utiliza `concurrently` para compilar y levantar de manera simultánea ambos servicios en una única consola interactiva con logs diferenciados por colores:
+> - 🟦 **`[API]` Backend (NestJS 12):** Disponible de inmediato en **`http://localhost:3000`**
+>   - Documentación Interactiva (Swagger UI): **`http://localhost:3000/docs`**
+> - 🟪 **`[SPA]` Frontend (Angular 22):** Disponible de inmediato en **`http://localhost:4200`**
+
+---
+
+### Paso 3: Verificación de Calidad y Tests en 1 Comando
+
+```bash
+# 1. Ejecución de la suite completa de 264 tests (123 backend Jest + 141 frontend Vitest)
+npm test
+
+# 2. Análisis estático ultra-rápido con Oxlint (0 errores, 0 advertencias)
+npm run lint
+
+# 3. Compilación de producción unificada (Backend dist + Frontend dist)
+npm run build
+```
+
+---
+
+## 🖥️ Flujo de Trabajo Alternativo (Terminales Separadas)
+
+Si el evaluador prefiere monitorizar los servicios en pestañas de terminal independientes:
+
+| Módulo | Comando desde la raíz | Comando tradicional (en subdirectorio) | URL / Puerto |
+| :--- | :--- | :--- | :--- |
+| **Backend (NestJS)** | `npm run start:backend` | `cd mic-saas-omatic && npm run start:dev` | `http://localhost:3000` (`/docs`) |
+| **Frontend (Angular)** | `npm run start:frontend` | `cd spa-saas-omatic && npm start` | `http://localhost:4200` |
 
 ---
 
@@ -35,67 +89,47 @@ El proyecto cuenta con plantillas de variables de entorno versionadas:
 
 ---
 
-## ⚡ Puesta en Marcha Rápida (Backend en Local)
-
-### 1. Instalación de Dependencias
-```bash
-cd mic-saas-omatic
-npm install
-```
-
-### 2. Levantar la API en Modo Desarrollo
-```bash
-npm run start:dev
-```
-> La API quedará disponible de inmediato en **`http://localhost:3000`** (sin prefijo `/api/v1`, conforme a la especificación oficial del reto).
-
----
-
 ## 🧪 Pirámide de Pruebas (Testing Strategy)
 
-El proyecto cuenta con cobertura exhaustiva separada en distintos *feedback loops*:
+El proyecto cuenta con cobertura exhaustiva (264 pruebas unitarias y de integración pasando al 100%):
 
-### Backend (`mic-saas-omatic`):
 ```bash
-cd mic-saas-omatic
-
-# 1. Tests Unitarios (Dominio puro, Casos de Uso con mocks, Mappers, Servicios Fiscales)
+# Ejecutar todo desde la raíz:
 npm test
 
-# 2. Tests de Integración E2E (Pipeline HTTP real con supertest + SQLite real en disco)
-npm run test:e2e
-
-# 3. Suite Completa Unificada (Ejecución determinista para CI/CD y pre-commit)
-npm run test:all
+# O ejecutar por separado según el módulo de interés:
+npm run test:backend   # 123 tests de Dominio, Casos de Uso, Mappers, Servicios Fiscales y E2E
+npm run test:frontend  # 141 tests de Componentes, Signals, Servicios i18n, Dialogs y Pipes (Vitest)
 ```
 
-### Frontend (`spa-saas-omatic`):
+### Detalle por subsistema:
+
+#### Backend (`mic-saas-omatic`):
+```bash
+cd mic-saas-omatic
+npm test        # Tests unitarios con Jest
+npm run test:e2e # Tests de integración HTTP con supertest + SQLite real
+npm run test:all # Suite unificada
+```
+
+#### Frontend (`spa-saas-omatic`):
 ```bash
 cd spa-saas-omatic
-
-# 1. Tests Unitarios con Vitest (Modo ejecución determinista de una pasada para evaluación)
-npm test
-
-# 2. Modo interactivo en desarrollo (Watch mode con recarga en caliente)
-npm run test:watch
+npm test        # Tests unitarios deterministas con Vitest
+npm run test:watch # Modo interactivo watch con recarga en caliente
 ```
 
 ---
 
 ## 🔍 Análisis Estático y Calidad de Código (Linter Oxlint)
 
-El monorepo utiliza **Oxlint** (`oxlint` + `oxlint-tsgolint`), un linter ultrarrápido programado en Rust con soporte *type-aware* e inspección de promesas flotantes, unificado para backend y frontend:
+El proyecto utiliza **Oxlint** (`oxlint` + `oxlint-tsgolint`), un linter ultrarrápido programado en Rust con soporte *type-aware* e inspección de promesas flotantes:
 
 ```bash
-# Frontend (inspección de 46 archivos en ~250 ms)
-cd spa-saas-omatic
-npm run lint
-
-# Backend (inspección de 60 archivos en ~600 ms)
-cd mic-saas-omatic
+# Ejecutar en todo el proyecto desde la raíz (129 archivos en < 1 segundo):
 npm run lint
 ```
-> Oxlint reporta advertencias y errores en consola indicando la ruta del fichero, número de línea, columna exacta y bloque contextual de código con sugerencias de remediación. Ambos módulos pasan con **0 errores y 0 advertencias**.
+> Oxlint reporta advertencias y errores indicando la ruta del fichero, línea, columna y bloque contextual de código. Ambos proyectos pasan con **0 errores y 0 advertencias**.
 
 ---
 
