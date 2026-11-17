@@ -969,15 +969,21 @@ Para resolver la ausencia de base de datos inicial (debido a que los archivos `*
   - Gobernanza de tokens en `src/styles/_colors.scss` (`$roams-coin-gold-*` y `--roams-coin-gold-*`) respetando la Única Fuente de Verdad (SSOT).
   - Accesibilidad y ergonomía: Marcado semántico decorativo con `aria-hidden="true"` y desactivación automática ante `@media (prefers-reduced-motion: reduce)`.
 
-### 3.24 Arquitectura Transversal de Modo Claro/Oscuro Reactivo: Angular Signals y SSOT mediante CSS Custom Properties (Sin Duplicación de Hojas SCSS)
+### 3.24 Arquitectura Transversal de Modo Claro/Oscuro Reactivo: Ergonomía para Paneles de Trabajo y SSOT mediante CSS Custom Properties
 
-#### A. Por qué NO compilar dos archivos SCSS independientes
+#### A. Justificación de Ergonomía Laboral: El Dashboard como Panel de Trabajo Diario
+Al concebir SaaS-O-Matic como un **panel de trabajo operativo diario (*workstation dashboard*)** para equipos comerciales, analistas de facturación y gestores de cuentas corporativas, la conmutación entre modo Claro y Oscuro no constituye un añadido meramente cosmético, sino un requisito técnico de salud laboral y productividad:
+1. **Reducción de la Fatiga Ocular (*Eye Strain*):** Quienes operan dashboards de tarificación dedican horas continuas al análisis de datos numéricos densos, tablas de auditoría y proyecciones de tramos. En condiciones de baja iluminación ambiental (trabajo nocturno, salas de operaciones o despachos con luz cálida/indirecta), el tema oscuro atenúa sustancialmente el flujo luminoso total recibido por la retina y el deslumbramiento fotópico.
+2. **Agudeza Visual Diurna:** En oficinas corporativas con luz natural directa o iluminación fluorescente de alta intensidad, el tema claro ofrece la máxima relación de contraste y definición para la lectura acelerada de cifras y nomenclaturas fiscales.
+3. **Personalización del Puesto de Trabajo Digital:** El usuario adapta su entorno de trabajo a su biomecánica visual en tiempo real con un solo clic, sin perder estado operativo, lo que redunda en menor cansancio cognitivo y mayor precisión analítica.
+
+#### B. Por qué NO compilar dos archivos SCSS independientes
 Ante la disyuntiva de compilar dos hojas de estilo físicas (`light-theme.scss` y `dark-theme.scss`) frente a gobernar el tema mediante CSS Custom Properties:
 1. **Impacto en Red y Bundle Size:** Descargar dos bundles CSS completos o duplicar cada regla CSS infla el payload de red.
 2. **Flash of Unstyled Content (FOUC):** Intercambiar dinámicamente un nodo `<link rel="stylesheet">` en el `<head>` fuerza una petición de red asíncrona que bloquea el renderizado y causa parpadeos perceptibles.
 3. **Violación de la Única Fuente de Verdad (SSOT):** Separar estilos en dos archivos duplica el código fuente, incrementa la probabilidad de desincronización de reglas y fragmenta el mantenimiento.
 
-#### B. La Solución Canónica Enterprise: CSS Custom Properties en `_colors.scss`
+#### C. La Solución Canónica Enterprise: CSS Custom Properties en `_colors.scss`
 Al basar todo el sistema de diseño en tokens CSS (`var(--roams-*)`), la conmutación de tema se resuelve de manera inmediata y atómica:
 - **Sobrescritura en Cascada:**
   ```scss
@@ -995,7 +1001,7 @@ Al basar todo el sistema de diseño en tokens CSS (`var(--roams-*)`), la conmuta
   ```
 - **Repintado Inmediato a 60 FPS:** Modificar el atributo `data-theme` en `document.documentElement` desencadena un repintado de hardware instantáneo sin peticiones de red ni desajustes de layout.
 
-#### C. Reactividad Unidireccional con Angular Signals (`ThemeService`)
+#### D. Reactividad Unidireccional con Angular Signals (`ThemeService`)
 - **Signal Primario y Computed Derivado:** `currentTheme = signal<ThemeMode>('light')` e `isDark = computed(() => this.currentTheme() === 'dark')`.
 - **Efecto Reactivo de Reflexión al DOM:** Un `effect()` sincroniza automáticamente el atributo `data-theme` y las clases `.dark-theme` en la raíz del documento.
 - **Persistencia y Resiliencia:** Guarda la elección en `localStorage` (`roams_theme`) y respeta las preferencias del sistema operativo (`window.matchMedia('(prefers-color-scheme: dark)')`).

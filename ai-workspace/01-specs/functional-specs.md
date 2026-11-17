@@ -222,8 +222,13 @@ Para enriquecer la experiencia analítica en el panel ejecutivo comercial:
 - **Sincronización Matemática Estricta:** Al derivar tanto el número como el ángulo de giro ($\theta \in [0^\circ, 360^\circ]$) del mismo factor de interpolación $p$, el dial completa su rotación de $360^\circ$ exactamente en el mismo instante en que el contador alcanza su cifra final.
 - **Accesibilidad y Rendimiento:** Bypass instantáneo sin animación bajo `prefers-reduced-motion: reduce`, diales marcados con `aria-hidden="true"` y cancelación de frames en `ngOnDestroy`.
 
-### 3.5 Selector Transversal de Tema Claro / Oscuro (Light / Dark Mode)
-Para proporcionar comodidad visual y adaptabilidad ergonómica en jornadas de uso intensivo del panel comercial:
+### 3.5 Selector Transversal de Tema Claro / Oscuro (Light / Dark Mode): Ergonomía para Paneles de Trabajo Intensivo
+Al tratarse SaaS-O-Matic de un **panel de trabajo operativo diario (*workstation dashboard*)** donde el equipo comercial, *controllers* de facturación y analistas financieros pasan jornadas completas auditando clientes, ajustando tramos de tarificación y redactando propuestas, la incorporación del conmutador de tema Claro y Oscuro responde a requisitos fundamentales de ergonomía y salud laboral:
+1. **Prevención de Fatiga Ocular (*Computer Vision Syndrome*):** Durante sesiones prolongadas de trabajo en entornos de baja iluminación ambiental (salas de operaciones, horario vespertino/nocturno o despachos con luz indirecta), el modo oscuro reduce drásticamente la emisión lumínica global y el deslumbramiento fotópico de la pantalla.
+2. **Máxima Agudeza y Legibilidad Diurna:** En entornos corporativos con luz solar directa o luminarias de oficina de alta intensidad, el modo claro ofrece un contraste nítido y óptimo para la lectura rápida de datos numéricos densos, desgloses impositivos y tablas de clientes.
+3. **Autonomía y Confort del Operador:** Proporciona al usuario profesional la capacidad de adecuar su entorno de trabajo a sus condiciones biomecánicas inmediatas con un solo clic, sin perder el contexto de navegación ni recargar la aplicación.
+
+**Especificaciones Técnicas del Conmutador:**
 - **Interruptor Transversal Accesible (`ThemeToggleComponent`):** Ubicado en la barra superior de navegación (`NavbarComponent`), arriba a la izquierda junto a la identidad corporativa de SaaS-O-Matic.
 - **Conmutación Reactiva mediante Angular Signals:** Gestionado a través de `ThemeService`, conmutando atómicamente entre `'light'` y `'dark'`.
 - **Persistencia y Detección Automática:** Detección de la preferencia nativa del sistema operativo mediante `window.matchMedia('(prefers-color-scheme: dark)')` y persistencia de la selección del usuario en `localStorage` (`roams_theme`).

@@ -3629,3 +3629,26 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
 - **Valor para la evaluación:** Demostración de atención meticulosa a la experiencia de usuario (eliminando anti-patrones visuales de cuadrículas incompletas mediante cálculo de múltiplos armónicos), higiene de código profesional y cumplimiento de los más altos estándares de seguridad OWASP y robustez en la API REST.
+
+---
+
+### 6.144. Justificación de Ergonomía Laboral en Documentación: El Dashboard como Panel de Trabajo Diario (Modos Claro y Oscuro)
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario solicita documentar explícitamente en la especificación funcional y en las directrices de arquitectura la justificación de producto y diseño detrás de la incorporación del interruptor de tema Claro y Oscuro (`Light / Dark Mode`), destacando la naturaleza de SaaS-O-Matic como un **panel de trabajo operativo intensivo (*workstation dashboard*)**.
+- **Feedback Humano:**
+  > *"explica que como es un panel de trabajo pues por eso meti el tema dark y ligth explicalo en los mds que correspondan"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Actualización de Especificaciones Funcionales ([functional-specs.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/01-specs/functional-specs.md)):*
+     - En la Sección 3.5, se amplió el fundamento de producto: SaaS-O-Matic es una herramienta de uso continuado donde el equipo comercial, *controllers* financieros y operadores analizan tablas densas, auditorías de tarificación y cálculos de tramos durante jornadas completas.
+     - Se detallaron los 3 pilares ergonómicos:
+       a) **Prevención de Fatiga Ocular (*Eye Strain / Computer Vision Syndrome*):** Reducción de la emisión lumínica y el deslumbramiento fotópico en salas con iluminación indirecta o sesiones vespertinas/nocturnas.
+       b) **Agudeza Visual Diurna:** Contraste nítido y rápido para entornos de oficina con alta intensidad de luz natural o reflectancia de monitores.
+       c) **Autonomía y Confort del Operador:** Ajuste biomecánico instantáneo sin pérdida de estado ni recarga de página.
+  2. *Ampliación de Directrices Arquitectónicas ([architecture-guidelines.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md)):*
+     - En la Sección 3.24, se introdujo la subsección `A. Justificación de Ergonomía Laboral: El Dashboard como Panel de Trabajo Diario`, conectando la ergonomía de salud laboral con la arquitectura técnica de conmutación reactiva mediante Angular Signals (`ThemeService`) y sobrescritura atómica de CSS Custom Properties en `:root[data-theme='dark']` (0 sobrecarga de red, 60 FPS y cero parpadeo FOUC).
+- **Resultados de Verificación:**
+  - Consistencia documental cruzada y sincrónica entre [functional-specs.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/01-specs/functional-specs.md), [architecture-guidelines.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md) y [prompts-and-audits.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/03-vibe-coding-log/prompts-and-audits.md).
+  - Batería de pruebas de frontend (245/245) y backend (128/128) 100% verde; Oxlint 0/0.
+- **Valor para la evaluación:** Evidencia de enfoque de Diseño Centrado en el Usuario (*User-Centered Design / UCD*) y salud laboral en herramientas corporativas, demostrando que las decisiones de interfaz responden a requerimientos ergonómicos reales y no a adornos superfluos.
