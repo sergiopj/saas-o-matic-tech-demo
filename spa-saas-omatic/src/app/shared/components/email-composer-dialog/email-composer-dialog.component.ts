@@ -78,7 +78,6 @@ export class EmailComposerDialogComponent {
   readonly subject = signal<string>(this.data.subject || '');
   readonly htmlBody = signal<string>(this.initHtmlBody());
   readonly isSending = signal<boolean>(false);
-  readonly sendSuccess = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
   readonly copied = signal<boolean>(false);
 
@@ -192,14 +191,11 @@ export class EmailComposerDialogComponent {
       .subscribe({
         next: (res) => {
           this.isSending.set(false);
-          this.sendSuccess.set(true);
-          setTimeout(() => {
-            this.dialogRef.close({
-              sent: true,
-              recipient: to,
-              messageId: res.messageId,
-            });
-          }, 800);
+          this.dialogRef.close({
+            sent: true,
+            recipient: to,
+            messageId: res.messageId,
+          });
         },
         error: (err) => {
           this.isSending.set(false);

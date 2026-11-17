@@ -3105,6 +3105,31 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint Frontend & Backend: **0 errores y 0 advertencias**.
 - **Valor para la evaluación:** Demostración de sensibilidad visual y diseño responsivo en frontend, complementada con un criterio arquitectónico maduro que previene la fricción del evaluador mientras exhibe capacidades completas para canalizaciones CI/CD empresariales.
 
+---
+
+### 6.129. Cierre Inmediato del Modal de Envío de Email y Feedback Transaccional mediante Toast (MatSnackBar)
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Al despachar una propuesta comercial desde el modal de correo (`EmailComposerDialogComponent`), el temporizador previo y el banner verde dentro del diálogo creaban una fricción innecesaria (un mensaje efímero que desaparecía apresuradamente). El usuario instruyó cerrar el modal de manera inmediata en cuanto el backend confirme el envío (`POST /emails`) y trasladar la confirmación a una notificación Toast (`MatSnackBar`) no intrusiva en la parte inferior de la pantalla.
+- **Feedback Humano (Tu criterio de agilidad y claridad en la experiencia de usuario):**
+  > *"aplica esta para lo del email ... o mejor aun que se cierre al enviar y que salga el toast de abajo que elminiamos anytes, quita ya el mensaje verde del modal al enviar el email pues ya lo vemos el resultado con el toast"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Cierre Inmediato sin Fricción en el Diálogo:*
+     - En [email-composer-dialog.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.ts#L185), el observable de `EmailApiService.sendEmail()` ejecuta inmediatamente `this.dialogRef.close({ sent: true, recipient: to, messageId: res.messageId })` en el bloque `next`, eliminando el `setTimeout` y el estado intermedio `sendSuccess`.
+     - En [email-composer-dialog.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.html#L35) y [email-composer-dialog.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.scss#L80), se retiró el bloque `@if (sendSuccess()) { <output class="success-banner">...` y su clase CSS asociada, erradicando código muerto.
+  2. *Feedback Transaccional Asíncrono en Componentes Clave:*
+     - En [customer-card.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-card/customer-card.component.ts#L62) y [customer-detail.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.ts#L329), se suscribe al evento `dialogRef.afterClosed()`.
+     - Si el resultado es exitoso (`result?.sent`), se invoca de forma reactiva `this.snackBar.open(this.i18n.t('customers.emailDialog.sentSuccess'), 'OK', { duration: 4000 })`, mostrando el aviso multilingüe en la vista principal durante 4 segundos.
+  3. *Blindaje de Pruebas Unitarias:*
+     - Actualizados [customer-card.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-card/customer-card.component.spec.ts#L121) y [customer-detail.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.spec.ts#L238) para verificar la llamada a `snackBar.open` tras el cierre con éxito.
+     - Actualizado [email-composer-dialog.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.spec.ts#L74) para validar el cierre síncrono del diálogo.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **226 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Oxlint Frontend & Backend: **0 errores y 0 advertencias**.
+- **Valor para la evaluación:** Implementación rigurosa del patrón de retroalimentación no obstructiva (*Toast Notifications*), manteniendo la interfaz limpia y rápida para los comerciales mientras se ofrece certeza operacional visible en la vista donde permanece el usuario.
+
 
 
 

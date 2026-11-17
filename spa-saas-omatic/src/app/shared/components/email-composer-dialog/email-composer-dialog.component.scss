@@ -79,18 +79,6 @@
   font-size: 0.875rem;
 }
 
-.success-banner {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border-radius: var(--roams-radius-sm);
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  color: var(--roams-status-success);
-  font-size: 0.875rem;
-}
-
 .full-width {
   width: 100%;
 }

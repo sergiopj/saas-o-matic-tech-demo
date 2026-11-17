@@ -326,7 +326,7 @@ export class CustomerDetailComponent implements OnInit {
     const cust = this.customer();
     if (!cust) return;
 
-    this.dialog.open(EmailComposerDialogComponent, {
+    const dialogRef = this.dialog.open(EmailComposerDialogComponent, {
       data: {
         recipient: cust.email,
         recipientName: cust.companyName,
@@ -342,6 +342,14 @@ export class CustomerDetailComponent implements OnInit {
       width: '640px',
       maxWidth: '94vw',
       panelClass: 'roams-email-dialog-panel',
+    });
+
+    dialogRef.afterClosed().subscribe((result: { sent?: boolean } | undefined) => {
+      if (result?.sent) {
+        this.snackBar.open(this.i18n.t('customers.emailDialog.sentSuccess'), 'OK', {
+          duration: 4000,
+        });
+      }
     });
   }
 

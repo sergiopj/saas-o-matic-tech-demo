@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { CustomerDetailComponent } from './customer-detail.component';
@@ -232,6 +233,22 @@ describe('CustomerDetailComponent', () => {
 
     component.openEmailComposer();
     expect(openSpy).toHaveBeenCalled();
+  });
+
+  it('should trigger snackBar toast when email dialog returns sent: true in detail view', () => {
+    const dialog = TestBed.inject(MatDialog);
+    const snackBar = fixture.debugElement.injector.get(MatSnackBar);
+    const snackBarSpy = vi.spyOn(snackBar, 'open');
+    vi.spyOn(dialog, 'open').mockReturnValue({
+      afterClosed: () => of({ sent: true, recipient: 'test@example.com' }),
+    } as unknown as ReturnType<MatDialog['open']>);
+
+    component.openEmailComposer();
+    expect(snackBarSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      'OK',
+      expect.objectContaining({ duration: 4000 })
+    );
   });
 
   describe('Simulation History Search Filters', () => {

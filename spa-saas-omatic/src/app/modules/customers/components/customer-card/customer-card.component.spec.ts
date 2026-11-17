@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
 import { CustomerCardComponent } from './customer-card.component';
 import { Customer } from '../../models/customer.model';
@@ -114,6 +115,23 @@ describe('CustomerCardComponent', () => {
           recipientName: mockCustomer.companyName,
         }),
       })
+    );
+  });
+
+  it('should trigger snackBar toast when email dialog returns sent: true', () => {
+    const dialog = TestBed.inject(MatDialog);
+    const snackBar = fixture.debugElement.injector.get(MatSnackBar);
+    const snackBarSpy = vi.spyOn(snackBar, 'open');
+    vi.spyOn(dialog, 'open').mockReturnValue({
+      afterClosed: () => of({ sent: true, recipient: 'test@example.com' }),
+    } as unknown as ReturnType<MatDialog['open']>);
+
+    component.openEmailComposer(new MouseEvent('click'));
+
+    expect(snackBarSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      'OK',
+      expect.objectContaining({ duration: 4000 })
     );
   });
 

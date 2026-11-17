@@ -177,6 +177,10 @@ Los impuestos se determinan a partir del código de país (`country`) del client
   5. **Hero Banner Esbelto a Ancho Completo y Visibilidad Above-the-Fold en `/home`:**
      - El contenedor de cabecera `.hero-banner` mantiene su longitud horizontal completa alineada con el contenedor general (`width: 100%; max-width: 1300px`) y una altura esbelta optimizada (`padding: 1.15rem 2rem`), con una ilustración 3D armónica (`max-height: 190px; max-width: 340px; aspect-ratio: 16 / 9`) que aprovecha el espacio vertical sin huecos residuales arriba ni abajo.
      - Esta reducción de más del 55% en espacio vertical garantiza que los elementos más relevantes del dashboard según carga (métricas KPI, tarjetas de tramos de precios y clientes recientes con simulación directa) aparezcan inmediatamente sobre el pliegue (*above the fold*) sin obligar al usuario a hacer scroll, preservando la continuidad visual de anchura con la cuadrícula de tarjetas inferiores.
+   6. **Despacho Comercial y Redacción de Email con Notificación Toast (`MatSnackBar`):**
+      - Modal corporativo de redacción enriquecida WYSIWYG (`EmailComposerDialogComponent`) para emitir propuestas comerciales personalizadas directamente al backend `POST /emails/send`.
+      - **Cierre Inmediato y Feedback Asíncrono no Obstructivo:** Al pulsar *"Enviar email"*, una vez validado y despachado con éxito por el servidor, el diálogo se cierra de forma inmediata (sin tiempos de espera residuales ni banners transitorios dentro del modal).
+      - Tras el cierre, se emite una notificación accesible en pantalla mediante `MatSnackBar` (*"Correo electrónico enviado y registrado con éxito en el servidor"*) visible durante 4 segundos en la vista principal donde permanece el usuario comercial.
 
 ### 3.2 Suite Visual 3D Táctil (Warm Product & Isometric Design) y Política de Anclaje Visual
 Para dotar a la plataforma de una identidad visual acogedora, moderna y profesional, alejándose radicalmente tanto de las figuras humanas antropomórficas como de la estética fría, oscura o de neones cibernéticos tipo Tron:

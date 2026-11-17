@@ -76,9 +76,6 @@ describe('EmailComposerDialogComponent', () => {
       subject: 'SaaS-O-Matic Proposal',
       htmlBody: expect.stringContaining('Hello Acme team'),
     });
-    expect(component.sendSuccess()).toBe(true);
-
-    vi.advanceTimersByTime(800);
     expect(mockDialogRef.close).toHaveBeenCalledWith({
       sent: true,
       recipient: 'corporate@acme.com',
