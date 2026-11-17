@@ -50,6 +50,7 @@
   .profile-main {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 1.5rem;
     flex-wrap: wrap;
   }
@@ -171,6 +172,33 @@
           height: 0.9rem;
         }
       }
+    }
+  }
+
+  .profile-badge-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-left: auto;
+
+    .profile-corporate-badge {
+      width: 84px;
+      height: 84px;
+      object-fit: cover;
+      border-radius: var(--roams-radius-md);
+      border: 1px solid var(--roams-border);
+      box-shadow: var(--roams-shadow-sm);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+      &:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: var(--roams-shadow-md);
+      }
+    }
+
+    @media (max-width: 680px) {
+      display: none;
     }
   }
 }

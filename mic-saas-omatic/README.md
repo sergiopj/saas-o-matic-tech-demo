@@ -27,14 +27,20 @@ El microservicio implementa **Arquitectura Hexagonal (Puertos y Adaptadores)** e
 ### 📦 Evolución de Esquemas y Compatibilidad de Datos
 - **Compatibilidad con Datos Existentes:** Para garantizar que los datos ya persistidos en SQLite sigan siendo válidos ante la evolución de entidades (nuevos campos o atributos), las columnas nuevas deben declararse siempre como `@Column({ nullable: true })` o con un `@Column({ default: ... })`. Esto evita errores de integridad relacional en SQLite ante filas previas.
 - **Patrón Expand/Contract:** En despliegues empresariales continuos (Blue/Green), los cambios de esquema se ejecutan en dos fases: primero se añade la columna compatible (Expand) para que convivan versiones v1 y v2 del software, y posteriormente se migran los datos históricos y se consolidan las restricciones (Contract).
-- **Flujo de Migraciones en Producción (TypeORM CLI):**
+- **Scripts de Migraciones en `package.json` (TypeORM CLI):**
+  El proyecto incluye los scripts listos para su uso con TypeORM CLI y el archivo de configuración `src/data-source.ts`:
   ```bash
-  # Generar migración diferencial:
-  npx typeorm-ts-node-commonjs migration:generate src/infrastructure/adapters/out/persistence/migrations/UpdateSchema -d src/data-source.ts
-  # Aplicar migraciones:
-  npx typeorm-ts-node-commonjs migration:run -d src/data-source.ts
-  # Revertir última migración:
-  npx typeorm-ts-node-commonjs migration:revert -d src/data-source.ts
+  # Ver estado de las migraciones:
+  npm run migration:show
+
+  # Generar migración diferencial detectando cambios en entidades:
+  npm run migration:generate -- src/infrastructure/adapters/out/persistence/migrations/UpdateCustomerSchema
+
+  # Aplicar migraciones pendientes:
+  npm run migration:run
+
+  # Revertir la última migración aplicada:
+  npm run migration:revert
   ```
 
 Para ver las directrices completas, consulta [`../ai-workspace/02-architecture/architecture-guidelines.md`](../ai-workspace/02-architecture/architecture-guidelines.md).

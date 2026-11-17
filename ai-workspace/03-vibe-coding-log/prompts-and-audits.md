@@ -3079,6 +3079,32 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: **0 errores y 0 advertencias** en los 140 archivos inspeccionados.
 - **Valor para la evaluación:** Refinamiento estético y jerarquía visual armónica, maximizando el impacto gráfico y la legibilidad de la escena 3D sin comprometer la visualización inmediata (*above-the-fold*) de los KPIs de negocio.
 
+---
+
+### 6.128. Insignia 3D en la Ficha Corporativa de Cliente y Scripts Canónicos de Migración en Backend
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  1. *Ficha Corporativa (`/customers/:id`):* En la cabecera de perfil de cliente ("TEST sergio project, ES, Starter SMB, CIF, fecha de alta, email"), existía un espacio amplio vacío a la derecha en pantallas de escritorio. El usuario solicitó incorporar una imagen elegante y no invasiva para equilibrar el espacio disponible.
+  2. *Estrategia de Evaluación de Base de Datos:* El usuario consultó la mejor aproximación para documentar y habilitar migraciones en `package.json` sin abrumar al evaluador con comandos manuales obligatorios.
+- **Feedback Humano (Tu criterio de usabilidad y equilibrio evaluador):**
+  > *"aqui a la derecha pondria una imagen tambien pero no muy grande ... que hay hueco a la derecha"*
+  > *"por otro lado el tema de migraciones se puede documentar en el md y dejar quiza slos scripts en el packaje definidos? o que harias? no quiero abrumar al que revisara la prueba tampoco"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Insignia Corporativa 3D en Ficha de Cliente:*
+     - En [customer-detail.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.html#L64) y [customer-detail.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.scss#L176), se añadió el contenedor `.profile-badge-visual` con la imagen diorama 3D `corporate-customer-badge.jpg` a tamaño discreto (84×84 px) con esquinas redondeadas (`--roams-radius-md`), borde sutil y sombra suave.
+     - `.profile-main` se configuró con `justify-content: space-between`, distribuyendo el avatar y la información a la izquierda y la insignia 3D a la derecha.
+     - En pantallas reducidas (`@media (max-width: 680px)`), la insignia se oculta para no saturar el flujo vertical móvil.
+  2. *Estrategia de Migraciones de "Doble Capa" (Zero Friction + Production Ready):*
+     - Se creó [src/data-source.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/data-source.ts) en el microservicio NestJS, configurando el `DataSource` explícito de TypeORM para CLI.
+     - Se añadieron los scripts canónicos en [mic-saas-omatic/package.json](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/package.json#L26): `migration:show`, `migration:run`, `migration:generate` y `migration:revert`.
+     - Se actualizó [mic-saas-omatic/README.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/README.md#L30) detallando que la prueba técnica arranca en modo autónomo (*Zero-Friction DX*) sin comandos manuales obligatorios, manteniendo los artefactos de migración listos para auditoría de ingeniería en producción.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Oxlint Frontend & Backend: **0 errores y 0 advertencias**.
+- **Valor para la evaluación:** Demostración de sensibilidad visual y diseño responsivo en frontend, complementada con un criterio arquitectónico maduro que previene la fricción del evaluador mientras exhibe capacidades completas para canalizaciones CI/CD empresariales.
+
 
 
 
