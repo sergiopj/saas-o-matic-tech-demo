@@ -2762,6 +2762,51 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: 0 errores y 0 advertencias.
 - **Valor para la evaluación:** Armonía y consistencia visual entre las tres vistas fundamentales del sistema (Home, Simulador y Catálogo de Clientes), manteniendo la densidad de información y la pulcritud corporativa.
 
+---
+
+### 6.117. Optimización de Ergonomía Móvil: Supresión de Ilustraciones Decorativas en Smartphones (`max-width: 768px`) y Valor Cognitivo del Anclaje Visual en Desktop/Tablet
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Tras la incorporación de las ilustraciones 3D en el Hero del Dashboard ([home.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.html)) y en la tarjeta lanzadora del Centro de Simulaciones ([simulation-hub.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/simulations/pages/simulation-hub/simulation-hub.component.html)), se identificó que en pantallas reducidas de smartphones el contenido vertical se elongaba en exceso, empujando los controles interactivos y las métricas esenciales debajo del pliegue (*below the fold*) y generando ruido visual innecesario en pantallas táctiles de mano.
+- **Feedback Humano (Tu criterio de usabilidad mobile-first y ergonomía):**
+  > *"creo que las imagenes de simulador de tramos y inicio dashboard solo en resoluciones que no sean smarthphones, creo que ahi solo hacen ruido visual, todo esto comentalo ademas y lo anterior en los mds correspondientes, la imagen es muy visual y aporta valor de un vistazo para identificar la pantalla"*
+- **Decisión de Diseño y Principio de Arquitectura UX:**
+  1. *Valor del Anclaje Visual (*Visual Anchoring*) en Desktop y Tablet:*
+     - En resoluciones de escritorio y tabletas (`> 768px`), las imágenes 3D de alta gama aportan un valor cognitivo decisivo: permiten al usuario identificar instantáneamente la pantalla sin requerir lectura de encabezados, transmiten la identidad tecnológica de SaaS-O-Matic y dotan de sofisticación a la demo comercial.
+  2. *Diseño Móvil Libre de Ruido (*Clean Smartphone UX*):*
+     - En dispositivos móviles (`max-width: 768px`), la prioridad absoluta es la densidad de información, la inmediatez de las acciones principales y la velocidad de operación con un solo pulgar.
+     - Las ilustraciones decorativas volumétricas se ocultan de forma limpia mediante media queries (`display: none !important`), permitiendo que el badge, los títulos, los botones de acción rápida (*Quick Actions*) y el selector de cliente corporativo queden inmediatamente visibles *above the fold*.
+- **Implementación Técnica:**
+  1. *Dashboard Home ([home.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.scss)):*
+     - Regla `@media (max-width: 768px)` en `.hero-banner`:
+       ```scss
+       @media (max-width: 768px) {
+         padding: 1.5rem 1.25rem;
+
+         .hero-visual {
+           display: none !important;
+         }
+       }
+       ```
+  2. *Centro de Simulaciones ([simulation-hub.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/simulations/pages/simulation-hub/simulation-hub.component.scss)):*
+     - Regla `@media (max-width: 768px)` en `.launcher-card`:
+       ```scss
+       @media (max-width: 768px) {
+         .launcher-content .launcher-visual-column {
+           display: none !important;
+         }
+       }
+       ```
+  3. *Preservación del Medallón Compacto en `/customers`:*
+     - El medallón de cabecera de clientes se mantiene con escalado fluido (de 64px a 52px) al integrarse de forma inline sin desplazar verticalmente la interfaz.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Oxlint: 0 errores y 0 advertencias.
+- **Valor para la evaluación:** Criterio senior de diseño centrado en el usuario, diferenciando intencionadamente la experiencia inmersiva de escritorio de la agilidad operativa en movilidad.
+
+
 
 
 

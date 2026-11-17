@@ -215,6 +215,13 @@
       }
     }
   }
+
+  // Hide 3D illustration on smartphones to avoid visual clutter and maintain immediate form accessibility
+  @media (max-width: 768px) {
+    .launcher-content .launcher-visual-column {
+      display: none !important;
+    }
+  }
 }
 
 @keyframes spin {

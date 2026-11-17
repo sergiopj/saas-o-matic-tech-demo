@@ -149,7 +149,8 @@ Los impuestos se determinan a partir del código de país (`country`) del client
 
 > [!NOTE]
 > **Recomendación de Entorno de Uso (Desktop Optimizado & 100% Responsive):**  
-> Al tratarse de una herramienta analítica y operativa para el equipo comercial (con matrices de tramos, tablas de histórico denso, simulación interactiva a 60 FPS, filtros avanzados y composición de presupuestos), **la experiencia de uso óptima está diseñada para pantallas de escritorio (Desktop $\ge$ 1024px)**. No obstante, la plataforma es **100% responsive** y cuenta con adaptaciones específicas para tablets y smartphones (navbar en dos filas en $\le$ 640px, sidebar colapsable, drawer de filtros táctil y tarjetas reordenables).
+> Al tratarse de una herramienta analítica y operativa para el equipo comercial (con matrices de tramos, tablas de histórico denso, simulación interactiva a 60 FPS, filtros avanzados y composición de presupuestos), **la experiencia de uso óptima está diseñada para pantallas de escritorio (Desktop $\ge$ 1024px)**. No obstante, la plataforma es **100% responsive** y cuenta con adaptaciones específicas para tablets y smartphones (navbar en dos filas en $\le$ 640px, sidebar colapsable, drawer de filtros táctil y tarjetas reordenables).  
+> **Anclaje Visual Inteligente vs. Cero Ruido en Smartphones:** En pantallas grandes (Desktop y Tablet), las ilustraciones 3D *glassmorphic* aportan un anclaje visual (*visual anchoring*) que permite identificar de un solo vistazo la pantalla activa (Dashboard, Simulador y Catálogo). En smartphones ($\le$ 768px), las ilustraciones decorativas se ocultan automáticamente (`display: none !important`) para eliminar el ruido visual, priorizar el espacio vertical sobre el pliegue (*above the fold*) y dejar acceso inmediato a los formularios, botones y métricas clave.
 
 ### 3.1 Arquitectura de Componentes
 - **Tecnología:** Angular 21 (Standalone Components, Signals reactivos para estado local).

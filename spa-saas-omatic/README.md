@@ -5,7 +5,8 @@ Dashboard Comercial interactivo para la optimización y presupuestado dinámico 
 > [!TIP]
 > **💻 Recomendación de Entorno (Desktop Optimizado & 100% Responsive):**  
 > Al tratarse de un panel operativo corporativo para el equipo comercial (diseñado para la simulación interactiva de tramos, análisis de métricas, filtros avanzados, tablas de histórico denso y composición de presupuestos), **la experiencia de uso óptima está recomendada en pantallas de escritorio (Desktop $\ge$ 1024px)** para maximizar la productividad visual.  
-> No obstante, la plataforma es **100% responsive** y está completamente adaptada para tablets y smartphones (navbar dinámico en 2 filas en pantallas $\le$ 640px, sidebar colapsable, drawer deslizante de filtros con botones táctiles y tarjetas reorganizables).
+> No obstante, la plataforma es **100% responsive** y está completamente adaptada para tablets y smartphones (navbar dinámico en 2 filas en pantallas $\le$ 640px, sidebar colapsable, drawer deslizante de filtros con botones táctiles y tarjetas reorganizables).  
+> **Anclaje Visual en Desktop vs. Cero Ruido en Smartphones:** Las ilustraciones 3D *glassmorphic* aportan un alto valor de anclaje visual para reconocer cada sección de un vistazo en desktop y tablets; en smartphones ($\le$ 768px), estas imágenes se ocultan de forma selectiva para erradicar el ruido visual y garantizar que los formularios interactivos y métricas queden visibles *above the fold*.
 
 ---
 
