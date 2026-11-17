@@ -436,7 +436,7 @@ spa-saas-omatic/
   - **Blindaje de la Carga Inicial (`initialLoading`):** Se controla el estado de carga inicial para asegurar que el spinner central se muestra de forma limpia antes de renderizar el primer lote de datos, impidiendo destellos del estado vacío.
 - **Virtualización Nativa del DOM para Grids Masivos (`content-visibility: auto`):**
   - En un Grid CSS elástico y responsive (`repeat(auto-fill, minmax(320px, 1fr))`), el uso de componentes tradicionales como `cdk-virtual-scroll-viewport` introduce serios problemas: está diseñado para listas unidimensionales de altura fija y genera saltos visuales (*glitches*) al variar el número de columnas según la pantalla.
-  - Se adopta el estándar moderno de la W3C: `.customer-card { content-visibility: auto; contain-intrinsic-size: auto 240px; }`. El motor C++ del navegador omite de forma nativa el cálculo de layout, estilo y pintado de las tarjetas fuera del viewport. Si existen 5.000 clientes, el DOM solo procesa los 8-12 visibles en pantalla a 60 FPS estables sin dependencias JS pesadas.
+  - Se adopta el estándar moderno de la W3C: `.customer-card { content-visibility: auto; contain-intrinsic-size: auto 190px; }`. El motor C++ del navegador omite de forma nativa el cálculo de layout, estilo y pintado de las tarjetas fuera del viewport. Si existen 5.000 clientes, el DOM solo procesa los 8-12 visibles en pantalla a 60 FPS estables sin dependencias JS pesadas.
 - **Filtro de Jurisdicción Fiscal por País con Chips Reactivos (`Signals`):**
   - Respondiendo directamente al núcleo del reto de Roams (donde el país determina el impuesto aplicable: España 21%, Alemania 19%, Francia 20%, USA 0%), se implementa una barra de filtros de facetas: `[ 🌐 Todos (N) | 🇪🇸 ES (x) | 🇺🇸 US (y) | ... ]`.
   - Mediante señales computadas (`countryFilters = computed(...)` y `filteredCustomers = computed(...)`), los países presentes en el catálogo y sus recuentos se derivan reactivamente en memoria, permitiendo al comercial aislar clientes por jurisdicción fiscal de forma instantánea sin peticiones HTTP redundantes a la base de datos.
@@ -690,10 +690,10 @@ Para garantizar que fallos en elementos cosméticos o de micro-interacción (spi
    ```scss
    .customer-card {
      content-visibility: auto;
-     contain-intrinsic-size: auto 240px;
+     contain-intrinsic-size: auto 190px;
    }
    ```
-   Esta propiedad instruye al motor C++ del navegador (Chromium/Gecko/WebKit) para omitir por completo las operaciones de cálculo de diseño (*layout*), pintado (*paint*) y renderizado de aquellas tarjetas que se encuentran fuera del área visible (*viewport*), activándolas de forma asíncrona solo a medida que el usuario hace scroll hacia ellas. La reserva de altura `contain-intrinsic-size: auto 240px` previene saltos bruscos en la barra de scroll (*layout shift*).
+   Esta propiedad instruye al motor C++ del navegador (Chromium/Gecko/WebKit) para omitir por completo las operaciones de cálculo de diseño (*layout*), pintado (*paint*) y renderizado de aquellas tarjetas que se encuentran fuera del área visible (*viewport*), activándolas de forma asíncrona solo a medida que el usuario hace scroll hacia ellas. La reserva de altura `contain-intrinsic-size: auto 190px` previene saltos bruscos en la barra de scroll (*layout shift*).
 5. **Detección de Cambios Optimizada (`ChangeDetectionStrategy.OnPush` y `@for track`):**
    Tanto `CustomerListComponent` como `CustomerCardComponent` emplean `ChangeDetectionStrategy.OnPush`. Angular evalúa las tarjetas únicamente cuando cambian sus referencias de señal o se disparan eventos directos. La directiva nativa `@for (customer of paginatedCustomers(); track customer.id)` recicla quirúrgicamente los nodos del DOM por su clave única primaria inmutable `customer.id`.
 6. **Comparativa Técnica: CSS Containment vs. CDK Virtual Scroll:**

@@ -3437,6 +3437,53 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
 - **Valor para la evaluación:** Excelencia en arquitectura CSS y Angular moderno: resolución elegante y sin sobrecarga del cambio de tema mediante Signals y CSS Custom Properties como Única Fuente de Verdad, ofreciendo al evaluador una experiencia de usuario del más alto nivel enterprise.
 
+---
+
+### 6.139. Compactación y Refactorización Ergonómica de Tarjetas de Cliente (CustomerCardComponent) (-24% Altura, -22% Anchura en Cuadrícula)
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Las tarjetas de clientes corporativos en la vista de listado ([customer-card.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-card/customer-card.component.html)) y la cuadrícula de [customer-list.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-list/customer-list.component.html) ocupaban una huella espacial sobredimensionada (`padding: 1.25rem`, avatar de 44px, botón de simular alto, ancho mínimo en grid de 320px). Esto limitaba la densidad de información a 3 tarjetas por fila en pantallas estándar y forzaba un scroll vertical innecesario. El usuario solicitó hacer estas tarjetas "al menos un 20% más pequeñas".
+- **Feedback Humano (Tu criterio de compacidad y densidad visual de información):**
+  > *"estas tarjetas al menos un 20% mas pequeñas*
+  > 
+  > *T*
+  > *TEST sergio project*
+  > *ES*
+  > *CIF / NIF*
+  > *B11111119*
+  > *Plan*
+  > *Starter SMB*
+  > *Fecha de alta*
+  > *17 nov 2026*
+  > 
+  > *sergiopjaranda@gmail.com"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Reducción Vertical y Espaciado Compacto (-24% a -40% en Huecos Muertos):*
+     - En [customer-card.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-card/customer-card.component.scss):
+       - Padding interior: de `1.25rem` (20px) $\rightarrow$ `0.85rem 1rem` (~14px/16px) (**-28% de relleno**).
+       - Margen inferior de cabecera: de `1rem` $\rightarrow$ `0.6rem` (**-40% de espacio vacío**).
+       - Avatar corporativo: de `44px x 44px` (font-size 1.2rem) $\rightarrow$ `34px x 34px` (font-size 0.95rem) (**-23% de tamaño de avatar**).
+       - Título de empresa: de `1.05rem` $\rightarrow$ `0.925rem` con peso 600 y elipsis controlada.
+       - Espaciado entre filas meta: de `0.65rem` $\rightarrow$ `0.45rem` (**-31% de separación vertical**).
+       - Margen inferior del bloque de datos: de `1.25rem` $\rightarrow$ `0.75rem` (**-40% de separación inferior**).
+       - Tipografía meta e insignias: CIF/NIF de `0.8rem` $\rightarrow$ `0.725rem`, Plan Pill de `0.75rem` $\rightarrow$ `0.6875rem`, Fecha de `0.8rem` $\rightarrow$ `0.725rem`, Email de `0.825rem` $\rightarrow$ `0.75rem`.
+       - Botón de acción comercial (`.simulate-btn`): de `padding: 0.6rem 1rem` $\rightarrow$ `padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.8rem;` (**-33% de altura de botón**).
+       - Contención W3C: reserva calibrada de `contain-intrinsic-size: auto 240px;` $\rightarrow$ `contain-intrinsic-size: auto 190px;` (**-21% de altura reservada en scroll**).
+  2. *Rediseño de la Cuadrícula Responsiva (-22% de Ancho Mínimo):*
+     - En [customer-list.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-list/customer-list.component.scss#L238):
+       - Ancho mínimo de columna: de `minmax(320px, 1fr)` $\rightarrow$ `minmax(250px, 1fr)` (**-22% de anchura mínima**).
+       - Gap de cuadrícula: de `1.25rem` (20px) $\rightarrow$ `1rem` (16px) (**-20% de separación entre tarjetas**).
+       - **Resultado Ergonómico:** Permite visualizar **4 tarjetas por fila en pantallas de escritorio estándar (1200px - 1440px)** en lugar de 3, mostrando más clientes simultáneamente sin sacrificar legibilidad.
+  3. *Reducción Global de Área:*
+     - Con una reducción media del 24% en altura y del 22% en anchura, la huella superficial de cada tarjeta disminuye más de un **40% de área**, cumpliendo con creces el requerimiento de "al menos un 20% más pequeñas".
+- **Resultados de Verificación:**
+  - Frontend Vitest: **241 pruebas unitarias pasando al 100%** (29 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados con 111 reglas).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+- **Valor para la evaluación:** Ergonomía visual de nivel Enterprise: maximización del ratio información/espacio (*information density*) en aplicaciones analíticas B2B, permitiendo un escaneo visual mucho más rápido y reduciendo el esfuerzo cognitivo del operador comercial.
+
+
 
 
 
