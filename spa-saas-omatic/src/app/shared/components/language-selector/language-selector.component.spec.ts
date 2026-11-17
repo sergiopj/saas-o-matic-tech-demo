@@ -25,25 +25,22 @@ describe('LanguageSelectorComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display the initial active language code and flag matching configuration SSOT', () => {
+  it('should display the initial active language code and semantic icon', () => {
     const defaultOption = SUPPORTED_LANGUAGES[0];
     const codeEl = fixture.nativeElement.querySelector('.current-code');
-    const flagEl = fixture.nativeElement.querySelector('.current-flag');
+    const iconEl = fixture.nativeElement.querySelector('.lang-icon');
 
     expect(codeEl.textContent.trim()).toBe(defaultOption.code.toUpperCase());
-    expect(flagEl.textContent.trim()).toBe(defaultOption.flag);
+    expect(iconEl.textContent.trim()).toBe('translate');
   });
 
-  it('should reactively update trigger flag and code when language changes', () => {
-    SUPPORTED_LANGUAGES.forEach(({ code, flag }) => {
+  it('should reactively update trigger code when language changes', () => {
+    SUPPORTED_LANGUAGES.forEach(({ code }) => {
       component.setLanguage(code);
       fixture.detectChanges();
 
       const codeEl = fixture.nativeElement.querySelector('.current-code');
-      const flagEl = fixture.nativeElement.querySelector('.current-flag');
-
       expect(codeEl.textContent.trim()).toBe(code.toUpperCase());
-      expect(flagEl.textContent.trim()).toBe(flag);
     });
   });
 

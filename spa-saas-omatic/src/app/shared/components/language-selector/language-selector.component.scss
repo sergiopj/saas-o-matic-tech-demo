@@ -17,9 +17,11 @@
     border-color: rgba(255, 255, 255, 0.35) !important;
   }
 
-  .current-flag {
-    font-size: 1.1rem;
-    line-height: 1;
+  .lang-icon {
+    font-size: 1.15rem;
+    width: 1.15rem;
+    height: 1.15rem;
+    color: var(--roams-accent-cyan);
   }
 
   .current-code {
@@ -48,12 +50,28 @@
     gap: 8px;
     font-size: 0.875rem;
 
-    .item-flag {
-      font-size: 1.1rem;
+    .item-code {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--roams-accent-blue);
+      background-color: rgba(16, 97, 226, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.03em;
+    }
+
+    .item-separator {
+      color: var(--roams-text-muted);
+      font-weight: 400;
     }
 
     .item-label {
       flex: 1;
+      color: var(--roams-primary);
+      font-weight: 500;
     }
 
     .item-check {
@@ -66,6 +84,11 @@
       font-weight: 600;
       color: var(--roams-accent-blue);
       background-color: rgba(16, 97, 226, 0.06);
+
+      .item-label {
+        color: var(--roams-accent-blue);
+        font-weight: 600;
+      }
     }
   }
 }
