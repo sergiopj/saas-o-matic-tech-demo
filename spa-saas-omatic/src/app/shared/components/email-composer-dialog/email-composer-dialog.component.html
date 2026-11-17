@@ -48,11 +48,19 @@
         id="recipient-email"
         aria-labelledby="recipient-label"
         type="email"
-        name="recipient"
-        [ngModel]="recipient()"
-        (ngModelChange)="recipient.set($event)"
+        [formControl]="recipientControl"
+        [errorStateMatcher]="errorMatcher"
       />
       <mat-icon matPrefix class="field-icon" aria-hidden="true">contact_mail</mat-icon>
+      @if (recipientControl.invalid && (recipientControl.dirty || recipientControl.touched)) {
+        <mat-error id="recipient-error">
+          @if (recipientControl.hasError('required')) {
+            {{ 'customers.emailDialog.recipientRequired' | translate }}
+          } @else if (recipientControl.hasError('pattern')) {
+            {{ 'customers.emailDialog.recipientInvalid' | translate }}
+          }
+        </mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="form-field full-width">
@@ -109,7 +117,7 @@
       mat-flat-button
       class="dispatch-btn"
       (click)="sendEmail()"
-      [disabled]="isSending() || sendSuccess() || !recipient() || !subject()"
+      [disabled]="isSending() || sendSuccess() || recipientControl.invalid || !subject()"
     >
       <span class="btn-inner">
         @if (isSending()) {

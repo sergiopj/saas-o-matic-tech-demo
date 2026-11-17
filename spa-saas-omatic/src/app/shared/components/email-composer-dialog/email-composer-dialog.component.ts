@@ -1,5 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {
+  FormControl,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
@@ -10,6 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { QuillEditorComponent } from 'ngx-quill';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { EmailApiService } from '../../../core/services/email-api.service';
@@ -31,6 +37,7 @@ export interface EmailComposerDialogData {
   selector: 'app-email-composer-dialog',
   imports: [
     FormsModule,
+    ReactiveFormsModule,
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -47,6 +54,21 @@ export class EmailComposerDialogComponent {
   readonly data = inject<EmailComposerDialogData>(MAT_DIALOG_DATA);
   readonly dialogRef = inject(MatDialogRef<EmailComposerDialogComponent>);
   private readonly emailApi = inject(EmailApiService);
+
+  readonly errorMatcher = new ShowOnDirtyErrorStateMatcher();
+
+  /**
+   * Pragmatic RFC 5322 regex requiring valid local part, domain name, and at least a 2-char TLD.
+   */
+  readonly recipientControl = new FormControl<string>(this.data.recipient || '', {
+    nonNullable: true,
+    validators: [
+      (control) => Validators.required(control),
+      Validators.pattern(
+        /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/
+      ),
+    ],
+  });
 
   readonly recipient = signal<string>(this.data.recipient || '');
   readonly subject = signal<string>(this.data.subject || '');
@@ -65,6 +87,12 @@ export class EmailComposerDialogComponent {
     ],
   };
 
+  constructor() {
+    this.recipientControl.valueChanges.subscribe((value) => {
+      this.recipient.set(value);
+    });
+  }
+
   private initHtmlBody(): string {
     if (this.data.htmlBody) {
       return this.data.htmlBody;
@@ -79,7 +107,13 @@ export class EmailComposerDialogComponent {
   }
 
   sendEmail(): void {
-    const to = this.recipient().trim();
+    if (this.recipientControl.invalid) {
+      this.recipientControl.markAsTouched();
+      this.recipientControl.markAsDirty();
+      return;
+    }
+
+    const to = this.recipientControl.value.trim();
     const subject = this.subject().trim();
     const htmlBody = this.htmlBody().trim();
 

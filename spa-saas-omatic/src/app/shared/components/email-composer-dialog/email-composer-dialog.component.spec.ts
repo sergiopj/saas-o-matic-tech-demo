@@ -115,4 +115,32 @@ describe('EmailComposerDialogComponent', () => {
     component.close();
     expect(mockDialogRef.close).toHaveBeenCalled();
   });
+
+  it('should validate recipient email in real time and reject invalid formats', () => {
+    expect(component.recipientControl.valid).toBe(true);
+
+    component.recipientControl.setValue('');
+    expect(component.recipientControl.valid).toBe(false);
+    expect(component.recipientControl.hasError('required')).toBe(true);
+
+    component.recipientControl.setValue('not-an-email');
+    expect(component.recipientControl.valid).toBe(false);
+    expect(component.recipientControl.hasError('pattern')).toBe(true);
+
+    component.recipientControl.setValue('user@domain');
+    expect(component.recipientControl.valid).toBe(false);
+    expect(component.recipientControl.hasError('pattern')).toBe(true);
+
+    component.recipientControl.setValue('valid.user@company.es');
+    expect(component.recipientControl.valid).toBe(true);
+    expect(component.recipient()).toBe('valid.user@company.es');
+  });
+
+  it('should not dispatch email when recipientControl is invalid', () => {
+    component.recipientControl.setValue('invalid-email');
+    component.sendEmail();
+
+    expect(mockEmailApi.sendEmail).not.toHaveBeenCalled();
+    expect(component.isSending()).toBe(false);
+  });
 });

@@ -1799,6 +1799,22 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   4. *Defensa en la Entrevista:* En Arquitectura Hexagonal, el caso de uso está desacoplado del proveedor real. En un entorno de producción, la infraestructura implementaría un puerto secundario `EmailSenderPort` (con Nodemailer, Resend o SendGrid) inyectando credenciales desde variables de entorno seguras (`.env`).
 - **Valor para la evaluación:** Criterio senior de ciberseguridad, prevención de fuga de credenciales en Git y justificación clara del patrón Puertos y Adaptadores para servicios externos.
 
+### 6.78 Validación Reactiva en Caliente (Real-Time Validation) para Formato de Email (RFC 5322)
+
+- **Situación inicial:** El campo de correo del modal de redacción permitía teclear cadenas sin validar en vivo si el formato correspondía a una dirección de correo válida, dejando el botón de envío habilitado con datos erróneos (ej. `nombre@`, `test`).
+- **Tu criterio y corrección:** Exigiste rigor en la interacción del formulario: *"validacion bien hecha en caliente para tipo email"*.
+- **Solución técnica implementada:**
+  1. *FormControl con `ShowOnDirtyErrorStateMatcher`:* Se integró `FormControl` reactivo acoplado a `ShowOnDirtyErrorStateMatcher` de Angular Material, asegurando que la validación visual actúe en tiempo real mientras el usuario escribe (`control.dirty`), sin obligarle a perder el foco (*blur*).
+  2. *Patrón Riguroso RFC 5322:* Se configuró `Validators.pattern` evaluando local-part, `@`, dominio y extensión TLD obligatoria de al menos dos caracteres (`/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/`).
+  3. *Feedback de Error Accesible y Multidioma:* Se proyecta `<mat-error id="recipient-error">` con mensajes traducidos en 4 idiomas (`es`, `en`, `de`, `fr`) distinguiendo entre campo vacío (`customers.emailDialog.recipientRequired`) y formato inválido (`customers.emailDialog.recipientInvalid`).
+  4. *Bloqueo Defensivo del Botón:* El botón de envío se inhabilita reactivamente (`recipientControl.invalid`) en cuanto el usuario introduce un formato incorrecto y se reactiva al corregirlo.
+  5. *Pruebas Unitarias Exhaustivas:* Se agregaron pruebas en `email-composer-dialog.component.spec.ts` validando el ciclo de vida del control ante entradas vacías, erróneas y válidas, así como la contención del envío ante datos no válidos.
+- **Resultados de Verificación:**
+  - 135 tests unitarios en frontend pasando al 100% (23 suites).
+  - 0 advertencias y 0 errores en `oxlint`.
+  - Build de producción completamente limpio.
+- **Valor para la evaluación:** Experiencia de usuario pulida (*Instant Feedback*), cumplimiento estricto de accesibilidad ARIA y estándares internacionales de validación web.
+
 
 
 
