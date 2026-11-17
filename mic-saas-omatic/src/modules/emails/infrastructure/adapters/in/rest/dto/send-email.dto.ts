@@ -6,7 +6,7 @@ export class SendEmailDto {
     description: 'Valid recipient email address conforming to RFC 5322',
     example: 'billing@acme.com',
   })
-  @IsEmail({}, { message: 'The field "to" must be a valid RFC 5322 email address' })
+  @IsEmail({}, { message: 'The field "to" must be a valid email address (e.g. billing@acme.com)' })
   @IsNotEmpty({ message: 'The field "to" cannot be empty' })
   to!: string;
 

@@ -3751,3 +3751,30 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
 - **Valor para la evaluación:** Eliminación total de iconos descontextualizados en modales clave, consolidando la coherencia visual de marca (*Design System Continuity*) en todas las superficies interactivas de SaaS-O-Matic.
+
+---
+
+### 6.148. Humanización del Feedback de Validación de Email (UX Writing Empático con Ejemplo Práctico)
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  En el formulario de alta de cliente corporativo ([customer-create-dialog.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.html)), el mensaje de error de validación del campo de correo electrónico mostraba una descripción excesivamente técnica, fría y poco humana: `"Formato de correo inválido (se requiere RFC 5322 con TLD de al menos 2 caracteres)."`. El usuario indicó que esta redacción es inadecuada para un usuario de negocio y solicitó sustituirla por una explicación accesible y humana que incluya un ejemplo claro (ej. mostrando un correo de ejemplo en rojo bajo el input).
+- **Feedback Humano:**
+  > *"esto es muy poco humano Formato de correo inválido (se requiere RFC 5322 con TLD de al menos 2 caracteres).
+  > 
+  > para explicar algo tan baxico coo el formato de un email pon example si eso en rojo y pones un correo no se"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Humanización de Mensajes de Validación (UX Writing & Empathy):*
+     - Aunque el validador reactivo subyacente sigue aplicando estrictamente el estándar RFC 5322 con TLD de al menos 2 caracteres a nivel de control, el texto de cara al usuario en `<mat-error>` (estilizado en rojo corporativo `--roams-status-error` bajo el campo) se actualizó en los 4 idiomas oficiales:
+       - **Español (`es`):** `'Formato no válido (ejemplo: contacto@empresa.com).'`
+       - **Inglés (`en`):** `'Invalid format (example: contact@company.com).'`
+       - **Alemán (`de`):** `'Ungültiges Format (Beispiel: kontakt@firma.de).'`
+       - **Francés (`fr`):** `'Format non valide (exemple : contact@entreprise.fr).'`
+  2. *Alineación en DTO de Backend:*
+     - En [send-email.dto.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/emails/infrastructure/adapters/in/rest/dto/send-email.dto.ts), se actualizó el mensaje de `@IsEmail` a:
+       `'The field "to" must be a valid email address (e.g. billing@acme.com)'`, garantizando coherencia y naturalidad en las respuestas de error RFC 7807 del backend.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **249 pruebas unitarias pasando al 100%** (29 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+- **Valor para la evaluación:** Enfoque de diseño empático (*Human-Centered UX Writing*), erradicando tecnicismos y jergas innecesarias para usuarios comerciales en favor de mensajes de error con ejemplos prácticos y directos.
