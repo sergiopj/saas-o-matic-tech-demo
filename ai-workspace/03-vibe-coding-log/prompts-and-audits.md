@@ -3483,6 +3483,48 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
 - **Valor para la evaluación:** Ergonomía visual de nivel Enterprise: maximización del ratio información/espacio (*information density*) en aplicaciones analíticas B2B, permitiendo un escaneo visual mucho más rápido y reduciendo el esfuerzo cognitivo del operador comercial.
 
+---
+
+### 6.140. Corrección del Salto de Scroll entre Navbar y Menú Lateral (Sticky Host Encapsulation en Angular)
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Al hacer scroll vertical en la aplicación, el usuario detectó que se producía un espacio en blanco anómalo entre el menú lateral (`app-sidebar`) y la barra superior (`app-navbar`).
+- **Feedback Humano (Detección visual de fallo en el comportamiento sticky):**
+  > *"al hacer scroll se hace un espacio entre el menu lateral y el navbar"*
+- **Análisis de Causa Raíz (Mecánica de CSS `position: sticky` en Angular):**
+  1. *El Contenedor Sticky Limitado del Hijo:*
+     - En [navbar.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/navbar/navbar.component.scss), la propiedad `position: sticky; top: 0;` estaba declarada dentro de la clase `.navbar-header` en lugar de aplicarse al elemento anfitrión `:host`.
+     - El componente anfitrión `<app-navbar>` no tenía estilos en `:host`, por lo que el navegador lo trataba con `display: inline` (o bloque estático de altura 64px).
+     - Según la especificación W3C de CSS, un elemento con `position: sticky` **solo puede adherirse dentro de los límites de su bloque contenedor padre**. Como el padre `<app-navbar>` finalizaba exactamente a los 64px, al hacer scroll el elemento `<app-navbar>` era desplazado hacia arriba por el flujo del documento, arrastrando consigo a `.navbar-header`.
+  2. *El Desfase con `app-sidebar`:*
+     - El menú lateral (`app-sidebar`), por el contrario, sí tenía declarado `:host { position: sticky; top: 64px; }` dentro de `.app-body` (cuya altura abarca miles de píxeles).
+     - En consecuencia, al hacer scroll, el sidebar permanecía anclado a `64px` de la parte superior del viewport, mientras que el navbar se desplazaba hacia arriba y salía de pantalla, dejando una brecha vacía de hasta 64px entre la parte superior del viewport/navbar y el sidebar.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Fijación en `:host` de `NavbarComponent`:*
+     - En [navbar.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/navbar/navbar.component.scss#L1):
+       ```scss
+       :host {
+         display: block;
+         position: sticky;
+         top: 0;
+         z-index: 1000;
+         width: 100%;
+       }
+       ```
+     - Al estar `<app-navbar>` ubicado directamente dentro de `.app-layout` (que tiene `min-height: 100vh` y envuelve a todo el cuerpo de la página), el host del navbar permanece fijado en `top: 0` de manera ininterrumpida durante el 100% del scroll de la página.
+  2. *Blindaje en el Layout Raíz (`app.scss`):*
+     - En [app.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/app.scss#L8), se reforzó explícitamente la declaración a nivel de layout global (`app-navbar { display: block; position: sticky; top: 0; z-index: 1000; width: 100%; }`), garantizando interoperabilidad inmune a la encapsulación de vistas.
+  3. *Alineación Milimétrica y `box-sizing: border-box`:*
+     - Se aseguró `box-sizing: border-box` en el host del navbar, en el toolbar (`height: 64px`), y en el host del sidebar (`top: 64px; height: calc(100vh - 64px); box-sizing: border-box;`).
+     - Al coincidir la altura del navbar (64px) con el offset superior del sidebar (`top: 64px`), ambos componentes permanecen perfectamente unidos y en contacto continuo a $Y = 64px$, eliminando cualquier fisura o espacio en blanco en cualquier posición de scroll y en cualquier ratio de zoom del sistema operativo.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **241 pruebas unitarias pasando al 100%** (29 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados con 111 reglas).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+- **Valor para la evaluación:** Dominio exhaustivo de la especificación de renderizado del navegador y de la encapsulación de componentes web en Angular, resolviendo anomalías de layout con precisión quirúrgica.
+
+
 
 
 

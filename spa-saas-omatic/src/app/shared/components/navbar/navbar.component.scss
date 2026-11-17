@@ -1,8 +1,15 @@
-.navbar-header {
+:host {
+  display: block;
   position: sticky;
   top: 0;
   z-index: 1000;
   width: 100%;
+}
+
+.navbar-header {
+  position: relative;
+  width: 100%;
+  display: block;
 }
 
 .navbar-toolbar {
@@ -10,6 +17,7 @@
   border-bottom: 1px solid var(--roams-border-inverse);
   padding: 0;
   height: 64px;
+  box-sizing: border-box;
   position: relative;
   z-index: 1000;
 }

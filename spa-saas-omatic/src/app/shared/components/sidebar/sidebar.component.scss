@@ -6,6 +6,7 @@
   top: 64px;
   height: calc(100vh - 64px);
   z-index: 50;
+  box-sizing: border-box;
 }
 
 .sidebar-container {
