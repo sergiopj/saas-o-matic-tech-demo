@@ -6,7 +6,22 @@ Dashboard Comercial interactivo para la optimización y presupuestado dinámico 
 > **💻 Recomendación de Entorno (Desktop Optimizado & 100% Responsive):**  
 > Al tratarse de un panel operativo corporativo para el equipo comercial (diseñado para la simulación interactiva de tramos, análisis de métricas, filtros avanzados, tablas de histórico denso y composición de presupuestos), **la experiencia de uso óptima está recomendada en pantallas de escritorio (Desktop $\ge$ 1024px)** para maximizar la productividad visual.  
 > No obstante, la plataforma es **100% responsive** y está completamente adaptada para tablets y smartphones (navbar dinámico en 2 filas en pantallas $\le$ 640px, sidebar colapsable, drawer deslizante de filtros con botones táctiles y tarjetas reorganizables).  
-> **Anclaje Visual en Desktop vs. Cero Ruido en Smartphones:** Las ilustraciones 3D *glassmorphic* aportan un alto valor de anclaje visual para reconocer cada sección de un vistazo en desktop y tablets; en smartphones ($\le$ 768px), estas imágenes se ocultan de forma selectiva para erradicar el ruido visual y garantizar que los formularios interactivos y métricas queden visibles *above the fold*.
+> **Anclaje Visual en Desktop vs. Cero Ruido en Smartphones:** Las ilustraciones 3D *human-centered* aportan un alto valor de anclaje visual cálido para reconocer cada sección de un vistazo en desktop y tablets; en smartphones ($\le$ 768px), las imágenes tipo banner se ocultan de forma selectiva para erradicar el ruido visual y garantizar que los formularios interactivos y métricas queden visibles *above the fold*.
+
+---
+
+## 🎨 Suite Visual 3D Human-Centered y Ergonomía de Diseño
+
+La interfaz gráfica incorpora una suite visual basada en personajes 3D empáticos, cálidos y de estética comercial cuidada (estilo Apple, Notion o Pixar), reemplazando composiciones geométricas frías o robóticas:
+1. **Hero Banner (`/home` - `hero-illustration.jpg`):** Profesional joven revisando analíticas de facturación en su portátil con luz natural y plantas de interior.
+2. **Estudio de Simulaciones (`/simulations` - `simulations-illustration.jpg`):** Dos compañeras de equipo colaborando sobre una tablet con el simulador interactivo de tramos y descuentos.
+3. **Medallón de Clientes Corporativos (`/customers` - `corporate-customer-badge.jpg`):** Avatar 3D de ejecutiva de cuentas en blazer lila sobre jersey crudo con tablet analítica.
+4. **Despacho Comercial (`email-composer-dialog` - `email-dispatch-badge.jpg`):** Emblema en el diálogo de emisión de presupuestos, con una propuesta lacrada en oro y un avioncito de papel origami ascendente.
+
+### Ergonomía de Controles y Micro-tipografía:
+- **Navbar Armonizado:** El selector de divisas (`CurrencySelectorComponent`) comparte dimensiones idénticas con el selector de idioma (`LanguageSelectorComponent`), con esquinas redondeadas estilo píldora (`--roams-radius-md`) y glifo de moneda (`monetization_on`).
+- **Live Conversion Respirable:** El bloque de conversión en vivo aplica espaciado generoso (`padding: 1rem 1.25rem; gap: 0.5rem; letter-spacing: 0.05em;`), erradicando la aglomeración visual de importes y tipos de cambio.
+- **Ocultación Selectiva Móvil:** En pantallas $\le$ 768px, los banners decorativos se ocultan (`display: none !important;`) preservando el área táctil y la visibilidad de métricas clave sobre el pliegue.
 
 ---
 

@@ -17,7 +17,7 @@ El proyecto sigue una convención corporativa de microservicio y single-page app
 > [!NOTE]
 > **🖥️ Recomendación de Visualización (Desktop Optimizado / 100% Responsive):**  
 > Al tratarse de una herramienta comercial interna orientada a la analítica de consumo, simulación interactiva de tramos en tiempo real, tablas de histórico denso y composición de propuestas, **se recomienda su uso en pantallas de escritorio (Desktop $\ge$ 1024px)** para maximizar la productividad y ergonomía del comercial. No obstante, la plataforma es **100% responsive** y está completamente adaptada para tablets y móviles (navbar en 2 filas, sidebar colapsable, drawer de filtros táctil y grids fluidos).  
-> **Anclaje Visual en Desktop vs. Cero Ruido en Smartphones:** Las ilustraciones 3D *glassmorphic* aportan un alto valor de anclaje visual para reconocer cada sección de un vistazo en desktop y tablets; en smartphones ($\le$ 768px), estas imágenes se ocultan de forma selectiva para erradicar el ruido visual y garantizar que los formularios interactivos y métricas queden visibles *above the fold*.
+> **Anclaje Visual en Desktop vs. Cero Ruido en Smartphones:** Las ilustraciones 3D *human-centered* aportan un alto valor de anclaje visual cálido para reconocer cada sección de un vistazo en desktop y tablets; en smartphones ($\le$ 768px), estas imágenes tipo banner se ocultan de forma selectiva para erradicar el ruido visual y garantizar que los formularios interactivos y métricas queden visibles *above the fold*.
 
 ---
 
@@ -69,7 +69,7 @@ npm start
 ### Paso 3: Verificación de Calidad y Tests en 1 Comando
 
 ```bash
-# 1. Ejecución de la suite completa de 351 tests unitarios (127 backend Jest + 224 frontend Vitest)
+# 1. Ejecución de la suite completa de 352 tests unitarios (128 backend Jest + 224 frontend Vitest)
 npm test
 
 # 2. Informes de cobertura de código unificados (> 90% en backend y > 95% en frontend)

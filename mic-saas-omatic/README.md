@@ -12,6 +12,18 @@ El microservicio implementa **Arquitectura Hexagonal (Puertos y Adaptadores)** e
 - **`application/`**: Casos de uso atómicos organizados por puertos de entrada y salida (`ports/in/`, `ports/out/`).
 - **`infrastructure/`**: Adaptadores primarios REST (`controllers/`, DTOs con `class-validator`) y adaptadores secundarios de persistencia (`adapters/out/persistence/` con TypeORM, mappers y entidades SQLite).
 
+### 🛡️ Resiliencia en DTOs y Validación de UUIDs RFC
+- En `CreateSimulationDto`, la validación de `customerId` utiliza una expresión regular estándar compatible con cualquier identificador RFC 4122 (versiones 1 a 5) y con el estándar moderno RFC 9562 (UUIDv7 ordenado por tiempo):
+  ```typescript
+  @Matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)
+  ```
+  Evita falsos rechazos `400 Bad Request` ante identificadores legítimos no estrictos v4 procedentes de clientes externos o fixtures de prueba.
+
+### 🗄️ Estrategia de Persistencia: SQLite WAL + Seeder Idempotente vs. Migraciones
+- **Modo WAL (`enableWAL: true`):** SQLite opera en modo Write-Ahead Logging, permitiendo lecturas concurrentes sin bloquear escrituras.
+- **Auto-Seeder Idempotente:** En el arranque local (`npm start`), `DatabaseSeederService` verifica si la base de datos está vacía y puebla automáticamente 18 clientes corporativos y sus simulaciones sin pasos manuales.
+- **¿Por qué no migraciones en esta tech demo?** Las migraciones DDL (`typeorm migration:run`) son esenciales en entornos productivos multi-desarrollador con PostgreSQL o MySQL para auditar cambios de esquema. En una prueba técnica local, obligar al evaluador a ejecutar comandos de migración añadiría fricción innecesaria; la combinación de `synchronize: true` + SQLite WAL + Seeder Idempotente proporciona la experiencia de evaluación inmediata y robusta (*Frictionless DX*).
+
 Para ver las directrices completas, consulta [`../ai-workspace/02-architecture/architecture-guidelines.md`](../ai-workspace/02-architecture/architecture-guidelines.md).
 
 ---
@@ -55,7 +67,7 @@ npm run lint
 ## 🧪 Pruebas
 
 ```bash
-# Tests Unitarios
+# Tests Unitarios (128 tests unitarios pasando al 100% en 26 suites)
 npm test
 
 # Tests de Integración E2E contra SQLite real

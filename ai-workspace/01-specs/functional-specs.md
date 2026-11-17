@@ -167,11 +167,23 @@ Los impuestos se determinan a partir del código de país (`country`) del client
      - Control deslizante (*slider*) para `activeUsers` (de 0 a 100+).
      - Controles numéricos para `storageGb` y `apiCalls`.
      - **Proyección Local en Tiempo Real:** El frontend aplica en memoria la misma fórmula de tramos e impuestos ante cualquier movimiento del slider, mostrando el desglose inmediato sin saturar el backend con peticiones.
-     - **Persistencia Bajo Demanda:** Solo cuando el usuario comercial pulsa `"Guardar Simulación"` se envía la petición `POST /simulations` para persistir el registro en la base de datos.
-  4. **Selector de Divisa Dinámico:**
+     - **Ergonomía de Espaciado en Conversión en Vivo (`Live Conversion`):** El bloque visual de conversión multi-divisa aplica espaciado amplio y respirable (`padding: 1rem 1.25rem`, separación vertical de etiquetas con `gap: 0.5rem` e interletreado `letter-spacing: 0.05em`) para evitar el apiñamiento entre el encabezado, el importe total convertido y el tipo de cambio unitario.
+     - **Persistencia Bajo Demanda y Feedback:** Solo cuando el usuario comercial pulsa `"Guardar Simulación"` se envía la petición `POST /simulations` para persistir el registro en SQLite. El sistema muestra una notificación accesible inmediata mediante `MatSnackBar` confirmando el guardado exitoso o informando con precisión si ocurrió un error de validación o red.
+  4. **Selector de Divisa Dinámico y Armonización en Navbar:**
      - Divisas soportadas: `EUR`, `USD`, `GBP`, `CHF`, `CAD`, `JPY`.
      - Conexión a API pública externa: `https://open.er-api.com/v6/latest/EUR`.
      - Gestión de estados: indicador visual de carga (*loading*), caché en memoria de tasas de cambio y mecanismo de contingencia (*fallback* a EUR) si la API externa falla o no tiene red.
+     - **Coherencia Visual con el Selector de Idioma:** En el navbar superior, el selector de moneda (`CurrencySelectorComponent`) cuenta con dimensiones idénticas a las del selector de idioma (`LanguageSelectorComponent`), con esquinas redondeadas estilo píldora (`--roams-radius-md`), padding armónico y un glifo temático de moneda (`<mat-icon>monetization_on</mat-icon>`) complementario al de globo terráqueo (`<mat-icon>language</mat-icon>`).
+
+### 3.2 Suite Visual 3D Human-Centered y Política de Anclaje Visual
+Para humanizar la herramienta comercial y trascender los diseños oscuros o excesivamente robóticos, SaaS-O-Matic incorpora una suite visual de cuatro piezas 3D basadas en personajes empáticos y atmósferas acogedoras:
+1. **Hero Banner Dashboard (`/home` - `hero-illustration.jpg`):** Escena luminosa de una profesional joven revisando métricas de crecimiento y ventas en su portátil junto a un café de especialidad y planta natural.
+2. **Estudio de Simulaciones (`/simulations` - `simulations-illustration.jpg`):** Dos compañeras de equipo colaborando amigablemente ante una tablet que proyecta el simulador de tramos y descuentos.
+3. **Catálogo de Clientes Corporativos (`/customers` - `corporate-customer-badge.jpg`):** Avatar 3D de ejecutiva de cuentas en blazer lila sobre jersey crudo con tablet analítica.
+4. **Despacho Comercial (`/customers/:id` - `email-dispatch-badge.jpg`):** Emblema entrañable en el diálogo modal de emisión de presupuestos, con una propuesta lacrada en oro y un avioncito de papel origami ascendente.
+
+**Política Responsive de Anclaje Visual vs. Cero Ruido:**  
+En pantallas de escritorio y tablet ($\ge$ 769px), estas ilustraciones proporcionan un anclaje visual inmediato para reconocer la pantalla de un vistazo. En smartphones ($\le$ 768px), las ilustraciones tipo banner de gran tamaño se ocultan de forma automática (`display: none !important;`), erradicando el ruido visual y manteniendo los controles interactivos y tablas directamente visibles *above the fold*.
 
 ---
 
@@ -222,7 +234,8 @@ Documentación interactiva (Swagger UI): `http://localhost:3000/docs`.
 | `GET` | `/customers` | `search` (opcional, string)<br>`country` (opcional, ISO-2)<br>`page` (opcional, entero $\ge 1$)<br>`limit` (opcional, entero $1..100$)<br>`sortBy` (opcional: `companyName`, `createdAt`, `country`, `taxId`)<br>`order` (opcional: `ASC`, `DESC`) | `X-Total-Count`<br>`X-Page`<br>`X-Limit`<br>`X-Total-Pages` | Lista clientes con búsqueda parcial, filtro de jurisdicción fiscal, ordenación SQL multi-criterio y paginación server-side. El cuerpo devuelve el array de clientes para mantener total compatibilidad hacia atrás. |
 | `GET` | `/customers/{id}` | Ninguno | Ninguna | Obtiene los datos del cliente corporativo. |
 | `GET` | `/simulations` | `customerId` (requerido, UUID) | Ninguna | Lista el historial de simulaciones de un cliente ordenadas descendentemente por fecha. |
-| `POST` | `/simulations` | Ninguno | Ninguna | Registra y persiste una simulación calculando el coste por tramos e impuestos. |
+| `POST` | `/simulations` | Ninguno | Ninguna | Registra y persiste una simulación calculando el coste por tramos e impuestos. Valida `customerId` compatible con cualquier estándar RFC de UUID (v1-v5 y v7). |
+| `POST` | `/emails/send` | Ninguno | Ninguna | Despacha una propuesta comercial o presupuesto por email mediante adaptador transaccional desacoplado con sanitización anti-XSS. |
 
 #### Especificación de Cabeceras de Paginación RFC
 Cuando se consulta `GET /customers`, el controlador primario inyecta las siguientes cabeceras HTTP estándar (expuestas en CORS mediante `Access-Control-Expose-Headers`):

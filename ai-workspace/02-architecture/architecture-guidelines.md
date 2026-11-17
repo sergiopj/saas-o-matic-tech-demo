@@ -207,6 +207,48 @@ Para evitar el anti-patrón de *Over-Fetching* (descarga masiva de atributos irr
    - Reduce el tamaño del JSON en más de un **70%** (de ~250 B a ~65 B por cliente), agilizando el parsing del navegador y reduciendo drásticamente el consumo de datos móviles.
    - Preserva la emisión de la cabecera `X-Total-Count`, permitiendo al frontend actualizar los contadores KPI y obtener los registros compactos en una sola petición HTTP.
 
+### 2.7 Validación Permisiva de Identificadores UUID RFC y Resiliencia en DTOs
+
+En microservicios orientados a la integración con diversos subsistemas empresariales o bases de datos heredadas, la validación estricta de UUIDs v4 mediante `@IsUUID('4')` introduce fragilidad operacional:
+- **Problema Detectado:** Determinados identificadores UUID válidos según la norma IETF RFC 4122 (versiones 1 a 5) o fixtures de inicialización pueden no presentar el dígito `4` en el nibble de versión, provocando respuestas `400 Bad Request` artificiales en peticiones legítimas como `POST /simulations`.
+- **Solución Arquitectónica:** En `CreateSimulationDto`, se sustituye la restricción rígida por una validación estándar basada en la especificación formal del formato UUID de 36 caracteres:
+  ```typescript
+  @Matches(
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+    { message: 'customerId must be a valid UUID format (8-4-4-4-12 hex string).' },
+  )
+  readonly customerId!: string;
+  ```
+- **Beneficio Senior:** Acepta sin fricción cualquier UUID canónico (RFC 4122 v1, v3, v4, v5) y los modernos identificadores ordenados temporalmente (RFC 9562 UUIDv7), garantizando interoperabilidad y eliminando falsos positivos de validación.
+
+### 2.8 Estrategia de Persistencia: SQLite WAL + Seeder Idempotente frente a Migraciones en Producción
+
+Ante la necesidad de gestionar la evolución del esquema relacional en bases de datos, surgen dos enfoques arquitectónicos con compromisos técnicos diferenciados:
+
+```mermaid
+flowchart TD
+    subgraph LocalEval["Tech Demo & Evaluación Local (SaaS-O-Matic Actual)"]
+        A["Arranque con 'npm start'"] --> B["TypeORM synchronize: true (SQLite WAL)"]
+        B --> C["DatabaseSeederService (Transaccional & Idempotente)"]
+        C --> D["Listo para evaluar en < 5s sin pasos manuales"]
+    end
+
+    subgraph ProdEnv["Entorno Productivo Empresarial (Roadmap Multi-Entorno)"]
+        E["CI/CD Pipeline (GitHub Actions)"] --> F["typeorm migration:run (PostgreSQL / MySQL)"]
+        F --> G["Trazabilidad de Esquema con Rollback Seguro"]
+        G --> H["Cluster en Alta Disponibilidad"]
+    end
+```
+
+#### A. Por qué SQLite WAL + Seeder Idempotente es la Elección Óptima para esta Tech Demo
+1. **Experiencia de Evaluación Cero-Fricción (*Frictionless DX*):** Un evaluador técnico debe poder clonar el repositorio y ejecutar `npm start` viendo la base de datos lista con 18 clientes y simulaciones sin requerir pasos manuales previos como `npm run typeorm:migration:run`.
+2. **Concurrencia con SQLite WAL (`enableWAL: true`):** El modo Write-Ahead Logging permite lecturas y escrituras simultáneas en archivos `.sqlite` locales sin contención ni bloqueos de base de datos.
+3. **Idempotencia Garantizada:** `DatabaseSeederService` comprueba la existencia de registros antes de insertar (`count === 0`), previniendo duplicados ante reinicios sucesivos del servidor.
+
+#### B. Cuándo y Por Qué Implementar Migraciones Formales en Producción
+- En entornos con bases de datos como PostgreSQL o MySQL en clúster, `synchronize: true` está terminantemente prohibido porque podría alterar tablas con millones de transacciones.
+- Las migraciones explícitas versionadas (`typeorm migration:generate` y `typeorm migration:run`) permiten auditoría de cambios DDL en Git, control granular de índices y ejecución de scripts de reversión (*rollback*) ante incidencias en despliegues automatizados.
+
 ---
 
 ## 3. Arquitectura del Frontend (Angular 22)
@@ -810,6 +852,30 @@ Para resolver la ausencia de base de datos inicial (debido a que los archivos `*
    - El `.mat-mdc-form-field-subscript-wrapper` se redimensiona reactivamente en el flujo del documento (`height: auto !important; position: relative !important; gap: 1.25rem`), garantizando que los mensajes de error multilínea empujen la interfaz hacia abajo con holgura y sin deformar a los campos contiguos.
 
 ---
+
+### 3.23 Coherencia Visual en Navbar, Ergonomía de Espaciado y Suite 3D Human-Centered
+
+#### A. Armonización del Selector de Divisas con el Selector de Idioma en Navbar
+- **Simetría y Morfología Visual:** En el top navbar corporativo, el selector de moneda (`CurrencySelectorComponent`) se rediseñó para compartir idénticas dimensiones que el selector de idioma (`LanguageSelectorComponent`):
+  - Altura táctil uniforme y esquinas redondeadas estilo píldora mediante `--roams-radius-md`.
+  - Padding y bordes coherentes (`border: 1px solid var(--roams-border-inverse); background: var(--roams-bg-input-dark)`).
+  - Icono temático complementario: `<mat-icon class="currency-icon">monetization_on</mat-icon>`, aportando paridad iconográfica con el glifo de idioma `<mat-icon>language</mat-icon>`.
+
+#### B. Ergonomía de Espaciado en Bloque de Conversión en Vivo (`.conversion-badge`)
+- Para evitar la aglomeración de textos y garantizar una lectura relajada durante la simulación de precios:
+  - Padding interior amplio: `padding: 1rem 1.25rem`.
+  - Disposición flexible con espaciado vertical estructurado: `gap: 0.5rem`.
+  - Tipografía de alta legibilidad con interletreado suave (`letter-spacing: 0.05em`) en la etiqueta `LIVE CONVERSION`, diferenciando con nitidez el título, el importe convertido y el tipo de cambio unitario.
+
+#### C. Suite Visual 3D Human-Centered y Política de Anclaje Visual
+- **Transición de lo Tecnológico a lo Humano:** Se reemplazaron todas las ilustraciones frías de estilo ciber-futurista (cubos con anillos de neón, consolas oscuras con hologramas y edificios geométricos) por una suite de cuatro piezas 3D centradas en personajes humanos empáticos y cálidos:
+  1. *Hero Banner Dashboard* (`/home` - `hero-illustration.jpg`): Profesional joven revisando analíticas de facturación en su portátil con luz natural y plantas de interior.
+  2. *Estudio de Simulaciones* (`/simulations` - `simulations-illustration.jpg`): Dos compañeras de equipo colaborando sobre una tablet con el simulador de tramos y descuentos.
+  3. *Medallón de Clientes Corporativos* (`/customers` - `corporate-customer-badge.jpg`): Retrato 3D en avatar de ejecutiva de cuentas en blazer lila sobre jersey crudo con tablet analítica.
+  4. *Emblema de Envío Comercial* (`email-composer-dialog` - `email-dispatch-badge.jpg`): Emblema entrañable en el modal de propuestas comerciales, con una propuesta lacrada en oro y un avioncito de papel origami ascendente.
+- **Política Responsive (Desktop $\ge$ 769px vs. Smartphones $\le$ 768px):**
+  - En pantallas medianas y grandes, las ilustraciones aportan el anclaje visual (*visual anchoring*) que permite al usuario identificar de inmediato la sección activa.
+  - En smartphones ($\le$ 768px), los banners decorativos se ocultan selectivamente (`display: none !important;`) para erradicar el ruido visual y asegurar que los componentes de interacción crítica (formularios, sliders, tablas) permanezcan *above the fold*.
 
 ---
 

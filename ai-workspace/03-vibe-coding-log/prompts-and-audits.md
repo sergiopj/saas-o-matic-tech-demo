@@ -2862,6 +2862,40 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: **0 errores y 0 advertencias**.
 - **Valor para la evaluación:** Madurez en diseño de experiencia y psicología visual: convertir herramientas financieras complejas en entornos amigables, cálidos y atractivos donde la tecnología se pone al servicio de las personas y no al revés.
 
+---
+
+### 6.120. Auditoría Integral y Sincronización Transversal de la Documentación en Todos los Documentos Markdown
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Tras completar la tanda de refinamientos funcionales, visuales y de persistencia (espaciado en conversión en vivo, simetría del selector de moneda en navbar, soporte flexible de UUIDs RFC, análisis de migraciones vs SQLite WAL y transformación completa de la suite gráfica 3D hacia personajes human-centered), era imperativo realizar una auditoría transversal para garantizar que la totalidad de los documentos Markdown del proyecto estuvieran perfectamente sincronizados, sin discrepancias de cifras ni conceptos desactualizados.
+- **Feedback Humano (Tu criterio de gobernanza documental senior):**
+  > *"ojo todos los cambios que te voy pidiendo a los mds que toquen"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  Se auditó y actualizó cada documento Markdown del repositorio según su ámbito de responsabilidad:
+  1. *[functional-specs.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/01-specs/functional-specs.md):*
+     - Incorporación de las especificaciones de espaciado respirable en el bloque de conversión multi-divisa (`.conversion-badge`).
+     - Detalle de la armonización del selector de divisas en navbar (mismo tamaño, bordes de píldora e iconografía `monetization_on`).
+     - Registro de la suite visual 3D de 4 piezas *human-centered* y la política responsive de anclaje visual (Desktop $\ge$ 769px) vs cero ruido en smartphones ($\le$ 768px).
+     - Actualización del catálogo de endpoints con `POST /emails/send` y la validación permisiva de UUIDs en `POST /simulations`.
+  2. *[architecture-guidelines.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md):*
+     - Sección 2.7: Validación permisiva de UUIDs RFC (v1 a v5 y v7 moderno) en `CreateSimulationDto` con regex estándar `@Matches(...)`.
+     - Sección 2.8: Comparativa arquitectónica entre migraciones formales (`typeorm migration:run` para producción multi-entorno) frente a SQLite WAL + Seeder Idempotente para una experiencia evaluable *out-of-the-box* de cero fricción.
+     - Sección 3.23: Coherencia morfológica en navbar, ergonomía de espaciado en conversión en vivo y estrategia de ilustraciones 3D humanas.
+  3. *[spa-saas-omatic/README.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/README.md):*
+     - Sección dedicada a la Suite Visual 3D Human-Centered, ergonomía de controles (navbar y live conversion) y política responsive en smartphones.
+  4. *[mic-saas-omatic/README.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/README.md):*
+     - Documentación de concurrencia SQLite WAL (`enableWAL: true`), auto-seeder idempotente y resiliencia en DTOs ante identificadores UUID estándar. Actualización del recuento a 128 tests unitarios.
+  5. *[README.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/README.md) (raíz):*
+     - Actualización del recuento oficial a **352 tests unitarios (128 backend Jest + 224 frontend Vitest)**.
+     - Alineación de la descripción de la suite visual 3D *human-centered* y de las directrices de visualización en desktop y movilidad.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Oxlint: **0 errores y 0 advertencias** en los 140 archivos inspeccionados.
+- **Valor para la evaluación:** Rigor absoluto en la trazabilidad documental (SSOT), asegurando que ningún cambio de código o diseño quede indocumentado ni huérfano de justificación arquitectónica.
+
+
 
 
 
