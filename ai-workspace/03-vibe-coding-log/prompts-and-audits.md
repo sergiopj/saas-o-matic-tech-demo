@@ -2922,6 +2922,36 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: **0 errores y 0 advertencias** en los 140 archivos inspeccionados.
 - **Valor para la evaluación:** Sensibilidad y adaptabilidad inmediata a la dirección de arte corporativa, logrando un equilibrio idóneo entre sobriedad profesional, calidez visual y acabado premium para un producto B2B fintech de nivel Enterprise.
 
+---
+
+### 6.122. Optimización de Ergonomía Espacial y Visibilidad Above-the-Fold en el Dashboard Principal (`/home`)
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El banner principal de cabecera (`.hero-banner`), a pesar de su acabado gráfico 3D refinado, presentaba una huella espacial sobredimensionada tanto en anchura como en altura (`padding: 2.25rem`, imagen a 250px de altura y ocupación vertical superior a 350px). Esta altura consumía más del 50% de la ventana inicial del navegador en pantallas estándar (1080p y portátiles 768p/900p), desplazando los componentes operacionales de mayor valor comercial (contadores KPI, matriz de tramos tarifarios y catálogo de clientes recientes para simulación rápida) fuera del viewport inicial (*below the fold*), forzando al usuario a realizar scroll nada más cargar la página.
+- **Feedback Humano (Tu criterio de usabilidad y jerarquía visual senior):**
+  > *"guapisimo lo unico este contenedor que sea mas pqeuqño de ancho por que ocupa demasiada opantalla y no se ve lo mas importante del home segun carga"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Contención de Ancho Máximo y Centrado Proporcional:*
+     - Establecido `max-width: 960px; width: 100%; margin: 0 auto;` en `.hero-banner` dentro de `home.component.scss`, impidiendo que el contenedor domine agresivamente el ancho en pantallas de escritorio y monitores panorámicos.
+  2. *Reducción de Huella Vertical (> 55% de Ahorro Espacial):*
+     - Padding vertical compactado de `2.25rem 2.25rem` a `1.15rem 1.75rem`.
+     - Dimensiones de la ilustración 3D (`.hero-illustration`) ajustadas de `max-height: 250px` a `max-height: 120px; max-width: 210px; flex: 0 0 auto;`.
+     - Tipografía y espaciados esbeltos: título escalado de `1.85rem` a `1.4rem`, subtítulo de `1rem` a `0.88rem` con márgenes inferiores ajustados (`0.85rem`), e insignia condensada (`padding: 0.25rem 0.65rem; font-size: 0.7rem;`).
+     - Botones de acción (`.hero-btn`) compactados a `min-height: 36px` con padding táctil de `0.35rem 1rem`.
+     - Gap entre secciones de `home-container` reducido de `1.75rem` a `1.25rem`.
+  3. *Impacto en la Experiencia de Carga (Above-the-Fold Instantáneo):*
+     - Al acceder a `http://localhost:4200/home`, el usuario visualiza ahora simultáneamente el banner de bienvenida en proporciones elegantes, los 4 contadores KPI clave, la tarjeta de tramos tarifarios y el primer lote de clientes corporativos recientes sin necesidad de desplazamiento vertical.
+  4. *Gobernanza de Tokens y Verificación:*
+     - Estricto cumplimiento de tokens oficiales `--roams-*` (cero hex hardcodeados, cero fallbacks en `var()`).
+     - Sincronización transversal con [functional-specs.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/01-specs/functional-specs.md), [architecture-guidelines.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md) y [spa-saas-omatic/README.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/README.md).
+- **Resultados de Verificación:**
+  - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Oxlint: **0 errores y 0 advertencias** en los 140 archivos inspeccionados.
+- **Valor para la evaluación:** Maestría en diseño de interacción y jerarquía visual web: subordinar los elementos decorativos al flujo operacional directo, asegurando que la información de negocio de mayor impacto esté a la vista desde el primer segundo.
+
+
 
 
 

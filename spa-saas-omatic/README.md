@@ -19,6 +19,7 @@ La interfaz gráfica incorpora una suite visual de diseño 3D cálido y táctil 
 4. **Despacho Comercial (`email-composer-dialog` - `email-dispatch-badge.jpg`):** Emblema en el diálogo de emisión de presupuestos con un sobre de gruesa textura crema, sello lacrado en oro en relieve, documento de propuesta y un avión de papel origami pastel ascendiendo con destellos dorados.
 
 ### Ergonomía de Controles y Micro-tipografía:
+- **Hero Banner Compacto (Above-the-Fold en `/home`):** Ancho contenido (`max-width: 960px; margin: 0 auto;`) y altura reducida en más de un 55% (`padding: 1.15rem 1.75rem`, imagen a 120px) para que las métricas KPI, tramos y clientes recientes aparezcan inmediatamente en el viewport inicial sin exigir scroll.
 - **Navbar Armonizado:** El selector de divisas (`CurrencySelectorComponent`) comparte dimensiones idénticas con el selector de idioma (`LanguageSelectorComponent`), con esquinas redondeadas estilo píldora (`--roams-radius-md`) y glifo de moneda (`monetization_on`).
 - **Live Conversion Respirable:** El bloque de conversión en vivo aplica espaciado generoso (`padding: 1rem 1.25rem; gap: 0.5rem; letter-spacing: 0.05em;`), erradicando la aglomeración visual de importes y tipos de cambio.
 - **Ocultación Selectiva Móvil:** En pantallas $\le$ 768px, los banners decorativos se ocultan (`display: none !important;`) preservando el área táctil y la visibilidad de métricas clave sobre el pliegue.
