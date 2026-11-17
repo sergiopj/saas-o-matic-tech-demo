@@ -47,21 +47,36 @@ export class EmailComposerDialogComponent {
   readonly subject = signal<string>(this.data.subject || '');
   readonly body = signal<string>(this.data.body || '');
   readonly copied = signal<boolean>(false);
+  readonly isDispatching = signal<boolean>(false);
 
   /**
-   * Constructs an RFC 6068 mailto URI and triggers the operating system's default email client.
+   * Constructs an RFC 6068 compliant mailto URI and triggers the operating system's default email client.
    */
   openMailClient(): void {
-    const to = encodeURIComponent(this.recipient());
+    this.isDispatching.set(true);
+
+    // RFC 6068: The recipient addr-spec preserves '@', query params are percent-encoded
+    const to = this.recipient().trim();
     const subjectParam = encodeURIComponent(this.subject());
     const bodyParam = encodeURIComponent(this.body());
     const mailtoUri = `mailto:${to}?subject=${subjectParam}&body=${bodyParam}`;
 
-    if (typeof window !== 'undefined') {
+    if (typeof document !== 'undefined') {
+      const link = document.createElement('a');
+      link.href = mailtoUri;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else if (typeof window !== 'undefined') {
       window.location.href = mailtoUri;
     }
 
-    this.dialogRef.close('dispatched');
+    // Defer closing so Chromium event loop has time to hand off the protocol URI to the OS
+    setTimeout(() => {
+      this.isDispatching.set(false);
+      this.dialogRef.close('dispatched');
+    }, 400);
   }
 
   /**

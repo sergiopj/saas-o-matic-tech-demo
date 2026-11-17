@@ -91,9 +91,10 @@
       mat-flat-button
       class="dispatch-btn"
       (click)="openMailClient()"
+      [disabled]="isDispatching()"
     >
-      <mat-icon aria-hidden="true">send</mat-icon>
-      <span>{{ 'customers.emailDialog.openClient' | translate }}</span>
+      <mat-icon aria-hidden="true">{{ isDispatching() ? 'hourglass_top' : 'send' }}</mat-icon>
+      <span>{{ (isDispatching() ? 'customers.emailDialog.opening' : 'customers.emailDialog.openClient') | translate }}</span>
     </button>
   </mat-dialog-actions>
 </div>

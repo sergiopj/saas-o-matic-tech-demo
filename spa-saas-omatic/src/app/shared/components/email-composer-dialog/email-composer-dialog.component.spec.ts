@@ -68,10 +68,21 @@ describe('EmailComposerDialogComponent', () => {
     expect(component.copied()).toBe(true);
   });
 
-  it('should dispatch mailto URI on openMailClient and close dialog', () => {
+  it('should dispatch mailto URI on openMailClient and close dialog after delay', () => {
+    vi.useFakeTimers();
+    const appendChildSpy = vi.spyOn(document.body, 'appendChild');
+
     component.openMailClient();
 
+    expect(appendChildSpy).toHaveBeenCalled();
+    expect(component.isDispatching()).toBe(true);
+
+    vi.advanceTimersByTime(400);
+
     expect(mockDialogRef.close).toHaveBeenCalledWith('dispatched');
+    expect(component.isDispatching()).toBe(false);
+    appendChildSpy.mockRestore();
+    vi.useRealTimers();
   });
 
   it('should close dialog when cancel/close is called', () => {
