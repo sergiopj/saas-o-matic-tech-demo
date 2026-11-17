@@ -48,8 +48,9 @@
         id="recipient-email"
         aria-labelledby="recipient-label"
         type="email"
-        [value]="recipient()"
-        (input)="recipient.set($any($event.target).value)"
+        name="recipient"
+        [ngModel]="recipient()"
+        (ngModelChange)="recipient.set($event)"
       />
       <mat-icon matPrefix class="field-icon" aria-hidden="true">contact_mail</mat-icon>
     </mat-form-field>
@@ -61,8 +62,9 @@
         id="subject"
         aria-labelledby="subject-label"
         type="text"
-        [value]="subject()"
-        (input)="subject.set($any($event.target).value)"
+        name="subject"
+        [ngModel]="subject()"
+        (ngModelChange)="subject.set($event)"
       />
       <mat-icon matPrefix class="field-icon" aria-hidden="true">subject</mat-icon>
     </mat-form-field>
