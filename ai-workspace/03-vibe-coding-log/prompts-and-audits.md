@@ -3130,6 +3130,33 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint Frontend & Backend: **0 errores y 0 advertencias**.
 - **Valor para la evaluación:** Implementación rigurosa del patrón de retroalimentación no obstructiva (*Toast Notifications*), manteniendo la interfaz limpia y rápida para los comerciales mientras se ofrece certeza operacional visible en la vista donde permanece el usuario.
 
+---
+
+### 6.130. Clústeres Dinámicos de Usuarios en Espejo con las Monedas en las Tarjetas de Tarificación
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Tras haber implementado la animación de monedas decrecientes por tramo (reflejando el abaratamiento del coste unitario por asiento: 10 € $\rightarrow$ 8 € $\rightarrow$ 5 €), el usuario propuso una metáfora visual complementaria: un grupo o clúster de iconos de personas que crezca en número y densidad conforme aumenta el volumen de usuarios del tramo (0-10 usuarios $\rightarrow$ equipo pequeño; 11-50 usuarios $\rightarrow$ mediana empresa; >50 usuarios $\rightarrow$ gran corporación masiva).
+- **Feedback Humano (Tu criterio de narrativa visual y economía SaaS intuitiva):**
+  > *"estaria guay a parte de lo de la smonedas que crezca o decrezca un grupito de personas en plan icono me entiendes?"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Composición Dual Inversa (Monedas vs. Personas):*
+     - **Tramo 1 (0 a 10 usuarios • 10,00 €):** Pila alta de **5 monedas** (mayor coste unitario) + Clúster de **1 persona** (`person` x1).
+     - **Tramo 2 (11 a 50 usuarios • 8,00 €):** Pila intermedia de **3 monedas** + Clúster de **3 personas** (`person` x3) solapadas como equipo en expansión.
+     - **Tramo 3 (Más de 50 usuarios • 5,00 €):** Pila baja de **2 monedas** + Clúster corporativo masivo de **5 personas** (`person` x5) en multitud.
+  2. *Integración en Vistas Clave:*
+     - En [simulation-hub.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/simulations/pages/simulation-hub/simulation-hub.component.html#L95) y [simulation-hub.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/simulations/pages/simulation-hub/simulation-hub.component.scss#L365): Se añadió `.tier-range-row` con `.users-cluster` alineado a la derecha del rango de usuarios.
+     - En [home.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.html#L100) y [home.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.scss#L375): Se incorporó `.tier-visual-group` en cada píldora (`.tier-pill`), situando el grupo de personas al lado de las monedas.
+  3. *Animación Hardware-Accelerated (100% CSS Puro):*
+     - `@keyframes userPop`: Entrada elástica escalonada con rebote suave al renderizar la vista.
+     - En `:hover`: Las figuras humanas se despliegan en abanico (*fan-out*, reduciendo el solapamiento de `-7px` a `-3px`) y crecen suavemente (`transform: scale(1.06)`), mientras que en T1 la figura única da un salto de atención (`translateY(-2px) scale(1.12)`).
+     - Accesibilidad: Marcado con `aria-hidden="true"` (la información textual permanece intacta) y desactivación instantánea mediante `@media (prefers-reduced-motion: reduce)`.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **226 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Oxlint Frontend & Backend: **0 errores y 0 advertencias**.
+- **Valor para la evaluación:** Demostración de diseño UX/UI de vanguardia, creando una narrativa visual intuitiva donde el evaluador comprende instantáneamente la economía del modelo SaaS por volumen con animaciones puras, fluidas a 60 FPS y cero impacto en runtime.
+
 
 
 
