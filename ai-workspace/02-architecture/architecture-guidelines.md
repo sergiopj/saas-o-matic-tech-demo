@@ -622,6 +622,41 @@ Para responder a las necesidades de extensión futura del equipo comercial y sep
    - En selectores y lanzadores de acción (ej. `SimulationHubComponent`), se prohíbe la duplicación de etiquetas externas y placeholders estáticos en `<mat-select>`. Se consolidan en un único `<mat-label>` flotante nativo de Angular Material con opción nula explícita (`-- Seleccionar cliente corporativo --`).
    - Los botones de acción principal nunca deben destruirse o eliminarse condicionalmente del DOM mediante directivas estructurales (`@if`) durante estados de carga o selecciones vacías: permanecen siempre renderizados en el layout con enlace reactivo `[disabled]` y estilos CSS accesibles (`cursor: not-allowed; opacity: 0.75`), blindando la interfaz contra saltos de diseño (*layout shift*).
 
+### 3.18 Comunicación y Flujo Unidireccional con Angular Signals en el Estudio de Simulación (Hydration & Historical Restore)
+
+Para conectar el historial de simulaciones guardadas (*Saved Simulations History*) con los controles interactivos del estudio (*Subscription Simulator*), SaaS-O-Matic implementa un **grafo reactivo puro basado en Angular Signals (`signal` y `computed`)**, descartando patrones obsoletos basados en eventos no estructurados o cadenas de `RxJS` en la vista:
+
+```mermaid
+flowchart LR
+    A["Tabla de Historial (Acción 'Cargar' / Click en fila)"] -->|loadSimulationIntoStudio| B["Writable Signals: activeUsers.set(), storageGb.set(), apiCalls.set()"]
+    B --> C["Computed Signals: projection(), tier1Cost(), tier2Cost(), tier3Cost()"]
+    C --> D["Actualización Quirúrgica del DOM: Slider, Stepper, Tiers Visual Bar y Proyección de Factura"]
+```
+
+#### A. Decisión Técnica: ¿Por qué Signals frente a RxJS (BehaviorSubject) o EventEmitters?
+1. **Reactividad de Grano Fino (Fine-Grained Reactivity):**
+   - En Angular tradicional con `Zone.js`, la interacción con un elemento desencadena un ciclo global de detección de cambios (*Dirty Checking*) que recorre todo el árbol de componentes buscando mutaciones.
+   - Con Angular 22 Signals y `ChangeDetectionStrategy.OnPush`, Angular conoce en tiempo de compilación qué nodos exactos del DOM dependen de `activeUsers()` o `projection()`. Al invocar `.set()`, únicamente se parchean los nodos de texto y atributos involucrados, garantizando **60 FPS constantes** sin micro-tirones.
+2. **Inmunidad a Fugas de Memoria (Cero Unsubscribes):**
+   - Los Signals son valores síncronos puros. No requieren `Observable`, llamadas a `.subscribe()`, tuberías con `takeUntilDestroyed()`, desuscripciones en `ngOnDestroy()` ni el uso defensivo de la tubería `| async` en plantillas.
+3. **Desacoplamiento Limpio entre Componentes Presentacionales:**
+   - La tabla de historial y los controles de simulación no necesitan comunicarse mediante `@Output()` / `@Input()` artificiales. Ambos leen y mutan el estado reactivo centralizado en las señales del componente (`activeUsers`, `storageGb`, `apiCalls`).
+
+#### B. Mecánica de la Acción "Cargar en el Simulador" (*Historical Restore*)
+- Cuando el comercial hace clic en el botón `settings_backup_restore` o pulsa sobre cualquier fila histórica:
+  1. Se invoca `loadSimulationIntoStudio(sim: Simulation)`.
+  2. Se actualizan síncronamente las señales fuente:
+     ```typescript
+     this.activeUsers.set(sim.activeUsers);
+     this.storageGb.set(sim.storageGb);
+     this.apiCalls.set(sim.apiCalls);
+     ```
+  3. De forma automática, las señales derivadas `computed()` recalculan la base imponible por tramos (`tier1Cost`, `tier2Cost`, `tier3Cost`), el impuesto por país y la conversión de divisa en vivo (`projection()`).
+  4. El slider de Angular Material `<mat-slider>` y el input numérico se sincronizan inmediatamente con los valores restaurados, acompañados de una notificación accesible `MatSnackBar` (*"Simulación cargada en el estudio ({{users}} usuarios)"*).
+
+#### C. Continuidad de Contexto y Auto-Hidratación Inicial
+- Si un cliente corporativo ya cuenta con presupuestos en SQLite, al entrar a su ficha o pulsar refresco en el navegador (`F5`), `loadSimulationsHistory()` auto-hidrata el simulador con la **última simulación guardada** (`sorted[0]`), evitando que la interfaz se reinicie a valores genéricos y preservando el contexto de trabajo del comercial.
+
 ---
 
 ## 4. Estrategia de Testing y Aseguramiento de Calidad
