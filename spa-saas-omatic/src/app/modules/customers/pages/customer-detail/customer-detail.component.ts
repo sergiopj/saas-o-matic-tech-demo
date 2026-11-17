@@ -26,7 +26,8 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { LocalizedCurrencyPipe } from '../../../../shared/pipes/localized-currency.pipe';
 import { LoadingStateComponent } from '../../../../shared/components/loading-state/loading-state.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
-import { CustomerEmailDialogComponent } from '../../components/customer-email-dialog/customer-email-dialog.component';
+import { EmailComposerDialogComponent } from '../../../../shared/components/email-composer-dialog/email-composer-dialog.component';
+import { I18nService } from '../../../../core/services/i18n.service';
 
 /**
  * Customer Detail view and Interactive Simulation Studio.
@@ -58,6 +59,7 @@ import { CustomerEmailDialogComponent } from '../../components/customer-email-di
 export class CustomerDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
+  private readonly i18n = inject(I18nService);
   readonly customerApi = inject(CustomerApiService);
   readonly simulationApi = inject(SimulationApiService);
   readonly currencyService = inject(CurrencyService);
@@ -195,10 +197,21 @@ export class CustomerDetailComponent implements OnInit {
     const cust = this.customer();
     if (!cust) return;
 
-    this.dialog.open(CustomerEmailDialogComponent, {
-      data: { customer: cust },
-      width: '600px',
-      maxWidth: '92vw',
+    this.dialog.open(EmailComposerDialogComponent, {
+      data: {
+        recipient: cust.email,
+        recipientName: cust.companyName,
+        subtitle: cust.country,
+        subject: this.i18n.t('customers.emailDialog.defaultSubject', {
+          company: cust.companyName,
+        }),
+        body: this.i18n.t('customers.emailDialog.defaultBody', {
+          company: cust.companyName,
+          plan: cust.selectedPlan,
+        }),
+      },
+      width: '640px',
+      maxWidth: '94vw',
       panelClass: 'roams-email-dialog-panel',
     });
   }

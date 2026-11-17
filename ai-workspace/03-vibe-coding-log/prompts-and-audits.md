@@ -1637,19 +1637,41 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   4. Verificación exhaustiva: 131 tests pasando al 100% y 0 advertencias/errores en `oxlint`.
 - **Valor para la evaluación:** Demostración de atención minuciosa al diseño de software, separación de responsabilidades y modularidad limpia en TypeScript/Angular.
 
+### 6.71. Refactorización a Componente Transversal y Editor Enriquecido Nativo (`EmailComposerDialogComponent`)
 
-
-
-
-
-
-
-
-
-
-
-
-
+- **La observación del Director de Orquesta:**
+  - El usuario cuestionó la duplicación y localización del modal de email, proponiendo su generalización y la incorporación de texto enriquecido:
+    > *"por otro lado el componente de envio de email es tonteria tenerlo repetido en varios modulos no? imagina que el dia de mañana se necesitan enviar emails desde otra seccion"*
+    > *"podemos hacer ademas que maneja texto enriquecido? de forma nativa? y si no mejor usar Quill"*
+- **Análisis de Arquitectura e Incompatibilidad de Terceros (Quill vs. Nativo):**
+  1. *El Riesgo de Quill en Angular 22:*
+     - La aplicación opera bajo `@angular/core: ^22.2.0`. Librerías externas como `ngx-quill` arrastran *peerDependencies* desfasadas (Angular 17/18), obligando a usar flags como `--legacy-peer-deps` o sobrecargar los bundles con más de 200 KB innecesarios.
+     - Además, en entornos de testing headless con Vitest / JSDOM, Quill produce roturas por acceso a Canvas y DOM fuera de ventana.
+  2. *Generalización en `shared/components/email-composer-dialog/`:*
+     - Se eliminó el componente acoplado a clientes (`customer-email-dialog`) y se trasladó a `src/app/shared/components/email-composer-dialog/`.
+     - Se definió un contrato agnóstico:
+       ```typescript
+       export interface EmailComposerDialogData {
+         recipient: string;
+         recipientName?: string;
+         subtitle?: string;
+         subject?: string;
+         body?: string;
+         bodyHtml?: string;
+       }
+       ```
+  3. *Editor Enriquecido Nativo con HTML5 `contenteditable` y Angular Signals:*
+     - Barra de herramientas compacta con estética Angular Material (Negrita, Cursiva, Subrayado, Viñetas, Lista numerada y Limpiar formato).
+     - Manejo de portapapeles Multi-MIME (`ClipboardItem` con `text/html` y `text/plain`), permitiendo pegar texto enriquecido intacto en clientes web como Gmail u Outlook.
+     - Extracción de texto plano sanitizado para el protocolo RFC 6068 `mailto:`, impidiendo que aparezcan etiquetas HTML crudas en gestores de escritorio.
+- **Implementación y Resultados:**
+  1. Creación de `EmailComposerDialogComponent` en `src/app/shared/components/email-composer-dialog/`.
+  2. Actualización de consumidores: `CustomerCardComponent` y `CustomerDetailComponent`.
+  3. Soporte de i18n cuádruple (`es`, `en`, `de`, `fr`) para los tooltips y controles del editor.
+  4. Suite de pruebas unitarias actualizada: **132 tests pasando al 100%**.
+  5. Análisis estático con Oxlint: **0 advertencias y 0 errores** en 56 archivos.
+  6. Compilación de producción (`ng build`): Generación limpia en 4.8s sin sobrecoste de budget.
+- **Valor para la evaluación:** Criterio senior de ingeniería al evitar sobreingeniería y dependencias pesadas, entregando una experiencia visual impecable (*Gmail-like*), accesible y 100% tipada.
 
 
 

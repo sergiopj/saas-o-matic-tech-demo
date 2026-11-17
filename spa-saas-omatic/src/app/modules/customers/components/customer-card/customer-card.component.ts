@@ -7,7 +7,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Customer } from '../../models/customer.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { CustomerEmailDialogComponent } from '../customer-email-dialog/customer-email-dialog.component';
+import { EmailComposerDialogComponent } from '../../../../shared/components/email-composer-dialog/email-composer-dialog.component';
+import { I18nService } from '../../../../core/services/i18n.service';
 
 /**
  * Presentational card component rendering corporate customer details,
@@ -29,6 +30,7 @@ import { CustomerEmailDialogComponent } from '../customer-email-dialog/customer-
 })
 export class CustomerCardComponent {
   private readonly dialog = inject(MatDialog);
+  private readonly i18n = inject(I18nService);
 
   readonly customer = input.required<Customer>();
   readonly selectCustomer = output<Customer>();
@@ -40,11 +42,23 @@ export class CustomerCardComponent {
   openEmailComposer(event: MouseEvent): void {
     event.stopPropagation();
     event.preventDefault();
+    const cust = this.customer();
 
-    this.dialog.open(CustomerEmailDialogComponent, {
-      data: { customer: this.customer() },
-      width: '600px',
-      maxWidth: '92vw',
+    this.dialog.open(EmailComposerDialogComponent, {
+      data: {
+        recipient: cust.email,
+        recipientName: cust.companyName,
+        subtitle: cust.country,
+        subject: this.i18n.t('customers.emailDialog.defaultSubject', {
+          company: cust.companyName,
+        }),
+        body: this.i18n.t('customers.emailDialog.defaultBody', {
+          company: cust.companyName,
+          plan: cust.selectedPlan,
+        }),
+      },
+      width: '640px',
+      maxWidth: '94vw',
       panelClass: 'roams-email-dialog-panel',
     });
   }

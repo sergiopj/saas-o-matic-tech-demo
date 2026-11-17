@@ -1,0 +1,162 @@
+<div class="email-dialog-container">
+  <div class="dialog-header">
+    <div class="header-icon-box" aria-hidden="true">
+      <mat-icon>mail</mat-icon>
+    </div>
+    <div class="header-text">
+      <h2 mat-dialog-title class="dialog-title">{{ 'customers.emailDialog.title' | translate }}</h2>
+      @if (data.recipientName || data.subtitle) {
+        <p class="dialog-subtitle">
+          {{ data.recipientName }}{{ data.subtitle ? ' (' + data.subtitle + ')' : '' }}
+        </p>
+      }
+    </div>
+    <button
+      type="button"
+      mat-icon-button
+      class="close-btn"
+      (click)="close()"
+      [attr.aria-label]="'customers.emailDialog.cancel' | translate"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-body">
+    <mat-form-field appearance="outline" class="form-field full-width">
+      <mat-label id="recipient-label">{{ 'customers.emailDialog.recipient' | translate }}</mat-label>
+      <input
+        matInput
+        id="recipient-email"
+        aria-labelledby="recipient-label"
+        type="email"
+        [value]="recipient()"
+        (input)="recipient.set($any($event.target).value)"
+      />
+      <mat-icon matPrefix class="field-icon" aria-hidden="true">contact_mail</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field full-width">
+      <mat-label id="subject-label">{{ 'customers.emailDialog.subject' | translate }}</mat-label>
+      <input
+        matInput
+        id="subject"
+        aria-labelledby="subject-label"
+        type="text"
+        [value]="subject()"
+        (input)="subject.set($any($event.target).value)"
+      />
+      <mat-icon matPrefix class="field-icon" aria-hidden="true">subject</mat-icon>
+    </mat-form-field>
+
+    <div class="rich-editor-wrapper">
+      <div class="rich-toolbar" role="toolbar" aria-label="Format toolbar">
+        <button
+          type="button"
+          mat-icon-button
+          class="toolbar-btn"
+          (click)="format('bold')"
+          [matTooltip]="'emailComposer.bold' | translate"
+          aria-label="Bold"
+        >
+          <mat-icon>format_bold</mat-icon>
+        </button>
+        <button
+          type="button"
+          mat-icon-button
+          class="toolbar-btn"
+          (click)="format('italic')"
+          [matTooltip]="'emailComposer.italic' | translate"
+          aria-label="Italic"
+        >
+          <mat-icon>format_italic</mat-icon>
+        </button>
+        <button
+          type="button"
+          mat-icon-button
+          class="toolbar-btn"
+          (click)="format('underline')"
+          [matTooltip]="'emailComposer.underline' | translate"
+          aria-label="Underline"
+        >
+          <mat-icon>format_underlined</mat-icon>
+        </button>
+
+        <span class="toolbar-separator" aria-hidden="true"></span>
+
+        <button
+          type="button"
+          mat-icon-button
+          class="toolbar-btn"
+          (click)="format('insertUnorderedList')"
+          [matTooltip]="'emailComposer.bulletList' | translate"
+          aria-label="Bullet list"
+        >
+          <mat-icon>format_list_bulleted</mat-icon>
+        </button>
+        <button
+          type="button"
+          mat-icon-button
+          class="toolbar-btn"
+          (click)="format('insertOrderedList')"
+          [matTooltip]="'emailComposer.numberList' | translate"
+          aria-label="Numbered list"
+        >
+          <mat-icon>format_list_numbered</mat-icon>
+        </button>
+
+        <span class="toolbar-separator" aria-hidden="true"></span>
+
+        <button
+          type="button"
+          mat-icon-button
+          class="toolbar-btn"
+          (click)="format('removeFormat')"
+          [matTooltip]="'emailComposer.clear' | translate"
+          aria-label="Clear formatting"
+        >
+          <mat-icon>format_clear</mat-icon>
+        </button>
+      </div>
+
+      <div
+        #editorRef
+        class="rich-editor-area"
+        contenteditable="true"
+        role="textbox"
+        aria-multiline="true"
+        (input)="onEditorInput()"
+        [attr.data-placeholder]="'emailComposer.placeholder' | translate"
+      ></div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions" align="end">
+    <button
+      type="button"
+      mat-button
+      class="copy-btn"
+      (click)="copyTemplate()"
+      [class.is-copied]="copied()"
+    >
+      <mat-icon aria-hidden="true">{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
+      <span>{{ (copied() ? 'customers.emailDialog.copied' : 'customers.emailDialog.copy') | translate }}</span>
+    </button>
+
+    <div class="actions-divider"></div>
+
+    <button type="button" mat-stroked-button (click)="close()">
+      {{ 'customers.emailDialog.cancel' | translate }}
+    </button>
+
+    <button
+      type="button"
+      mat-flat-button
+      class="dispatch-btn"
+      (click)="openMailClient()"
+    >
+      <mat-icon aria-hidden="true">send</mat-icon>
+      <span>{{ 'customers.emailDialog.openClient' | translate }}</span>
+    </button>
+  </mat-dialog-actions>
+</div>

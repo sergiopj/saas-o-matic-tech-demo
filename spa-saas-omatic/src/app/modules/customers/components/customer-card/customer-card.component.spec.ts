@@ -4,7 +4,7 @@ import { provideRouter } from '@angular/router';
 import { CustomerCardComponent } from './customer-card.component';
 import { Customer } from '../../models/customer.model';
 import { I18nService } from '../../../../core/services/i18n.service';
-import { CustomerEmailDialogComponent } from '../customer-email-dialog/customer-email-dialog.component';
+import { EmailComposerDialogComponent } from '../../../../shared/components/email-composer-dialog/email-composer-dialog.component';
 
 describe('CustomerCardComponent', () => {
   let fixture: ComponentFixture<CustomerCardComponent>;
@@ -69,16 +69,19 @@ describe('CustomerCardComponent', () => {
     expect(countryEl.textContent.trim()).toBe('US');
   });
 
-  it('should open CustomerEmailDialogComponent when clicking the email button', () => {
+  it('should open EmailComposerDialogComponent when clicking the email button', () => {
     const openSpy = vi.spyOn((component as any).dialog, 'open').mockReturnValue({} as any);
 
     const emailBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.email-action-btn');
     emailBtn.click();
 
     expect(openSpy).toHaveBeenCalledWith(
-      CustomerEmailDialogComponent,
+      EmailComposerDialogComponent,
       expect.objectContaining({
-        data: { customer: mockCustomer },
+        data: expect.objectContaining({
+          recipient: mockCustomer.email,
+          recipientName: mockCustomer.companyName,
+        }),
       })
     );
   });
