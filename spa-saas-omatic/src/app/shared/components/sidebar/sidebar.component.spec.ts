@@ -36,4 +36,9 @@ describe('SidebarComponent', () => {
     const container = fixture.nativeElement.querySelector('.sidebar-container');
     expect(container.classList.contains('is-collapsed')).toBe(true);
   });
+
+  it('should render dynamic current year in footer badge', () => {
+    const textEl = fixture.nativeElement.querySelector('.footer-badge .text');
+    expect(textEl.textContent.trim()).toBe(`${new Date().getFullYear()} • Online`);
+  });
 });

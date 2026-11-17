@@ -32,6 +32,7 @@ export interface NavItem {
 })
 export class SidebarComponent {
   readonly isCollapsed = signal<boolean>(false);
+  readonly currentYear = new Date().getFullYear();
 
   readonly navItems: readonly NavItem[] = [
     {
