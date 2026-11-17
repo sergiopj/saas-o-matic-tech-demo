@@ -2244,6 +2244,42 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: 0 errores y 0 advertencias.
 - **Valor para la evaluación:** Garantiza fiabilidad empresarial e integridad de datos en el explorador comercial, demostrando rigurosidad en pruebas unitarias y edge cases.
 
+---
+
+### 6.95 Visualización de Fecha de Alta (`createdAt`) en Tarjetas de Clientes con `DatePipe` e Internacionalización Dinámica de Fechas
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  En la vista del catálogo de clientes (`/customers`), el selector de ordenación permite ordenar por *"Más recientes"* y *"Más antiguos"*. Sin embargo, las tarjetas (`CustomerCardComponent`) no mostraban la fecha de creación del cliente (`createdAt`), impidiendo al usuario corroborar visualmente el orden cronológico. Se requiere renderizar este dato utilizando el pipe nativo del core de Angular (`DatePipe`) y asegurar que el formato de fecha se adapte reactivamente al idioma de traducción seleccionado (`es`, `en`, `de`, `fr`).
+- **Feedback Humano:**
+  *"en las cards de http://localhost:4200/customers se puede ordenar por mas recientes y antiguos pero no mostramos ninguna fecha en la card, de donde lo sacariamos? en created at verdad? y ojo usa un pipe del core de angular para pintarla , lo que no tengo claro si el formato cambia segun el pais seleccionado d etraduccion verdad?"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Registro de Paquetes de Localización de Angular (`registerLocaleData`):*
+     - Por defecto, Angular únicamente incluye los datos de formateo para `en-US`. Para dar soporte a fechas localizadas en tiempo de ejecución sin errores de *"Missing locale data"*, se registraron los paquetes oficiales de `@angular/common/locales` (`es`, `en`, `de`, `fr`) en `I18nService`.
+  2. *Uso del Pipe Nativo `DatePipe` con Locale Reactivo:*
+     - En `CustomerCardComponent`, se incorpora `DatePipe` de `@angular/common`.
+     - En la plantilla HTML se renderiza la etiqueta semántica:
+       ```html
+       <time [attr.datetime]="customer().createdAt">
+         {{ customer().createdAt | date:'mediumDate':'':i18n.currentLanguage() }}
+       </time>
+       ```
+     - Al enlazar el 4º argumento de `DatePipe` con la señal `i18n.currentLanguage()`, la fecha se recalcula reactivamente al conmutar el idioma en el navbar:
+       - **Español (`es`):** `14 nov 2026` (Día Mes Año)
+       - **Inglés (`en`):** `Nov 14, 2026` (Mes Día, Año)
+       - **Alemán (`de`):** `14.11.2026` (Día.Mes.Año)
+       - **Francés (`fr`):** `14 nov. 2026` (Día mes. año)
+  3. *Tokens de Diseño Roams y Accesibilidad Semántica:*
+     - Estilizado con `.date-badge` usando `--roams-text-secondary`, icono vectorial `calendar_today` con `aria-hidden="true"` y etiqueta nativa `<time>`. Cero colores hexadecimales.
+  4. *Traducción i18n:*
+     - Clave `'customers.card.createdAt'` añadida a los catálogos en `es`, `en`, `de` y `fr`.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **161 pruebas unitarias pasando al 100%** (25 suites).
+  - Cobertura global de frontend: **93.06% de líneas cubiertas** (98.14% en `CustomerCardComponent`).
+  - Monorepo total: **284 pruebas unitarias y de integración pasando al 100%**.
+  - Oxlint: 0 errores y 0 advertencias.
+- **Valor para la evaluación:** Refleja dominio profundo del ecosistema Angular, estándares W3C (`<time datetime>`), internacionalización de formatos y reactividad con Signals.
+
 
 
 

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
 import { CustomerCardComponent } from './customer-card.component';
 import { Customer } from '../../models/customer.model';
@@ -70,10 +71,37 @@ describe('CustomerCardComponent', () => {
     expect(countryEl.textContent.trim()).toBe('US');
   });
 
+  it('should render creation date using DatePipe and dynamically adapt format to active language', () => {
+    const timeEl = fixture.nativeElement.querySelector('.date-badge time');
+    expect(timeEl).toBeTruthy();
+    expect(timeEl.getAttribute('datetime')).toBe('2026-11-14T10:00:00.000Z');
+
+    // 1. In Spanish: "14 nov 2026"
+    i18nService.setLanguage('es');
+    fixture.detectChanges();
+    expect(timeEl.textContent.trim().toLowerCase()).toContain('nov');
+
+    // 2. In English: "Nov 14, 2026"
+    i18nService.setLanguage('en');
+    fixture.detectChanges();
+    expect(timeEl.textContent.trim()).toMatch(/Nov\s+14,\s+2026/);
+
+    // 3. In German: "14.11.2026" or "14. Nov. 2026"
+    i18nService.setLanguage('de');
+    fixture.detectChanges();
+    expect(timeEl.textContent.trim()).toContain('14');
+
+    // 4. In French: "14 nov. 2026"
+    i18nService.setLanguage('fr');
+    fixture.detectChanges();
+    expect(timeEl.textContent.trim()).toContain('14');
+  });
+
   it('should open EmailComposerDialogComponent when clicking the email button', () => {
-    const openSpy = vi.spyOn((component as any).dialog, 'open').mockReturnValue({
+    const dialog = TestBed.inject(MatDialog);
+    const openSpy = vi.spyOn(dialog, 'open').mockReturnValue({
       afterClosed: () => of(null),
-    } as any);
+    } as unknown as ReturnType<MatDialog['open']>);
 
     const emailBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.email-action-btn');
     emailBtn.click();

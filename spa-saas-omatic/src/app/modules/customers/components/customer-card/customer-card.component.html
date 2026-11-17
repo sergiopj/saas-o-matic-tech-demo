@@ -29,6 +29,16 @@
       </span>
     </div>
 
+    <div class="meta-row">
+      <span class="meta-label">{{ 'customers.card.createdAt' | translate }}</span>
+      <span class="date-badge">
+        <mat-icon class="date-icon" aria-hidden="true">calendar_today</mat-icon>
+        <time [attr.datetime]="customer().createdAt">
+          {{ customer().createdAt | date:'mediumDate':'':i18n.currentLanguage() }}
+        </time>
+      </span>
+    </div>
+
     <div class="meta-row email-row">
       <button
         type="button"

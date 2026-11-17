@@ -1,4 +1,9 @@
 import { Injectable, computed, signal } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
+import localeEn from '@angular/common/locales/en';
+import localeDe from '@angular/common/locales/de';
+import localeFr from '@angular/common/locales/fr';
 import {
   SupportedLanguage,
   TranslationKey,
@@ -6,6 +11,12 @@ import {
   SUPPORTED_LANGUAGES,
   LanguageOption,
 } from '../i18n/translations';
+
+// Register Angular locale formatting packages for international DatePipe and CurrencyPipe
+registerLocaleData(localeEs, 'es');
+registerLocaleData(localeEn, 'en');
+registerLocaleData(localeDe, 'de');
+registerLocaleData(localeFr, 'fr');
 
 /**
  * Enterprise internationalization service managing reactive application locale,

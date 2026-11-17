@@ -155,6 +155,22 @@
   }
 }
 
+.date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--roams-text-secondary);
+
+  .date-icon {
+    font-size: 0.95rem;
+    width: 0.95rem;
+    height: 0.95rem;
+    color: var(--roams-text-muted);
+  }
+}
+
 .email-row {
   display: flex;
   align-items: center;

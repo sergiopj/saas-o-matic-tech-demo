@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -18,6 +19,7 @@ import { I18nService } from '../../../../core/services/i18n.service';
 @Component({
   selector: 'app-customer-card',
   imports: [
+    DatePipe,
     RouterLink,
     MatCardModule,
     MatButtonModule,
@@ -33,7 +35,7 @@ import { I18nService } from '../../../../core/services/i18n.service';
 export class CustomerCardComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
-  private readonly i18n = inject(I18nService);
+  readonly i18n = inject(I18nService);
 
   readonly customer = input.required<Customer>();
   readonly selectCustomer = output<Customer>();
