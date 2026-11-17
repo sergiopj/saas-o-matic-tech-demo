@@ -1815,6 +1815,19 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Build de producción completamente limpio.
 - **Valor para la evaluación:** Experiencia de usuario pulida (*Instant Feedback*), cumplimiento estricto de accesibilidad ARIA y estándares internacionales de validación web.
 
+### 6.79 Decisión Estratégica para la Entrevista: Simulación Hexagonal vs. Dependencia de Nodemailer Real
+
+- **Situación inicial:** Tras comprobar que el modal valida y despacha el correo al backend, surgió el dilema técnico de si convenía integrar `nodemailer` conectado a una cuenta real de Gmail para recibir el correo en el buzón físico, o si era preferible mantener el despacho transaccional simulado.
+- **Tu criterio y dirección de calidad:** Planteaste la duda con visión estratégica de evaluación: *"si estaria bien para la prueba nodemailer? o simplemente es mejor lo otro para una prueba de entrevista"*.
+- **Análisis de evaluación y por qué forzar Nodemailer real es contraproducente:**
+  1. *Fricción para el Evaluador (Broken DX):* Si la aplicación exige un servidor SMTP real, cuando el equipo técnico de Roams clone el repositorio y pulse el botón de envío, la llamada fallará con un error 500 al no disponer de credenciales en `.env`, o bien le obligaría a crearse cuentas de correo para poder evaluar un formulario. Un proyecto de prueba debe funcionar de forma autónoma e impecable al instante (*Out-of-the-Box*).
+  2. *Cero Fuga de Credenciales (Security Hygiene):* Subir contraseñas de aplicación de Google o API keys a un repositorio público de Git vulnera los estándares OWASP y activa alertas inmediatas en escáneres de seguridad (GitGuardian, GitHub Secret Scanning), lo que descalificaría la entrega.
+  3. *Bloqueos de Red y 2FA:* Las conexiones SMTP de Google desde IPs no habituales (como la máquina del evaluador o un entorno de CI/CD) son bloqueadas con frecuencia como actividad no autorizada.
+- **Decisión de Arquitectura Senior:**
+  - Se consolida el despacho transaccional simulado en `SendEmailUseCase` con registro estructurado en el Logger de NestJS, garantizando determinismo absoluto en la prueba (135 tests en frontend y 121 en backend pasando al 100%).
+  - Se articula la defensa técnica en la entrevista bajo **Arquitectura Hexagonal (Puertos y Adaptadores)**: el dominio y la aplicación (`SendEmailUseCase`) gobiernan la validación RFC 5322 y la desinfección XSS de forma agnóstica. Para un entorno de producción, la infraestructura simplemente sustituye el adaptador simulado por un `NodemailerEmailAdapter` o un SDK cloud (`Resend`, `SendGrid`) consumiendo credenciales de variables de entorno protegidas, sin alterar ni una sola línea de la lógica de negocio ni del frontend.
+- **Valor para la evaluación:** Demostración de madurez profesional: primar la experiencia del evaluador (*Developer Experience*), mantener cero dependencias frágiles y justificar el desacoplamiento arquitectónico entre lógica de dominio e infraestructura de red.
+
 
 
 
