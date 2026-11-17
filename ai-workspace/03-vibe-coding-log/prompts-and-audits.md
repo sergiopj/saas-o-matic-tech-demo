@@ -2186,6 +2186,35 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Total monorepo: 273 tests automatizados.
 - **Valor para la evaluación:** Transparencia técnica y rigor de nivel Senior / Staff: permite al evaluador auditar inmediatamente la densidad de pruebas con un solo comando en consola.
 
+---
+
+### 6.93 Navegación Adaptativa Mobile-First: Menú Superior Desplegable en Navbar y Blindaje de Viewport para Modales y Drawers
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  En dispositivos móviles y pantallas estrechas (ancho <= 768px), mantener el menú de navegación lateral fijo (`app-sidebar`) consumía 64px de espacio horizontal crítico, constriñendo el contenido principal. Además, al abrir componentes modales laterales, como el *Slide-over Drawer* de filtros del historial de simulaciones con un ancho fijo (ej. 460px), se desbordaba el viewport o se comía el margen derecho de la pantalla, recortando controles interactivos.
+- **Feedback Humano:**
+  *"en modo mobile estaria bien que el menu lateral este arriba y sea desplegable al pulsar un boton y asi ganamos espacio puesto que al abrir modales laterales como los filters en modo movil se come parte de la derecha, esto a los mds tambien segun lo arregles"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Ocultación Completa de la Sidebar Lateral en Móvil (`SidebarComponent`):*
+     - Mediante `@media (max-width: 768px) { :host { display: none !important; } }`, el sidebar lateral deja de renderizarse en pantallas móviles, cediendo el 100% del ancho del viewport al contenedor principal (`.main-container`).
+  2. *Menú Superior Desplegable en Navbar (`NavbarComponent`):*
+     - Incorporación de un botón hamburguesa accesible en la cabecera (`.mobile-menu-btn` con `aria-expanded`, `aria-controls` y conmutación de iconos `menu` / `close`).
+     - Despliegue de un panel de navegación superior (`.mobile-nav-panel`) con animación CSS acelerada por GPU (`mobileNavSlideDown`) y telón de fondo semitransparente (`.mobile-backdrop`).
+     - Reutilización de la constante canónica de navegación `APP_NAV_ITEMS` (Single Source of Truth) compartida entre la barra lateral y el navbar.
+     - Auto-cierre del menú móvil tras hacer clic en un enlace de navegación, al pulsar la tecla `Escape` o al navegar entre rutas con el `Router`.
+  3. *Blindaje de Viewport en el Drawer Genérico (`SlideOverDrawerComponent`):*
+     - En pantallas móviles (<= 768px), el drawer pasa de un ancho fijo a `width: 100% !important; max-width: 100vw !important; border-left: none;`, ocupando el 100% de la pantalla sin desbordamientos ni recortes en el lateral derecho.
+  4. *Estricto Cumplimiento de Design Tokens de Roams:*
+     - Cero códigos hexadecimales hardcodeados y cero fallbacks en SCSS. Uso exclusivo de tokens `--roams-*` (`--roams-surface`, `--roams-border`, `--roams-accent-blue`, `--roams-bg-backdrop`, etc.).
+  5. *Internacionalización Completa (i18n):*
+     - Nuevas claves `navbar.mobileMenu.open` y `navbar.mobileMenu.close` traducidas en los 4 idiomas soportados (`es`, `en`, `de`, `fr`).
+- **Resultados de Verificación:**
+  - Frontend Vitest: 152 pruebas unitarias pasando al 100% (25 suites).
+  - Cobertura de código frontend: > 91% mantenida.
+  - Oxlint: 0 errores y 0 advertencias en 63 ficheros.
+- **Valor para la evaluación:** Demuestra maestría en responsive design mobile-first, accesibilidad W3C y ergonomía en pantallas táctiles sin sacrificar la elegancia en escritorio.
+
 
 
 

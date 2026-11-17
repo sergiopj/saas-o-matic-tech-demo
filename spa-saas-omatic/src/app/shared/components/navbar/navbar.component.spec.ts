@@ -58,4 +58,35 @@ describe('NavbarComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('app-language-selector')).toBeTruthy();
   });
+
+  it('should toggle mobile menu when hamburger button is clicked', () => {
+    expect(component.isMobileMenuOpen()).toBe(false);
+    expect(fixture.nativeElement.querySelector('.mobile-nav-panel')).toBeNull();
+
+    const menuBtn = fixture.nativeElement.querySelector('.mobile-menu-btn') as HTMLButtonElement;
+    menuBtn.click();
+    fixture.detectChanges();
+
+    expect(component.isMobileMenuOpen()).toBe(true);
+    expect(fixture.nativeElement.querySelector('.mobile-nav-panel')).toBeTruthy();
+
+    const navLinks = fixture.nativeElement.querySelectorAll('.mobile-nav-link');
+    expect(navLinks.length).toBe(3);
+
+    menuBtn.click();
+    fixture.detectChanges();
+
+    expect(component.isMobileMenuOpen()).toBe(false);
+    expect(fixture.nativeElement.querySelector('.mobile-nav-panel')).toBeNull();
+  });
+
+  it('should close mobile menu on Escape key press', () => {
+    component.toggleMobileMenu();
+    fixture.detectChanges();
+    expect(component.isMobileMenuOpen()).toBe(true);
+
+    component.onEscape();
+    fixture.detectChanges();
+    expect(component.isMobileMenuOpen()).toBe(false);
+  });
 });

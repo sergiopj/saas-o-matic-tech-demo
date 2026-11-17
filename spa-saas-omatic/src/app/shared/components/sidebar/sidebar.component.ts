@@ -12,6 +12,24 @@ export interface NavItem {
   badge?: string;
 }
 
+export const APP_NAV_ITEMS: readonly NavItem[] = [
+  {
+    path: '/home',
+    labelKey: 'sidebar.home',
+    icon: 'dashboard',
+  },
+  {
+    path: '/customers',
+    labelKey: 'sidebar.customers',
+    icon: 'groups',
+  },
+  {
+    path: '/simulations',
+    labelKey: 'sidebar.simulations',
+    icon: 'calculate',
+  },
+] as const;
+
 /**
  * Responsive lateral sidebar providing direct navigation to modules:
  * Home Overview (/home), Corporate Customers (/customers), and Simulations Studio (/simulations).
@@ -33,24 +51,7 @@ export interface NavItem {
 export class SidebarComponent {
   readonly isCollapsed = signal<boolean>(false);
   readonly currentYear = new Date().getFullYear();
-
-  readonly navItems: readonly NavItem[] = [
-    {
-      path: '/home',
-      labelKey: 'sidebar.home',
-      icon: 'dashboard',
-    },
-    {
-      path: '/customers',
-      labelKey: 'sidebar.customers',
-      icon: 'groups',
-    },
-    {
-      path: '/simulations',
-      labelKey: 'sidebar.simulations',
-      icon: 'calculate',
-    },
-  ] as const;
+  readonly navItems = APP_NAV_ITEMS;
 
   toggleCollapse(): void {
     this.isCollapsed.update((v) => !v);

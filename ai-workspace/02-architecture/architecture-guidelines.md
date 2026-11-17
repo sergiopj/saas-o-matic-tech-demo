@@ -707,6 +707,23 @@ flowchart TD
 - Al encadenar filtros (Rango de fechas con selector de calendario `MatDatepicker`, usuarios activos, llamadas a API, almacenamiento y texto libre), la señal computada `filteredSimulations()` evalúa la condición de filtrado O(N) sin llamadas redundantes al servidor.
 - La paginación (`paginatedSimulations`) se calcula dinámicamente como slice de la lista filtrada, reseteando la página activa a 1 ante cualquier cambio de filtro para evitar estados de índice fuera de rango.
 
+### 3.20 Arquitectura Adaptativa Mobile-First: Menú Superior Desplegable y Blindaje de Viewport para Modales y Drawers
+
+- **El Problema del Espacio en Dispositivos Móviles (Viewports <= 768px):**
+  Mantener una barra de navegación lateral fija (`app-sidebar`) en dispositivos móviles sustraía 64px de ancho de pantalla crítico, dejando el contenido de tablas, tarjetas y formularios constreñido. Además, al abrir un panel lateral deslizante (*slide-over drawer* de filtros) configurado con un ancho fijo (ej. 460px), se solapaba o desbordaba el viewport, comiéndose el lateral derecho de la interfaz.
+- **La Solución Arquitectónica Mobile-First:**
+  1. **Ocultación Completa de la Barra Lateral en Móvil (`SidebarComponent`):**
+     Mediante `@media (max-width: 768px) { :host { display: none !important; } }`, el sidebar lateral desaparece por completo en pantallas estrechas, permitiendo que el contenedor principal (`.main-container`) aproveche el 100% del ancho del viewport sin márgenes muertos.
+  2. **Menú Superior Desplegable en el Navbar (`NavbarComponent`):**
+     - En pantallas <= 768px se activa un botón hamburguesa accesible (`mat-icon-button` con conmutación de glifos `menu` / `close` y atributos W3C `aria-expanded` y `aria-controls`).
+     - Al pulsar el botón, se despliega una capa de navegación superior animada por GPU (`.mobile-nav-panel`) con un telón semitransparente (`.mobile-backdrop`), facilitando el acceso táctil a todas las secciones (`/home`, `/customers`, `/simulations`).
+     - El menú se cierra automáticamente al seleccionar un enlace, al pulsar `Escape` o al navegar a otra ruta mediante el `Router`.
+     - Comparte la misma Single Source of Truth (`APP_NAV_ITEMS`) que el sidebar de escritorio, garantizando consistencia total.
+  3. **Blindaje de Viewport en el Drawer Genérico (`SlideOverDrawerComponent`):**
+     En pantallas móviles (<= 768px), el drawer pasa dinámicamente de su ancho de escritorio a `width: 100% !important; max-width: 100vw !important; border-left: none;`, ocupando todo el ancho de la pantalla de forma fluida, eliminando solapamientos o recortes en los controles de filtrado.
+  4. **Cumplimiento de Design Tokens:**
+     Uso estricto de tokens oficiales `--roams-*` (`--roams-surface`, `--roams-border`, `--roams-accent-blue`, `--roams-bg-backdrop`), sin códigos hexadecimales directos ni fallbacks en variables CSS.
+
 ---
 
 ---
