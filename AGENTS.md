@@ -69,3 +69,9 @@ Whenever you operate in this repository, you MUST strictly adhere to the followi
 - **Oxlint Compliance**: Run `oxlint --type-aware src/` and ensure zero warnings and zero errors.
 - **No Dead Code**: Remove unused imports, dead variables, and redundant comments.
 - **Strict Typing**: Avoid `any`. Use strict TypeScript types, discriminated unions, and explicit return types.
+
+---
+
+## 5. Traceability & Markdown Documentation Policy (AI Evaluation Governance)
+- **Mandatory Synchronous Logging per Prompt**: Every prompt, architectural decision, UI refinement, and technical change MUST be documented synchronously in the corresponding `.md` files (`ai-workspace/03-vibe-coding-log/prompts-and-audits.md`, `ai-workspace/01-specs/functional-specs.md`, `ai-workspace/02-architecture/architecture-guidelines.md`, and module READMEs).
+- **Audit-Ready Vibe Coding Dataset**: Every entry in `prompts-and-audits.md` must record the date, context, human prompt verbatim, architectural solution applied, verification results (Oxlint 0/0, 100% test pass rate), and value for the Roams technical evaluation committee.

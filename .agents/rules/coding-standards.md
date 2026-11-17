@@ -9,3 +9,4 @@ Refer to [AGENTS.md](../../AGENTS.md) at the repository root for the comprehensi
 3. **Dirty Validation**: Use `ShowOnDirtyErrorStateMatcher` for real-time validation on typing (`control.dirty`).
 4. **W3C Semantics**: Use native `<output>` instead of `<div role="status">` for accessibility notices.
 5. **Quality Gate**: 0 warnings and 0 errors in Oxlint, 100% test passing rate across all suites.
+6. **Synchronous Markdown Audit**: Every prompt, architectural decision, and UI refinement must be logged in `ai-workspace/` and synchronized across all project Markdown files for the technical evaluation committee.
