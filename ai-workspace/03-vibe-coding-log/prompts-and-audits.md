@@ -2703,59 +2703,40 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
 
 ---
 
-### 6.113. Resolución de Validación de UUID en Simulación (`POST /simulations` 400 Bad Request) y Resiliencia en Formato de Identificadores Corporativos
+### 6.114. Enriquecimiento Visual del Dashboard Home: Generación de Ilustración 3D Glassmorphism por IA y Análisis de Migraciones en SQLite
 
 - **Fecha:** 17 de noviembre de 2026.
 - **Contexto / Desafío:**
-  Al intentar guardar una simulación desde la vista de detalle de cliente ([customer-detail.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.ts)), la petición `POST /simulations` fallaba con código HTTP `400 Bad Request` y el siguiente payload RFC 7807:
-  ```json
-  {
-    "type": "https://errors.saas-o-matic.com/400",
-    "title": "Bad Request",
-    "status": 400,
-    "detail": "Validation failed for one or more fields.",
-    "instance": "/simulations",
-    "invalidParams": [
-      { "name": "customerId", "reason": "customerId must be a valid UUID v4." }
-    ],
-    "timestamp": "2026-11-17T16:42:56.349Z"
-  }
-  ```
-- **Feedback Humano (Tu reporte de incidencia en vivo):**
-  *"ojo al guardar la simulacion {type: "https://errors.saas-o-matic.com/400", title: "Bad Request", status: 400, invalidParams: [{name: "customerId", reason: "customerId must be a valid UUID v4."}]} erroir me dio"*
-- **Diagnóstico de Causa Raíz:**
-  1. *Restricción Excesiva en el DTO de Entrada:*
-     - En [create-simulation.dto.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/simulations/infrastructure/adapters/in/rest/dto/create-simulation.dto.ts), el decorador `@IsUUID('4', { message: 'customerId must be a valid UUID v4.' })` de `class-validator` / `validator.js` exigía de forma estricta que el identificador cumpliera con la variante 1 de RFC 4122 (bits más significativos del reloj/variante en `[8, 9, a, b]`).
-  2. *Identificadores de Datos Semilla Existentes en la Base de Datos:*
-     - En la base de datos SQLite poblada por [database-seeder.service.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/shared/infrastructure/persistence/database-seeder.service.ts), cuatro cuentas corporativas emblemáticas (Doctolib SAS `7f5083bb-377e-4c56-2f23-2c43d5689066`, Datadog France SAS `8a4f74cc-488f-4d67-3a34-1b32e6790077`, Celonis SE `6e6192aa-266d-4b45-1e12-3d54c4578055` y SEAT S.A. `5d7201ff-155c-4a34-0d01-4e65b3467044`) poseían identificadores con formato estándar UUID de 36 caracteres pero dígitos de variante manuales (`2`, `3`, `1`, `0`).
-     - Al estar estos clientes cargados en el frontend y en la base de datos activa, cualquier intento de persistir una simulación para ellos era rechazado artificialmente por la capa de transporte HTTP antes de alcanzar la capa de aplicación.
-  3. *Incompatibilidad con Estándares Modernos de UUID (RFC 9562 / UUID v7):*
-     - En sistemas empresariales reales, limitar `customerId` exclusivamente a la versión 4 rompe la interoperabilidad con identificadores UUID v7 (ordenados temporalmente) o UUID v1 heredados.
-- **Decisión de Arquitectura y Solución Aplicada:**
-  1. *Flexibilización y Robustez en la Capa REST ([create-simulation.dto.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/simulations/infrastructure/adapters/in/rest/dto/create-simulation.dto.ts)):*
-     - Se sustituyó `@IsUUID('4')` por la combinación segura de `@IsString()`, `@IsNotEmpty()` y una expresión regular que valida la estructura formal de UUID de 36 caracteres hexadecimales:
-       ```typescript
-       @IsString({ message: 'customerId must be a string.' })
-       @IsNotEmpty({ message: 'customerId is required.' })
-       @Matches(
-         /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
-         { message: 'customerId must be a valid UUID.' },
-       )
-       customerId: string;
-       ```
-     - Esta validación previene inyecciones, cadenas vacías o formatos maliciosos, a la par que admite cualquier variante y versión válida de UUID (v1 a v7 y formatos corporativos de 36 caracteres).
-  2. *Garantía de Existencia en la Capa de Dominio / Aplicación:*
-     - La autenticidad del identificador sigue estrictamente protegida en [create-simulation.use-case.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/simulations/application/use-cases/create-simulation.use-case.ts), donde `customerRepository.findById` comprueba que el cliente exista en la base de datos y lanza `EntityNotFoundError` (HTTP 404 Problem Details) si no se encuentra.
-  3. *Feedback de Error Accesible en Frontend ([customer-detail.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.ts)):*
-     - En caso de cualquier error de persistencia, se integró el despacho de notificaciones con `MatSnackBar` extrayendo el mensaje descriptivo del Problem Details (`err?.error?.detail`) o la clave localizada `simulation.form.savedError` en los cuatro idiomas (`es`, `en`, `de`, `fr`).
-  4. *Ampliación de Pruebas Automatizadas:*
-     - En [create-simulation.dto.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/simulations/infrastructure/adapters/in/rest/dto/create-simulation.dto.spec.ts), se añadieron casos de prueba que validan el rechazo de formatos no válidos (`not-a-valid-uuid`) y la aceptación de UUIDs RFC 4122 v4 y variantes estándar de 36 caracteres.
+  1. *Análisis Arquitectónico de Base de Datos y Migraciones:*
+     El usuario planteó si el error previo de UUIDs denotaba la necesidad de incorporar un sistema formal de migraciones de base de datos en SQLite.
+  2. *Experiencia de Usuario en la Landing Page:*
+     La sección principal (*hero banner*) de la página de inicio ([home.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.html)) presentaba una estética excesivamente esquemática y tipográfica (gradiente CSS puro sin apoyo visual), restándole dinamismo y cercanía para perfiles comerciales y evaluadores de producto.
+- **Feedback Humano (Tu criterio de diseño y arquitectura):**
+  > *"customerId must be a valid UUID v4 esto creo que pasa por antiguo formato o no se, harian falta sistema de migraciones en la bd? en sqlite???"*
+  > *"a ver me gusta mucho el home y lo veo funcional pero pondrias una imagen asi chula por ia? para que no sea tan robotico?"*
+- **Análisis de Arquitectura (Migraciones en SQLite vs. Modo Tech Demo):**
+  - *Causa del Error de UUID:* No se debió a un cambio de esquema en la base de datos (SQLite almacena texto sin restringir variantes de UUID), sino a la colisión entre el seed manual inicial (que incrementó artificialmente dígitos de variante como `0d01` o `2f23`) y el decorador restrictivo `@IsUUID('4')` en el DTO.
+  - *¿Cuándo son necesarias las migraciones?:*
+    - En producción/staging con bases de datos relacionales (Postgres/MySQL) y datos reales persistentes, `synchronize: true` está prohibido para prevenir pérdidas de columnas al refactorizar entidades. Las migraciones versionadas (`typeorm migration:generate`) garantizan trazabilidad, *rollback* y seguridad en CI/CD.
+    - En esta Tech Demo y entorno de evaluación con SQLite WAL, `synchronize: true` junto con el servicio de seeding idempotente (`DatabaseSeederService`) es la solución idónea: no requiere pasos manuales de configuración (`npm run migrate`), garantiza arranque instantáneo en local y Docker, y asegura datos homogéneos para cualquier evaluador.
+- **Implementación de la Solución Visual:**
+  1. *Generación de Ilustración 3D con Subagente de IA (`image-generator`):*
+     - Se orquestó la generación de una pieza visual en estética *3D glassmorphic fintech*: tarjetas de analítica translúcidas flotantes, gráficos de crecimiento en cian y azul real (`#00c5e0`, `#0052cc`), capas de suscripción por tramos y tokens holográficos de divisas (€, $, £) sobre una atmósfera azul marino oscura idéntica a la paleta corporativa de Roams (`--roams-primary`).
+     - Imagen alojada en `public/images/hero-illustration.jpg`.
+  2. *Integración en el Layout del Hero ([home.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.html)):*
+     - Reestructuración a layout bifocal (contenido a la izquierda, arte visual a la derecha).
+     - Incorporación de accesos directos de acción rápida (*Quick Actions*): botón primario hacia el catálogo de clientes (`/customers`) y botón secundario hacia el simulador de tarifas (`/simulations`).
+  3. *Estilos y Responsive Design ([home.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.scss)):*
+     - Uso estricto de tokens corporativos (`--roams-*`), sin códigos hexadecimales ni *fallbacks*.
+     - Borde sutil `var(--roams-border-inverse)` y sombreado `var(--roams-shadow-lg)`.
+     - Efecto micro-interactivo *hover lift* con transición suave.
+     - Adaptación responsive en pantallas móviles/tablets (reorganización vertical y escalado proporcional de la imagen).
 - **Resultados de Verificación:**
-  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
   - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
   - Oxlint: 0 errores y 0 advertencias.
-  - Verificación en caliente mediante peticiones `curl` a `POST /simulations` para Doctolib, Datadog France, Celonis y SEAT: **HTTP 201 Created inmediato con cálculo exacto de impuestos y desglose fiscal.**
-- **Valor para la evaluación:** Resiliencia en arquitectura de contratos REST, tolerancia a fallos, preservación de compatibilidad hacia atrás y feedback de usuario sin puntos ciegos.
+- **Valor para la evaluación:** Transforma la primera impresión del evaluador de un panel austero a un producto SaaS B2B moderno, pulido y de alta gama visual.
+
 
 
 

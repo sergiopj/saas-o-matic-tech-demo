@@ -8,6 +8,24 @@
       </div>
       <h1 class="hero-title">{{ 'home.hero.title' | translate }}</h1>
       <p class="hero-subtitle">{{ 'home.hero.subtitle' | translate }}</p>
+      <div class="hero-actions">
+        <a mat-flat-button routerLink="/customers" class="hero-btn primary">
+          <mat-icon aria-hidden="true">groups</mat-icon>
+          <span>{{ 'home.recent.viewAll' | translate }}</span>
+        </a>
+        <a mat-stroked-button routerLink="/simulations" class="hero-btn secondary">
+          <mat-icon aria-hidden="true">tune</mat-icon>
+          <span>{{ 'sidebar.simulations' | translate }}</span>
+        </a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <img
+        src="images/hero-illustration.jpg"
+        alt="SaaS-O-Matic Intelligent Billing Architecture"
+        class="hero-illustration"
+        loading="eager"
+      />
     </div>
   </section>
 
