@@ -643,7 +643,7 @@ Para garantizar que fallos en elementos cosméticos o de micro-interacción (spi
 - **Documentación en Español:**
   La documentación de arquitectura (`architecture-guidelines.md`), especificaciones funcionales (`functional-specs.md`), bitácoras de auditoría (`prompts-and-audits.md`) y el `README.md` principal se redactan en **español**, tal como exige el pliego técnico de Roams.
 
-### 3.14 Desacoplamiento del Protocolo HTTP en la UI y UX Defensiva (OWASP & Clean Presentation)
+### 3.15 Desacoplamiento del Protocolo HTTP en la UI y UX Defensiva (OWASP & Clean Presentation)
 
 - **Principio de Aislamiento de Capas y Mínima Revelación:**
   Bajo las directrices de Clean Architecture, seguridad OWASP y los estándares de UX en B2B SaaS, **los códigos de transporte HTTP (`400`, `404`, `500`) pertenecen al protocolo de red, nunca a la interfaz de usuario**:
@@ -657,6 +657,29 @@ Para garantizar que fallos en elementos cosméticos o de micro-interacción (spi
      - Tabla estructurada de parámetros no válidos (`p.invalidParams`) para validaciones de formulario.
   3. **Componente Presentacional Puro:** Sin números mágicos ni heurísticas de protocolo. El modelo `ProblemDetail` mantiene `status?: number` de forma opcional por compatibilidad con el estándar RFC 9457 y trazabilidad de logs, pero la capa visual queda 100% desacoplada.
   4. **Acción Reconciliadora Inmediata (`[retryable]="true"` y `(retry)`):** Proporciona un botón explícito de reintento (`Reintentar` / `Retry`) con icono de refresco que permite al usuario volver a solicitar los datos (`loadCustomers()`) sin necesidad de recargar toda la página del navegador.
+
+### 3.16 Estrategia de Configuración Zero-Friction (DX) en Entornos: Angular Environments vs. .env en Evaluación Técnica
+
+- **Dicotomía de Runtimes: Frontend (Browser Sandbox) vs. Backend (Node.js):**
+  1. *Aislamiento del Navegador:* En una Single Page Application (SPA) construida en Angular, el código JavaScript se descarga y ejecuta en el navegador web del cliente. Los navegadores carecen por completo de acceso al sistema de archivos local del host y no disponen del objeto global `process.env` de Node.js en tiempo de ejecución.
+  2. *Estándar Canónico de Angular CLI:* La herramienta oficial de Google implementa un sistema de reemplazo estático de archivos en tiempo de compilación (*build-time file replacement*) articulado en `src/environments/`:
+     - `environment.development.ts`: Cargado automáticamente al ejecutar `ng serve` / `npm start`.
+     - `environment.ts`: Sustitución canónica para compilaciones de producción (`ng build --configuration production`).
+     Introducir librerías externas para forzar variables `.env` en Angular añade dependencias frágiles, empaqueta polyfills pesados e infringe las directrices oficiales del framework.
+- **Developer Experience (DX) para el Evaluador: "Cero Fricción" (*Out-of-the-Box*):**
+  - *El Dilema de las Pruebas Técnicas:* Un evaluador técnico suele revisar múltiples retos cada semana. Exigir la creación manual de archivos `.env` (renombrando `.env.example`, rellenando puertos y configurando URLs de API) es una fuente recurrente de fallos de compilación (`undefined is not a function`), desajustes de puertos entre frontend y backend y frustración del revisor.
+  - *Solución Aplicada con "Sane Defaults":*
+    - **Backend (`mic-saas-omatic`):** Soporta `.env` opcional de forma nativa en Node.js 20.6+ (`process.loadEnvFile()`), pero cuenta con valores por defecto inmediatos (`process.env.PORT ?? 3000`, SQLite en archivo local `saas_o_matic.sqlite` y auto-sembrado inicial idempotente).
+    - **Frontend (`spa-saas-omatic`):** El archivo tipado `environment.development.ts` viene preconfigurado con `apiBaseUrl: 'http://localhost:3000'` y la URL pública de la API de tipos de cambio de divisas.
+    - **Resultado Determinista:** Tras clonar el repositorio de Git, el evaluador puede arrancar ambos servicios sin configurar nada:
+      ```bash
+      npm --prefix mic-saas-omatic start
+      npm --prefix spa-saas-omatic start
+      ```
+      Todo funciona a la primera, conectado y con datos representativos sin necesidad de crear archivos `.env`.
+- **Compatibilidad con Producción, Docker y Seguridad OWASP:**
+  - *Cero Secretos en el Frontend:* Ningún endpoint público (`apiBaseUrl`, `currencyApiUrl`) constituye un secreto criptográfico. Siguiendo el principio de menor privilegio, los secretos sensibles (claves de pasarelas de pago, tokens SMTP) residen exclusivamente en la capa hexagonal del backend y nunca se exponen al cliente.
+  - *Contenedores Docker:* En despliegues orquestados (`docker-compose up --build`), las variables pueden ser inyectadas como argumentos de compilación (*build args*) en la etapa de Nginx o mediante plantillas dinámicas `env.js`, asegurando portabilidad enterprise sin sacrificar la simplicidad en desarrollo local.
 
 ### 3.15 Arquitectura de Paginación Server-Side y Optimización de Renderizado en Scroll
 

@@ -42,9 +42,9 @@ Para ver las directrices completas, consulta [`../ai-workspace/02-architecture/a
 
 ---
 
-## ⚙️ Gestión de Entornos (`src/environments/`)
+## ⚙️ Gestión de Entornos (`src/environments/`) y Estrategia Zero-Friction (DX)
 
-En aplicaciones cliente (SPA) que se ejecutan en el navegador del usuario, no existe el runtime de Node.js ni `process.env`. Angular gestiona la configuración mediante ficheros tipados en `src/environments/`:
+En aplicaciones cliente (SPA) que se ejecutan en el navegador del usuario, no existe el runtime de Node.js ni el objeto `process.env`. Angular gestiona la configuración mediante ficheros tipados en `src/environments/`:
 
 - **`environment.development.ts`**: Utilizado durante `npm start` (desarrollo local contra `http://localhost:3000`).
 - **`environment.ts`**: Utilizado en compilaciones de producción (`npm run build`).
@@ -54,6 +54,12 @@ En aplicaciones cliente (SPA) que se ejecutan en el navegador del usuario, no ex
 | `production` | Boolean | `false` / `true` | Indicador de modo producción para optimizaciones de Angular. |
 | `apiBaseUrl` | String | `http://localhost:3000` | URL base del microservicio backend NestJS. |
 | `currencyApiUrl` | String | `https://open.er-api.com/v6/latest/EUR` | Endpoint público para obtener tipos de cambio en vivo. |
+
+> [!NOTE]
+> **🚀 Cero Fricción para el Evaluador Técnico (*Out-of-the-Box DX*):**  
+> En proyectos técnicos de evaluación senior, obligar al evaluador a crear y rellenar archivos `.env` manualmente suele ser fuente de desajustes y errores innecesarios.  
+> Por diseño arquitectónico, tanto el backend NestJS (con puertos y SQLite por defecto) como el frontend Angular (con `environment.development.ts` preconfigurado) arrancan y se comunican **100% de forma inmediata tras clonar el repositorio**, sin exigir la creación manual de ningún archivo `.env`.  
+> Consulta [`../ai-workspace/02-architecture/architecture-guidelines.md#316`](../ai-workspace/02-architecture/architecture-guidelines.md) para más detalles.
 
 ---
 
