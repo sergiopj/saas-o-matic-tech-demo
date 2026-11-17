@@ -3727,3 +3727,27 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
 - **Valor para la evaluación:** Demostración de microinteracciones refinadas orientadas al descubrimiento de funcionalidades (*product discovery*), combinando animación CSS lúdica y ligera con accesibilidad W3C e higiene de código sin librerías externas pesadas.
+
+---
+
+### 6.147. Insignia 3D de Cliente Corporativo en el Modal de Alta (`CustomerCreateDialogComponent`) en Sustitución del Icono Genérico
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  En el diálogo modal de creación de nuevo cliente corporativo ([customer-create-dialog.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.html)), el encabezado mostraba un icono genérico de Material (`<mat-icon>add_business</mat-icon>`) dentro de una caja cuadrada simple (`.header-icon-badge`). El usuario solicitó reemplazar este icono por una imagen atractiva y compacta que represente a un cliente corporativo, en estricta consonancia con el estilo visual y diorama táctil 3D del proyecto.
+- **Feedback Humano:**
+  > *"en este modal imagen chula de nuevo cliente en vez del icono cutrecillo de la izquierda, que la imagen sea pequeña y represente un cliente corporativo acorde con el estilo de imagenes qu eya tenemos en el proyecto"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Integración del Medallón Corporativo 3D:*
+     - Se sustituyó el contenedor `.header-icon-badge` por el elemento de imagen `.header-badge-img`, cargando `images/corporate-customer-badge.jpg` (maqueta arquitectónica diorama 3D de sede empresarial escandinava con madera de cedro, grandes cristaleras y maletín de cuero tostado con herrajes dorados).
+     - Dimensiones compactas: 48×48 px con `--roams-radius-md`, borde `1px solid var(--roams-border)`, sombra suave `var(--roams-shadow-sm)` y micro-interacción al hover (`scale(1.06)`).
+     - Marcado accesible: `alt=""` y `aria-hidden="true"` al tratarse de un elemento decorativo que acompaña al título semántico `mat-dialog-title`.
+  2. *Refactorización de Hojas de Estilos SCSS:*
+     - En [customer-create-dialog.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.scss), se eliminaron las declaraciones obsoletas de `.header-icon-badge` y se incorporaron los estilos optimizados de `.header-badge-img` gobernados íntegramente por tokens `--roams-*` (sin colores hexadecimales directos).
+  3. *Actualización de la Suite de Pruebas Unitarias:*
+     - En [customer-create-dialog.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.spec.ts), se incorporó una nueva prueba verificando la presencia del elemento `.header-badge-img` con la ruta de la imagen 3D corporativa.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **249 pruebas unitarias pasando al 100%** (29 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+- **Valor para la evaluación:** Eliminación total de iconos descontextualizados en modales clave, consolidando la coherencia visual de marca (*Design System Continuity*) en todas las superficies interactivas de SaaS-O-Matic.

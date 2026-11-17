@@ -20,22 +20,18 @@
   margin-bottom: 1.25rem;
   position: relative;
 
-  .header-icon-badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
+  .header-badge-img {
+    width: 48px;
+    height: 48px;
     border-radius: var(--roams-radius-md);
-    background: var(--roams-bg-card);
     border: 1px solid var(--roams-border);
-    color: var(--roams-accent-blue);
+    box-shadow: var(--roams-shadow-sm);
+    object-fit: cover;
     flex-shrink: 0;
+    transition: transform 0.2s ease;
 
-    mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
+    &:hover {
+      transform: scale(1.06);
     }
   }
 
