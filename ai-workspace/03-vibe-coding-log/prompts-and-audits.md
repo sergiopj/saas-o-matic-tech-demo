@@ -3652,3 +3652,43 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Consistencia documental cruzada y sincrónica entre [functional-specs.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/01-specs/functional-specs.md), [architecture-guidelines.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md) y [prompts-and-audits.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/03-vibe-coding-log/prompts-and-audits.md).
   - Batería de pruebas de frontend (245/245) y backend (128/128) 100% verde; Oxlint 0/0.
 - **Valor para la evaluación:** Evidencia de enfoque de Diseño Centrado en el Usuario (*User-Centered Design / UCD*) y salud laboral en herramientas corporativas, demostrando que las decisiones de interfaz responden a requerimientos ergonómicos reales y no a adornos superfluos.
+
+---
+
+### 6.145. Carrusel de Últimos Clientes: Desplazamiento por Lotes Visibles Completos (`visibleCardsCount`) con Alineación de Múltiplos y Soporte Gestual
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  En la sección "Últimos Clientes Añadidos" del panel de inicio (`/home`), el carrusel de tarjetas incorporaba flechas de navegación a ambos lados, pero el avance se realizaba de tarjeta en tarjeta (`curr + 1`). El usuario expresó su satisfacción con el slider, pero solicitó que al hacer clic en la flecha no se desplace una sola tarjeta con cada click, sino que cargue los siguientes clientes de golpe (el lote visible completo).
+- **Feedback Humano:**
+  > *"me encanta Últimos Clientes Añadidos
+  > Clientes corporativos incorporados recientemente al sistema.
+  > 
+  > 
+  > el slider pero si pulsas la flechita que carge los siguientes de golpe no uno con cada click"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Avance por Lotes Visibles Dinámicos (`slideNext`):*
+     - En lugar de incrementar por 1 unidad (`curr + 1`), el paso de deslizamiento se calcula en tiempo de ejecución a partir de la señal reactiva `visibleCardsCount()` (3 tarjetas en escritorio $> 1024\text{px}$, 2 en tablets $640–1024\text{px}$, 1 en móviles $< 640\text{px}$):
+       $$\text{currentSlideIndex} \leftarrow \min(\text{curr} + \text{visibleCardsCount}(), \text{maxSlideIndex}())$$
+     - Al pulsar la flecha derecha, la cuadrícula traslada en una sola transición fluida (0.35s con curva `cubic-bezier(0.25, 1, 0.5, 1)`) todo el bloque visible, revelando inmediatamente el siguiente conjunto completo de clientes.
+  2. *Algoritmo de Retroceso Simétrico con Alineación de Múltiplos (`slidePrev`):*
+     - Si el número total de clientes no es un múltiplo exacto de las tarjetas visibles (o se ha alcanzado el extremo derecho `maxSlideIndex`), restar ciegamente `step` provocaría saltos desincronizados.
+     - Se implementó un algoritmo basado en el módulo del índice:
+       ```typescript
+       const step = this.visibleCardsCount();
+       this.currentSlideIndex.update((curr) => {
+         const remainder = curr % step;
+         const decrement = remainder === 0 ? step : remainder;
+         return Math.max(curr - decrement, 0);
+       });
+       ```
+     - Si un usuario avanza en escritorio (3 tarjetas) hasta el índice final 5 ($5 \pmod 3 = 2$), al retroceder decrementa exactamente 2 unidades para volver a alinearse con la página canónica anterior (índice 3), y de 3 a 0.
+  3. *Optimización del Conjunto de Clientes en Carga (`getRecentLite(12)`):*
+     - Se amplió la consulta de clientes recientes a 12 elementos (`getRecentLite(12)`), múltiplo perfecto de 3 (escritorio: 4 páginas de 3) y de 2 (tablet: 6 páginas de 2), eliminando solapamientos parciales.
+  4. *Alineación de Pruebas Unitarias:*
+     - Actualizado [home.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.spec.ts) para validar el desplazamiento por lotes completos (`visibleCardsCount = 3` y `visibleCardsCount = 2`) en los botones de flecha, swipe táctil y arrastre de ratón.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **245 pruebas unitarias pasando al 100%** (29 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+- **Valor para la evaluación:** Refinamiento ergonómico de microinteracciones en componentes de navegación, eliminando fricción cognitiva mediante paginación por lotes cohesivos en componentes de carrusel continuo.

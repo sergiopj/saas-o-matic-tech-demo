@@ -99,7 +99,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   loadRecentCustomers(): void {
-    this.customerApi.getRecentLite(8).subscribe({
+    this.customerApi.getRecentLite(12).subscribe({
       next: (res) => {
         this.recentCustomers.set(res.items);
         this.totalCustomers.set(res.total);
@@ -113,11 +113,17 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   slideNext(): void {
-    this.currentSlideIndex.update((curr) => Math.min(curr + 1, this.maxSlideIndex()));
+    const step = this.visibleCardsCount();
+    this.currentSlideIndex.update((curr) => Math.min(curr + step, this.maxSlideIndex()));
   }
 
   slidePrev(): void {
-    this.currentSlideIndex.update((curr) => Math.max(curr - 1, 0));
+    const step = this.visibleCardsCount();
+    this.currentSlideIndex.update((curr) => {
+      const remainder = curr % step;
+      const decrement = remainder === 0 ? step : remainder;
+      return Math.max(curr - decrement, 0);
+    });
   }
 
   onTouchStart(event: TouchEvent): void {

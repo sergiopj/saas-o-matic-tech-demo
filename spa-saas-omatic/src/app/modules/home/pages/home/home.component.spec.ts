@@ -49,7 +49,7 @@ describe('HomeComponent', () => {
     fixture.detectChanges();
 
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?page=1&limit=8&sortBy=createdAt&order=DESC&fields=lite`
+      `${environment.apiBaseUrl}/customers?page=1&limit=12&sortBy=createdAt&order=DESC&fields=lite`
     );
     req.flush(mockCustomers, { headers: { 'x-total-count': '25' } });
 
@@ -136,34 +136,40 @@ describe('HomeComponent', () => {
     expect(cancelSpy).toHaveBeenCalled();
   });
 
-  it('should navigate through carousel slides correctly with slideNext and slidePrev', () => {
-    // Populate more customers to test pagination
+  it('should navigate through carousel slides correctly in visible batches with slideNext and slidePrev', () => {
+    // Populate more customers to test batch navigation
     component.recentCustomers.set([
       { id: 'c1', companyName: 'Company 1', country: 'ES' },
       { id: 'c2', companyName: 'Company 2', country: 'DE' },
       { id: 'c3', companyName: 'Company 3', country: 'FR' },
       { id: 'c4', companyName: 'Company 4', country: 'IT' },
       { id: 'c5', companyName: 'Company 5', country: 'PT' },
+      { id: 'c6', companyName: 'Company 6', country: 'US' },
+      { id: 'c7', companyName: 'Company 7', country: 'GB' },
     ]);
     component.visibleCardsCount.set(3);
     fixture.detectChanges();
 
-    expect(component.maxSlideIndex()).toBe(2); // 5 - 3 = 2
+    expect(component.maxSlideIndex()).toBe(4); // 7 - 3 = 4
     expect(component.currentSlideIndex()).toBe(0);
 
+    // Advances by full batch of visibleCardsCount (3)
     component.slideNext();
-    expect(component.currentSlideIndex()).toBe(1);
+    expect(component.currentSlideIndex()).toBe(3);
 
+    // Advances to maxSlideIndex (4)
     component.slideNext();
-    expect(component.currentSlideIndex()).toBe(2);
+    expect(component.currentSlideIndex()).toBe(4);
 
     // Cannot advance past maxSlideIndex
     component.slideNext();
-    expect(component.currentSlideIndex()).toBe(2);
+    expect(component.currentSlideIndex()).toBe(4);
 
+    // Retreats aligning with previous batch (4 - (4 % 3) = 3)
     component.slidePrev();
-    expect(component.currentSlideIndex()).toBe(1);
+    expect(component.currentSlideIndex()).toBe(3);
 
+    // Retreats full batch back to 0
     component.slidePrev();
     expect(component.currentSlideIndex()).toBe(0);
 
@@ -182,12 +188,12 @@ describe('HomeComponent', () => {
     component.visibleCardsCount.set(2);
     fixture.detectChanges();
 
-    // Swipe left (next)
+    // Swipe left (next): advances by full visible batch of 2
     component.onTouchStart({ changedTouches: [{ clientX: 200 }] } as unknown as TouchEvent);
     component.onTouchEnd({ changedTouches: [{ clientX: 120 }] } as unknown as TouchEvent);
-    expect(component.currentSlideIndex()).toBe(1);
+    expect(component.currentSlideIndex()).toBe(2);
 
-    // Swipe right (prev)
+    // Swipe right (prev): retreats by full visible batch of 2
     component.onTouchStart({ changedTouches: [{ clientX: 100 }] } as unknown as TouchEvent);
     component.onTouchEnd({ changedTouches: [{ clientX: 180 }] } as unknown as TouchEvent);
     expect(component.currentSlideIndex()).toBe(0);
@@ -203,15 +209,15 @@ describe('HomeComponent', () => {
     component.visibleCardsCount.set(2);
     fixture.detectChanges();
 
-    // Mouse drag left (diff > 40 -> next)
+    // Mouse drag left (diff > 40 -> next): advances by full visible batch of 2
     component.onMouseDown({ button: 0, clientX: 200 } as MouseEvent);
     expect(component.isDragging()).toBe(true);
     component.onMouseMove({ clientX: 150 } as MouseEvent);
     component.onMouseUp({ clientX: 120 } as MouseEvent);
     expect(component.isDragging()).toBe(false);
-    expect(component.currentSlideIndex()).toBe(1);
+    expect(component.currentSlideIndex()).toBe(2);
 
-    // Mouse drag right (diff < -40 -> prev)
+    // Mouse drag right (diff < -40 -> prev): retreats by full visible batch of 2
     component.onMouseDown({ button: 0, clientX: 100 } as MouseEvent);
     expect(component.isDragging()).toBe(true);
     component.onMouseUp({ clientX: 180 } as MouseEvent);
