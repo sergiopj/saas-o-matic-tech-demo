@@ -75,4 +75,24 @@ describe('SimulationHubComponent', () => {
 
     expect(navigateSpy).toHaveBeenCalledWith(['/customers', 'cust-1']);
   });
+
+  it('should render 3D badge image in header and no calculator icon circle', () => {
+    const badgeImg: HTMLImageElement | null = fixture.nativeElement.querySelector('.simulations-badge-img');
+    const iconCircle = fixture.nativeElement.querySelector('.header-icon-circle');
+
+    expect(badgeImg).toBeTruthy();
+    expect(badgeImg?.getAttribute('src')).toBe('images/simulations-badge.jpg');
+    expect(iconCircle).toBeNull();
+  });
+
+  it('should render launcher title as Dynamic Billing Engine without icon', () => {
+    const launcherTitle: HTMLElement | null = fixture.nativeElement.querySelector('.launcher-title');
+    const launcherBadge = fixture.nativeElement.querySelector('.launcher-badge');
+    const iconInTitle = launcherTitle?.querySelector('mat-icon');
+
+    expect(launcherTitle).toBeTruthy();
+    expect(launcherTitle?.textContent?.trim()).toBeTruthy();
+    expect(launcherBadge).toBeNull();
+    expect(iconInTitle).toBeNull();
+  });
 });

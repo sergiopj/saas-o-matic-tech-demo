@@ -1,11 +1,18 @@
 <div class="simulation-hub-container">
   <header class="hub-header">
-    <div class="header-icon-circle">
-      <mat-icon aria-hidden="true">calculate</mat-icon>
-    </div>
-    <div class="header-titles">
-      <h1 class="page-title">{{ 'simulations.hub.title' | translate }}</h1>
-      <p class="page-subtitle">{{ 'simulations.hub.subtitle' | translate }}</p>
+    <div class="header-titles-group">
+      <img
+        src="images/simulations-badge.jpg"
+        alt="Centro de Simulaciones"
+        class="simulations-badge-img"
+        width="64"
+        height="64"
+        loading="eager"
+      />
+      <div class="header-titles">
+        <h1 class="page-title">{{ 'simulations.hub.title' | translate }}</h1>
+        <p class="page-subtitle">{{ 'simulations.hub.subtitle' | translate }}</p>
+      </div>
     </div>
   </header>
 
@@ -13,11 +20,7 @@
   <section class="launcher-card">
     <div class="launcher-content">
       <div class="launcher-info-column">
-        <div class="launcher-badge">
-          <mat-icon aria-hidden="true">tune</mat-icon>
-          <span>{{ 'simulations.hub.launcherBadge' | translate }}</span>
-        </div>
-        <h2 class="launcher-title">{{ 'simulations.hub.selectCustomer' | translate }}</h2>
+        <h2 class="launcher-title">{{ 'simulations.hub.launcherBadge' | translate }}</h2>
         <p class="launcher-desc">{{ 'simulations.hub.launcherDesc' | translate }}</p>
 
         <div class="launcher-form">

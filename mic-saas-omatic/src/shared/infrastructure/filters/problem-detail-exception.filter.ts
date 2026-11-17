@@ -59,7 +59,7 @@ export class ProblemDetailExceptionFilter implements ExceptionFilter {
     } else {
       // 500: Do not leak internal database/system errors to clients; log internally
       console.error('Unhandled internal server error:', exception);
-      detail = 'An unexpected error occurred.';
+      detail = 'An unexpected error occurred.'; // TODO revisar este tipo de mensajes hardcodeados, no es muy amigable para el usuario final, deberia ser mas generico y amigable, y no dar detalles de la excepcion interna
     }
 
     response

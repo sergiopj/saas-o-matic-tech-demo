@@ -3557,3 +3557,36 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
   - Verificación manual: Desplazamiento fluido tanto en ratón de sobremesa como en pantalla táctil y clic en flechas.
 - **Valor para la evaluación:** Experiencia de usuario (UX) de grado consumidor combinada con robustez empresarial: adaptabilidad multidispositivo transparente sin librerías externas de carrusel pesadas, manteniendo el bundle ultraligero y el código 100% tipado y mantenible.
+
+---
+
+### 6.142. Medallón 3D para el Centro de Simulaciones (`/simulations`) y Promoción de "Motor de Facturación Dinámica" a Título Principal sin Icono
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  En la pantalla de Estudio de Simulaciones ([simulation-hub.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/simulations/pages/simulation-hub/simulation-hub.component.html)), el encabezado principal mostraba un icono genérico de calculadora dentro de un círculo azul (`.header-icon-circle`), mientras que en la tarjeta lanzadora inferior el concepto clave "Motor de Facturación Dinámica" aparecía como un pill badge secundario con icono (`<mat-icon>tune</mat-icon>`), por encima del título de selección de cliente. El usuario solicitó reemplazar el icono de calculadora por una imagen atractiva a la izquierda de "Centro de Simulaciones" y su subtítulo, y transformar "Motor de Facturación Dinámica" en un título destacado, más grande y sin icono.
+- **Feedback Humano:**
+  > *"mejor una iumagen chula ala izquierda que el icono ese de calculadora Centro de Simulaciones
+  > Selecciona un cliente corporativo para iniciar una simulación personalizada con tramos y conversión de divisa.
+  > 
+  > y esto que sea un titulo chulo algo mas grande y sin icono etc 
+  > 
+  > Motor de Facturación Dinámica"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Generación de Medallón 3D Táctil con Subagente de IA (`image-generator`):*
+     - Se orquestó la creación de un nuevo activo visual alineado con el universo estético escandinavo de SaaS-O-Matic:
+       - Medallón isométrico 1:1 en plinto de madera de roble claro.
+       - Tableta-calculadora táctil en claymorphism con sliders interactivos, bloques de tramos en tonos pastel (ámbar, verde esmeralda y azul cobalto), monedas doradas y paneles de cristal esmerilado con glifos holográficos de sumatorio ($\Sigma$) y porcentaje ($\%$).
+     - Imagen guardada y optimizada en `public/images/simulations-badge.jpg` (557 kB).
+  2. *Reemplazo del Icono en el Encabezado (`.hub-header`):*
+     - En [simulation-hub.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/simulations/pages/simulation-hub/simulation-hub.component.html), se sustituyó el contenedor `.header-icon-circle` por `.simulations-badge-img` (64×64 px con `--roams-radius-md`, borde `--roams-border`, sombra suave y micro-interacción `hover scale(1.05)`).
+     - Se unificó el diseño con el patrón visual establecido en la cabecera del catálogo de clientes corporativos (`customer-list`).
+  3. *Jerarquía Tipográfica en la Tarjeta Lanzadora:*
+     - Se eliminó el badge pequeño con icono (`.launcher-badge`), promoviendo directamente la clave internacionalizada `simulations.hub.launcherBadge` ("Motor de Facturación Dinámica") al elemento `h2` principal: `<h2 class="launcher-title">{{ 'simulations.hub.launcherBadge' | translate }}</h2>`.
+     - En [simulation-hub.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/simulations/pages/simulation-hub/simulation-hub.component.scss), se elevó `.launcher-title` a `1.75rem` con `font-weight: 800`, `letter-spacing: -0.02em` y `line-height: 1.25`, libre de iconos y con un diseño tipográfico sobrio y distinguido.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **245 pruebas unitarias pasando al 100%** (29 suites), incluyendo validaciones de la insignia 3D y del título limpio sin iconos.
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Verificación visual: Encabezado con imagen diorama 3D armónica y tarjeta lanzadora con jerarquía tipográfica impecable.
+- **Valor para la evaluación:** Coherencia de diseño de marca (*Design System Continuity*) en todas las pantallas principales de la aplicación, eliminando redundancias visuales y reforzando la identidad de SaaS-O-Matic.
