@@ -2280,6 +2280,28 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: 0 errores y 0 advertencias.
 - **Valor para la evaluación:** Refleja dominio profundo del ecosistema Angular, estándares W3C (`<time datetime>`), internacionalización de formatos y reactividad con Signals.
 
+---
+
+### 6.96 Supresión de Notificación Redundante (Toast SnackBar) tras Envío Exitoso de Correo Comercial
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Al despachar una propuesta comercial desde el modal de redacción (`EmailComposerDialogComponent`), el propio diálogo sustituye el formulario por una vista de éxito completa (`.sent-success-view`) con el identificador del mensaje y el destinatario. Sin embargo, al cerrarse el diálogo, tanto en `CustomerCardComponent` como en `CustomerDetailComponent` se ejecutaba un `ref.afterClosed().subscribe()` que disparaba un toast flotante inferior (`MatSnackBar`) con un mensaje similar. Esto generaba una doble notificación redundante (*UI clutter*).
+- **Feedback Humano:**
+  *"cuando se envia el email su muestra el success en el modal y eso me gusta perop veo innceesario el toast inferior de confirmacion para estos casos"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Eliminación del Suscriptor de SnackBar Post-Cierre:*
+     - En `CustomerCardComponent` y `CustomerDetailComponent`, se suprimió la suscripción `afterClosed()` que disparaba `this.snackBar.open(...)`.
+     - El diálogo gestiona su propio ciclo de vida y feedback dentro del modal con total claridad.
+  2. *Higiene y Reducción de Dependencias Muertas:*
+     - En `CustomerCardComponent`, al no requerirse `MatSnackBar` para ninguna otra función, se eliminó su inyección y el módulo `MatSnackBarModule` de los imports del componente standalone, reduciendo overhead.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **161 pruebas unitarias pasando al 100%**.
+  - Monorepo total: **284 pruebas unitarias pasando al 100%**.
+  - Cobertura global de frontend: **93.06%**.
+  - Oxlint: 0 errores y 0 advertencias.
+- **Valor para la evaluación:** Pulcritud en la experiencia de usuario (UX) al evitar saturación de notificaciones superpuestas.
+
 
 
 

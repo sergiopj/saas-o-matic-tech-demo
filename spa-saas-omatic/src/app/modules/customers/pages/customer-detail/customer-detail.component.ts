@@ -322,7 +322,7 @@ export class CustomerDetailComponent implements OnInit {
     const cust = this.customer();
     if (!cust) return;
 
-    const ref = this.dialog.open(EmailComposerDialogComponent, {
+    this.dialog.open(EmailComposerDialogComponent, {
       data: {
         recipient: cust.email,
         recipientName: cust.companyName,
@@ -338,16 +338,6 @@ export class CustomerDetailComponent implements OnInit {
       width: '640px',
       maxWidth: '94vw',
       panelClass: 'roams-email-dialog-panel',
-    });
-
-    ref.afterClosed().subscribe((res) => {
-      if (res?.sent) {
-        this.snackBar.open(
-          `Email enviado a ${res.recipient} (ID: ${res.messageId})`,
-          'OK',
-          { duration: 4500 }
-        );
-      }
     });
   }
 
