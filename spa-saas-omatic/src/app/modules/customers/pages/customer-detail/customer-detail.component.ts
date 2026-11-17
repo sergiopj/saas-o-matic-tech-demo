@@ -312,8 +312,12 @@ export class CustomerDetailComponent implements OnInit {
           this.hasUserInteracted = false;
           this.loadSimulationsHistory(cust.id);
         },
-        error: () => {
+        error: (err) => {
           this.isSaving.set(false);
+          const errorMsg =
+            err?.error?.detail ||
+            this.i18n.t('simulation.form.savedError');
+          this.snackBar.open(errorMsg, 'OK', { duration: 5000 });
         },
       });
   }

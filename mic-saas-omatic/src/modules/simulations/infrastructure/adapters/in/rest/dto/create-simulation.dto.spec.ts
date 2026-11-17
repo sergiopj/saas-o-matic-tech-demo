@@ -24,7 +24,7 @@ describe('CreateSimulationDto (Validation Layer)', () => {
     expect(errors.length).toBe(0);
   });
 
-  it('should reject invalid customerId when not a UUID v4', async () => {
+  it('should reject invalid customerId when not a valid UUID format', async () => {
     const dto = new CreateSimulationDto();
     dto.customerId = 'not-a-valid-uuid';
     dto.activeUsers = 10;
@@ -34,6 +34,17 @@ describe('CreateSimulationDto (Validation Layer)', () => {
     const errors = await validate(dto);
     expect(errors.length).toBeGreaterThan(0);
     expect(errors.some((e) => e.property === 'customerId')).toBe(true);
+  });
+
+  it('should accept standard UUID representations including RFC 4122 v4 and formatted UUIDs', async () => {
+    const dto = new CreateSimulationDto();
+    dto.customerId = '7f5083bb-377e-4c56-2f23-2c43d5689066';
+    dto.activeUsers = 10;
+    dto.storageGb = 10;
+    dto.apiCalls = 1000;
+
+    const errors = await validate(dto);
+    expect(errors.length).toBe(0);
   });
 
   it('should reject negative activeUsers', async () => {

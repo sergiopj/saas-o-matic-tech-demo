@@ -1,8 +1,12 @@
-import { IsInt, IsNotEmpty, IsNumber, IsUUID, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber, IsString, Matches, Min } from 'class-validator';
 
 export class CreateSimulationDto {
-  @IsUUID('4', { message: 'customerId must be a valid UUID v4.' })
+  @IsString({ message: 'customerId must be a string.' })
   @IsNotEmpty({ message: 'customerId is required.' })
+  @Matches(
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+    { message: 'customerId must be a valid UUID.' },
+  )
   customerId: string;
 
   @IsInt({ message: 'activeUsers must be an integer.' })
@@ -17,3 +21,4 @@ export class CreateSimulationDto {
   @Min(0, { message: 'apiCalls must be greater than or equal to 0.' })
   apiCalls: number;
 }
+
