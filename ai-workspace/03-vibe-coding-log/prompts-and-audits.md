@@ -3054,6 +3054,31 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: **0 errores y 0 advertencias** en los 140 archivos inspeccionados.
 - **Valor para la evaluación:** Garantía absoluta de transparencia, reproducibilidad y rigor metodológico, asegurando que los evaluadores de Roams encuentren una correspondencia perfecta del 100% entre el código ejecutable y la documentación técnica de ingeniería.
 
+---
+
+### 6.127. Ampliación y Ajuste Vertical de la Ilustración 3D en la Cabecera del Home
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Al evaluar visualmente la cabecera principal del Home ("Panel de Control Comercial / Supervisa clientes corporativos, simula tramos de tarificación SaaS..."), el usuario señaló que la ilustración 3D del puesto de trabajo SaaS (`hero-illustration.jpg`) resultaba demasiado reducida (`max-height: 120px; max-width: 210px;`), dejando espacios vacíos innecesarios arriba y abajo dentro del contenedor y perdiendo nitidez y presencia visual.
+- **Feedback Humano (Tu criterio de equilibrio espacial y claridad visual):**
+  > *"la imagen de Panel de Control Comercial Supervisa clientes corporativos, simula tramos de tarificación SaaS y proyecta facturación multi-divisa en tiempo real. mas grande aun hay hueco arriba y abajo es que casi no se ve ahora"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Optimización del Aprovechamiento Vertical:*
+     - Se ajustó `.hero-visual` en [home.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.scss#L111-L135), ampliando el ancho máximo de `220px` a `360px`.
+     - La clase `.hero-illustration` incrementó sus cotas de `max-height: 120px` a `190px` y `max-width: 210px` a `340px`, incorporando `aspect-ratio: 16 / 9` nativo (coincidente con la resolución original de 1376×768 px).
+     - De esta forma, la ilustración llena de forma equilibrada la altura generada por los elementos tipográficos del bloque izquierdo (título, subtítulo, badge y botones de acción), eliminando los huecos vacíos superior e inferior sin incrementar la altura global del banner.
+  2. *Escalado Proporcional y Responsividad:*
+     - En resoluciones intermedias tipo tablet (`max-width: 960px`), se ajustaron las dimensiones a `max-height: 145px; max-width: 250px`.
+     - Se preservó inalterada la regla mobile (`max-width: 768px`) que oculta la ilustración en smartphones para priorizar métricas y accesibilidad.
+  3. *Tokens SSOT y Calidad de Código:*
+     - Sin colores hexadecimales en CSS (`var(--roams-border-inverse)`, `var(--roams-shadow-md)`).
+- **Resultados de Verificación:**
+  - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Oxlint: **0 errores y 0 advertencias** en los 140 archivos inspeccionados.
+- **Valor para la evaluación:** Refinamiento estético y jerarquía visual armónica, maximizando el impacto gráfico y la legibilidad de la escena 3D sin comprometer la visualización inmediata (*above-the-fold*) de los KPIs de negocio.
+
 
 
 

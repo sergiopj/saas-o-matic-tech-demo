@@ -113,14 +113,15 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    max-width: 220px;
+    max-width: 360px;
     z-index: 1;
 
     .hero-illustration {
       width: 100%;
       height: auto;
-      max-height: 120px;
-      max-width: 210px;
+      max-height: 190px;
+      max-width: 340px;
+      aspect-ratio: 16 / 9;
       object-fit: cover;
       border-radius: var(--roams-radius-md);
       border: 1px solid var(--roams-border-inverse);
@@ -152,8 +153,13 @@
     }
 
     .hero-visual {
-      max-width: 180px;
-      margin-bottom: 0.35rem;
+      max-width: 260px;
+      margin-bottom: 0.5rem;
+
+      .hero-illustration {
+        max-height: 145px;
+        max-width: 250px;
+      }
     }
   }
 
