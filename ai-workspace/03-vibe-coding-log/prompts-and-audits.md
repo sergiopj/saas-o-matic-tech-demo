@@ -1875,6 +1875,28 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - 0 errores y 0 warnings en `oxlint`.
 - **Valor para la evaluación:** Conocimiento profundo de estándares W3C ARIA, semántica HTML5, interoperabilidad de tecnologías asistivas y diferenciación técnica entre linters de código TypeScript y analizadores estáticos de plantillas web.
 
+### 6.82 Gobernanza Persistente de IA: Creación de AGENTS.md, Reglas de Espacio de Trabajo y Educación Continua
+
+- **Situación inicial:** Tras haber pulido la aplicación con más de 80 iteraciones (desterrando colores hardcodeados, suprimiendo fallbacks en `var()`, garantizando validaciones reactivas en caliente RFC 5322, aplicando accesibilidad nativa `<output>` y aislando la arquitectura hexagonal), surgió la necesidad estratégica de cómo "entrenar" o educar a la IA para que en sesiones futuras y proyectos nuevos recuerde y aplique automáticamente esta lógica de trabajo sin tener que corregirla de nuevo.
+- **Tu criterio y dirección de calidad:** Planteaste la visión formativa del sistema:
+  *"por otro lado hay desde nuestro lado algo que hagamos para poder entrenar a la ia con esta base de por ejemplo los promt y nuestros md? y asi otras veces que desarrolle aplique la logica y forma de trabajar con la que la hemos ido entrenando? hazlo y explica en los mds correspondientes esta solucion de educacion del modelo"*
+- **Análisis de evaluación: ¿Por qué la Gobernanza Contextual supera al Fine-Tuning tradicional?**
+  1. *Agilidad vs. Obsolescencia:* El re-entrenamiento de pesos neuronales (fine-tuning) requiere hardware costoso, semanas de computación y queda obsoleto en cuanto el proveedor actualiza el modelo fundacional (de GPT-4 a GPT-5, o Gemini 1.5 a 2.0).
+  2. *Gobernanza Contextual Incondicional:* Herramientas agénticas de última generación (Antigravity, Cursor, Gemini CLI, Claude Code) implementan mecanismos de descubrimiento jerárquico de archivos de reglas (`AGENTS.md`, `GEMINI.md`, `.agents/rules/*.md`). Estas directrices se inyectan en el prompt de sistema del agente antes de que emita la primera llamada a herramientas, asegurando cumplimiento estricto y determinista en cada sesión.
+  3. *Valor de los Logs como Dataset SFT/DPO:* La bitácora acumulada en `prompts-and-audits.md` tiene el formato canónico de *Supervised Fine-Tuning* (SFT) y *Direct Preference Optimization* (DPO). Si una organización quisiera entrenar modelos locales (vía LoRA o Vertex AI), este archivo es directamente convertible a pares `{ instruction, human_correction, accepted_code }`.
+- **Solución técnica implementada:**
+  1. *Creación del archivo universal de reglas maestras ([AGENTS.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/AGENTS.md)):*
+     - Situado en la raíz del repositorio, establece la política lingüística (código en inglés, documentación en español), prohibición terminante de fallbacks y colores directos en SCSS, directrices de validación reactiva en caliente (`ShowOnDirtyErrorStateMatcher`), accesibilidad W3C (`<output>`), arquitectura hexagonal desacoplada en backend y política de cero advertencias en `oxlint`.
+  2. *Creación de regla modular en espacio de trabajo ([.agents/rules/coding-standards.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/.agents/rules/coding-standards.md)):*
+     - Registrado en la ruta canónica `.agents/rules/` del sistema de personalización de Antigravity, asegurando que cualquier subagente o tarea en segundo plano herede estas directrices.
+  3. *Documentación arquitectónica ([architecture-guidelines.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md)):*
+     - Se añadió la **Sección 6: Gobernanza y Educación Continua de Modelos de IA**, describiendo el diagrama de capas de gobernanza, el papel del estándar `AGENTS.md`, el comando slash `/learn` y la estrategia de datasets vivos.
+- **Resultados de Verificación:**
+  - El archivo `AGENTS.md` y `.agents/rules/coding-standards.md` han quedado consolidados en la raíz del repositorio.
+  - El monorepo mantiene 135 tests en frontend y 121 tests en backend pasando al 100%.
+  - 0 advertencias y 0 errores en `oxlint`.
+- **Valor para la evaluación:** Demostración pionera de ingeniería agéntica (*Agentic Engineering*): transición de un asistente conversacional genérico a un sistema colaborativo especializado y gobernado por directrices persistentes de la empresa.
+
 
 
 

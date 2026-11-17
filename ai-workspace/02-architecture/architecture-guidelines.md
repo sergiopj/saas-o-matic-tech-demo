@@ -703,3 +703,72 @@ Cada módulo se desarrolla, se prueba con Jest, se audita en `03-vibe-coding-log
 | **10** | `feat(dashboard): add customer search, responsive cards and detail view` | `dashboard/src/app/features/customers` | Entrada 11 |
 | **11** | `feat(dashboard): add interactive simulation slider and multi-currency exchange rate integration` | `dashboard/src/app/features/simulations` | Entrada 12 |
 | **12** | `ci/deploy: add docker-compose and comprehensive readme with local and docker execution` | `docker-compose.yml`, `README.md` | Entrada 13 |
+
+---
+
+## 6. Gobernanza y Educación Continua de Modelos de IA (Agent Instructions & Persistent Rules)
+
+### 6.1 Filosofía: Gobernanza Contextual vs. Fine-Tuning de Pesos
+
+En proyectos de software asistidos por IA (*Vibe Coding* y Desarrollo Agéntico), la forma óptima de "educar" o "entrenar" al modelo para que adopte la metodología del equipo **no requiere re-entrenar los pesos neuronales del LLM** (proceso lento, costoso y que queda obsoleto al actualizar la versión del modelo). 
+
+En su lugar, se implementa una **Gobernanza Contextual Jerárquica** estructurada en tres niveles:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                   NIVEL 1: GOBERNANZA UNIVERSAL                        │
+│   - AGENTS.md (Raíz del proyecto): Reglas obligatorias incondicionales │
+│   - .agents/rules/*.md: Reglas granulares de espacio de trabajo        │
+└──────────────────────────────────┬─────────────────────────────────────┘
+                                   │ Descubrimiento jerárquico
+                                   ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                   NIVEL 2: REPOSITORIO DE PROCEDIMIENTOS               │
+│   - Skills / Runbooks (SKILL.md): Procedimientos paso a paso bajo      │
+│     demanda (Progressive Disclosure) para flujos complejos             │
+└──────────────────────────────────┬─────────────────────────────────────┘
+                                   │ In-Context Learning
+                                   ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                   NIVEL 3: MEMORIA Y DATASETS VIVOS                     │
+│   - ai-workspace/03-vibe-coding-log/prompts-and-audits.md:             │
+│     Bitácora de pares (Prompt -> Feedback Humano -> Código Aceptado)   │
+│     Exportable a formato JSONL para fine-tuning supervisado (SFT/DPO)  │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 6.2 El Estándar `AGENTS.md` (Single Source of Truth de la IA)
+
+En la raíz del repositorio se dispone el archivo maestro [AGENTS.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/AGENTS.md), reconocido universalmente por los principales agentes de desarrollo (Antigravity, Cursor, Gemini CLI, Claude Code y GitHub Copilot).
+
+El agente lee este archivo antes de comenzar cualquier turno, internalizando de forma incondicional:
+1. **Política Lingüística:** Código e identificadores en inglés canónico; documentación y bitácoras en español profesional.
+2. **Design Tokens SSOT (`_colors.scss`):**
+   - Prohibición estricta de códigos hexadecimales quemados en hojas de estilo de componentes (`.scss`).
+   - Prohibición estricta de fallbacks en variables (`var(--token, #hex)`), forzando el consumo limpio del token (`var(--token)`).
+   - Ausencia total de librerías CSS externas no deseadas (cero Tailwind).
+3. **Validación Reactiva de Formularios:** Uso de `ShowOnDirtyErrorStateMatcher` para validación instantánea durante el tecleo (`control.dirty`) en lugar de esperar al desenfoque (*blur*).
+4. **Accesibilidad W3C Nativa:** Uso de `<output>` nativo para mensajes de estado y feedback en lugar de `<div role="status">` (resolviendo la regla de calidad SonarQube `Web:S6819`).
+5. **Arquitectura Hexagonal en Backend:** Núcleo de dominio inmaculado sin dependencias de NestJS o TypeORM; orquestación mediante puertos y adaptadores.
+6. **Seguridad y Cero Fuga de Credenciales:** Despacho simulado transaccional y sanitización OWASP anti-XSS (`HtmlSanitizerService`), previniendo credenciales comprometidas en Git.
+
+---
+
+### 6.3 Reutilización Global: Skills y el Comando `/learn`
+
+Para transferir este conocimiento más allá de un único repositorio:
+1. **Comando `/learn`:** Permite al usuario consolidar las correcciones del chat en la memoria persistente del agente, generando automáticamente reglas locales o globales.
+2. **Skills Compartidas:** Las directrices arquitectónicas se pueden empaquetar en una skill (`~/.gemini/antigravity/skills/roams-standards/SKILL.md`), permitiendo al agente invocar este estándar en cualquier nuevo proyecto de la organización.
+
+---
+
+### 6.4 El Log de Vibe Coding como Dataset de Preferencia (SFT / DPO)
+
+El documento [prompts-and-audits.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/03-vibe-coding-log/prompts-and-audits.md) almacena un historial curado de más de 80 iteraciones siguiendo la estructura canónica de alineamiento de IA:
+- **Input / Contexto inicial:** Estado previo del código o propuesta inicial del asistente.
+- **Human Feedback (Supervisión Humana):** Tu criterio explícito de corrección técnica y estética (ej. *"nada de versiones hardcodeadas"*, *"validación bien hecha en caliente"*, *"nada de colores hardcodeados en SCSS"*).
+- **Accepted Ground Truth (Salida Aceptada):** Código final refactorizado, tipado y verificado con 100% de tests unitarios y 0 advertencias de linter.
+
+Este artefacto constituye un dataset de alto valor técnico preparado para ser serializado a formato JSONL `{ instruction, input, output }` si la organización decidiera realizar un fine-tuning con LoRA o Vertex AI sobre modelos fundacionales.
