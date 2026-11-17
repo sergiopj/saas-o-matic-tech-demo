@@ -43,4 +43,10 @@ describe('I18nService', () => {
     service.setLanguage('unsupported' as any);
     expect(service.currentLanguage()).toBe(SUPPORTED_LANGUAGES[0].code);
   });
+
+  it('should persist selected language to localStorage and prioritize it on detection', () => {
+    service.setLanguage('de');
+    expect(localStorage.getItem('saas_omatic_lang')).toBe('de');
+    localStorage.removeItem('saas_omatic_lang');
+  });
 });

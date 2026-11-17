@@ -47,10 +47,28 @@ export class I18nService {
   setLanguage(lang: SupportedLanguage): void {
     if (lang in TRANSLATIONS) {
       this.currentLanguage.set(lang);
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('saas_omatic_lang', lang);
+        }
+      } catch {
+        // Ignore in environments where storage access is restricted
+      }
     }
   }
 
   private detectLanguage(): SupportedLanguage {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem('saas_omatic_lang') as SupportedLanguage | null;
+        if (stored && stored in TRANSLATIONS) {
+          return stored;
+        }
+      }
+    } catch {
+      // Ignore in environments where storage access is restricted
+    }
+
     if (typeof navigator !== 'undefined' && navigator.language) {
       const browserCode = navigator.language.slice(0, 2).toLowerCase();
       if (browserCode in TRANSLATIONS) {
