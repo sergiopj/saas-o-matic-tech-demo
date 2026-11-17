@@ -154,9 +154,10 @@
 
   .country-filter-field {
     width: 100%;
+    --mdc-outlined-text-field-container-shape: var(--roams-radius-md);
 
     .filter-icon {
-      color: var(--roams-teal);
+      color: var(--roams-status-info);
       margin-right: 8px;
       font-size: 20px;
       width: 20px;
@@ -175,6 +176,7 @@
 
   .sort-filter-field {
     width: 100%;
+    --mdc-outlined-text-field-container-shape: var(--roams-radius-md);
 
     .sort-icon {
       color: var(--roams-accent-blue);

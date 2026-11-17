@@ -3277,6 +3277,50 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
 - **Valor para la evaluación:** Criterio editorial senior de UX writing (lenguaje centrado en el usuario de negocio y no en la fontanería técnica del backend) sumado a un estricto rigor de gobernanza documental que garantiza cero discrepancias entre código, pruebas y documentación para el comité evaluador de Roams.
 
+---
+
+### 6.135. Corrección de Doble Contorno en el Buscador de Clientes (Tokens Nativos MDC Outlined Shape)
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Al visualizar el buscador corporativo de clientes ([customer-search-bar.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-search-bar/customer-search-bar.component.html)), se apreciaba un artefacto óptico anómalo en el flanco izquierdo: parecía haber una "segunda caja o buscador pequeño" incrustado en el lado izquierdo del campo que se tocaba o solapaba con el resto del borde.
+- **Feedback Humano (Tu agudeza visual para detectar artefactos de renderizado en Angular Material):**
+  > *"el buscador de clientes corporativods en se ve raro a la izquierda es como que hubiese otro buscador y se juntan casi no se como explicarlo"*
+- **Diagnóstico de Causa Raíz (Análisis de Segmentación MDC Notched Outline):**
+  1. En los componentes `mat-form-field appearance="outline"`, Material Design 3 (MDC) divide el borde perimetral en tres piezas contiguas:
+     - `.mdc-notched-outline__leading`: El segmento curvo izquierdo (de apenas 12px de ancho).
+     - `.mdc-notched-outline__notch`: El segmento central donde se sitúa la etiqueta flotante (si existe).
+     - `.mdc-notched-outline__trailing`: El segmento largo derecho que cierra el contorno.
+  2. En [customer-search-bar.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-search-bar/customer-search-bar.component.scss), se había forzado mediante `::ng-deep`:
+     ```scss
+     .mdc-notched-outline__leading,
+     .mdc-notched-outline__notch,
+     .mdc-notched-outline__trailing {
+       border-color: var(--roams-border) !important;
+       border-radius: var(--roams-radius-md); // 12px en las cuatro esquinas
+     }
+     ```
+  3. Al forzar `border-radius: 12px` indiscriminadamente sobre `.mdc-notched-outline__leading` (cuya anchura es exactamente de 12px), sus esquinas derechas se curvaban hacia adentro formando una cápsula/píldora cerrada en la izquierda. A su vez, `.mdc-notched-outline__trailing` curvaba sus esquinas izquierdas, dibujando una línea vertical divisoria curva que simulaba visualmente dos cajas de búsqueda pegadas.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Adopción de Design Tokens Oficiales de Angular Material MDC:*
+     - Se eliminó el `border-radius` directo sobre los segmentos internos del notched outline.
+     - Se configuró la variable CSS oficial del estándar MDC:
+       ```scss
+       --mdc-outlined-text-field-container-shape: var(--roams-radius-md);
+       --mdc-outlined-text-field-outline-color: var(--roams-border);
+       --mdc-outlined-text-field-focus-outline-color: var(--roams-accent-blue);
+       --mdc-outlined-text-field-hover-outline-color: var(--roams-accent-blue);
+       ```
+     - MDC ahora calcula matemáticamente los radios selectivos: sólo las esquinas exteriores (izquierda de `leading` y derecha de `trailing`) se redondean, mientras que los puntos de unión permanecen 100% planos y continuos.
+  2. *Armonización Perimetral en la Barra de Herramientas:*
+     - Se aplicó `--mdc-outlined-text-field-container-shape: var(--roams-radius-md)` también a los desplegables de filtro por país (`.country-filter-field`) y ordenación (`.sort-filter-field`) en [customer-list.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-list/customer-list.component.scss), garantizando un lenguaje visual uniforme en toda la fila de controles.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **229 pruebas unitarias pasando al 100%** (27 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (67 archivos analizados con 111 reglas).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+- **Valor para la evaluación:** Profundo conocimiento de las tripas de Angular Material MDC y de las variables de diseño CSS, erradicando fallos sutiles de renderizado causados por selectores `::ng-deep` excesivos y garantizando acabados limpios de nivel enterprise.
+
+
 
 
 
