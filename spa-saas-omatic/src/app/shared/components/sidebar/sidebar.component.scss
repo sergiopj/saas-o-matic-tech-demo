@@ -134,19 +134,42 @@
   padding-top: 1rem;
   border-top: 1px solid var(--roams-border-light);
 
-  .footer-badge {
-    display: flex;
+  .footer-link {
+    display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    font-size: 0.75rem;
-    color: var(--roams-text-muted);
-    padding: 0 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--roams-text-secondary);
+    text-decoration: none;
+    padding: 0.35rem 0.6rem;
+    border-radius: var(--roams-radius-sm);
+    transition: all 0.15s ease-in-out;
 
-    .dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background-color: var(--roams-status-success);
+    .footer-copy {
+      color: var(--roams-text-secondary);
+      transition: color 0.15s ease-in-out;
+    }
+
+    .external-icon {
+      font-size: 0.95rem;
+      width: 0.95rem;
+      height: 0.95rem;
+      color: var(--roams-text-muted);
+      transition: color 0.15s ease-in-out, transform 0.15s ease-in-out;
+    }
+
+    &:hover {
+      background-color: rgba(16, 97, 226, 0.06);
+
+      .footer-copy {
+        color: var(--roams-accent-blue);
+      }
+
+      .external-icon {
+        color: var(--roams-accent-blue);
+        transform: translate(1px, -1px);
+      }
     }
   }
 }

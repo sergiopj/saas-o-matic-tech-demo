@@ -43,9 +43,12 @@ describe('NavbarComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render the ROAMS brand badge and SaaS-O-Matic title', () => {
+  it('should render the official Roams logo image and SaaS-O-Matic title', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.brand-badge')?.textContent).toContain('ROAMS');
+    const logoImg = compiled.querySelector('.brand-logo-img') as HTMLImageElement;
+    expect(logoImg).toBeTruthy();
+    expect(logoImg.getAttribute('src')).toContain('images/roams-logo.png');
+    expect(logoImg.getAttribute('alt')).toBe('Roams');
     expect(compiled.querySelector('.app-title')?.textContent).toContain('SaaS-O-Matic');
   });
 

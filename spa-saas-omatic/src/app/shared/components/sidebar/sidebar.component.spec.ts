@@ -37,8 +37,13 @@ describe('SidebarComponent', () => {
     expect(container.classList.contains('is-collapsed')).toBe(true);
   });
 
-  it('should render dynamic current year in footer badge', () => {
-    const textEl = fixture.nativeElement.querySelector('.footer-badge .text');
-    expect(textEl.textContent.trim()).toBe(`${new Date().getFullYear()} • Online`);
+  it('should render dynamic current year with external link to roams.es', () => {
+    const linkEl = fixture.nativeElement.querySelector('.sidebar-footer .footer-link') as HTMLAnchorElement;
+    expect(linkEl).toBeTruthy();
+    expect(linkEl.getAttribute('href')).toBe('https://roams.es/');
+    expect(linkEl.getAttribute('target')).toBe('_blank');
+    expect(linkEl.getAttribute('rel')).toContain('noopener');
+    expect(linkEl.textContent).toContain(`${new Date().getFullYear()}`);
+    expect(linkEl.textContent).toContain('Roams');
   });
 });

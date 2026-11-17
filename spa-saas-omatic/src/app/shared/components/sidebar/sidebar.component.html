@@ -44,10 +44,17 @@
 
   @if (!isCollapsed()) {
     <div class="sidebar-footer">
-      <div class="footer-badge">
-        <span class="dot"></span>
-        <span class="text">{{ currentYear }} • Online</span>
-      </div>
+      <a
+        href="https://roams.es/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="footer-link"
+        [matTooltip]="'sidebar.roamsLink.aria' | translate"
+        [attr.aria-label]="'sidebar.roamsLink.aria' | translate"
+      >
+        <span class="footer-copy">© {{ currentYear }} Roams</span>
+        <mat-icon class="external-icon" aria-hidden="true">open_in_new</mat-icon>
+      </a>
     </div>
   }
 </aside>

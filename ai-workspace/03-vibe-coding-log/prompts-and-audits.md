@@ -2302,6 +2302,34 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: 0 errores y 0 advertencias.
 - **Valor para la evaluación:** Pulcritud en la experiencia de usuario (UX) al evitar saturación de notificaciones superpuestas.
 
+---
+
+### 6.97 Integración de Logotipo Oficial de Roams en Navbar y Enlace Institucional Dinámico en Footer del Sidebar
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Sustituir la insignia de texto estilizado `"ROAMS"` con fondo degradado azul en el navbar por el logotipo vectorial corporativo oficial de Roams proporcionado por el usuario (`roams-logo.png`). Asimismo, en el pie del menú lateral (`SidebarComponent`), eliminar el indicador estático e innecesario `"• Online"` y el punto verde, reemplazándolo por un enlace dinámico oficial `"© {{ currentYear }} Roams"` con icono externo accesible que redirija a `https://roams.es/` en una nueva pestaña.
+- **Feedback Humano:**
+  *"en el navbar superior pon mejor este logo en vez del que pone ROAMS con el fndo azul en el year de abajo dinamico pon Roams y que sentido tien eponer onlimne y el punto verde? que aemas texto y fecha al pulsarlo lleve a https://roams.es/ en una pestaña nueva"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Alojamiento del Activo de Marca en Directorio Público:*
+     - Copia del logotipo oficial `roams-logo.png` en `spa-saas-omatic/public/images/roams-logo.png`.
+  2. *Contenedor de Logotipo en Navbar (`NavbarComponent`):*
+     - En [navbar.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/navbar/navbar.component.html) se sustituyó `<div class="brand-badge">ROAMS</div>` por `<div class="brand-logo-badge"><img src="images/roams-logo.png" alt="Roams" class="brand-logo-img" /></div>`.
+     - Estilizado con superficie limpia `var(--roams-surface)` para resaltar nítidamente la tipografía negra y el imagotipo de Roams sobre el navbar oscuro (`var(--roams-primary)`), con adaptación en media queries (`@media (max-width: 480px)`). Cero colores hexadecimales en SCSS.
+  3. *Footer Limpio con Enlace Institucional en Sidebar (`SidebarComponent`):*
+     - Supresión total del indicador superfluo `"Online"` y del punto verde `.dot`.
+     - Sustitución por un enlace accesible `<a href="https://roams.es/" target="_blank" rel="noopener noreferrer" class="footer-link">` que muestra `"© {{ currentYear }} Roams"` e icono vectorial `open_in_new`.
+     - Micro-interacción: al hacer hover, el texto y el icono cambian a `var(--roams-accent-blue)` con traslación sutil de 1px.
+  4. *Accesibilidad e Internacionalización:*
+     - Nuevas claves `'sidebar.roamsLink.aria'` añadidas en los 4 idiomas (`es`, `en`, `de`, `fr`).
+- **Resultados de Verificación:**
+  - Frontend Vitest: **161 pruebas unitarias pasando al 100%**.
+  - Monorepo total: **284 pruebas unitarias pasando al 100%**.
+  - Cobertura global de frontend: **93.06%**.
+  - Oxlint: 0 errores y 0 advertencias.
+- **Valor para la evaluación:** Refuerzo de la identidad corporativa de Roams, eliminación de elementos no profesionales (indicador "Online") y fidelidad estricta a la marca.
+
 
 
 

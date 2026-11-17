@@ -22,7 +22,15 @@
           (click)="closeMobileMenu()"
           [attr.aria-label]="'navbar.home.aria' | translate"
         >
-          <div class="brand-badge">ROAMS</div>
+          <div class="brand-logo-badge">
+            <img
+              src="images/roams-logo.png"
+              alt="Roams"
+              class="brand-logo-img"
+              width="100"
+              height="30"
+            />
+          </div>
           <div class="brand-text">
             <span class="app-title">{{ 'navbar.title' | translate }}</span>
             <span class="app-subtitle">{{ 'navbar.subtitle' | translate }}</span>

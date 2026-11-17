@@ -54,15 +54,23 @@
   }
 }
 
-.brand-badge {
-  background: linear-gradient(135deg, var(--roams-accent-blue), var(--roams-accent-cyan));
-  color: var(--roams-text-inverse);
-  font-weight: 800;
-  font-size: 0.8125rem;
-  letter-spacing: 0.08em;
+.brand-logo-badge {
+  background-color: var(--roams-surface);
   padding: 4px 10px;
-  border-radius: var(--roams-radius-sm);
-  box-shadow: 0 2px 4px rgba(14, 165, 233, 0.25);
+  border-radius: var(--roams-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  height: 36px;
+  box-sizing: border-box;
+
+  .brand-logo-img {
+    height: 22px;
+    width: auto;
+    display: block;
+    object-fit: contain;
+  }
 }
 
 .brand-text {
@@ -200,9 +208,13 @@
     gap: 4px;
   }
 
-  .brand-badge {
-    padding: 3px 6px;
-    font-size: 0.75rem;
+  .brand-logo-badge {
+    padding: 2px 6px;
+    height: 30px;
+
+    .brand-logo-img {
+      height: 18px;
+    }
   }
 
   .app-title {
