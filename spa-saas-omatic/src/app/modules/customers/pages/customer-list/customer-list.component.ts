@@ -111,8 +111,8 @@ export class CustomerListComponent implements OnInit {
 
   // Pure Server-Side Pagination state
   readonly currentPage = signal<number>(1);
-  readonly pageSize = signal<number>(6);
-  readonly pageSizeOptions = [6, 12, 24];
+  readonly pageSize = signal<number>(8);
+  readonly pageSizeOptions = [8, 12, 24];
   readonly totalCount = signal<number>(0);
 
   /**

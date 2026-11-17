@@ -12,10 +12,6 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { EmailComposerDialogComponent } from '../../../../shared/components/email-composer-dialog/email-composer-dialog.component';
 import { I18nService } from '../../../../core/services/i18n.service';
 
-/** // TODO revisar todos estos tipos de comentarios roboticos
- * Presentational card component rendering corporate customer details,
- * ISO country badge, direct email composer trigger, and simulation navigation.
- */
 @Component({
   selector: 'app-customer-card',
   imports: [
@@ -40,12 +36,10 @@ export class CustomerCardComponent {
   readonly customer = input.required<Customer>();
   readonly selectCustomer = output<Customer>();
 
-  /** Memoized avatar initial (pure computed signal) */
   readonly avatarInitial = computed(() =>
     this.customer().companyName.charAt(0).toUpperCase()
   );
 
-  /** Memoized CSS plan modifier class (pure computed signal) */
   readonly planClass = computed(
     () => 'plan-' + this.customer().selectedPlan.toLowerCase()
   );

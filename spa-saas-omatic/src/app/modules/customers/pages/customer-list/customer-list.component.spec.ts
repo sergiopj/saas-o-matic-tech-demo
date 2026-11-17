@@ -57,7 +57,7 @@ describe('CustomerListComponent', () => {
 
     // Flush initial GET /customers triggered by ngOnInit
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?page=1&limit=8&sortBy=createdAt&order=DESC`
     );
     expect(req.request.method).toBe('GET');
     req.flush(mockCustomers, { headers: { 'x-total-count': '2' } });
@@ -87,7 +87,7 @@ describe('CustomerListComponent', () => {
     component.onSearchChange('Roams');
 
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?search=Roams&page=1&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?search=Roams&page=1&limit=8&sortBy=createdAt&order=DESC`
     );
     expect(req.request.method).toBe('GET');
     req.flush([mockCustomers[0]], { headers: { 'x-total-count': '1' } });
@@ -101,7 +101,7 @@ describe('CustomerListComponent', () => {
     component.onSearchChange('NonExistent');
 
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?search=NonExistent&page=1&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?search=NonExistent&page=1&limit=8&sortBy=createdAt&order=DESC`
     );
     req.flush([], { headers: { 'x-total-count': '0' } });
     fixture.detectChanges();
@@ -116,14 +116,14 @@ describe('CustomerListComponent', () => {
   it('should reset search and reload all customers when onClearSearch is called', () => {
     component.onSearchChange('NonExistent');
     const searchReq = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?search=NonExistent&page=1&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?search=NonExistent&page=1&limit=8&sortBy=createdAt&order=DESC`
     );
     searchReq.flush([], { headers: { 'x-total-count': '0' } });
     fixture.detectChanges();
 
     component.onClearSearch();
     const reloadReq = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?page=1&limit=8&sortBy=createdAt&order=DESC`
     );
     reloadReq.flush(mockCustomers, { headers: { 'x-total-count': '2' } });
     fixture.detectChanges();
@@ -136,7 +136,7 @@ describe('CustomerListComponent', () => {
     component.onSearchChange('error-trigger');
 
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?search=error-trigger&page=1&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?search=error-trigger&page=1&limit=8&sortBy=createdAt&order=DESC`
     );
     req.flush(
       { message: 'Database unreachable' },
@@ -158,7 +158,7 @@ describe('CustomerListComponent', () => {
     retryBtn.click();
 
     const retryReq = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?search=error-trigger&page=1&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?search=error-trigger&page=1&limit=8&sortBy=createdAt&order=DESC`
     );
     expect(retryReq.request.method).toBe('GET');
     retryReq.flush(mockCustomers, { headers: { 'x-total-count': '2' } });
@@ -184,7 +184,7 @@ describe('CustomerListComponent', () => {
     component.selectCountry('ES');
 
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?country=ES&page=1&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?country=ES&page=1&limit=8&sortBy=createdAt&order=DESC`
     );
     expect(req.request.method).toBe('GET');
     req.flush([mockCustomers[0]], { headers: { 'x-total-count': '1' } });
@@ -198,7 +198,7 @@ describe('CustomerListComponent', () => {
 
     component.selectCountry('ALL');
     const allReq = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?page=1&limit=8&sortBy=createdAt&order=DESC`
     );
     allReq.flush(mockCustomers, { headers: { 'x-total-count': '2' } });
     fixture.detectChanges();
@@ -207,7 +207,7 @@ describe('CustomerListComponent', () => {
   });
 
   it('should compute pagination properties and navigate between pages with pure server-side pagination', () => {
-    const manyCustomers: Customer[] = Array.from({ length: 6 }, (_, i) => ({
+    const manyCustomers: Customer[] = Array.from({ length: 8 }, (_, i) => ({
       id: `cust-${i + 1}`,
       companyName: `Company ${i + 1}`,
       taxId: `B1234567${i % 10}`,
@@ -217,47 +217,47 @@ describe('CustomerListComponent', () => {
       createdAt: '2026-11-14T10:00:00.000Z',
     }));
 
-    // Change page size to 6
-    component.onPageSizeChange(6);
+    // Initial page with default size 8 and total 20 items (3 pages)
+    component.loadCustomers(1, 8);
     const sizeReq = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?page=1&limit=8&sortBy=createdAt&order=DESC`
     );
-    sizeReq.flush(manyCustomers, { headers: { 'x-total-count': '15' } });
+    sizeReq.flush(manyCustomers, { headers: { 'x-total-count': '20' } });
     fixture.detectChanges();
 
     expect(component.totalPages()).toBe(3);
-    expect(component.paginatedCustomers().length).toBe(6);
-    expect(component.displayedRange()).toEqual({ start: 1, end: 6, total: 15 });
+    expect(component.paginatedCustomers().length).toBe(8);
+    expect(component.displayedRange()).toEqual({ start: 1, end: 8, total: 20 });
 
     // Go to page 2 (server query)
     component.goToPage(2);
     const page2Req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?page=2&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?page=2&limit=8&sortBy=createdAt&order=DESC`
     );
-    page2Req.flush(manyCustomers, { headers: { 'x-total-count': '15' } });
+    page2Req.flush(manyCustomers, { headers: { 'x-total-count': '20' } });
     fixture.detectChanges();
 
     expect(component.currentPage()).toBe(2);
-    expect(component.displayedRange()).toEqual({ start: 7, end: 12, total: 15 });
+    expect(component.displayedRange()).toEqual({ start: 9, end: 16, total: 20 });
 
-    // Go to page 3 (server query with 3 items)
+    // Go to page 3 (server query with remaining 4 items)
     component.goToPage(3);
     const page3Req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?page=3&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?page=3&limit=8&sortBy=createdAt&order=DESC`
     );
-    page3Req.flush(manyCustomers.slice(0, 3), { headers: { 'x-total-count': '15' } });
+    page3Req.flush(manyCustomers.slice(0, 4), { headers: { 'x-total-count': '20' } });
     fixture.detectChanges();
 
     expect(component.currentPage()).toBe(3);
-    expect(component.paginatedCustomers().length).toBe(3);
-    expect(component.displayedRange()).toEqual({ start: 13, end: 15, total: 15 });
+    expect(component.paginatedCustomers().length).toBe(4);
+    expect(component.displayedRange()).toEqual({ start: 17, end: 20, total: 20 });
   });
 
   it('should trigger server-side query with updated sorting when onSortChange is called', () => {
     component.onSortChange('name_asc');
 
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=companyName&order=ASC`
+      `${environment.apiBaseUrl}/customers?page=1&limit=8&sortBy=companyName&order=ASC`
     );
     expect(req.request.method).toBe('GET');
     req.flush([mockCustomers[1], mockCustomers[0]], { headers: { 'x-total-count': '2' } });
@@ -267,8 +267,8 @@ describe('CustomerListComponent', () => {
   });
 
   it('should render mat-progress-bar and disable pagination controls while request is in flight without activating search spinner', () => {
-    // Set total count to 15 so totalPages is 3 and page 2 is valid
-    component.totalCount.set(15);
+    // Set total count to 20 so totalPages is 3 and page 2 is valid
+    component.totalCount.set(20);
     fixture.detectChanges();
 
     component.goToPage(2);
@@ -286,7 +286,7 @@ describe('CustomerListComponent', () => {
     expect(navButtons.every((btn) => btn.disabled)).toBe(true);
 
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?page=2&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?page=2&limit=8&sortBy=createdAt&order=DESC`
     );
     req.flush(mockCustomers, { headers: { 'x-total-count': '15' } });
     fixture.detectChanges();
@@ -339,7 +339,7 @@ describe('CustomerListComponent', () => {
     expect(component.searchTerm()).toBe('');
 
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?page=1&limit=8&sortBy=createdAt&order=DESC`
     );
     req.flush([], { headers: { 'x-total-count': '0' } });
   });
@@ -347,7 +347,7 @@ describe('CustomerListComponent', () => {
   it('should handle API failure gracefully and set initialLoading to false', () => {
     component.loadCustomers();
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?page=1&limit=8&sortBy=createdAt&order=DESC`
     );
     req.error(new ProgressEvent('error'));
     expect(component.initialLoading()).toBe(false);
@@ -377,13 +377,13 @@ describe('CustomerListComponent', () => {
   it('should fallback to default sort option when unknown sort key is passed', () => {
     component.onSortChange('unknownKey');
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?page=1&limit=8&sortBy=createdAt&order=DESC`
     );
     req.flush([], { headers: { 'x-total-count': '0' } });
   });
 
   it('should navigate through template pagination buttons (next, prev, first, last, page number)', () => {
-    component.totalCount.set(24);
+    component.totalCount.set(32);
     component.currentPage.set(2);
     fixture.detectChanges();
 
@@ -397,9 +397,9 @@ describe('CustomerListComponent', () => {
     if (nextBtn) {
       nextBtn.click();
       const req = httpTesting.expectOne(
-        `${environment.apiBaseUrl}/customers?page=3&limit=6&sortBy=createdAt&order=DESC`
+        `${environment.apiBaseUrl}/customers?page=3&limit=8&sortBy=createdAt&order=DESC`
       );
-      req.flush(mockCustomers, { headers: { 'x-total-count': '24' } });
+      req.flush(mockCustomers, { headers: { 'x-total-count': '32' } });
     }
 
     // Click prev button
@@ -407,9 +407,9 @@ describe('CustomerListComponent', () => {
     if (prevBtn) {
       prevBtn.click();
       const req = httpTesting.expectOne(
-        `${environment.apiBaseUrl}/customers?page=2&limit=6&sortBy=createdAt&order=DESC`
+        `${environment.apiBaseUrl}/customers?page=2&limit=8&sortBy=createdAt&order=DESC`
       );
-      req.flush(mockCustomers, { headers: { 'x-total-count': '24' } });
+      req.flush(mockCustomers, { headers: { 'x-total-count': '32' } });
     }
 
     // Click first page button
@@ -417,9 +417,9 @@ describe('CustomerListComponent', () => {
     if (firstBtn) {
       firstBtn.click();
       const req = httpTesting.expectOne(
-        `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+        `${environment.apiBaseUrl}/customers?page=1&limit=8&sortBy=createdAt&order=DESC`
       );
-      req.flush(mockCustomers, { headers: { 'x-total-count': '24' } });
+      req.flush(mockCustomers, { headers: { 'x-total-count': '32' } });
     }
 
     // Click last page button
@@ -427,9 +427,9 @@ describe('CustomerListComponent', () => {
     if (lastBtn) {
       lastBtn.click();
       const req = httpTesting.expectOne(
-        `${environment.apiBaseUrl}/customers?page=4&limit=6&sortBy=createdAt&order=DESC`
+        `${environment.apiBaseUrl}/customers?page=4&limit=8&sortBy=createdAt&order=DESC`
       );
-      req.flush(mockCustomers, { headers: { 'x-total-count': '24' } });
+      req.flush(mockCustomers, { headers: { 'x-total-count': '32' } });
     }
   });
 
@@ -455,7 +455,7 @@ describe('CustomerListComponent', () => {
     component.openCreateCustomerDialog();
 
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+      `${environment.apiBaseUrl}/customers?page=1&limit=8&sortBy=createdAt&order=DESC`
     );
     req.flush(mockCustomers, { headers: { 'x-total-count': '2' } });
     expect(component.customers().length).toBe(2);

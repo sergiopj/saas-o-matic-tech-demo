@@ -57,9 +57,9 @@ export class ProblemDetailExceptionFilter implements ExceptionFilter {
         }
       }
     } else {
-      // 500: Do not leak internal database/system errors to clients; log internally
+      // 500: Log internal errors without leaking database or system details to clients (OWASP A05)
       console.error('Unhandled internal server error:', exception);
-      detail = 'An unexpected error occurred.'; // TODO revisar este tipo de mensajes hardcodeados, no es muy amigable para el usuario final, deberia ser mas generico y amigable, y no dar detalles de la excepcion interna
+      detail = 'An unexpected internal error occurred. Please try again shortly or contact support.';
     }
 
     response

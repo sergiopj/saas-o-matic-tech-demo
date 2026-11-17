@@ -20,7 +20,7 @@ Para garantizar mantenibilidad, testabilidad y aislamiento estricto de las regla
 3. **Módulo como Orquestador (Wiring):** Los archivos de módulo de NestJS (`customers.module.ts`, `simulations.module.ts`) residen en la raíz de cada módulo para actuar como orquestadores de las tres capas (dominio, aplicación e infraestructura).
 4. **Capa Transversal (`src/shared/`):** La carpeta `shared/` se sitúa en la raíz de `src/`, fuera de `modules/`, agrupando excepciones genéricas de dominio y filtros globales como el manejador RFC 7807.
 5. **Código en Inglés, Documentación en Español:** Nombres de clases, variables, interfaces, tests y commits se escriben en inglés canónico. La documentación, explicaciones y bitácoras se redactan en español.
-6. **Estandarización de Errores:** Ninguna excepción interna escapa sin ser transformada al estándar **IETF RFC 7807 Problem Details** (`application/problem+json`).
+6. **Estandarización y Sanitización Defensiva de Errores (RFC 7807):** Ninguna excepción interna escapa sin ser transformada al estándar **IETF RFC 7807 Problem Details** (`application/problem+json`). En errores no controlados (HTTP 500 *Internal Server Error*), los mensajes se normalizan a un texto genérico seguro (`An unexpected internal error occurred. Please try again shortly or contact support.`), impidiendo la filtración de trazas del runtime, consultas SQL o esquemas de base de datos (defensa en profundidad OWASP *Information Disclosure*).
 7. **Soberanía del Dominio sobre Fechas y Precisión Financiera:**
    - Las entidades de dominio originan y gobiernan sus propios timestamps (`createdAt: new Date()`). En infraestructura, TypeORM utiliza `@Column('datetime')` en lugar de `@CreateDateColumn` para no sobrescribir ni desincronizar los ciclos de vida del dominio.
    - Todo importe monetario se persiste con `@Column('decimal', { precision: 10, scale: 2 })` (y `scale: 4` en tasas) para prevenir errores de coma flotante IEEE 754 de los tipos `float`.
@@ -999,6 +999,31 @@ Al basar todo el sistema de diseño en tokens CSS (`var(--roams-*)`), la conmuta
 - **Signal Primario y Computed Derivado:** `currentTheme = signal<ThemeMode>('light')` e `isDark = computed(() => this.currentTheme() === 'dark')`.
 - **Efecto Reactivo de Reflexión al DOM:** Un `effect()` sincroniza automáticamente el atributo `data-theme` y las clases `.dark-theme` en la raíz del documento.
 - **Persistencia y Resiliencia:** Guarda la elección en `localStorage` (`roams_theme`) y respeta las preferencias del sistema operativo (`window.matchMedia('(prefers-color-scheme: dark)')`).
+
+---
+
+### 3.25 Paginación Armónica en Cuadrículas Responsivas (Harmonic Grid Pagination) y Directrices de Código Limpio
+
+#### A. Geometría Armónica en Grids CSS Fluídos
+Cuando se aplican cuadrículas responsivas con ajuste automático (`grid-template-columns: repeat(auto-fill, minmax(250px, 1fr))`), el número de columnas resultante depende del ancho del viewport disponible:
+- **Desktop ($\ge 1100\text{ px}$):** $4\text{ columnas}$.
+- **Tablet ($\approx 768\text{ px} - 1024\text{ px}$):** $2\text{ o } 3\text{ columnas}$.
+- **Mobile ($< 600\text{ px}$):** $1\text{ columna}$.
+
+Si el tamaño de página (`pageSize`) no es armónicamente divisible por las columnas del viewport principal (por ejemplo, `pageSize = 6` en un grid de 4 columnas):
+- Fila 1: 4 tarjetas (100% de ocupación).
+- Fila 2: 2 tarjetas (50% de ocupación), dejando **2 espacios vacíos** a la derecha en la primera página y en cualquier página que no sea la última.
+
+Para resolver este defecto visual de forma universal y elegante:
+1. **Regla del Mínimo Común Múltiplo Armónico:** El tamaño de página por defecto se establece en **8** (con opciones de selector en `[8, 12, 24]`).
+   - En 4 columnas: $8 / 4 = 2$ filas completas; $12 / 4 = 3$ filas; $24 / 4 = 6$ filas.
+   - En 2 columnas: $8 / 2 = 4$ filas completas; $12 / 2 = 6$ filas; $24 / 2 = 12$ filas.
+   - En 1 columna: $8 / 1 = 8$ filas completas; $12 / 1 = 12$ filas.
+2. **Resultado de Experiencia:** En todas las páginas intermedias, la cuadrícula siempre se renderiza como un bloque rectangular geométricamente simétrico y sólido, eliminando la apariencia descuidada de ranuras desocupadas.
+
+#### B. Directrices de Código Limpio (Anti-Robotic Comments)
+- **Eliminación de Comentarios Artificiales o Redundantes:** En componentes declarativos basados en Angular Signals (`signal`, `computed`, `input`), se prohíben comentarios JSDoc verbosos que solo repiten la firma del método o la variable (ej. `/** Memoized avatar initial (pure computed signal) */`).
+- **Código Auto-Documentado:** Los nombres expresivos de señales e inputs en inglés canónico (`avatarInitial`, `taxCountryCode`, `creationDateFormatted`) comunican su propósito de manera auto-contenida sin añadir ruido visual al código fuente.
 
 ---
 

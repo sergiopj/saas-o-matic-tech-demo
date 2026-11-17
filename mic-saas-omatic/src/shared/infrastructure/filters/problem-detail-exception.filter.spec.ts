@@ -131,7 +131,7 @@ describe('ProblemDetailExceptionFilter (RFC 7807)', () => {
       expect.objectContaining({
         status: 500,
         title: 'Internal Server Error',
-        detail: 'An unexpected error occurred.',
+        detail: 'An unexpected internal error occurred. Please try again shortly or contact support.',
       }),
     );
     consoleSpy.mockRestore();
