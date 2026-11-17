@@ -454,6 +454,14 @@ spa-saas-omatic/
 - **Catálogo Controlado (UX Whitelist):** En lugar de abrumar al equipo comercial con 160 opciones en el desplegable, `SUPPORTED_CURRENCIES` acota el selector a las divisas operativas estratégicas del mercado SaaS (`EUR`, `USD`, `GBP`, `CHF`, `CAD`, `JPY`).
 - **Extensibilidad Abierta/Cerrada:** Incorporar una nueva divisa comercial (ej. `AUD` o `MXN`) requiere únicamente añadir su código a la tupla `SUPPORTED_CURRENCIES`.
 - **Formateo Universal con Fallback `Intl`:** Si se solicita formatear una divisa no registrada en `CURRENCY_METADATA`, el pipe `LocalizedCurrencyPipe` recurre de forma transparente al motor nativo `Intl.NumberFormat` de ECMAScript (`meta?.locale` y `meta?.decimals` como `undefined`), infiriendo automáticamente el símbolo oficial, el número canónico de decimales y el orden según el locale del navegador del usuario.
+- **Resiliencia de Red y Degradación Elegante (*Graceful Degradation*):**
+  - *Independencia Operativa de Terceros:* Toda integración HTTP hacia APIs públicas externas (`open.er-api.com`) es inherentemente susceptible a latencias, caídas temporales o cuotas agotadas. La arquitectura de SaaS-O-Matic no detiene la navegación ni bloquea los flujos comerciales si la API externa no responde.
+  - *SSOT de Contingencia en `currency.model.ts`:* `DEFAULT_FALLBACK_RATES` (`EUR: 1.0, USD: 1.08, GBP: 0.85, CHF: 0.96, CAD: 1.48, JPY: 165.0`) actúa como salvaguarda inmutable en memoria ante errores HTTP (4xx, 5xx, timeout o desconexión).
+  - *Feedback Visual Tri-Estado No Obstructivo (`CurrencySelectorComponent`):* En el top navbar, un icono de nube informa el estado operativo sin modales invasivos:
+    - `cloud_done` (verde `--roams-status-success`): Conexión en vivo operativa.
+    - `sync` (cian `--roams-status-info` con animación `spin`): Petición HTTP en vuelo.
+    - `cloud_off` (ámbar `--roams-status-warning`): Contingencia activa con tipos en caché. Al hover/focus, un tooltip internacionalizado informa: *"API de tipos de cambio no disponible. Usando tipos de contingencia en caché."*.
+  - *Cero Salida Confusa en Consola Productiva:* Emite un aviso estructurado `console.warn(...)`, mientras que en la suite unitaria (`currency.service.spec.ts`) se intercepta con espías de Vitest para respetar la política *Zero-Stderr*.
 
 ### 3.4 Estándares de Plantillas: Built-in Control Flow (`@if`, `@for`) y Pureza Declarativa (Dumb Templates)
 

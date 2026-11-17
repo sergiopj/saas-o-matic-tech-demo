@@ -3807,3 +3807,46 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
 - **Valor para la evaluación:** Eliminación de sobrecarga visual en elementos de formulario, asegurando una presentación limpia, profesional y libre de duplicidades.
+
+---
+
+### 6.150. Sincronización Documental: Resiliencia ante Caídas de API Externa, Indicador Tri-Estado y *Graceful Degradation* en Divisas
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario consulta si el comportamiento de resiliencia y degradación elegante ante caídas de la API externa de tipos de cambio (`https://open.er-api.com/v6/latest/EUR`) está documentado con todo detalle en los archivos normativos `.md` (qué ve el usuario en el navbar, cómo conmuta el icono de nube a `cloud_off` en ámbar con tooltip explicativo y cómo `CurrencyService` preserva la operatividad total activando `DEFAULT_FALLBACK_RATES` sin bloquear la aplicación).
+- **Feedback Humano:**
+  > *"esto se explica en los mds que tocan?
+  > 
+  > Analyzed currency.service.ts:L1-79
+  > Ran search currencyService.error references
+  > Analyzed currency-selector.component.ts:L1-45
+  > Analyzed currency-selector.component.html:L1-50
+  > Ran check translation keys for currency.sync
+  > Analyzed currency-selector.component.scss:L50-100
+  > Analyzed currency-selector.component.scss:L101-142
+  > 
+  > **Sí, se le muestra y además la aplicación nunca se rompe.**
+  > 
+  > Esto es exactamente lo que ocurre tanto a nivel visual como funcional:
+  > ...
+  > 1. Qué ve el usuario en la interfaz (Navbar)
+  > ...
+  > 2. Resiliencia operativa (Graceful Degradation)"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Actualización de [functional-specs.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/01-specs/functional-specs.md) (Sección 3.1, ítem 4):*
+     - Documentación exhaustiva del indicador visual tri-estado en el Navbar:
+       - `cloud_done` en verde esmeralda (`--roams-status-success`): API en vivo conectada.
+       - `sync` en cian (`--roams-status-info` con animación `spin`): Petición en curso.
+       - `cloud_off` en ámbar de advertencia (`--roams-status-warning`): API no disponible.
+     - Documentación de los tooltips multilingües (`currency.sync.synced`, `currency.sync.loading`, `currency.sync.error`).
+     - Detalle de la resiliencia operativa: la aplicación nunca lanza bloqueos obstructivos; se activa `DEFAULT_FALLBACK_RATES` para mantener los cálculos y conversiones al 100%.
+  2. *Ampliación de [architecture-guidelines.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md) (Sección 3.3):*
+     - Formalización del principio de *Degradación Elegante (Graceful Degradation)* e independencia operativa respecto a servicios de terceros.
+     - Co-ubicación inmutable del SSOT `DEFAULT_FALLBACK_RATES` en `currency.model.ts`.
+     - Observabilidad limpia y respeto a la política *Zero-Stderr* mediante espías en pruebas unitarias.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **249 pruebas unitarias pasando al 100%** (29 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+- **Valor para la evaluación:** Garantía de que cualquier evaluador técnico que audite la arquitectura encuentre documentado el patrón de tolerancia a fallos en servicios externos y la experiencia de usuario resiliente.
