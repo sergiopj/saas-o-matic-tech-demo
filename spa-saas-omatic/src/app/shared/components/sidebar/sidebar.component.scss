@@ -1,17 +1,30 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+  z-index: 50;
+}
+
 .sidebar-container {
   display: flex;
   flex-direction: column;
   width: 250px;
+  height: 100%;
+  min-height: 100%;
   background-color: var(--roams-surface, #ffffff);
   border-right: 1px solid var(--roams-border, #e2e8f0);
   transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 1rem 0.75rem;
+  padding: 1.25rem 0.75rem 1rem 0.75rem;
   box-sizing: border-box;
-  flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 
   &.is-collapsed {
     width: 72px;
-    padding: 1rem 0.5rem;
+    padding: 1.25rem 0.5rem 1rem 0.5rem;
 
     .sidebar-header {
       justify-content: center;
@@ -117,6 +130,7 @@
 }
 
 .sidebar-footer {
+  margin-top: auto;
   padding-top: 1rem;
   border-top: 1px solid var(--roams-border-light, #f1f5f9);
 

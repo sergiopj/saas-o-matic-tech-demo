@@ -1613,6 +1613,39 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
      - Se añadió una prueba en `simulation-hub.component.spec.ts` verificando que el botón existe en el DOM, se inicia en `disabled: true`, y conmuta a `disabled: false` de inmediato al seleccionar una cuenta corporativa.
 - **Valor para la evaluación:** Ergonomía visual de nivel enterprise, erradicación de saltos en el DOM (*layout shift*) y feedback interactivo inequívoco para el usuario.
 
+### 6.69. Auditoría de Altura Vertical de Barra Lateral (Full Viewport Height & Sticky Sidebar)
+
+- **La observación del Director de Orquesta:**
+  - El usuario detectó que el menú lateral se truncaba verticalmente al terminar los tres enlaces:
+    > *"en al lateral el mwenu quneue solo haya tres enlaces que la barra lateral llegue hazta el fondo de la pantalla en vertical, me entiendes?"*
+- **Análisis del Problema de CSS y Flexbox:**
+  1. *Comportamiento por Defecto de Custom Elements en Angular:*
+     - La etiqueta `<app-sidebar>` se renderiza como elemento de bloque/en línea sin regla `:host` definida. Por tanto, su altura dependía exclusivamente de la suma de alturas de sus hijos directos (encabezado, 3 enlaces y footer).
+     - Si la página no tenía suficiente contenido, o si el usuario bajaba en la página, la barra lateral terminaba abruptamente en la parte superior, dejando un corte gris antiestético en el fondo de la pantalla.
+  2. *Desacople entre el Sticky de Navbar y el Sidebar:*
+     - Mientras que el Navbar de 64px (`.navbar-header`) tenía `position: sticky; top: 0;`, el Sidebar no tenía anclaje sticky, perdiéndose de vista al hacer scroll en listados largos.
+- **Implementación y Solución:**
+  1. *Definición de `:host` con Altura Total de Viewport (`calc(100vh - 64px)`):*
+     - En `sidebar.component.scss` se configuró la regla raíz del componente:
+       ```scss
+       :host {
+         display: flex;
+         flex-direction: column;
+         flex-shrink: 0;
+         position: sticky;
+         top: 64px;
+         height: calc(100vh - 64px);
+         z-index: 50;
+       }
+       ```
+  2. *Contenedor al 100% y Empuje del Footer al Fondo:*
+     - `.sidebar-container` toma `height: 100%; min-height: 100%;` con scroll interno independiente (`overflow-y: auto`).
+     - El footer (`.sidebar-footer`) aplica `margin-top: auto`, asegurando que la insignia de estado del sistema permanezca fijada en la parte inferior de la pantalla.
+  3. *Alineación de `.app-body` en `app.scss`:*
+     - Se reforzó con `align-items: stretch; position: relative;` y `min-width: 0;` en el contenedor principal.
+- **Valor para la evaluación:** Acabado visual corporativo premium estándar en plataformas SaaS B2B (Stripe, GitHub, AWS), manteniendo la navegación lateral fijada hasta el fondo del viewport independientemente de la longitud de la página.
+
+
 
 
 
