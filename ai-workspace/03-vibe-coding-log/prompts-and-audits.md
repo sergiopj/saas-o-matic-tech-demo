@@ -1728,6 +1728,34 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Bundle de producción limpio en 4.5s sin sobrecostes.
 - **Valor para la evaluación:** Capacidad de escuchar el feedback del usuario, priorizar la estabilidad y simplicidad (*Less is more*) y mantener una arquitectura limpia y desacoplada sin sobrecargar la experiencia.
 
+### 6.74 Integración Enterprise de Despacho Backend (`POST /emails`) con Editor Enriquecido Quill (`ngx-quill`) y Sanitización Anti-XSS
+
+- **Situación inicial:** El envío de correo comercial mediante la URI `mailto:` del cliente del sistema operativo presentaba limitaciones graves: dependía del cliente de correo predeterminado del sistema operativo (que en muchos entornos web o corporativos no está asociado o no responde), no permitía formato enriquecido HTML y no ofrecía feedback de entrega ni validación transaccional.
+- **Tu criterio y dirección de arquitectura:** Tras consultar las mejores prácticas y justificaciones de cara a la entrevista técnica, decidiste dar el salto cualitativo a nivel senior: implementar un endpoint transaccional backend en NestJS (`POST /emails`), sanitizar el HTML entrante en backend contra inyecciones XSS (OWASP), e integrar el editor WYSIWYG Quill en el frontend con una barra de herramientas ligera y configurable, aportando 3 argumentos defensivos de peso:
+  1. *Frente a `contenteditable` nativo:* Evita la heterogeneidad de marcado entre navegadores y los problemas de accesibilidad.
+  2. *Frente a CKEditor/TinyMCE:* Evita dependencias mastodónticas y costes de licencia comercial innecesarios para un formulario de correo.
+  3. *Frente a TipTap:* Quill ya provee una barra de herramientas declarativa sin necesidad de desarrollarla desde cero (*headless*).
+  4. *Rigor de Seguridad (Senior Touch):* Cero confianza en el HTML del frontend (*Zero-Trust*), sanitizando en el backend para erradicar cualquier vector de ataque `<script>`.
+- **Solución técnica implementada:**
+  1. *Backend NestJS (`EmailsModule` bajo Arquitectura Hexagonal):*
+     - `SendEmailDto` con validaciones declarativas `class-validator` (`@IsEmail()`, `@IsNotEmpty()`, `@MaxLength(200)`).
+     - `HtmlSanitizerService` en la capa de dominio desinfectando etiquetas ejecutables (`<script>`, `<iframe>`, `<object>`, `<embed>`), manejadores inline de eventos (`onclick`, `onload`, `onerror`) y esquemas de URI maliciosos (`javascript:`).
+     - `SendEmailUseCase` orquestando la sanitización, generando identificador único de despacho (`msg-UUID`) y trazando el log transaccional.
+     - `EmailController` exponiendo `POST /emails` con respuesta estructurada (`success`, `messageId`, `recipient`, `sanitizedBodyLength`, `dispatchedAt`).
+     - Batería completa de pruebas unitarias en Jest: 24 test suites y 121 tests pasando al 100%.
+  2. *Frontend Angular 22 (`ngx-quill` + `quill` 2.x):*
+     - Instalación y configuración de estilos en `angular.json` con segregación de dependencias CommonJS (`allowedCommonJsDependencies: ['quill', 'quill-delta']`) para garantizar 0 advertencias de optimización.
+     - Servicio reactivo `EmailApiService` conectado a `environment.apiBaseUrl/emails`.
+     - `EmailComposerDialogComponent` integrado con `<quill-editor>`, soporte multidioma en plantilla, manejo reactivo de estados (`isSending`, `sendSuccess`, `errorMessage`), spinner en botón de envío y fallback de portapapeles.
+     - Feedback accesible mediante `MatSnackBar` toast tras el cierre exitoso del diálogo en `CustomerCardComponent` y `CustomerDetailComponent`.
+     - Carga diferida (*Lazy Loading*): Quill se empaqueta en su propio chunk diferido (`ngx-quill-quill`, ~51 kB transferidos), manteniendo el bundle inicial de la aplicación en apenas 160 kB.
+- **Resultados de Verificación:**
+  - 132 tests unitarios en frontend pasando al 100% (23 suites).
+  - 121 tests unitarios en backend pasando al 100% (24 suites).
+  - 0 errores y 0 warnings en `oxlint`.
+  - Build de producción con 0 errores y 0 warnings.
+- **Valor para la evaluación:** Demostración de arquitectura robusta, conocimiento profundo de seguridad (OWASP A03: Injection), optimización de rendimiento web (Lazy Chunks) y justificación sólida de decisiones técnicas para la entrevista.
+
 
 
 

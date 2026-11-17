@@ -12,6 +12,8 @@ dist/
 # SQLite databases
 *.sqlite
 *.sqlite3
+*.sqlite-shm
+*.sqlite-wal
 *.db
 
 # Logs & environment

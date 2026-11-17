@@ -16,6 +16,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CustomerApiService } from '../../services/customer-api.service';
 import { SimulationApiService } from '../../../simulations/services/simulation-api.service';
 import { CurrencyService } from '../../../../core/services/currency.service';
@@ -47,6 +48,7 @@ import { I18nService } from '../../../../core/services/i18n.service';
     MatFormFieldModule,
     MatInputModule,
     MatTooltipModule,
+    MatSnackBarModule,
     TranslatePipe,
     LocalizedCurrencyPipe,
     LoadingStateComponent,
@@ -59,6 +61,7 @@ import { I18nService } from '../../../../core/services/i18n.service';
 export class CustomerDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
   private readonly i18n = inject(I18nService);
   readonly customerApi = inject(CustomerApiService);
   readonly simulationApi = inject(SimulationApiService);
@@ -197,7 +200,7 @@ export class CustomerDetailComponent implements OnInit {
     const cust = this.customer();
     if (!cust) return;
 
-    this.dialog.open(EmailComposerDialogComponent, {
+    const ref = this.dialog.open(EmailComposerDialogComponent, {
       data: {
         recipient: cust.email,
         recipientName: cust.companyName,
@@ -213,6 +216,16 @@ export class CustomerDetailComponent implements OnInit {
       width: '640px',
       maxWidth: '94vw',
       panelClass: 'roams-email-dialog-panel',
+    });
+
+    ref.afterClosed().subscribe((res) => {
+      if (res?.sent) {
+        this.snackBar.open(
+          `Email enviado a ${res.recipient} (ID: ${res.messageId})`,
+          'OK',
+          { duration: 4500 }
+        );
+      }
     });
   }
 }

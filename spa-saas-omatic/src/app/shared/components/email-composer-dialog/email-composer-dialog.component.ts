@@ -9,7 +9,10 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { QuillEditorComponent } from 'ngx-quill';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { EmailApiService } from '../../../core/services/email-api.service';
 
 export interface EmailComposerDialogData {
   recipient: string;
@@ -17,13 +20,12 @@ export interface EmailComposerDialogData {
   subtitle?: string;
   subject?: string;
   body?: string;
+  htmlBody?: string;
 }
 
 /**
- * Universal, modular enterprise dialog for composing and dispatching
- * commercial proposals or communications.
- * Fully decoupled in shared/components with native RFC 6068 mailto dispatch
- * and clipboard copy backup.
+ * Enterprise dialog for drafting, rich-text editing (Quill WYSIWYG), and dispatching
+ * commercial proposals and notifications directly to the backend POST /emails endpoint.
  */
 @Component({
   selector: 'app-email-composer-dialog',
@@ -34,6 +36,8 @@ export interface EmailComposerDialogData {
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatProgressSpinnerModule,
+    QuillEditorComponent,
     TranslatePipe,
   ],
   templateUrl: './email-composer-dialog.component.html',
@@ -42,51 +46,82 @@ export interface EmailComposerDialogData {
 export class EmailComposerDialogComponent {
   readonly data = inject<EmailComposerDialogData>(MAT_DIALOG_DATA);
   readonly dialogRef = inject(MatDialogRef<EmailComposerDialogComponent>);
+  private readonly emailApi = inject(EmailApiService);
 
   readonly recipient = signal<string>(this.data.recipient || '');
   readonly subject = signal<string>(this.data.subject || '');
-  readonly body = signal<string>(this.data.body || '');
+  readonly htmlBody = signal<string>(this.initHtmlBody());
+  readonly isSending = signal<boolean>(false);
+  readonly sendSuccess = signal<boolean>(false);
+  readonly errorMessage = signal<string | null>(null);
   readonly copied = signal<boolean>(false);
-  readonly isDispatching = signal<boolean>(false);
 
-  /**
-   * Constructs an RFC 6068 compliant mailto URI and triggers the operating system's default email client.
-   */
-  openMailClient(): void {
-    this.isDispatching.set(true);
+  readonly quillModules = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ header: [1, 2, 3, false] }],
+      ['clean'],
+    ],
+  };
 
-    // RFC 6068: The recipient addr-spec preserves '@', query params are percent-encoded
-    const to = this.recipient().trim();
-    const subjectParam = encodeURIComponent(this.subject());
-    const bodyParam = encodeURIComponent(this.body());
-    const mailtoUri = `mailto:${to}?subject=${subjectParam}&body=${bodyParam}`;
-
-    if (typeof document !== 'undefined') {
-      const link = document.createElement('a');
-      link.href = mailtoUri;
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else if (typeof window !== 'undefined') {
-      window.location.href = mailtoUri;
+  private initHtmlBody(): string {
+    if (this.data.htmlBody) {
+      return this.data.htmlBody;
     }
-
-    // Defer closing so Chromium event loop has time to hand off the protocol URI to the OS
-    setTimeout(() => {
-      this.isDispatching.set(false);
-      this.dialogRef.close('dispatched');
-    }, 400);
+    if (this.data.body) {
+      return this.data.body
+        .split('\n\n')
+        .map((p) => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+        .join('');
+    }
+    return '';
   }
 
-  /**
-   * Copies the full subject and message to clipboard with visual feedback.
-   */
+  sendEmail(): void {
+    const to = this.recipient().trim();
+    const subject = this.subject().trim();
+    const htmlBody = this.htmlBody().trim();
+
+    if (!to || !subject || !htmlBody) {
+      return;
+    }
+
+    this.isSending.set(true);
+    this.errorMessage.set(null);
+
+    this.emailApi
+      .sendEmail({
+        to,
+        subject,
+        htmlBody,
+      })
+      .subscribe({
+        next: (res) => {
+          this.isSending.set(false);
+          this.sendSuccess.set(true);
+          setTimeout(() => {
+            this.dialogRef.close({
+              sent: true,
+              recipient: to,
+              messageId: res.messageId,
+            });
+          }, 800);
+        },
+        error: (err) => {
+          this.isSending.set(false);
+          this.errorMessage.set(
+            err?.error?.detail || err?.message || 'Could not dispatch email. Please try again.'
+          );
+        },
+      });
+  }
+
   async copyTemplate(): Promise<void> {
-    const fullText = `Subject: ${this.subject()}\n\n${this.body()}`;
+    const plainText = `Subject: ${this.subject()}\n\n${this.htmlBody().replace(/<[^>]*>/g, '')}`;
 
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      await navigator.clipboard.writeText(fullText);
+      await navigator.clipboard.writeText(plainText);
       this.copied.set(true);
       setTimeout(() => this.copied.set(false), 2500);
     }

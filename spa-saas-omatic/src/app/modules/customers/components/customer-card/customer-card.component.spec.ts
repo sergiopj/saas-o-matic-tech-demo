@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
 import { CustomerCardComponent } from './customer-card.component';
 import { Customer } from '../../models/customer.model';
 import { I18nService } from '../../../../core/services/i18n.service';
@@ -70,7 +71,9 @@ describe('CustomerCardComponent', () => {
   });
 
   it('should open EmailComposerDialogComponent when clicking the email button', () => {
-    const openSpy = vi.spyOn((component as any).dialog, 'open').mockReturnValue({} as any);
+    const openSpy = vi.spyOn((component as any).dialog, 'open').mockReturnValue({
+      afterClosed: () => of(null),
+    } as any);
 
     const emailBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.email-action-btn');
     emailBtn.click();

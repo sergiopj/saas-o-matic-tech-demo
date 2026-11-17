@@ -448,16 +448,24 @@ Para garantizar que fallos en elementos cosméticos o de micro-interacción (spi
   3. **Lista Desplegable Scrollable:** El panel desplegable de opciones maneja decenas de países con scroll fluido sin alterar el DOM de la página principal.
   4. **Identificación Limpia y Textual:** Cada opción expone el código ISO en texto claro junto a la insignia de recuento numérico (`ES (1)`, `US (1)`), evitando dependencias de emojis y garantizando máxima legibilidad.
 
-### 3.12 Componente Universal de Redacción de Correo Comercial (`EmailComposerDialogComponent`)
+### 3.12 Redacción de Correo Comercial y Transaccional: Despacho Backend con Editor WYSIWYG Quill
 
-- **Evolución Modular hacia `src/app/shared/components/email-composer-dialog/`:**
-  Inicialmente acoplado al módulo de clientes, el diálogo de redacción se generalizó como un componente transversal en `shared` con contrato agnóstico (`EmailComposerDialogData { recipient, recipientName?, subtitle?, subject?, body? }`), permitiendo que cualquier pantalla (Clientes, Simulaciones, Facturación o Notificaciones) pueda disparar comunicaciones comerciales o de soporte sin duplicidad de código.
-- **Flujo Robusto de Despacho Nativo (RFC 6068 `mailto:`):**
-  - *Filosofía UX KISS (Keep It Simple & Solid):* Se evita la sobreingeniería de editores pesados o dependencias hacia proveedores web concretos (ej. Gmail). La interfaz se mantiene limpia con dos acciones nítidas y complementarias:
-    1. **"Abrir en gestor de correo":** Dispara la URI estándar `mailto:` al gestor predeterminado del sistema operativo mediante `window.location.href = mailtoUri` con cierre fluido del diálogo modal.
-    2. **"Copiar plantilla":** Copia el mensaje completo al portapapeles mediante la API nativa `navigator.clipboard` con confirmación visual reactiva (`copied`), ofreciendo un respaldo inmediato si el usuario prefiere pegar el texto en su webmail.
-- **Interpolación Dinámica Multidioma:**
-  Soporta la precarga de plantillas parametrizadas por idioma (`es`, `en`, `de`, `fr`) inyectando variables de contexto (`{{company}}`, `{{plan}}`).
+- **Evolución Modular de `mailto:` a Endpoint Transaccional Backend (`POST /emails`):**
+  - *Limitaciones de `mailto:` en Producción:* Un enlace `mailto:` del navegador no permite controlar formato HTML enriquecido, carece de validación, no puede reportar fallos de entrega ni transaccionales y depende del cliente de correo local del sistema operativo del usuario (que frecuentemente falla o no está configurado).
+  - *Arquitectura Enterprise:* El modal de redacción (`EmailComposerDialogComponent` en `src/app/shared/components/email-composer-dialog/`) captura los datos del destinatario, asunto y cuerpo en HTML limpio y los delega a través del servicio reactivo `EmailApiService` (`src/app/core/services/email-api.service.ts`) al endpoint backend `POST /emails`.
+- **Integración de Editor Enriquecido Quill (`ngx-quill` + `quill` 2.x):**
+  - *Justificación Técnica para la Prueba y Entrevista:*
+    1. **Frente a `contenteditable` manual:** Un `contenteditable` sin control genera HTML heterogéneo según el navegador, introduce graves problemas de accesibilidad y requiere cientos de líneas de código frágil. Quill estandariza las mutaciones DOM mediante su modelo interno *Deltas* y produce HTML semántico limpio.
+    2. **Frente a CKEditor / TinyMCE:** CKEditor y TinyMCE son suites muy pesadas orientadas a colaboración o CMS, con licencias restrictivas. Para un cuerpo de correo comercial basta una barra de herramientas ligera y enfocada.
+    3. **Frente a TipTap:** TipTap es *headless* y exige construir toda la barra de herramientas y controles visuales desde cero. `ngx-quill` provee soporte oficial para Angular 22, configuración declarativa (`quillModules`) y empaquetado *Lazy Loaded* (chunk segregado de solo ~51 kB de transferencia), blindando el rendimiento del bundle inicial.
+  - *Barra de Herramientas Estándar:* Negrita, cursiva, subrayado, tachado, listas ordenadas y con viñetas, jerarquía de encabezados (`h1`, `h2`, `h3`) y botón de limpieza de formato (`clean`).
+- **Seguridad Defensiva y Sanitización HTML Anti-XSS (Zero-Trust Backend):**
+  - Siguiendo los principios de **OWASP Top 10 (A03: Injection)**, el backend nunca confía en el HTML emitido por el cliente. El servicio de dominio `HtmlSanitizerService` (`src/modules/emails/domain/services/html-sanitizer.service.ts`) sanea el contenido antes de procesarlo o remitirlo a un gateway SMTP, eliminando etiquetas ejecutables (`<script>`, `<iframe>`, `<object>`, `<embed>`), manejadores de eventos inline (`onclick`, `onload`, `onerror`) y esquemas de URI peligrosos (`javascript:`).
+- **Experiencia de Usuario Reactiva y Resiliente (UI/UX Feedback):**
+  1. **Indicador de Carga Transaccional:** El botón de confirmación muestra un spinner (`<mat-spinner diameter="18">`) y bloquea pulsaciones duplicadas mientras la petición HTTP está en tránsito.
+  2. **Tratamiento de Errores RFC 7807:** Si el backend rechaza la petición (ej. error de validación o caída de pasarela), el diálogo despliega un banner de alerta inline (`.error-banner`) con el detalle del problema sin cerrar la ventana para evitar la pérdida del texto redactado.
+  3. **Confirmación y Cierre Automático:** Al confirmarse el despacho (`201 Created`), el botón conmuta a estado exitoso con icono de verificación y el diálogo se cierra tras 800 ms, emitiendo una notificación toast accesible (`MatSnackBar`) en la vista emisora (`CustomerCardComponent` o `CustomerDetailComponent`).
+  4. **Mecanismo de Respaldo ("Copiar plantilla"):** Se mantiene la utilidad para copiar el texto plano al portapapeles (`navigator.clipboard`) con confirmación temporal de 2.5 segundos.
 
 ### 3.13 Regla de Oro: "Code in English, documentation in Spanish"
 

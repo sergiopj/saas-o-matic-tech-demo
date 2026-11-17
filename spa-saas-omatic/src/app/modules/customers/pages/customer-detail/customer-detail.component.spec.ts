@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { of } from 'rxjs';
 import { CustomerDetailComponent } from './customer-detail.component';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { environment } from '../../../../../environments/environment';
@@ -148,7 +149,9 @@ describe('CustomerDetailComponent', () => {
 
   it('should open email dialog on email composer click', () => {
     const dialog = TestBed.inject(MatDialog);
-    const openSpy = vi.spyOn(dialog, 'open').mockReturnValue({} as any);
+    const openSpy = vi.spyOn(dialog, 'open').mockReturnValue({
+      afterClosed: () => of(null),
+    } as any);
 
     component.openEmailComposer();
     expect(openSpy).toHaveBeenCalled();
