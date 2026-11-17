@@ -24,6 +24,6 @@ export class SimulationPersistenceAdapter implements SimulationRepositoryPort {
       where: { customerId },
       order: { createdAt: 'DESC' },
     });
-    return records.map(SimulationPersistenceMapper.toDomain);
+    return records.map((record) => SimulationPersistenceMapper.toDomain(record));
   }
 }

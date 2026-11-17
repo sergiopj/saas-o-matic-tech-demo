@@ -111,7 +111,7 @@ export class CustomerPersistenceAdapter implements CustomerRepositoryPort {
     const [entities, total] = await this.repository.findAndCount(options);
 
     return {
-      items: entities.map(CustomerPersistenceMapper.toDomain),
+      items: entities.map((entity) => CustomerPersistenceMapper.toDomain(entity)),
       total,
     };
   }

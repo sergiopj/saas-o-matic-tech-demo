@@ -93,7 +93,7 @@ export class CustomerController {
       }
     }
 
-    return items.map(CustomerResponseDto.fromDomain);
+    return items.map((item) => CustomerResponseDto.fromDomain(item));
   }
 
   @Get(':id')

@@ -25,6 +25,6 @@ export class SimulationController {
     @Query('customerId') customerId: string,
   ): Promise<SimulationResponseDto[]> {
     const simulations = await this.listSimulationsByCustomerUseCase.execute(customerId);
-    return simulations.map(SimulationResponseDto.fromDomain);
+    return simulations.map((sim) => SimulationResponseDto.fromDomain(sim));
   }
 }
