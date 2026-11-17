@@ -95,7 +95,6 @@ export class CustomerDetailComponent implements OnInit {
   readonly filterMaxStorage = signal<number | null>(null);
   readonly filterMinApiCalls = signal<number | null>(null);
   readonly filterMaxApiCalls = signal<number | null>(null);
-  readonly filterSearchText = signal<string>('');
 
   // Simulation History Pagination
   readonly historyPage = signal<number>(1);
@@ -107,7 +106,6 @@ export class CustomerDetailComponent implements OnInit {
     if (this.filterMinUsers() !== null || this.filterMaxUsers() !== null) count++;
     if (this.filterMinStorage() !== null || this.filterMaxStorage() !== null) count++;
     if (this.filterMinApiCalls() !== null || this.filterMaxApiCalls() !== null) count++;
-    if (this.filterSearchText().trim()) count++;
     return count;
   });
 
@@ -121,7 +119,6 @@ export class CustomerDetailComponent implements OnInit {
     const maxS = this.filterMaxStorage();
     const minA = this.filterMinApiCalls();
     const maxA = this.filterMaxApiCalls();
-    const search = this.filterSearchText().trim().toLowerCase();
 
     return list.filter((sim) => {
       // Date range filtering
@@ -148,15 +145,6 @@ export class CustomerDetailComponent implements OnInit {
       // API calls range
       if (minA !== null && sim.apiCalls < minA) return false;
       if (maxA !== null && sim.apiCalls > maxA) return false;
-
-      // Text search
-      if (search) {
-        const matchUsers = sim.activeUsers.toString().includes(search);
-        const matchStorage = sim.storageGb.toString().includes(search);
-        const matchApi = sim.apiCalls.toString().includes(search);
-        const matchCost = sim.totalCost.toString().includes(search);
-        if (!matchUsers && !matchStorage && !matchApi && !matchCost) return false;
-      }
 
       return true;
     });
@@ -380,7 +368,6 @@ export class CustomerDetailComponent implements OnInit {
     this.filterMaxStorage.set(null);
     this.filterMinApiCalls.set(null);
     this.filterMaxApiCalls.set(null);
-    this.filterSearchText.set('');
     this.historyPage.set(1);
   }
 
@@ -427,12 +414,6 @@ export class CustomerDetailComponent implements OnInit {
   onMaxApiCallsChange(event: Event): void {
     const val = (event.target as HTMLInputElement).value;
     this.filterMaxApiCalls.set(val === '' ? null : Number(val));
-    this.historyPage.set(1);
-  }
-
-  onSearchTextChange(event: Event): void {
-    const val = (event.target as HTMLInputElement).value;
-    this.filterSearchText.set(val);
     this.historyPage.set(1);
   }
 }

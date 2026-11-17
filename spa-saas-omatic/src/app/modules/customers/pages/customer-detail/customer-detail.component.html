@@ -515,35 +515,6 @@
             </mat-form-field>
           </div>
         </div>
-
-        <!-- 5. Quick Free-Text Search -->
-        <div class="filter-section">
-          <label class="filter-section-title">
-            <mat-icon class="section-icon">search</mat-icon>
-            <span>{{ 'customers.search.aria' | translate }}</span>
-          </label>
-          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-            <mat-label>{{ 'customers.search.placeholder' | translate }}</mat-label>
-            <input
-              matInput
-              type="text"
-              [value]="filterSearchText()"
-              (input)="onSearchTextChange($event)"
-              placeholder="Usuarios, GB, llamadas..."
-            />
-            @if (filterSearchText()) {
-              <button
-                mat-icon-button
-                matSuffix
-                type="button"
-                (click)="filterSearchText.set(''); historyPage.set(1)"
-                aria-label="Limpiar texto"
-              >
-                <mat-icon>close</mat-icon>
-              </button>
-            }
-          </mat-form-field>
-        </div>
       </div>
 
       <!-- Drawer Footer Actions -->

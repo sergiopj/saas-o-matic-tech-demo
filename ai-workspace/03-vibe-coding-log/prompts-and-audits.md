@@ -2137,6 +2137,30 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Suite completa unificada: 273 pruebas pasando al 100%.
 - **Valor para la evaluación:** Ergonomía superior y escalabilidad B2B: pantalla despejada con panel offcanvas desplegable bajo demanda, componentes agnósticos reutilizables y reactividad pura con Signals.
 
+### 6.91 Purificación Declarativa de Plantillas: Adopción del Patrón Dumb Template, Signals Memoizados y Eliminación del Filtro Redundante de Texto Libre
+
+- **Situación inicial:** Durante la auditoría de rendimiento y mantenibilidad del frontend, se detectaron micro-fugas donde las plantillas ejecutaban transformaciones inline de cadenas (`customer().companyName.charAt(0).toUpperCase()` y concatenación `'plan-' + plan.toLowerCase()`), así como aritmética manual `(taxRate * 100).toFixed(0)` con aserciones no nulas `!`. Asimismo, en el panel lateral deslizante de filtros del historial de simulaciones se había introducido un quinto campo de búsqueda de texto libre que reutilizaba de forma forzada los textos de búsqueda de clientes corporativos (`customers.search.placeholder`), resultando confuso y redundante frente a los filtros numéricos específicos ya disponibles.
+- **Tu criterio y dirección de calidad:** Solicitaste un análisis profundo de rendimiento y separación de responsabilidades entre TS y HTML, e identificaste la presencia de elementos sobrantes en los filtros:
+  *"necesito que analices todo el front, en plan petrformance de rendimiento, crees que hay logica de ifs etc en el ts que deberia ir en la vista? el html, o esta bien asi, claro el html ha de ser optimo en claridad y rendimiento y mantenimiento"*
+  *"esto cvreo que sobra en nuestros filtros de buscar en historial de simulaciuones guardadas y por otro lado las optimizaciones del committ ulttimo las pusistes en sus mds que tocan?"*
+- **Análisis de Rendimiento y Arquitectura Dumb Template:**
+  1. *El TS Gobierna la Lógica O(N):* Los `ifs`, condiciones y filtros residen legítimamente en el TypeScript porque con Angular 22 Signals (`computed()`) el resultado queda memoizado en memoria y no se recalcula en cada ciclo de renderizado, garantizando 60 FPS estables y tests unitarios deterministas con Vitest.
+  2. *El HTML es 100% Declarativo:* La vista no debe ejecutar aritmética, transformaciones ni bucles lógicos: solo decide qué se pinta y cuándo mediante el nuevo control flow nativo (`@if`, `@else if`, `@else`, `@for`).
+  3. *Eliminación de Filtros Redundantes:* El historial de simulaciones ya pertenece a una empresa concreta (`/customers/:id`), por lo que un buscador de texto libre era completamente superfluo. Se eliminó el campo de texto libre dejando los 4 filtros técnicos especializados: Rango de fechas con calendario interactivo (`MatDatepicker`), usuarios activos (mín/máx), llamadas API (mín/máx) y almacenamiento GB (mín/máx).
+- **Acciones correctoras aplicadas:**
+  1. *[customer-card.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-card/customer-card.component.ts) y [.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-card/customer-card.component.html):*
+     - Creación de señales computadas `avatarInitial` y `planClass`, dejando el HTML libre de manipulación de cadenas.
+  2. *[customer-detail.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.ts) y [.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.html):*
+     - Creación de señal computada `taxPercentage` y sustitución de aserción `!` por `customer()?.country`.
+     - Integración del pipe puro nativo `PercentPipe` (`sim.taxRate | percent:'1.0-0'`), eliminando `.toFixed(0)` en la tabla.
+     - Supresión del input de búsqueda libre redundante (`filterSearchText`).
+- **Resultados de Verificación:**
+  - `oxlint --type-aware src/`: 0 advertencias, 0 errores en 70 archivos de backend y 63 archivos de frontend.
+  - `vitest`: 150 pruebas unitarias de frontend pasando al 100% (25 suites).
+  - `jest`: 123 pruebas unitarias de backend pasando al 100% (25 suites).
+  - Suite completa: 273 pruebas pasando al 100%.
+- **Valor para la evaluación:** Refuerzo de las directrices de Clean Frontend Architecture: plantillas tontas ultra-legibles, cero manipulación en vista y controles ergonómicos adaptados al contexto de negocio.
+
 
 
 

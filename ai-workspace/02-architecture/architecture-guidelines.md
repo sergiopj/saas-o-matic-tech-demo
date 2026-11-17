@@ -346,11 +346,15 @@ spa-saas-omatic/
 - **Extensibilidad Abierta/Cerrada:** Incorporar una nueva divisa comercial (ej. `AUD` o `MXN`) requiere únicamente añadir su código a la tupla `SUPPORTED_CURRENCIES`.
 - **Formateo Universal con Fallback `Intl`:** Si se solicita formatear una divisa no registrada en `CURRENCY_METADATA`, el pipe `LocalizedCurrencyPipe` recurre de forma transparente al motor nativo `Intl.NumberFormat` de ECMAScript (`meta?.locale` y `meta?.decimals` como `undefined`), infiriendo automáticamente el símbolo oficial, el número canónico de decimales y el orden según el locale del navegador del usuario.
 
-### 3.4 Estándares de Plantillas: Built-in Control Flow (`@if`, `@for`)
+### 3.4 Estándares de Plantillas: Built-in Control Flow (`@if`, `@for`) y Pureza Declarativa (Dumb Templates)
 
-Se prescribe el uso exclusivo del nuevo flujo de control nativo de Angular 22:
+Se prescribe el uso exclusivo del nuevo flujo de control nativo de Angular 22 y el principio estricto de **Plantillas Tontas (*Dumb Templates*)**:
 - **`@if / @else if / @else`**: Sustituye a `*ngIf` con `<ng-template>`, permitiendo evaluar directamente las funciones de señales (`loading()`, `error()`) sin hacks reactivos.
 - **`@for (...; track ...)`**: Sustituye a `*ngFor` y exige `track` obligatorio por compilador, garantizando una reconciliación quirúrgica del DOM sin destrucción de nodos.
+- **Pureza Declarativa (Cero Lógica, Aritmética o Manipulación de Strings en HTML):**
+  - **La regla:** El HTML solo responde a *¿QUÉ pinto y CUÁNDO lo pinto?*. El TypeScript responde a *¿CÓMO se calcula o se transforma?*.
+  - **Prohibición de transformaciones inline:** Se prohíben manipulaciones de cadenas en el template (ej. `{{ name.charAt(0).toUpperCase() }}`) o concatenaciones de clases dinámicas (`'plan-' + plan.toLowerCase()`). En su lugar, se exponen señales computadas memoizadas en TS: `avatarInitial = computed(...)` y `planClass = computed(...)`.
+  - **Prohibición de aritmética inline:** Se prohíbe el cálculo matemático en interpolaciones (ej. `(taxRate * 100).toFixed(0)` con aserciones no nulas `!`). En su lugar, se delega en señales computadas (`taxPercentage = computed(...)`) o en pipes puros nativos de Angular (`sim.taxRate | percent:'1.0-0'`), garantizando que la vista sea 100% declarativa, libre de errores en tiempo de ejecución y óptima en rendimiento a 60 FPS.
 - **Descarte de `CommonModule`**: Cero dependencias de directivas estructurales legacy en componentes Standalone, optimizando el tamaño del bundle y el type-checking estricto de plantillas.
 
 ### 3.5 Internacionalización Reactiva y Desacoplamiento de Textos (`I18nService` + `TranslatePipe`)
