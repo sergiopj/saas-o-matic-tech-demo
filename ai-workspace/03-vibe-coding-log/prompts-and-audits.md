@@ -2215,6 +2215,35 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: 0 errores y 0 advertencias en 63 ficheros.
 - **Valor para la evaluación:** Demuestra maestría en responsive design mobile-first, accesibilidad W3C y ergonomía en pantallas táctiles sin sacrificar la elegancia en escritorio.
 
+---
+
+### 6.94 Verificación Exhaustiva y Suite de Pruebas Automatizadas de los Filtros de Búsqueda del Historial de Simulaciones
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Asegurar la robustez matemática, reactiva y visual de todos los criterios de filtrado disponibles en el Historial de Simulaciones (`CustomerDetailComponent`): rango de fechas (con selector de calendario interactivo), volumen de usuarios activos (min/max), almacenamiento en la nube (min/max), llamadas a API (min/max), combinación multicriterio simultánea, reseteo de filtros, paginación asociada e interacción de eventos del DOM.
+- **Feedback Humano:**
+  *"prueba bien todos los filtros de busqueda en el kustado de simulaciones"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Suite Exhaustiva de Tests en `CustomerDetailComponent` (`customer-detail.component.spec.ts`):*
+     - Ampliación de la suite de pruebas unitarias de 7 a 15 pruebas detalladas cubriendo todas las ramas de decisión (`filterDateFrom`, `filterDateTo`, `filterMinUsers`, `filterMaxUsers`, `filterMinStorage`, `filterMaxStorage`, `filterMinApiCalls`, `filterMaxApiCalls`).
+  2. *Casos Límite y Cobertura de Condiciones:*
+     - **Rango de usuarios activos:** Verificación de cota inferior estricta, cota superior, intervalo cerrado `[20, 80]`, coincidencia exacta en los extremos (`35`) y condición sin resultados (`> 200`).
+     - **Rango de almacenamiento en GB:** Comprobación de límites `[50, 400] GB`, cotas unilaterales y exclusiones exactas.
+     - **Llamadas a API:** Filtrado sobre volúmenes reales `[10000, 100000]`, límites y exclusión de outliers.
+     - **Rango de fechas:** Verificación de hora límite (`00:00:00.000` para `from` y `23:59:59.999` para `to`), rangos abiertos y coincidencia exacta en el mismo día (*same-day match*).
+     - **Multicriterio Completo (4 dimensiones activas simultáneamente):** Evaluación de la conjunción lógica AND entre las 4 categorías, verificando que `activeFiltersCount()` computa exactamente `4` y aísla la única simulación objetivo (`sim-gamma`).
+     - **Controladores de eventos DOM:** Cobertura de métodos `onMinUsersChange`, `onMaxUsersChange`, `onMinStorageChange`, etc., comprobando tanto la asignación numérica como la limpieza a `null` con cadenas vacías `""`, garantizando el reseteo automático de la página activa (`historyPage.set(1)`).
+     - **Paginación reactiva asociada:** Verificación del recálculo de rebanadas (*slices*) ante cambios de página y de filtros.
+     - **Sincronización de plantilla:** Comprobación del botón disparador (`.filter-trigger-btn`), clase condicional `.has-active-filters` y la insignia numérica `.active-badge`.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **160 pruebas unitarias pasando al 100%** (25 suites).
+  - Cobertura de líneas en `CustomerDetailComponent`: sube a **90.34%** (85% branches, 85.71% functions).
+  - Cobertura global de frontend: **93.00% de líneas cubiertas**.
+  - Monorepo total: **283 pruebas unitarias y de integración pasando al 100%**.
+  - Oxlint: 0 errores y 0 advertencias.
+- **Valor para la evaluación:** Garantiza fiabilidad empresarial e integridad de datos en el explorador comercial, demostrando rigurosidad en pruebas unitarias y edge cases.
+
 
 
 
