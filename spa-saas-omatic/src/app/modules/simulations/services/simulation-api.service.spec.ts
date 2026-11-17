@@ -142,5 +142,19 @@ describe('SimulationApiService', () => {
       expect(capturedError?.type).toBe('about:blank');
       expect(service.error()?.type).toBe('about:blank');
     });
+
+    it('should clear error state when clearError is called', () => {
+      service.error.set({
+        type: 'about:blank',
+        title: 'Error',
+        status: 400,
+        detail: 'Test',
+        instance: baseUrl,
+        timestamp: new Date().toISOString(),
+      });
+      expect(service.error()).toBeTruthy();
+      service.clearError();
+      expect(service.error()).toBeNull();
+    });
   });
 });

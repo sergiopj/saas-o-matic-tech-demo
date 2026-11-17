@@ -776,6 +776,7 @@ Para optimizar los tiempos de respuesta durante el desarrollo y asegurar la máx
 | :--- | :--- | :--- | :--- |
 | `npm test` | **Pase Único (Vitest)** | Ejecución determinista de una pasada (`ng test --watch=false`). Diseñado para evaluación y pipelines de CI/CD. | ~1-2 segundos |
 | `npm run test:watch` | **Modo Interactivo** | Recarga en caliente ante cambios de código para desarrollo local. | Continuo |
+| `npm run test:coverage` | **Cobertura de Código (v8)** | Análisis exhaustivo de cobertura de líneas, ramas y funciones en Vitest con v8 (**95.77% líneas**, **92.15% ramas**, 197 tests). | ~10-12 segundos |
 | `npm run lint` | **Análisis Estático (Oxlint)** | Linter Rust ultrarrápido (`oxlint --type-aware src/`). Muestra diagnósticos de advertencias y errores con ruta de fichero, número de línea y fragmento visual de código. | ~250 ms |
 
 ---

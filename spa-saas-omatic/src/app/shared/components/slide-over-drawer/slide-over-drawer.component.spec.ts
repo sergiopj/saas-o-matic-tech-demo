@@ -49,4 +49,40 @@ describe('SlideOverDrawerComponent', () => {
     component.onBackdropClick();
     expect(component.isOpen()).toBe(false);
   });
+
+  it('should not re-open if already open, nor re-close if already closed', () => {
+    let openCount = 0;
+    let closeCount = 0;
+    component.opened.subscribe(() => openCount++);
+    component.closed.subscribe(() => closeCount++);
+
+    component.open();
+    expect(openCount).toBe(1);
+    component.open(); // already open
+    expect(openCount).toBe(1);
+
+    component.close();
+    expect(closeCount).toBe(1);
+    component.close(); // already closed
+    expect(closeCount).toBe(1);
+  });
+
+  it('should not close on escape key when closeOnEscape is false', () => {
+    fixture.componentRef.setInput('closeOnEscape', false);
+    component.open();
+    expect(component.isOpen()).toBe(true);
+
+    const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+    component.onEscape(escapeEvent);
+    expect(component.isOpen()).toBe(true);
+  });
+
+  it('should not close on backdrop click when closeOnBackdrop is false', () => {
+    fixture.componentRef.setInput('closeOnBackdrop', false);
+    component.open();
+    expect(component.isOpen()).toBe(true);
+
+    component.onBackdropClick();
+    expect(component.isOpen()).toBe(true);
+  });
 });

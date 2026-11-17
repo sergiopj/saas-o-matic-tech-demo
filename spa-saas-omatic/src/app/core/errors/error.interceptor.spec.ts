@@ -99,4 +99,25 @@ describe('errorInterceptor', () => {
     expect(caughtError?.detail).toBe(i18nService.t('error.communication.detail'));
     expect(caughtError?.instance).toBe('/offline-endpoint');
   });
+
+  it('should handle non-object error payload like raw string gracefully', () => {
+    let caughtError: ProblemDetail | undefined;
+
+    http.get('/raw-string-error').subscribe({
+      next: () => {
+        throw new Error('should have failed');
+      },
+      error: (err: ProblemDetail) => {
+        caughtError = err;
+      },
+    });
+
+    const req = httpTesting.expectOne('/raw-string-error');
+    req.flush('Bad Gateway', { status: 502, statusText: 'Bad Gateway' });
+
+    expect(caughtError).toBeDefined();
+    expect(caughtError?.status).toBe(502);
+    expect(caughtError?.title).toBe(i18nService.t('error.communication.title'));
+    expect(caughtError?.detail).toBe(i18nService.t('error.communication.detail'));
+  });
 });

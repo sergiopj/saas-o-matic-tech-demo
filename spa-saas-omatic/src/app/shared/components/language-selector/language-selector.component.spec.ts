@@ -58,4 +58,10 @@ describe('LanguageSelectorComponent', () => {
       expect(sorted.length).toBe(SUPPORTED_LANGUAGES.length);
     });
   });
+
+  it('should fallback to all languages when active language is not found in catalog', () => {
+    (i18nService.currentLanguage as any).set?.('xx');
+    fixture.detectChanges();
+    expect(component.sortedLanguages()).toEqual(component.languages);
+  });
 });

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { NavbarComponent } from './navbar.component';
@@ -83,12 +83,37 @@ describe('NavbarComponent', () => {
     expect(fixture.nativeElement.querySelector('.mobile-nav-panel')).toBeNull();
   });
 
-  it('should close mobile menu on Escape key press', () => {
+  it('should close mobile menu on Escape key press only when open', () => {
+    component.isMobileMenuOpen.set(false);
+    component.onEscape();
+    expect(component.isMobileMenuOpen()).toBe(false);
+
     component.toggleMobileMenu();
     fixture.detectChanges();
     expect(component.isMobileMenuOpen()).toBe(true);
 
     component.onEscape();
+    fixture.detectChanges();
+    expect(component.isMobileMenuOpen()).toBe(false);
+  });
+
+  it('should close mobile menu on backdrop click and NavigationEnd event', async () => {
+    const router = TestBed.inject(Router);
+    component.isMobileMenuOpen.set(true);
+    fixture.detectChanges();
+    expect(component.isMobileMenuOpen()).toBe(true);
+
+    const backdrop = fixture.nativeElement.querySelector('.mobile-backdrop') as HTMLElement;
+    expect(backdrop).toBeTruthy();
+    backdrop.click();
+    fixture.detectChanges();
+    expect(component.isMobileMenuOpen()).toBe(false);
+
+    component.isMobileMenuOpen.set(true);
+    fixture.detectChanges();
+    expect(component.isMobileMenuOpen()).toBe(true);
+
+    await router.navigate([]);
     fixture.detectChanges();
     expect(component.isMobileMenuOpen()).toBe(false);
   });

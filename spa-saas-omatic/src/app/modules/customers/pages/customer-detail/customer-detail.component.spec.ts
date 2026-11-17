@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 import { CustomerDetailComponent } from './customer-detail.component';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { environment } from '../../../../../environments/environment';
@@ -495,6 +496,64 @@ describe('CustomerDetailComponent', () => {
       triggerBtn.click();
       fixture.detectChanges();
       expect(component.isFilterDrawerOpen()).toBe(true);
+    });
+
+    it('should update active users and reset saveSuccess on slider change', () => {
+      const event = { target: { value: '45' } } as unknown as Event;
+      component.saveSuccess.set(true);
+      component.onUsersSliderChange(event);
+      expect(component.activeUsers()).toBe(45);
+      expect(component.saveSuccess()).toBe(false);
+
+      // Invalid slider value should be ignored
+      const invalidEvent = { target: { value: 'NaN' } } as unknown as Event;
+      component.onUsersSliderChange(invalidEvent);
+      expect(component.activeUsers()).toBe(45);
+    });
+
+    it('should update storage and apiCalls inputs and reset saveSuccess', () => {
+      component.saveSuccess.set(true);
+      component.onStorageChange(80);
+      expect(component.storageGb()).toBe(80);
+      expect(component.saveSuccess()).toBe(false);
+
+      component.saveSuccess.set(true);
+      component.onApiCallsChange(35000);
+      expect(component.apiCalls()).toBe(35000);
+      expect(component.saveSuccess()).toBe(false);
+    });
+
+    it('should handle saveSimulation failure gracefully and reset isSaving', () => {
+      component.customer.set(mockCustomer);
+      component.saveSimulation();
+      expect(component.isSaving()).toBe(true);
+
+      const req = httpTesting.expectOne(`${environment.apiBaseUrl}/simulations`);
+      req.error(new ProgressEvent('error'));
+      expect(component.isSaving()).toBe(false);
+      expect(component.saveSuccess()).toBe(false);
+    });
+
+    it('should handle loadSimulationsHistory failure gracefully', () => {
+      component.loadSimulationsHistory('cust-123');
+      const req = httpTesting.expectOne(`${environment.apiBaseUrl}/simulations?customerId=cust-123`);
+      req.error(new ProgressEvent('error'));
+      expect(component.simulationsLoading()).toBe(false);
+    });
+
+    it('should not open email dialog if customer is null', () => {
+      const dialog = TestBed.inject(MatDialog);
+      const dialogSpy = vi.spyOn(dialog, 'open');
+      component.customer.set(null);
+      component.openEmailComposer();
+      expect(dialogSpy).not.toHaveBeenCalled();
+    });
+
+    it('should handle loadCustomerData failure gracefully and reset customerLoading', () => {
+      component.loadCustomerData('cust-error');
+      const req = httpTesting.expectOne(`${environment.apiBaseUrl}/customers/cust-error`);
+      req.error(new ProgressEvent('error'));
+      expect(component.customerLoading()).toBe(false);
     });
   });
 });

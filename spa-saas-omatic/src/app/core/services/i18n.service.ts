@@ -44,7 +44,8 @@ export class I18nService {
    */
   t(key: TranslationKey, params?: Record<string, string | number>): string {
     const lang = this.currentLanguage();
-    let text: string = TRANSLATIONS[lang][key] ?? key;
+    const dict = TRANSLATIONS[lang] ?? TRANSLATIONS['es'];
+    let text: string = dict?.[key] ?? (TRANSLATIONS['es']?.[key] as string | undefined) ?? key;
 
     if (params) {
       for (const [paramKey, value] of Object.entries(params)) {

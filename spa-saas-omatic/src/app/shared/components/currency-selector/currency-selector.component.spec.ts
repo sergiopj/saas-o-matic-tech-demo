@@ -72,4 +72,18 @@ describe('CurrencySelectorComponent', () => {
     i18nService.setLanguage('en');
     expect(component.statusTooltip()).toContain('Exchange rates API unavailable');
   });
+
+  it('should render sync icon when loading and cloud_off icon when error in template', () => {
+    currencyService.loading.set(true);
+    currencyService.error.set(null);
+    fixture.detectChanges();
+    const iconLoading = fixture.nativeElement.querySelector('.status-icon');
+    expect(iconLoading.textContent.trim()).toBe('sync');
+
+    currencyService.loading.set(false);
+    currencyService.error.set('Network failure');
+    fixture.detectChanges();
+    const iconError = fixture.nativeElement.querySelector('.status-icon');
+    expect(iconError.textContent.trim()).toBe('cloud_off');
+  });
 });

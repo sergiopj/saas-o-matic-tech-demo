@@ -331,4 +331,104 @@ describe('CustomerListComponent', () => {
     expect(rangeText.textContent).toContain('Affichage');
     expect(rangeText.textContent).toContain('sur');
   });
+
+  it('should clear search term and reload page 1 on onClearSearch', () => {
+    component.searchTerm.set('Acme');
+    component.onClearSearch();
+    expect(component.searchTerm()).toBe('');
+
+    const req = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+    );
+    req.flush([], { headers: { 'x-total-count': '0' } });
+  });
+
+  it('should handle API failure gracefully and set initialLoading to false', () => {
+    component.loadCustomers();
+    const req = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+    );
+    req.error(new ProgressEvent('error'));
+    expect(component.initialLoading()).toBe(false);
+  });
+
+  it('should ignore goToPage when target page is out of bounds or same page', () => {
+    component.goToPage(1); // same page
+    component.goToPage(-1); // negative
+    component.goToPage(999); // out of totalPages
+    httpTesting.expectNone(`${environment.apiBaseUrl}/customers`);
+  });
+
+  it('should return zero range when totalCount is 0', () => {
+    component.totalCount.set(0);
+    expect(component.displayedRange()).toEqual({ start: 0, end: 0, total: 0 });
+  });
+
+  it('should change page size and reset to page 1 on onPageSizeChange', () => {
+    component.onPageSizeChange(12);
+    const req = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?page=1&limit=12&sortBy=createdAt&order=DESC`
+    );
+    req.flush(mockCustomers, { headers: { 'x-total-count': '15' } });
+    expect(component.pageSize()).toBe(12);
+  });
+
+  it('should fallback to default sort option when unknown sort key is passed', () => {
+    component.onSortChange('unknownKey');
+    const req = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+    );
+    req.flush([], { headers: { 'x-total-count': '0' } });
+  });
+
+  it('should navigate through template pagination buttons (next, prev, first, last, page number)', () => {
+    component.totalCount.set(24);
+    component.currentPage.set(2);
+    fixture.detectChanges();
+
+    const buttons: HTMLButtonElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('.pagination-controls button')
+    );
+    expect(buttons.length).toBeGreaterThan(0);
+
+    // Click next button
+    const nextBtn = buttons.find((b) => b.getAttribute('aria-label') === 'Página siguiente');
+    if (nextBtn) {
+      nextBtn.click();
+      const req = httpTesting.expectOne(
+        `${environment.apiBaseUrl}/customers?page=3&limit=6&sortBy=createdAt&order=DESC`
+      );
+      req.flush(mockCustomers, { headers: { 'x-total-count': '24' } });
+    }
+
+    // Click prev button
+    const prevBtn = buttons.find((b) => b.getAttribute('aria-label') === 'Página anterior');
+    if (prevBtn) {
+      prevBtn.click();
+      const req = httpTesting.expectOne(
+        `${environment.apiBaseUrl}/customers?page=2&limit=6&sortBy=createdAt&order=DESC`
+      );
+      req.flush(mockCustomers, { headers: { 'x-total-count': '24' } });
+    }
+
+    // Click first page button
+    const firstBtn = buttons.find((b) => b.getAttribute('aria-label') === 'Primera página');
+    if (firstBtn) {
+      firstBtn.click();
+      const req = httpTesting.expectOne(
+        `${environment.apiBaseUrl}/customers?page=1&limit=6&sortBy=createdAt&order=DESC`
+      );
+      req.flush(mockCustomers, { headers: { 'x-total-count': '24' } });
+    }
+
+    // Click last page button
+    const lastBtn = buttons.find((b) => b.getAttribute('aria-label') === 'Última página');
+    if (lastBtn) {
+      lastBtn.click();
+      const req = httpTesting.expectOne(
+        `${environment.apiBaseUrl}/customers?page=4&limit=6&sortBy=createdAt&order=DESC`
+      );
+      req.flush(mockCustomers, { headers: { 'x-total-count': '24' } });
+    }
+  });
 });

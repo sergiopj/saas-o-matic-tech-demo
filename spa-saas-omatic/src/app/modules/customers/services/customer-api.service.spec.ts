@@ -261,5 +261,29 @@ describe('CustomerApiService', () => {
       expect(req.request.method).toBe('GET');
       req.flush(mockLiteList, { headers: { 'x-total-count': '2' } });
     });
+
+    it('should clear error state when clearError is called', () => {
+      service.error.set({
+        type: 'about:blank',
+        title: 'Error',
+        status: 400,
+        detail: 'Test detail',
+        instance: baseUrl,
+        timestamp: new Date().toISOString(),
+      });
+      expect(service.error()).toBeTruthy();
+      service.clearError();
+      expect(service.error()).toBeNull();
+    });
+
+    it('should normalize non-object or non-problem error objects', () => {
+      const normalized = (service as any).normalizeProblem('string error');
+      expect(normalized.type).toBe('about:blank');
+      expect(normalized.title).toBe(i18n.t('error.communication.title'));
+      expect(normalized.status).toBe(500);
+
+      const normalizedWithStatus = (service as any).normalizeProblem({ status: 503 });
+      expect(normalizedWithStatus.status).toBe(503);
+    });
   });
 });

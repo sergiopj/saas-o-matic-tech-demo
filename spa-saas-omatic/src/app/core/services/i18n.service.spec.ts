@@ -49,4 +49,20 @@ describe('I18nService', () => {
     expect(localStorage.getItem('saas_omatic_lang')).toBe('de');
     localStorage.removeItem('saas_omatic_lang');
   });
+
+  it('should return the key when translation is not found', () => {
+    expect(service.t('missing.translation.key' as any)).toBe('missing.translation.key');
+  });
+
+  it('should fallback to es when browser language is not in catalog', () => {
+    localStorage.removeItem('saas_omatic_lang');
+    const originalLanguage = navigator.language;
+    try {
+      Object.defineProperty(navigator, 'language', { value: 'pt-BR', configurable: true });
+      const detected = (service as any).detectLanguage();
+      expect(detected).toBe('es');
+    } finally {
+      Object.defineProperty(navigator, 'language', { value: originalLanguage, configurable: true });
+    }
+  });
 });

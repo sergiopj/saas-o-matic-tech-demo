@@ -104,4 +104,35 @@ describe('CurrencyService', () => {
     service.setCurrency('USD');
     expect(service.convert(100)).toBe(110.00);
   });
+
+  it('should ignore unsupported currency code on setCurrency', () => {
+    const req = httpTesting.expectOne(environment.currencyApiUrl);
+    req.flush(mockApiResponse);
+
+    service.setCurrency('XYZ' as any);
+    expect(service.selectedCurrency()).toBe('EUR');
+  });
+
+  it('should handle API response without rates object', () => {
+    const req = httpTesting.expectOne(environment.currencyApiUrl);
+    req.flush({ result: 'error' } as any);
+
+    expect(service.rates()).toEqual(DEFAULT_FALLBACK_RATES);
+    expect(service.loading()).toBe(false);
+  });
+
+  it('should expose currency options for all supported currencies', () => {
+    const req = httpTesting.expectOne(environment.currencyApiUrl);
+    req.flush(mockApiResponse);
+
+    expect(service.currencyOptions().length).toBe(6);
+    expect(service.currencyOptions().map((o) => o.code)).toEqual([
+      'EUR',
+      'USD',
+      'GBP',
+      'CHF',
+      'CAD',
+      'JPY',
+    ]);
+  });
 });

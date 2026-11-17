@@ -15,6 +15,8 @@ describe('SidebarComponent', () => {
 
     fixture = TestBed.createComponent(SidebarComponent);
     component = fixture.componentInstance;
+    const i18n = TestBed.inject(I18nService);
+    i18n.setLanguage('es');
     fixture.detectChanges();
   });
 
@@ -50,7 +52,7 @@ describe('SidebarComponent', () => {
   it('should render the commercial optimizer brand tag when expanded and hide it when collapsed', () => {
     const brandTag = fixture.nativeElement.querySelector('.brand-tag');
     expect(brandTag).toBeTruthy();
-    expect(brandTag.textContent.trim()).toBe('COMMERCIAL OPTIMIZER PANEL');
+    expect(brandTag.textContent.trim()).toBe('PANEL OPTIMIZADOR');
 
     component.toggleCollapse();
     fixture.detectChanges();

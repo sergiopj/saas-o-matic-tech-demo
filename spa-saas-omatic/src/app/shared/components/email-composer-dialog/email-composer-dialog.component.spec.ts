@@ -220,4 +220,50 @@ describe('EmailComposerDialogComponent', () => {
     expect(boldBtn.getAttribute('data-tooltip')).toBe('Bold (Ctrl+B)');
     expect(boldBtn.getAttribute('aria-label')).toBe('Bold (Ctrl+B)');
   });
+
+  it('should initialize with htmlBody when passed directly in data', () => {
+    const customFixture = TestBed.createComponent(EmailComposerDialogComponent);
+    const customComp = customFixture.componentInstance;
+    (customComp as any).data = {
+      recipient: 'direct@acme.com',
+      htmlBody: '<p>Direct HTML</p>',
+      subject: 'Custom Subject',
+    };
+    expect((customComp as any).initHtmlBody()).toBe('<p>Direct HTML</p>');
+  });
+
+  it('should return empty string if neither body nor htmlBody are provided', () => {
+    const customFixture = TestBed.createComponent(EmailComposerDialogComponent);
+    const customComp = customFixture.componentInstance;
+    (customComp as any).data = {
+      recipient: 'direct@acme.com',
+      subject: 'Custom Subject',
+    };
+    expect((customComp as any).initHtmlBody()).toBe('');
+  });
+
+  it('should not dispatch email if subject or htmlBody are empty', () => {
+    component.subject.set('   ');
+    component.sendEmail();
+    expect(mockEmailApi.sendEmail).not.toHaveBeenCalled();
+
+    component.subject.set('Valid Subject');
+    component.htmlBody.set('   ');
+    component.sendEmail();
+    expect(mockEmailApi.sendEmail).not.toHaveBeenCalled();
+  });
+
+  it('should fall back to err.message or generic message when err.error.detail is absent', () => {
+    mockEmailApi.sendEmail.mockReturnValue(
+      throwError(() => ({ message: 'Network offline' }))
+    );
+    component.sendEmail();
+    expect(component.errorMessage()).toBe('Network offline');
+
+    mockEmailApi.sendEmail.mockReturnValue(
+      throwError(() => ({}))
+    );
+    component.sendEmail();
+    expect(component.errorMessage()).toBe('Could not dispatch email. Please try again.');
+  });
 });
