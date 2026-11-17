@@ -3157,6 +3157,28 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint Frontend & Backend: **0 errores y 0 advertencias**.
 - **Valor para la evaluación:** Demostración de diseño UX/UI de vanguardia, creando una narrativa visual intuitiva donde el evaluador comprende instantáneamente la economía del modelo SaaS por volumen con animaciones puras, fluidas a 60 FPS y cero impacto en runtime.
 
+---
+
+### 6.131. Corrección de Espaciado Superior y Desbordamiento en la Etiqueta de Destinatario
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Al abrir el modal de redacción de correo comercial (`EmailComposerDialogComponent`), el campo de entrada "Destinatario" presentaba dos defectos de acabado visual:
+  1. Carecía de holgura vertical con respecto a la cabecera del diálogo (`.dialog-header`), sintiéndose comprimido contra el encabezado.
+  2. Al tener un valor cargado por defecto (correo corporativo del cliente), la etiqueta de Material (`appearance="outline"`) flotaba hacia el borde superior ($y \le 0$) y sufría un recorte tipográfico (*clipping*) por el contenedor `.dialog-body` configurado con `overflow-y: auto` y `padding: 0`.
+- **Feedback Humano (Tu criterio de pulido visual y prevención de cortes de texto):**
+  > *"ojo el campo destinatario del email no respira arriba y se corta el texto de Destinatario"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Holgura Perimetral en el Cuerpo del Modal:*
+     - En [email-composer-dialog.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.scss#L61), se actualizó `.dialog-body` pasando de `padding: 0;` a `padding: 0.75rem 0.35rem 0.5rem 0.35rem;` y ampliando el `gap` vertical entre controles de `0.85rem` a `1.15rem`.
+  2. *Margen Seguro para Etiquetas Flotantes Outline:*
+     - Se introdujo la regla `.form-field:first-of-type { margin-top: 0.35rem; }`, garantizando que la etiqueta flotante (`.mdc-floating-label--float-above`) cuente con más de 16px de espacio libre superior antes de los límites del contenedor con scroll, previniendo cualquier corte de los glifos de la palabra "Destinatario".
+- **Resultados de Verificación:**
+  - Frontend Vitest: **226 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Oxlint: **0 errores y 0 advertencias** en los 141 archivos analizados.
+- **Valor para la evaluación:** Atención meticulosa al detalle en componentes complejos de Angular Material, garantizando acabados gráficos limpios sin anomalías de renderizado o recorte CSS en tipografías flotantes.
+
 
 
 

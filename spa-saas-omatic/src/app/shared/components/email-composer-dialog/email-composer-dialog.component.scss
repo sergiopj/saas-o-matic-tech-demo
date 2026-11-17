@@ -61,8 +61,8 @@
 .email-dialog-container .dialog-body {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  padding: 0;
+  gap: 1.15rem;
+  padding: 0.75rem 0.35rem 0.5rem 0.35rem;
   max-height: 72vh;
   overflow-y: auto;
 }
@@ -77,6 +77,14 @@
   border: 1px solid rgba(239, 68, 68, 0.25);
   color: var(--roams-status-error);
   font-size: 0.875rem;
+}
+
+.form-field {
+  width: 100%;
+
+  &:first-of-type {
+    margin-top: 0.35rem;
+  }
 }
 
 .full-width {
