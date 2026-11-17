@@ -6,8 +6,11 @@
 // SCSS Variables (for compile-time usage, mixins and functions)
 $roams-primary: #0f172a;           // Deep Navy (Navbar / Topbar / Main Headers)
 $roams-primary-light: #1e293b;     // Slate Dark
+$roams-primary-dark: #090d16;      // Darker Navy
 $roams-accent-blue: #1061e2;       // Roams Royal Blue
+$roams-accent-blue-hover: #0d4eb8; // Roams Royal Blue Hover
 $roams-accent-cyan: #0ea5e9;       // Roams Cyan
+$roams-accent-purple: #8b5cf6;     // Roams Purple
 
 $roams-status-success: #10b981;    // Emerald / Synced / Savings
 $roams-status-warning: #f59e0b;    // Amber / Contingency / Alert
@@ -16,14 +19,17 @@ $roams-status-info: #0ea5e9;       // Cyan / Live Sync
 
 $roams-bg-page: #f8fafc;           // Canvas background
 $roams-bg-card: #ffffff;           // Card surface
+$roams-surface: #ffffff;           // Surface alias
 $roams-bg-input-dark: rgba(255, 255, 255, 0.1); // Transparent input over dark navbar
 
 $roams-text-primary: #0f172a;      // Dark Charcoal for headers & body
 $roams-text-secondary: #64748b;    // Muted Slate for secondary text & hints
+$roams-text-muted: #94a3b8;        // Lighter Slate for captions/hints
 $roams-text-inverse: #ffffff;      // White text for dark surfaces
 $roams-text-inverse-muted: rgba(255, 255, 255, 0.7);
 
 $roams-border: #e2e8f0;            // Subtle border for light cards
+$roams-border-light: #f1f5f9;      // Inner border divider
 $roams-border-inverse: rgba(255, 255, 255, 0.2); // Subtle border for dark inputs
 
 // CSS Custom Properties (:root) for runtime cascade & dynamic theming
@@ -31,8 +37,11 @@ $roams-border-inverse: rgba(255, 255, 255, 0.2); // Subtle border for dark input
   /* Brand Colors */
   --roams-primary: #{$roams-primary};
   --roams-primary-light: #{$roams-primary-light};
+  --roams-primary-dark: #{$roams-primary-dark};
   --roams-accent-blue: #{$roams-accent-blue};
+  --roams-accent-blue-hover: #{$roams-accent-blue-hover};
   --roams-accent-cyan: #{$roams-accent-cyan};
+  --roams-accent-purple: #{$roams-accent-purple};
 
   /* Status & Visual Feedback */
   --roams-status-success: #{$roams-status-success};
@@ -43,15 +52,18 @@ $roams-border-inverse: rgba(255, 255, 255, 0.2); // Subtle border for dark input
   /* Surfaces & Backgrounds */
   --roams-bg-page: #{$roams-bg-page};
   --roams-bg-card: #{$roams-bg-card};
+  --roams-surface: #{$roams-surface};
   --roams-bg-input-dark: #{$roams-bg-input-dark};
 
   /* Typography Colors */
   --roams-text-primary: #{$roams-text-primary};
   --roams-text-secondary: #{$roams-text-secondary};
+  --roams-text-muted: #{$roams-text-muted};
   --roams-text-inverse: #{$roams-text-inverse};
   --roams-text-inverse-muted: #{$roams-text-inverse-muted};
 
   /* Borders & Dividers */
   --roams-border: #{$roams-border};
+  --roams-border-light: #{$roams-border-light};
   --roams-border-inverse: #{$roams-border-inverse};
 }

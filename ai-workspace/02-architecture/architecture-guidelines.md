@@ -273,16 +273,41 @@ spa-saas-omatic/
   - `src/styles/_variables.scss`: Centraliza radios de curvatura (`--roams-radius-*`) y matrices de elevación y sombra (`--roams-shadow-*`).
   - `src/styles.scss`: Actúa exclusivamente como orquestador raíz limpio, importando los parciales mediante `@use './styles/colors'` y `@use './styles/variables'`.
   - `angular.json`: Se configura `stylePreprocessorOptions.includePaths: ["src/styles"]`, permitiendo a cualquier componente importar `@use 'colors'` directamente sin rutas relativas frágiles (`../../styles`).
-- **Design Tokens Corporativos Roams (`--roams-*`):** Inspirados en la identidad visual de `roams.es`, en `_colors.scss` se centraliza la paleta corporativa:
-  - `--roams-primary`: `#0F172A` (Azul marino cabecera / fondo oscuro)
-  - `--roams-accent-blue`: `#1061E2` (Azul real Roams)
-  - `--roams-accent-cyan`: `#0EA5E9` (Cian de acento y feedback)
-  - `--roams-status-success`: `#10B981` (Verde esmeralda para ahorros y sincronización)
-  - `--roams-status-warning`: `#F59E0B` (Ámbar de contingencia y alertas)
-  - `--roams-status-error`: `#EF4444` (Rojo de error RFC 7807)
-  - Superficies: `--roams-bg-page` (`#F8FAFC`), `--roams-bg-card` (`#FFFFFF`).
-  - Geometría: `--roams-radius-lg` (`16px` para tarjetas Roams).
-- **Cascada Nativa y Cero Hardcodeo:** Queda terminantemente prohibido incluir valores hexadecimales directos en los archivos `.scss` de los componentes. Todos los colores bajan en cascada nativa mediante `var(--roams-*)`.
+- **Design Tokens Corporativos Roams (`--roams-*`):** Inspirados en la identidad visual de `roams.es`, en `_colors.scss` se centraliza la paleta corporativa completa como Única Fuente de Verdad (SSOT):
+  - **Identidad de Marca:**
+    - `--roams-primary`: `#0F172A` (Azul marino profundo cabecera / fondo oscuro)
+    - `--roams-primary-light`: `#1E293B` (Pizarra oscuro para contrastes y degradados)
+    - `--roams-primary-dark`: `#090D16` (Azul marino ultra oscuro para sombras y profundidad)
+    - `--roams-accent-blue`: `#1061E2` (Azul real Roams de acción y foco)
+    - `--roams-accent-blue-hover`: `#0D4EB8` (Azul real hover/active)
+    - `--roams-accent-cyan`: `#0EA5E9` (Cian de acento y feedback interactivo)
+    - `--roams-accent-purple`: `#8B5CF6` (Púrpura institucional para planes Enterprise)
+  - **Estados y Feedback:**
+    - `--roams-status-success`: `#10B981` (Verde esmeralda para ahorros, sincronización y estado activo)
+    - `--roams-status-warning`: `#F59E0B` (Ámbar de contingencia y alertas)
+    - `--roams-status-error`: `#EF4444` (Rojo de error RFC 7807)
+    - `--roams-status-info`: `#0EA5E9` (Cian de sincronización en vivo)
+  - **Superficies y Fondos:**
+    - `--roams-bg-page`: `#F8FAFC` (Lienzo general)
+    - `--roams-bg-card` / `--roams-surface`: `#FFFFFF` (Superficies de tarjetas, paneles y diálogos)
+    - `--roams-bg-input-dark`: `rgba(255, 255, 255, 0.1)` (Campos translúcidos sobre barra oscura)
+  - **Tipografía y Contraste:**
+    - `--roams-text-primary`: `#0F172A` (Texto principal de alta legibilidad)
+    - `--roams-text-secondary`: `#64748B` (Texto secundario, metadatos y etiquetas)
+    - `--roams-text-muted`: `#94A3B8` (Texto atenuado, placeholders y capturas)
+    - `--roams-text-inverse`: `#FFFFFF` (Texto blanco sobre fondos oscuros o botones)
+    - `--roams-text-inverse-muted`: `rgba(255, 255, 255, 0.7)` (Texto atenuado sobre fondos oscuros)
+  - **Bordes y Divisores:**
+    - `--roams-border`: `#E2E8F0` (Borde sutil para tarjetas y contenedores)
+    - `--roams-border-light`: `#F1F5F9` (Separadores internos de listas y pie de página)
+    - `--roams-border-inverse`: `rgba(255, 255, 255, 0.2)` (Borde sutil para inputs oscuros)
+  - **Geometría y Elevación:**
+    - `--roams-radius-sm`: `8px`, `--roams-radius-md`: `12px`, `--roams-radius-lg`: `16px`.
+    - `--roams-shadow-sm`, `--roams-shadow-md`, `--roams-shadow-lg`.
+- **Cascada Nativa, Cero Hardcodeo y Prohibición de Fallbacks Hexadecimales:**
+  - Queda terminantemente prohibido incluir valores hexadecimales directos (`#1061e2`, `#64748b`, `#ffffff`) en los archivos `.scss` de los componentes.
+  - **Regla estricta contra fallbacks en `var()`**: No se permiten declaraciones como `var(--roams-text-secondary, #64748b)` ni `var(--roams-accent-blue, #1061e2)`. Incluir códigos de color en el segundo parámetro de `var()` duplica la declaración de colores, crea múltiples fuentes de verdad no sincronizadas y rompe la capacidad del sistema para re-tematizarse dinámicamente.
+  - La invocación debe ser estrictamente canónica: `color: var(--roams-text-secondary);`. Si se requiere el color en SCSS en tiempo de compilación (ej. para funciones `color.adjust()` o gradientes SCSS), se debe importar `@use 'colors' as c;` y consumir `$c.roams-*`.
 - **Diseño Mobile-First y Responsividad Total:**
   - Toda la interfaz (Navbar, buscador, tarjetas, modal/vistas y slider) se diseña bajo enfoque **Mobile-First**: el layout base se concibe para pantallas móviles compactas (`320px` - `480px`), adaptándose de forma progresiva a tablets (`768px`) y escritorio (`1024px` - `1440px+`).
   - Empleo exclusivo de **CSS Flexbox y CSS Grid elástico** (`grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))`), garantizando cero scrollbars horizontales no deseados (`overflow-x: hidden` en contenedor principal) y wrapping fluido de controles de acción.

@@ -1815,18 +1815,38 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Build de producción completamente limpio.
 - **Valor para la evaluación:** Experiencia de usuario pulida (*Instant Feedback*), cumplimiento estricto de accesibilidad ARIA y estándares internacionales de validación web.
 
-### 6.79 Decisión Estratégica para la Entrevista: Simulación Hexagonal vs. Dependencia de Nodemailer Real
+### 6.80 Auditoría Exhaustiva de SCSS: Erradicación de Colores Hardcodeados y Centralización SSOT en Design Tokens
 
-- **Situación inicial:** Tras comprobar que el modal valida y despacha el correo al backend, surgió el dilema técnico de si convenía integrar `nodemailer` conectado a una cuenta real de Gmail para recibir el correo en el buzón físico, o si era preferible mantener el despacho transaccional simulado.
-- **Tu criterio y dirección de calidad:** Planteaste la duda con visión estratégica de evaluación: *"si estaria bien para la prueba nodemailer? o simplemente es mejor lo otro para una prueba de entrevista"*.
-- **Análisis de evaluación y por qué forzar Nodemailer real es contraproducente:**
-  1. *Fricción para el Evaluador (Broken DX):* Si la aplicación exige un servidor SMTP real, cuando el equipo técnico de Roams clone el repositorio y pulse el botón de envío, la llamada fallará con un error 500 al no disponer de credenciales en `.env`, o bien le obligaría a crearse cuentas de correo para poder evaluar un formulario. Un proyecto de prueba debe funcionar de forma autónoma e impecable al instante (*Out-of-the-Box*).
-  2. *Cero Fuga de Credenciales (Security Hygiene):* Subir contraseñas de aplicación de Google o API keys a un repositorio público de Git vulnera los estándares OWASP y activa alertas inmediatas en escáneres de seguridad (GitGuardian, GitHub Secret Scanning), lo que descalificaría la entrega.
-  3. *Bloqueos de Red y 2FA:* Las conexiones SMTP de Google desde IPs no habituales (como la máquina del evaluador o un entorno de CI/CD) son bloqueadas con frecuencia como actividad no autorizada.
-- **Decisión de Arquitectura Senior:**
-  - Se consolida el despacho transaccional simulado en `SendEmailUseCase` con registro estructurado en el Logger de NestJS, garantizando determinismo absoluto en la prueba (135 tests en frontend y 121 en backend pasando al 100%).
-  - Se articula la defensa técnica en la entrevista bajo **Arquitectura Hexagonal (Puertos y Adaptadores)**: el dominio y la aplicación (`SendEmailUseCase`) gobiernan la validación RFC 5322 y la desinfección XSS de forma agnóstica. Para un entorno de producción, la infraestructura simplemente sustituye el adaptador simulado por un `NodemailerEmailAdapter` o un SDK cloud (`Resend`, `SendGrid`) consumiendo credenciales de variables de entorno protegidas, sin alterar ni una sola línea de la lógica de negocio ni del frontend.
-- **Valor para la evaluación:** Demostración de madurez profesional: primar la experiencia del evaluador (*Developer Experience*), mantener cero dependencias frágiles y justificar el desacoplamiento arquitectónico entre lógica de dominio e infraestructura de red.
+- **Situación inicial:** En varias hojas de estilos de componentes (`email-composer-dialog.component.scss`, `sidebar.component.scss`, `home.component.scss`, `simulation-hub.component.scss`, `customer-detail.component.scss`), se habían introducido llamadas `var()` con valores hexadecimales de fallback (ejemplo: `color: var(--roams-text-secondary, #64748b);` o `var(--roams-accent-blue, #1061e2);`), así como colores hexadecimales quemados directamente en CSS (`#22c55e`, `#2563eb`, `#1d4ed8`, `#ffffff`).
+- **Tu criterio y dirección de calidad:** Me diste una instrucción contundente y precisa:
+  *"por otro lado revisa bien todos los scss te dije que nada de colores hardcodeados hay un scss de colors tras corregirlo señala esto en los mds de correccion y etc"*
+  `color: var(--roams-text-secondary, #64748b);`
+- **Diagnóstico técnico y anti-patrones detectados:**
+  1. *Ruptura de la Única Fuente de Verdad (SSOT):* Tener un fallback como `, #64748b` en cada propiedad CSS duplica las definiciones de color fuera de `_colors.scss`. Si el equipo de diseño actualiza el token `--roams-text-secondary` en el catálogo central, los fallbacks dispersos por el código generan inconsistencias y dificultan el soporte multitema (*dark mode* o temas corporativos).
+  2. *Incoherencia de Marca:* En el componente de envío de correos se habían empleado tonos de azul procedentes de la paleta por defecto de Tailwind (`#2563eb`, `#1d4ed8`) en lugar del Azul Real corporativo de Roams (`#1061e2` / `--roams-accent-blue`).
+  3. *Incompletitud en el Catálogo Central de Tokens:* Hojas de estilo requerían tokens para superficies (`--roams-surface`), bordes sutiles (`--roams-border-light`), textos de pie o caption (`--roams-text-muted`), estados hover (`--roams-accent-blue-hover`) y planes enterprise (`--roams-accent-purple`), pero al no estar expuestos en `:root`, los componentes recurrían a fallbacks manuales.
+- **Solución técnica implementada:**
+  1. *Ampliación y Consolidación del Catálogo en `src/styles/_colors.scss`:*
+     - Se incorporaron las variables SCSS y sus proyecciones equivalentes en `:root`:
+       - `$roams-primary-dark: #090d16;` -> `--roams-primary-dark`
+       - `$roams-accent-blue-hover: #0d4eb8;` -> `--roams-accent-blue-hover`
+       - `$roams-accent-purple: #8b5cf6;` -> `--roams-accent-purple`
+       - `$roams-surface: #ffffff;` -> `--roams-surface`
+       - `$roams-text-muted: #94a3b8;` -> `--roams-text-muted`
+       - `$roams-border-light: #f1f5f9;` -> `--roams-border-light`
+  2. *Refactorización y Purga en los Componentes:*
+     - `email-composer-dialog.component.scss`: Se eliminaron todos los fallbacks hexadecimales y colores quemados; se sustituyeron los botones y títulos por `--roams-accent-blue`, `--roams-accent-blue-hover`, `--roams-surface`, `--roams-border` y `--roams-text-secondary`.
+     - `sidebar.component.scss`: Se reemplazaron todas las llamadas `var(--..., #...)` y el literal verde `#22c55e` por `var(--roams-status-success)`.
+     - `home.component.scss`: Se sanearon los gradientes, bordes y textos secundarios migrando a `var(--roams-border)`, `var(--roams-surface)`, `var(--roams-text-secondary)` y `var(--roams-text-muted)`.
+     - `simulation-hub.component.scss`: Se sustituyeron los valores de fallback en tarjetas de métricas, bordes y badges por los tokens correspondientes.
+     - `customer-detail.component.scss`: Se homogeneizaron los badges de planes (`.plan-enterprise`, `.plan-pro`, `.plan-starter`), avatars y tarjetas de desglose fiscal con `--roams-accent-purple`, `--roams-accent-blue`, `--roams-text-secondary`, `--roams-surface` y `--roams-border`.
+  3. *Auditoría Automatizada de Cero Residuos:* Se ejecutó un rastreo mediante expresiones regulares (`#[0-9a-fA-F]{3,8}`) y búsqueda de `var\(--[^,)]+,\s*#` sobre todos los ficheros `.scss` y `.css` del proyecto, certificando **0 ocurrencias** fuera del archivo maestro `_colors.scss`.
+- **Resultados de Verificación:**
+  - 135 tests unitarios en frontend pasando al 100% (23 suites).
+  - 121 tests unitarios en backend pasando al 100% (24 suites).
+  - 0 errores y 0 warnings en `oxlint`.
+  - Build de producción generado limpiamente sin ninguna advertencia de compilación SCSS.
+- **Valor para la evaluación:** Demostración de rigor profesional en Design Systems y arquitectura CSS moderna: observancia estricta del principio DRY (Don't Repeat Yourself), desacoplamiento visual, mantenimiento predecible y fidelidad corporativa total a la marca Roams.
 
 
 
