@@ -123,5 +123,6 @@ docker compose up --build
 En cumplimiento con los criterios de evaluación del reto (35% Planificación y 25% Control de Calidad):
 
 1. **[`01-specs/`](ai-workspace/01-specs/)**: Especificaciones funcionales rigurosas (`functional-specs.md`), reglas fiscales (DNI/NIE/CIF y tramos graduales) y contrato `openapi.yaml`.
-2. **[`02-architecture/`](ai-workspace/02-architecture/)**: Directrices de Arquitectura Hexagonal (`architecture-guidelines.md`), principios SOLID, árbol canónico y decisiones de concurrencia.
+2. **[`02-architecture/`](ai-workspace/02-architecture/)**: Directrices de Arquitectura Hexagonal (`architecture-guidelines.md`), principios SOLID, árbol canónico, decisiones de concurrencia y gobernanza de IA (Sección 6).
 3. **[`03-vibe-coding-log/`](ai-workspace/03-vibe-coding-log/)**: Bitácora cronológica auditada (`prompts-and-audits.md`) con las dos dimensiones del rol de Director de Orquesta: inputs estratégicos de arquitectura y auditoría continua de calidad frente a los sesgos de la IA.
+4. **Gobernanza Persistente del Agente de IA**: Configuración universal viva en la raíz con [`AGENTS.md`](AGENTS.md) y [`.agents/rules/coding-standards.md`](.agents/rules/coding-standards.md), reconocida automáticamente por los principales agentes de desarrollo (Google Antigravity, Cursor, Claude Code, Gemini CLI, Copilot) para forzar el cumplimiento incondicional de los estándares de calidad.
