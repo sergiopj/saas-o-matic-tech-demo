@@ -694,11 +694,13 @@
 
       .range-field {
         flex: 1;
+        min-width: 0;
       }
 
       .range-separator {
         color: var(--roams-text-muted);
         font-weight: 600;
+        flex-shrink: 0;
       }
     }
   }
@@ -726,6 +728,19 @@
 
     &:hover {
       background-color: var(--roams-accent-blue-hover);
+    }
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column-reverse;
+    gap: 0.65rem;
+
+    .clear-drawer-btn,
+    .apply-drawer-btn {
+      width: 100%;
+      justify-content: center;
+      min-height: 42px;
+      margin: 0;
     }
   }
 }

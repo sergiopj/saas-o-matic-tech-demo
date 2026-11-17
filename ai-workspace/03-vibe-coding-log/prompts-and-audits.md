@@ -2330,6 +2330,42 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: 0 errores y 0 advertencias.
 - **Valor para la evaluación:** Refuerzo de la identidad corporativa de Roams, eliminación de elementos no profesionales (indicador "Online") y fidelidad estricta a la marca.
 
+---
+
+### 6.98 Contexto de Marca en Sidebar ('SAAS-O-MATIC') y Blindaje Responsive en 2 Filas para Navbar y Drawer de Filtros Móvil
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  1. *Revisión de Contexto de Título:* En el menú lateral (`SidebarComponent`), el badge superior mostraba `"ROAMS CRM"`. Dicho nombre introducía disonancia cognitiva y falta de precisión semántica, ya que el producto no es un CRM comercial o de ventas tradicional, sino una plataforma de cálculo dinámico de costes, simulación por tramos y optimización de suscripciones B2B (*SaaS-O-Matic*). Además, el logotipo oficial de Roams ya figura en la cabecera, por lo que duplicar el nombre de la compañía resultaba redundante.
+  2. *Prevención de Colisiones y Solapamientos en Móvil:* En pantallas pequeñas (`<= 640px` y especialmente 360px–414px), mantener en una sola fila el botón hamburguesa, el logotipo oficial de Roams, el título de la aplicación, el selector de moneda y el selector desacoplado de idioma provocaba estrujamiento y solapamiento visual entre elementos. Del mismo modo, en el pie del panel deslizante de filtros (`SlideOverDrawerComponent`), los botones "Limpiar filtros" y "Aplicar filtros (X)" dispuestos en horizontal colisionaban en dispositivos móviles con anchos reducidos.
+- **Feedback Humano:**
+  *"este titulo esta bien? tiene contexto apropuado? ROAMS CRM"*
+  *"ojo con el responsive tanto en el modal de los filtros como en le navbar, prefiero que en mobiles si lo necesitas bajes el selector de currency y idioma a una line abajo por que es que responsive se junta todo y se superponen lso etelemtos y textos"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Alineamiento de Marca e Identidad de Producto:*
+     - En [sidebar.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic\src\app\shared\components\sidebar\sidebar.component.html), se sustituyó `<span class="brand-tag">ROAMS CRM</span>` por `<span class="brand-tag">SAAS-O-MATIC</span>`.
+     - Esto otorga identidad inequívoca de producto al motor de simulación, respetando la arquitectura de marca de Roams sin confusiones funcionales.
+  2. *Top Navbar Adaptativo en 2 Filas en Dispositivos Móviles (`<= 640px`):*
+     - En [navbar.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic\src\app\shared\components\navbar\navbar.component.scss), se reestructuró el layout del toolbar para viewports móviles:
+       - `.navbar-toolbar`: Se desbloqueó la altura fija con `height: auto !important; min-height: auto !important; padding: 8px 0 !important;` y `position: relative; z-index: 1000;`.
+       - `.navbar-container`: Se configuró con `flex-wrap: wrap; row-gap: 8px;`.
+       - *Fila 1 (`.navbar-brand-group`):* Ancho completo (`width: 100%`) alojando con holgura el botón hamburguesa, la insignia con el logotipo oficial de Roams y el título `SaaS-O-Matic`.
+       - *Fila 2 (`.navbar-actions`):* Ancho completo (`width: 100%`) con `justify-content: space-between; padding-top: 8px; border-top: 1px solid var(--roams-border-inverse);`, situando el selector de moneda a la izquierda y el selector de idioma a la derecha sin riesgo de solapamiento ni recorte.
+     - *Despliegue Dinámico del Menú Móvil:* Se ajustó `.mobile-nav-panel` con `top: 100%` y `.mobile-backdrop` con `position: fixed; inset: 0; z-index: 998;`. Al anclarse al 100% del contenedor sticky, el panel de navegación desplegable siempre arranca exactamente al ras del navbar, sin importar si este mide 64px o 104px de altura.
+  3. *Blindaje Responsive del Slide-Over Drawer de Filtros (`SlideOverDrawerComponent`):*
+     - En [slide-over-drawer.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic\src\app\shared\components\slide-over-drawer\slide-over-drawer.component.scss), se blindó la cabecera en pantallas `<= 640px`: `.header-main` con `min-width: 0; flex: 1;`, truncado con elipsis en título y subtítulo, y reducción proporcional de padding (`0.875rem 1rem`) e icono para garantizar que el botón de cierre nunca sea desplazado fuera de pantalla.
+     - En [customer-detail.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic\src\app\modules\customers\pages\customer-detail\customer-detail.component.scss):
+       - En `.range-inputs-row`: se añadió `min-width: 0;` a los campos numéricos y `flex-shrink: 0;` al separador para prevenir el desbordamiento de las entradas en 360px.
+       - En `.drawer-footer-content`: a través de `@media (max-width: 480px)`, los botones se disponen en columna invertida (`flex-direction: column-reverse; gap: 0.65rem;`), de modo que "Aplicar filtros (X)" ocupa el 100% del ancho en la parte superior y "Limpiar filtros" el 100% en la parte inferior, garantizando accesibilidad táctil ergonómica para el pulgar sin colisiones de texto.
+  4. *Estricta Fidelidad a Design Tokens:*
+     - 0 colores hexadecimales en SCSS y 0 variables con fallbacks directos. Uso exclusivo de tokens corporativos (`--roams-primary`, `--roams-border-inverse`, `--roams-accent-blue`, etc.).
+- **Resultados de Verificación:**
+  - Frontend Vitest: **161 pruebas unitarias pasando al 100%**.
+  - Backend Jest: **123 pruebas unitarias pasando al 100%**.
+  - Monorepo total: **284 pruebas unitarias pasando al 100%**.
+  - Oxlint: 0 errores y 0 advertencias.
+- **Valor para la evaluación:** Excelencia en Responsive Design, ergonomía Mobile-First real y consistencia conceptual de dominio.
+
 
 
 

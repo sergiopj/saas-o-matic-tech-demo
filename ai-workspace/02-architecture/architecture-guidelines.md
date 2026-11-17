@@ -721,8 +721,17 @@ flowchart TD
      - Comparte la misma Single Source of Truth (`APP_NAV_ITEMS`) que el sidebar de escritorio, garantizando consistencia total.
   3. **Blindaje de Viewport en el Drawer Genérico (`SlideOverDrawerComponent`):**
      En pantallas móviles (<= 768px), el drawer pasa dinámicamente de su ancho de escritorio a `width: 100% !important; max-width: 100vw !important; border-left: none;`, ocupando todo el ancho de la pantalla de forma fluida, eliminando solapamientos o recortes en los controles de filtrado.
-  4. **Cumplimiento de Design Tokens:**
-     Uso estricto de tokens oficiales `--roams-*` (`--roams-surface`, `--roams-border`, `--roams-accent-blue`, `--roams-bg-backdrop`), sin códigos hexadecimales directos ni fallbacks en variables CSS.
+  4. **Distribución en 2 Filas del Top Navbar en Móviles (`<= 640px`):**
+     Para evitar el apiñamiento entre el logotipo corporativo, el título, el botón hamburguesa y los selectores de moneda e idioma en viewports estrechos (360px–414px):
+     - `.navbar-toolbar` conmuta a altura dinámica (`height: auto; padding: 8px 0;`).
+     - `.navbar-container` activa `flex-wrap: wrap; row-gap: 8px;`.
+     - **Fila 1:** El grupo de marca (`.navbar-brand-group`) se expande al 100% alojando el menú hamburguesa, el logotipo oficial y el título `SaaS-O-Matic`.
+     - **Fila 2:** El contenedor de acciones (`.navbar-actions`) ocupa el 100% del ancho con `justify-content: space-between; border-top: 1px solid var(--roams-border-inverse); padding-top: 8px;`, alineando el selector de moneda a la izquierda y el selector de idioma a la derecha sin riesgo de solapamiento.
+     - El panel desplegable del menú móvil (`.mobile-nav-panel`) se posiciona con `top: 100%`, garantizando que comience siempre exactamente bajo el navbar sin importar la altura final de este.
+  5. **Apilado de Botones en Pie de Filtros Móvil (`CustomerDetailComponent`):**
+     En `@media (max-width: 480px)`, el contenedor `.drawer-footer-content` conmuta a `flex-direction: column-reverse; gap: 0.65rem;`. Los botones "Aplicar filtros (X)" y "Limpiar filtros" pasan a tener `width: 100%` y altura táctil optimizada (`min-height: 42px`), ofreciendo una zona de toque confortable para el pulgar y evitando colisiones de texto.
+  6. **Cumplimiento de Design Tokens:**
+     Uso estricto de tokens oficiales `--roams-*` (`--roams-surface`, `--roams-border`, `--roams-accent-blue`, `--roams-bg-backdrop`, `--roams-border-inverse`), sin códigos hexadecimales directos ni fallbacks en variables CSS.
 
 ---
 
