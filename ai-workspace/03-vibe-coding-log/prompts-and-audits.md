@@ -2982,6 +2982,30 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: **0 errores y 0 advertencias** en los 140 archivos inspeccionados.
 - **Valor para la evaluación:** Capacidad de implementar micro-interacciones visualmente ricas y placenteras con máxima elegancia de ingeniería: sin frameworks pesados, con código 100% estándar, accesible y mantenible a largo plazo.
 
+---
+
+### 6.124. Refinamiento Proporcional del Hero Banner: Preservación del Ancho Completo con Altura Esbelta Above-the-Fold
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Tras aplicar la reducción inicial del banner principal, acotar la anchura con una regla restrictiva `max-width: 960px` generaba una rotura visual en la cuadrícula de escritorio, desalineando el banner respecto a los cuatro bloques KPI, la tarjeta de tramos y la tabla de clientes recientes (todos dimensionados sobre el contenedor general de 1300px). El criterio de usuario validó con entusiasmo la reducción vertical (altura esbelta), pero requirió restaurar la longitud/anchura completa para armonizar con el resto de la página.
+- **Feedback Humano (Tu criterio de alineación y ritmo visual):**
+  > *"me ha gustado como lo dejaste de alto pero no de largo de largo como estaba SaaS-O-Matic Engine Panel de Control Comercial Supervisa clientes corporativos, simula tramos de tarificación SaaS y proyecta facturación multi-divisa en tiempo real."*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Restauración de Anchura Completa (`width: 100%`):*
+     - Se eliminaron `max-width: 960px` y `margin: 0 auto` en `.hero-banner` dentro de `home.component.scss`, permitiendo que el contenedor se extienda al 100% de la anchura del layout general (`max-width: 1300px`), en perfecta simetría con la cuadrícula de KPIs y clientes recientes.
+  2. *Amplitud Tipográfica y Respiración del Texto:*
+     - Se amplió `.hero-content` a `max-width: 760px` y `.hero-subtitle` a `max-width: 680px`, permitiendo que el texto descriptivo respire de forma natural y elegante en dos líneas limpias.
+     - Se mantuvo intacta la optimización de altura vertical que gustó al usuario (`padding: 1.15rem 2rem`, ilustración contenida a 120px de altura y tipografía esbelta), garantizando que todos los datos clave sigan perfectamente visibles *above the fold*.
+  3. *Sincronización Documental Transversal:*
+     - Actualizados los documentos normativos: [functional-specs.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/01-specs/functional-specs.md#L177), [architecture-guidelines.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md#L880) y [spa-saas-omatic/README.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/README.md#L22).
+- **Resultados de Verificación:**
+  - Frontend Vitest: **224 pruebas unitarias pasando al 100%** (27 suites).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+  - Oxlint: **0 errores y 0 advertencias** en los 140 archivos inspeccionados.
+- **Valor para la evaluación:** Criterio senior de arquitectura visual frontend: saber escuchar el feedback sutil de proporción espacial, combinando compacidad vertical para usabilidad con amplitud horizontal para jerarquía y aplomo visual.
+
+
 
 
 

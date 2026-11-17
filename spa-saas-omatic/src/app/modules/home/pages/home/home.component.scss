@@ -10,21 +10,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: 2rem;
   background: linear-gradient(135deg, var(--roams-primary) 0%, var(--roams-primary-light) 100%);
   border-radius: var(--roams-radius-lg);
-  padding: 1.15rem 1.75rem;
+  padding: 1.15rem 2rem;
   color: var(--roams-text-inverse);
   box-shadow: var(--roams-shadow-sm);
   position: relative;
   overflow: hidden;
-  max-width: 960px;
-  width: 100%;
-  margin: 0 auto;
 
   .hero-content {
     flex: 1 1 65%;
-    max-width: 580px;
+    max-width: 760px;
     z-index: 1;
   }
 
@@ -60,7 +57,7 @@
     font-size: 0.88rem;
     color: var(--roams-text-inverse-muted);
     margin: 0 0 0.85rem 0;
-    max-width: 540px;
+    max-width: 680px;
     line-height: 1.4;
   }
 

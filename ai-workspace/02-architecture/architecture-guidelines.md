@@ -878,9 +878,9 @@ Para resolver la ausencia de base de datos inicial (debido a que los archivos `*
   - En smartphones ($\le$ 768px), los banners decorativos se ocultan selectivamente (`display: none !important;`) para erradicar el ruido visual y asegurar que los componentes de interacción crítica (formularios, sliders, tablas) permanezcan *above the fold*.
 
 #### D. Optimización de Huella Espacial y Visibilidad Above-the-Fold en `/home`
-- **Contención de Ancho y Altura en Hero Banner:**
-  - Reducción del ancho máximo a `max-width: 960px; margin: 0 auto; width: 100%;` para evitar que el banner domine excesivamente el ancho del monitor de escritorio.
-  - Reducción del padding vertical a `padding: 1.15rem 1.75rem;` y de la ilustración a `max-height: 120px; max-width: 210px; flex: 0 0 auto;`.
+- **Ancho Completo y Altura Esbelta en Hero Banner:**
+  - Preservación de la anchura completa alineada con el contenedor principal (`width: 100%`) para mantener simetría horizontal con la cuadrícula de KPIs, tarjetas tarifarias y clientes recientes.
+  - Reducción del padding vertical a `padding: 1.15rem 2rem;` y de la ilustración a `max-height: 120px; max-width: 220px; flex: 0 0 auto;`.
   - Esta optimización reduce la altura total del hero banner de ~350px a ~150px (reducción del 57%), logrando que los indicadores KPI, los tramos tarifarios y los clientes recientes aparezcan inmediatamente en el viewport inicial (*above the fold*) sin necesidad de scroll.
 
 #### E. Micro-interacción Visual: Pilas de Monedas 3D Dinámicas y Aceleración CSS
