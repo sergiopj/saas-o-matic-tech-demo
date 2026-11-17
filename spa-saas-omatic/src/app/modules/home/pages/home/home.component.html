@@ -181,39 +181,79 @@
   <!-- Recent Customers Section -->
   <section class="recent-section">
     <div class="section-header">
-      <div>
+      <div class="header-text-group">
         <h2 class="section-title">{{ 'home.recent.title' | translate }}</h2>
         <p class="section-subtitle">{{ 'home.recent.subtitle' | translate }}</p>
       </div>
-      <a mat-flat-button routerLink="/customers" class="view-all-btn">
-        <span>{{ 'home.recent.viewAll' | translate }}</span>
-        <mat-icon aria-hidden="true">arrow_forward</mat-icon>
-      </a>
+
+      <div class="section-actions">
+        @if (recentCustomers().length > 1) {
+          <div class="slider-controls">
+            <button
+              mat-icon-button
+              type="button"
+              class="slider-btn prev"
+              (click)="slidePrev()"
+              [disabled]="currentSlideIndex() === 0"
+              [attr.aria-label]="'home.recent.prev' | translate"
+            >
+              <mat-icon aria-hidden="true">chevron_left</mat-icon>
+            </button>
+            <span class="slider-indicator" aria-live="polite">
+              {{ currentSlideIndex() + 1 }} / {{ maxSlideIndex() + 1 }}
+            </span>
+            <button
+              mat-icon-button
+              type="button"
+              class="slider-btn next"
+              (click)="slideNext()"
+              [disabled]="currentSlideIndex() >= maxSlideIndex()"
+              [attr.aria-label]="'home.recent.next' | translate"
+            >
+              <mat-icon aria-hidden="true">chevron_right</mat-icon>
+            </button>
+          </div>
+        }
+
+        <a mat-flat-button routerLink="/customers" class="view-all-btn">
+          <span>{{ 'home.recent.viewAll' | translate }}</span>
+          <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+        </a>
+      </div>
     </div>
 
     @if (customerApi.loading() && recentCustomers().length === 0) {
       <app-loading-state [message]="'customers.list.loading' | translate" />
     } @else {
-      <div class="recent-grid">
-        @for (customer of recentCustomers(); track customer.id) {
-          <article class="customer-lite-card">
-            <div class="lite-card-header">
-              <div class="lite-avatar">{{ customer.companyName.charAt(0).toUpperCase() }}</div>
-              <div class="lite-info">
-                <h3 class="lite-company" [title]="customer.companyName">{{ customer.companyName }}</h3>
-                <span class="country-badge">{{ customer.country }}</span>
+      <div
+        class="slider-viewport"
+        (touchstart)="onTouchStart($event)"
+        (touchend)="onTouchEnd($event)"
+      >
+        <div
+          class="slider-track"
+          [style.--slider-index]="currentSlideIndex()"
+        >
+          @for (customer of recentCustomers(); track customer.id) {
+            <article class="customer-lite-card">
+              <div class="lite-card-header">
+                <div class="lite-avatar">{{ customer.companyName.charAt(0).toUpperCase() }}</div>
+                <div class="lite-info">
+                  <h3 class="lite-company" [title]="customer.companyName">{{ customer.companyName }}</h3>
+                  <span class="country-badge">{{ customer.country }}</span>
+                </div>
               </div>
-            </div>
-            <div class="lite-card-actions">
-              <a mat-flat-button [routerLink]="['/customers', customer.id]" class="lite-simulate-btn">
-                <span class="btn-inner">
-                  <mat-icon aria-hidden="true">calculate</mat-icon>
-                  <span>{{ 'home.recent.simulate' | translate }}</span>
-                </span>
-              </a>
-            </div>
-          </article>
-        }
+              <div class="lite-card-actions">
+                <a mat-flat-button [routerLink]="['/customers', customer.id]" class="lite-simulate-btn">
+                  <span class="btn-inner">
+                    <mat-icon aria-hidden="true">calculate</mat-icon>
+                    <span>{{ 'home.recent.simulate' | translate }}</span>
+                  </span>
+                </a>
+              </div>
+            </article>
+          }
+        </div>
       </div>
     }
   </section>

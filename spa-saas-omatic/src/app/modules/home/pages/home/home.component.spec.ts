@@ -49,7 +49,7 @@ describe('HomeComponent', () => {
     fixture.detectChanges();
 
     const req = httpTesting.expectOne(
-      `${environment.apiBaseUrl}/customers?page=1&limit=4&sortBy=createdAt&order=DESC&fields=lite`
+      `${environment.apiBaseUrl}/customers?page=1&limit=8&sortBy=createdAt&order=DESC&fields=lite`
     );
     req.flush(mockCustomers, { headers: { 'x-total-count': '25' } });
 
@@ -134,5 +134,62 @@ describe('HomeComponent', () => {
     const cancelSpy = vi.spyOn(window, 'cancelAnimationFrame');
     component.ngOnDestroy();
     expect(cancelSpy).toHaveBeenCalled();
+  });
+
+  it('should navigate through carousel slides correctly with slideNext and slidePrev', () => {
+    // Populate more customers to test pagination
+    component.recentCustomers.set([
+      { id: 'c1', companyName: 'Company 1', country: 'ES' },
+      { id: 'c2', companyName: 'Company 2', country: 'DE' },
+      { id: 'c3', companyName: 'Company 3', country: 'FR' },
+      { id: 'c4', companyName: 'Company 4', country: 'IT' },
+      { id: 'c5', companyName: 'Company 5', country: 'PT' },
+    ]);
+    component.visibleCardsCount.set(3);
+    fixture.detectChanges();
+
+    expect(component.maxSlideIndex()).toBe(2); // 5 - 3 = 2
+    expect(component.currentSlideIndex()).toBe(0);
+
+    component.slideNext();
+    expect(component.currentSlideIndex()).toBe(1);
+
+    component.slideNext();
+    expect(component.currentSlideIndex()).toBe(2);
+
+    // Cannot advance past maxSlideIndex
+    component.slideNext();
+    expect(component.currentSlideIndex()).toBe(2);
+
+    component.slidePrev();
+    expect(component.currentSlideIndex()).toBe(1);
+
+    component.slidePrev();
+    expect(component.currentSlideIndex()).toBe(0);
+
+    // Cannot advance below 0
+    component.slidePrev();
+    expect(component.currentSlideIndex()).toBe(0);
+  });
+
+  it('should handle touch swipe navigation events', () => {
+    component.recentCustomers.set([
+      { id: 'c1', companyName: 'Company 1', country: 'ES' },
+      { id: 'c2', companyName: 'Company 2', country: 'DE' },
+      { id: 'c3', companyName: 'Company 3', country: 'FR' },
+      { id: 'c4', companyName: 'Company 4', country: 'IT' },
+    ]);
+    component.visibleCardsCount.set(2);
+    fixture.detectChanges();
+
+    // Swipe left (next)
+    component.onTouchStart({ changedTouches: [{ clientX: 200 }] } as unknown as TouchEvent);
+    component.onTouchEnd({ changedTouches: [{ clientX: 120 }] } as unknown as TouchEvent);
+    expect(component.currentSlideIndex()).toBe(1);
+
+    // Swipe right (prev)
+    component.onTouchStart({ changedTouches: [{ clientX: 100 }] } as unknown as TouchEvent);
+    component.onTouchEnd({ changedTouches: [{ clientX: 180 }] } as unknown as TouchEvent);
+    expect(component.currentSlideIndex()).toBe(0);
   });
 });

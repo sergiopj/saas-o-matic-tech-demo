@@ -3,6 +3,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -55,9 +56,25 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly countriesFillAngle = signal<number>(0);
   readonly tiersFillAngle = signal<number>(0);
 
+  // Responsive Carousel Slide Signals
+  readonly currentSlideIndex = signal<number>(0);
+  readonly visibleCardsCount = signal<number>(3);
+
+  readonly maxSlideIndex = computed(() => {
+    const total = this.recentCustomers().length;
+    const visible = this.visibleCardsCount();
+    return Math.max(0, total - visible);
+  });
+
+  private touchStartX = 0;
   private readonly animationFrameIds: number[] = [];
+  private readonly resizeHandler = () => this.updateVisibleCount();
 
   ngOnInit(): void {
+    this.updateVisibleCount();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', this.resizeHandler);
+    }
     this.loadRecentCustomers();
     this.animateKpi(
       this.supportedCountriesCount,
@@ -72,6 +89,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', this.resizeHandler);
+    }
     for (const id of this.animationFrameIds) {
       cancelAnimationFrame(id);
     }
@@ -79,7 +99,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   loadRecentCustomers(): void {
-    this.customerApi.getRecentLite(4).subscribe({
+    this.customerApi.getRecentLite(8).subscribe({
       next: (res) => {
         this.recentCustomers.set(res.items);
         this.totalCustomers.set(res.total);
@@ -90,6 +110,45 @@ export class HomeComponent implements OnInit, OnDestroy {
         );
       },
     });
+  }
+
+  slideNext(): void {
+    this.currentSlideIndex.update((curr) => Math.min(curr + 1, this.maxSlideIndex()));
+  }
+
+  slidePrev(): void {
+    this.currentSlideIndex.update((curr) => Math.max(curr - 1, 0));
+  }
+
+  onTouchStart(event: TouchEvent): void {
+    this.touchStartX = event.changedTouches[0].clientX;
+  }
+
+  onTouchEnd(event: TouchEvent): void {
+    const touchEndX = event.changedTouches[0].clientX;
+    const diff = this.touchStartX - touchEndX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        this.slideNext();
+      } else {
+        this.slidePrev();
+      }
+    }
+  }
+
+  private updateVisibleCount(): void {
+    if (typeof window === 'undefined') return;
+    const width = window.innerWidth;
+    if (width < 640) {
+      this.visibleCardsCount.set(1);
+    } else if (width < 1024) {
+      this.visibleCardsCount.set(2);
+    } else {
+      this.visibleCardsCount.set(3);
+    }
+    if (this.currentSlideIndex() > this.maxSlideIndex()) {
+      this.currentSlideIndex.set(this.maxSlideIndex());
+    }
   }
 
   /**

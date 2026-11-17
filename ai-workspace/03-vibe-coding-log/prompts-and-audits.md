@@ -3352,6 +3352,43 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
 - **Valor para la evaluación:** Demostración de criterio técnico de nivel Architect, priorizando la empatía con el evaluador (*Zero-Friction DX*) sin comprometer la seguridad ni las mejores prácticas de los estándares web modernos.
 
+---
+
+### 6.137. Carrusel de Fila Única y Controles Deslizantes (*Slide Carousel*) para Clientes Recientes
+
+- **Fecha:** 17 de noviembre de 2026.
+- **Contexto / Desafío:**
+  En la sección "Últimos Clientes Añadidos" del panel de inicio ([home.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.html)), las tarjetas se mostraban en una cuadrícula CSS (`repeat(auto-fill, minmax(280px, 1fr))`). Al tener 4 cuentas registradas (o en pantallas medianas), las tarjetas se envolvían inevitablemente en dos filas, ocupando demasiado espacio vertical y fragmentando la armonía visual de la vista. El usuario instruyó fijar estrictamente una sola fila horizontal (mostrando 3, 2 o 1 tarjeta según el ancho de pantalla pero **nunca dos filas**) e incorporar controles de deslizamiento (*slide*) con flechas para navegar entre las cuentas.
+- **Feedback Humano (Tu criterio de compacidad visual y navegación fluida por carrusel):**
+  > *"Últimos Clientes Añadidos*  
+  > *Clientes corporativos incorporados recientemente al sistema.*  
+  > *en el dashboard o inicio solo una linea que se vean 3 o 2 o 1 segun el tamaño pero que nunca sean dos filas, ademas que haya una flechita en plan slide para cargar los siguientes, etc me entiendes?"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Estructura Inviolable de Fila Única (Strict Single-Row Viewport):*
+     - En [home.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.scss#L605), se reemplazó la cuadrícula envolvente por un contenedor de carrusel `.slider-viewport` (`overflow: hidden`) y una pista deslizante `.slider-track` con `display: flex; flex-wrap: nowrap;`.
+     - Esto garantiza matemáticamente que las tarjetas **jamás se dividan en dos filas** bajo ninguna resolución.
+  2. *Dimensionamiento Responsive Dinámico (3 en Desktop, 2 en Tablet, 1 en Móvil):*
+     - Mediante variables CSS y media queries, la anchura de cada tarjeta se calibra para llenar exactamente el ancho del viewport:
+       - **Desktop ($\ge 1024px$):** `--visible-cards: 3` $\rightarrow$ 3 tarjetas visibles simultáneas.
+       - **Tablet ($640px \le \text{width} < 1024px$):** `--visible-cards: 2` $\rightarrow$ 2 tarjetas visibles simultáneas.
+       - **Smartphone ($< 640px$):** `--visible-cards: 1` $\rightarrow$ 1 tarjeta visible a ancho completo.
+  3. *Controles Deslizantes y Cinemática por Hardware:*
+     - En la cabecera de la sección (`.section-header`), se integraron controles de navegación compactos (`.slider-controls`):
+       - Botón retroceder (`chevron_left`) y avanzar (`chevron_right`) con micro-interacciones hover y deshabilitación visual en extremos.
+       - Indicador numérico de página accesible (`1 / 2`, `2 / 2`).
+     - Desplazamiento acelerado por GPU a 60 FPS:
+       `transform: translateX(calc(-1 * var(--slider-index) * (var(--card-width) + var(--slider-gap))))`
+       con una curva cúbica suave `cubic-bezier(0.25, 1, 0.5, 1)` de 350 ms.
+     - Detección de gestos táctiles *swipe* móvil mediante escuchadores `touchstart` y `touchend` en el viewport.
+  4. *Ampliación de Límite de Consulta a 8 Clientes:*
+     - En [home.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.ts#L88), `loadRecentCustomers()` amplió la llamada a `customerApi.getRecentLite(8)` para alimentar el carrusel con hasta 8 cuentas recientes.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **231 pruebas unitarias pasando al 100%** (27 suites). Suite `home.component.spec.ts` ampliada a 9 tests unitarios incluyendo navegación de carrusel y gestos swipe.
+  - Oxlint Frontend: **0 errores y 0 advertencias** (67 archivos analizados con 111 reglas).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+- **Valor para la evaluación:** Refinamiento estético y funcional de primer nivel en UX/UI para dashboards empresariales, preservando la información crítica *above the fold* con transiciones cinemáticas fluidas y cero desbordamiento vertical.
+
+
 
 
 
