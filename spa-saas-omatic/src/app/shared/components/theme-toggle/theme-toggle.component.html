@@ -24,6 +24,7 @@
       class="comic-speech-bubble"
       [class.fading-out]="isBubbleFading()"
       (click)="dismissBubble()"
+      (keydown)="dismissBubble()"
       aria-live="polite"
     >
       <span class="bubble-tail" aria-hidden="true"></span>
