@@ -101,4 +101,59 @@ describe('Customer Domain Entity (Pure TypeScript)', () => {
     expect(customer.getId()).toBe(fakeId);
     expect(customer.getCreatedAt()).toBe(pastDate);
   });
+
+  describe('update', () => {
+    let customer: Customer;
+
+    beforeEach(() => {
+      customer = Customer.create(
+        {
+          companyName: 'Acme Corp',
+          taxId: 'B12345674',
+          email: 'contact@acme.com',
+          country: 'ES',
+          selectedPlan: 'Pro',
+        },
+        mockIdGenerator,
+      );
+    });
+
+    it('should update companyName, email, and plan while preserving id and createdAt', () => {
+      const updated = customer.update({
+        companyName: 'Acme Global Inc',
+        email: 'billing@acme.com',
+        selectedPlan: 'Enterprise Unlimited',
+      });
+
+      expect(updated.getId()).toBe(fakeId);
+      expect(updated.getCompanyName()).toBe('Acme Global Inc');
+      expect(updated.getEmail()).toBe('billing@acme.com');
+      expect(updated.getSelectedPlan()).toBe('Enterprise Unlimited');
+      expect(updated.getTaxId()).toBe('B12345674');
+      expect(updated.getCountry()).toBe('ES');
+      expect(updated.getCreatedAt()).toEqual(customer.getCreatedAt());
+    });
+
+    it('should update country and taxId when valid', () => {
+      const updated = customer.update({
+        country: 'DE',
+        taxId: 'DE123456789',
+      });
+
+      expect(updated.getCountry()).toBe('DE');
+      expect(updated.getTaxId()).toBe('DE123456789');
+    });
+
+    it('should throw DomainError when updating with invalid email', () => {
+      expect(() => customer.update({ email: 'bad-email' })).toThrow(DomainError);
+    });
+
+    it('should throw DomainError when updating with invalid Spanish CIF', () => {
+      expect(() => customer.update({ taxId: 'B12345679' })).toThrow(DomainError);
+    });
+
+    it('should throw DomainError when updating with short company name', () => {
+      expect(() => customer.update({ companyName: ' ' })).toThrow(DomainError);
+    });
+  });
 });

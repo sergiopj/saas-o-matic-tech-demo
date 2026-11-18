@@ -137,6 +137,21 @@ export class CustomerApiService {
     );
   }
 
+  update(id: string, payload: Partial<CustomerCreate>): Observable<Customer> {
+    this.loading.set(true);
+    this.error.set(null);
+
+    return this.http.patch<Customer>(`${this.baseUrl}/${id}`, payload).pipe(
+      tap(() => this.error.set(null)),
+      catchError((err: unknown) => {
+        const problem = this.normalizeProblem(err);
+        this.error.set(problem);
+        return throwError(() => problem);
+      }),
+      finalize(() => this.loading.set(false))
+    );
+  }
+
   clearError(): void {
     this.error.set(null);
   }

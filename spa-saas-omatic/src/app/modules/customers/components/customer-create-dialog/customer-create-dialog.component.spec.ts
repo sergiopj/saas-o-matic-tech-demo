@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { of, throwError } from 'rxjs';
 import { CustomerCreateDialogComponent } from './customer-create-dialog.component';
 import { CustomerApiService } from '../../services/customer-api.service';
@@ -11,7 +11,10 @@ describe('CustomerCreateDialogComponent', () => {
   let component: CustomerCreateDialogComponent;
   let fixture: ComponentFixture<CustomerCreateDialogComponent>;
   let mockDialogRef: { close: ReturnType<typeof vi.fn> };
-  let mockCustomerApi: { create: ReturnType<typeof vi.fn> };
+  let mockCustomerApi: {
+    create: ReturnType<typeof vi.fn>;
+    update: ReturnType<typeof vi.fn>;
+  };
 
   const sampleCustomer: Customer = {
     id: 'cust-uuid-1',
@@ -30,6 +33,7 @@ describe('CustomerCreateDialogComponent', () => {
 
     mockCustomerApi = {
       create: vi.fn().mockReturnValue(of(sampleCustomer)),
+      update: vi.fn().mockReturnValue(of(sampleCustomer)),
     };
 
     await TestBed.configureTestingModule({
@@ -157,5 +161,61 @@ describe('CustomerCreateDialogComponent', () => {
   it('should close dialog when onCancel is invoked', () => {
     component.onCancel();
     expect(mockDialogRef.close).toHaveBeenCalled();
+  });
+
+  describe('Edit Mode', () => {
+    let editComponent: CustomerCreateDialogComponent;
+    let editFixture: ComponentFixture<CustomerCreateDialogComponent>;
+
+    beforeEach(() => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [CustomerCreateDialogComponent],
+        providers: [
+          { provide: MatDialogRef, useValue: mockDialogRef },
+          { provide: CustomerApiService, useValue: mockCustomerApi },
+          { provide: MAT_DIALOG_DATA, useValue: sampleCustomer },
+          I18nService,
+        ],
+      });
+
+      editFixture = TestBed.createComponent(CustomerCreateDialogComponent);
+      editComponent = editFixture.componentInstance;
+      editFixture.detectChanges();
+    });
+
+    it('should prefill form with existing customer data in edit mode', () => {
+      expect(editComponent.isEditMode()).toBe(true);
+      expect(editComponent.form.get('companyName')?.value).toBe('Acme Solutions S.L.');
+      expect(editComponent.form.get('taxId')?.value).toBe('B12345674');
+      expect(editComponent.form.get('country')?.value).toBe('ES');
+      expect(editComponent.form.get('email')?.value).toBe('billing@acme.es');
+      expect(editComponent.form.get('selectedPlan')?.value).toBe('Growth Pro');
+      expect(editComponent.form.valid).toBe(true);
+    });
+
+    it('should call customerApi.update instead of create when submitting in edit mode', () => {
+      vi.useFakeTimers();
+
+      editComponent.form.patchValue({
+        companyName: 'Acme Solutions Updated',
+      });
+
+      editComponent.onSubmit();
+
+      expect(mockCustomerApi.update).toHaveBeenCalledWith('cust-uuid-1', {
+        companyName: 'Acme Solutions Updated',
+        taxId: 'B12345674',
+        country: 'ES',
+        email: 'billing@acme.es',
+        selectedPlan: 'Growth Pro',
+      });
+      expect(mockCustomerApi.create).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(700);
+      expect(mockDialogRef.close).toHaveBeenCalledWith(sampleCustomer);
+
+      vi.useRealTimers();
+    });
   });
 });

@@ -34,6 +34,16 @@
             <span class="plan-pill" [class]="'plan-' + customer()!.selectedPlan.toLowerCase()">
               {{ customer()!.selectedPlan }}
             </span>
+            <button
+              mat-stroked-button
+              type="button"
+              class="edit-customer-btn"
+              (click)="openEditCustomerDialog()"
+              [attr.aria-label]="'customers.edit.btn' | translate"
+            >
+              <mat-icon aria-hidden="true">edit</mat-icon>
+              <span>{{ 'customers.edit.btn' | translate }}</span>
+            </button>
           </div>
 
           <div class="meta-chips-row">

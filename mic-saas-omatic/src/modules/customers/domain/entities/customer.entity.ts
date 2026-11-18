@@ -21,6 +21,14 @@ export interface CreateCustomerPayload {
   selectedPlan: string;
 }
 
+export interface UpdateCustomerPayload {
+  companyName?: string;
+  taxId?: string;
+  email?: string;
+  country?: string;
+  selectedPlan?: string;
+}
+
 export class Customer {
   private readonly id: string;
   private readonly companyName: string;
@@ -85,6 +93,63 @@ export class Customer {
 
   public static reconstitute(props: CustomerProperties): Customer {
     return new Customer(props);
+  }
+
+  public update(payload: UpdateCustomerPayload): Customer {
+    const nextCompanyName =
+      payload.companyName !== undefined
+        ? payload.companyName.trim()
+        : this.companyName;
+    if (!nextCompanyName || nextCompanyName.length < 2) {
+      throw new DomainError('Company name must have at least 2 characters.');
+    }
+
+    const nextCountry =
+      payload.country !== undefined
+        ? payload.country.trim().toUpperCase()
+        : this.country;
+    if (!/^[A-Z]{2}$/.test(nextCountry)) {
+      throw new DomainError(
+        'Country must be a valid 2-letter ISO 3166-1 alpha-2 code.',
+      );
+    }
+
+    const nextTax =
+      payload.taxId !== undefined ? normalizeTaxId(payload.taxId) : this.taxId;
+    if (payload.taxId !== undefined || payload.country !== undefined) {
+      if (!isValidTaxId(nextTax, nextCountry)) {
+        throw new DomainError(
+          `Invalid tax identifier '${payload.taxId ?? nextTax}' for country '${nextCountry}'.`,
+        );
+      }
+    }
+
+    const nextEmail =
+      payload.email !== undefined
+        ? payload.email.trim().toLowerCase()
+        : this.email;
+    const emailRegex = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
+    if (!emailRegex.test(nextEmail)) {
+      throw new DomainError(`Invalid email address format '${payload.email}'.`);
+    }
+
+    const nextPlan =
+      payload.selectedPlan !== undefined
+        ? payload.selectedPlan.trim()
+        : this.selectedPlan;
+    if (!nextPlan || nextPlan.length < 2) {
+      throw new DomainError('Selected plan must have at least 2 characters.');
+    }
+
+    return new Customer({
+      id: this.id,
+      companyName: nextCompanyName,
+      taxId: nextTax,
+      email: nextEmail,
+      country: nextCountry,
+      selectedPlan: nextPlan,
+      createdAt: this.createdAt,
+    });
   }
 
   public getId(): string {

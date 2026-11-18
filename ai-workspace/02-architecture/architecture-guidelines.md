@@ -90,6 +90,7 @@ mic-saas-omatic/
 │   │   │   │   ├── ports/
 │   │   │   │   │   ├── in/                                  # Casos de uso (interfaces)
 │   │   │   │   │   │   ├── create-customer.use-case.ts
+│   │   │   │   │   │   ├── update-customer.use-case.ts
 │   │   │   │   │   │   ├── list-customers.use-case.ts
 │   │   │   │   │   │   └── get-customer-detail.use-case.ts
 │   │   │   │   │   └── out/                                 # Repositorios (interfaces)
@@ -103,6 +104,7 @@ mic-saas-omatic/
 │   │   │   │       │       ├── customer.controller.ts
 │   │   │   │       │       ├── dto/
 │   │   │   │       │       │   ├── create-customer.dto.ts
+│   │   │   │       │       │   ├── update-customer.dto.ts
 │   │   │   │       │       │   └── customer-response.dto.ts
 │   │   │   │       │       └── customer-rest.mapper.ts
 │   │   │   │       └── out/
@@ -337,7 +339,7 @@ spa-saas-omatic/
 │   │   │   │   ├── models/
 │   │   │   │   │   └── customer.model.ts                    # Customer y CustomerCreate
 │   │   │   │   ├── services/
-│   │   │   │   │   └── customer-api.service.ts              # GET /customers, GET /customers/:id
+│   │   │   │   │   └── customer-api.service.ts              # GET /customers, GET /customers/:id, POST /customers, PATCH /customers/:id
 │   │   │   │   ├── components/
 │   │   │   │   │   ├── customer-card/                       # Dumb Component: tarjeta responsive
 │   │   │   │   │   └── customer-search-bar/                 # Dumb Component: input con debounce

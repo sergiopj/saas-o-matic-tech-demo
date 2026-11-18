@@ -289,6 +289,32 @@ describe('CustomerDetailComponent', () => {
     );
   });
 
+  it('should open edit customer dialog and update customer signal on success', () => {
+    const dialog = TestBed.inject(MatDialog);
+    const snackBar = fixture.debugElement.injector.get(MatSnackBar);
+    const snackBarSpy = vi.spyOn(snackBar, 'open');
+
+    const updatedCustomer: Customer = {
+      ...mockCustomer,
+      companyName: 'Acme Solutions Global',
+      selectedPlan: 'Enterprise Unlimited',
+    };
+
+    vi.spyOn(dialog, 'open').mockReturnValue({
+      afterClosed: () => of(updatedCustomer),
+    } as unknown as ReturnType<MatDialog['open']>);
+
+    component.openEditCustomerDialog();
+
+    expect(component.customer()?.companyName).toBe('Acme Solutions Global');
+    expect(component.customer()?.selectedPlan).toBe('Enterprise Unlimited');
+    expect(snackBarSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      'OK',
+      expect.objectContaining({ duration: 4000 })
+    );
+  });
+
   describe('Simulation History Search Filters', () => {
     beforeEach(() => {
       component.simulations.set(testSimulations);

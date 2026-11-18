@@ -2,6 +2,7 @@ import { CustomerController } from './customer.controller';
 import { CreateCustomerUseCase } from '../../../../application/use-cases/create-customer.use-case';
 import { ListCustomersUseCase } from '../../../../application/use-cases/list-customers.use-case';
 import { GetCustomerDetailUseCase } from '../../../../application/use-cases/get-customer-detail.use-case';
+import { UpdateCustomerUseCase } from '../../../../application/use-cases/update-customer.use-case';
 import { Customer } from '../../../../domain/entities/customer.entity';
 
 describe('CustomerController (Primary Adapter)', () => {
@@ -9,6 +10,7 @@ describe('CustomerController (Primary Adapter)', () => {
   let mockCreateCustomerUseCase: jest.Mocked<Partial<CreateCustomerUseCase>>;
   let mockListCustomersUseCase: jest.Mocked<Partial<ListCustomersUseCase>>;
   let mockGetCustomerDetailUseCase: jest.Mocked<Partial<GetCustomerDetailUseCase>>;
+  let mockUpdateCustomerUseCase: jest.Mocked<Partial<UpdateCustomerUseCase>>;
 
   const sampleCustomer = Customer.reconstitute({
     id: 'uuid-100',
@@ -30,11 +32,15 @@ describe('CustomerController (Primary Adapter)', () => {
     mockGetCustomerDetailUseCase = {
       execute: jest.fn().mockResolvedValue(sampleCustomer),
     };
+    mockUpdateCustomerUseCase = {
+      execute: jest.fn().mockResolvedValue(sampleCustomer),
+    };
 
     controller = new CustomerController(
       mockCreateCustomerUseCase as CreateCustomerUseCase,
       mockListCustomersUseCase as ListCustomersUseCase,
       mockGetCustomerDetailUseCase as GetCustomerDetailUseCase,
+      mockUpdateCustomerUseCase as UpdateCustomerUseCase,
     );
   });
 
@@ -120,5 +126,33 @@ describe('CustomerController (Primary Adapter)', () => {
 
     expect(result.id).toBe('uuid-100');
     expect(mockGetCustomerDetailUseCase.execute).toHaveBeenCalledWith('uuid-100');
+  });
+
+  it('should update customer and return updated CustomerResponseDto', async () => {
+    const updatedCustomer = Customer.reconstitute({
+      id: 'uuid-100',
+      companyName: 'Roams Updated Corp',
+      taxId: 'B12345674',
+      email: 'new-billing@roams.es',
+      country: 'ES',
+      selectedPlan: 'Enterprise Unlimited',
+      createdAt: new Date('2026-05-10T10:00:00.000Z'),
+    });
+    mockUpdateCustomerUseCase.execute?.mockResolvedValue(updatedCustomer);
+
+    const result = await controller.update('uuid-100', {
+      companyName: 'Roams Updated Corp',
+      email: 'new-billing@roams.es',
+      selectedPlan: 'Enterprise Unlimited',
+    });
+
+    expect(result.id).toBe('uuid-100');
+    expect(result.companyName).toBe('Roams Updated Corp');
+    expect(result.email).toBe('new-billing@roams.es');
+    expect(mockUpdateCustomerUseCase.execute).toHaveBeenCalledWith('uuid-100', {
+      companyName: 'Roams Updated Corp',
+      email: 'new-billing@roams.es',
+      selectedPlan: 'Enterprise Unlimited',
+    });
   });
 });

@@ -6,6 +6,7 @@ import { CUSTOMER_REPOSITORY_PORT } from './application/ports/out/customer-repos
 import { CreateCustomerUseCase } from './application/use-cases/create-customer.use-case';
 import { ListCustomersUseCase } from './application/use-cases/list-customers.use-case';
 import { GetCustomerDetailUseCase } from './application/use-cases/get-customer-detail.use-case';
+import { UpdateCustomerUseCase } from './application/use-cases/update-customer.use-case';
 import { CustomerController } from './infrastructure/adapters/in/rest/customer.controller';
 
 @Module({
@@ -15,6 +16,7 @@ import { CustomerController } from './infrastructure/adapters/in/rest/customer.c
     CreateCustomerUseCase,
     ListCustomersUseCase,
     GetCustomerDetailUseCase,
+    UpdateCustomerUseCase,
     {
       provide: CUSTOMER_REPOSITORY_PORT,
       useClass: CustomerPersistenceAdapter,

@@ -30,6 +30,7 @@ import { LocalizedCurrencyPipe } from '../../../../shared/pipes/localized-curren
 import { LoadingStateComponent } from '../../../../shared/components/loading-state/loading-state.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
 import { EmailComposerDialogComponent } from '../../../../shared/components/email-composer-dialog/email-composer-dialog.component';
+import { CustomerCreateDialogComponent } from '../../components/customer-create-dialog/customer-create-dialog.component';
 import { SlideOverDrawerComponent } from '../../../../shared/components/slide-over-drawer/slide-over-drawer.component';
 import { PaginatorComponent } from '../../../../shared/components/paginator/paginator.component';
 import { I18nService } from '../../../../core/services/i18n.service';
@@ -349,6 +350,29 @@ export class CustomerDetailComponent implements OnInit {
         this.snackBar.open(this.i18n.t('customers.emailDialog.sentSuccess'), 'OK', {
           duration: 4000,
         });
+      }
+    });
+  }
+
+  openEditCustomerDialog(): void {
+    const cust = this.customer();
+    if (!cust) return;
+
+    const dialogRef = this.dialog.open(CustomerCreateDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      panelClass: 'corporate-dialog-panel',
+      data: cust,
+    });
+
+    dialogRef.afterClosed().subscribe((updated: Customer | undefined) => {
+      if (updated) {
+        this.customer.set(updated);
+        this.snackBar.open(
+          this.i18n.t('customers.edit.success'),
+          'OK',
+          { duration: 4000 },
+        );
       }
     });
   }

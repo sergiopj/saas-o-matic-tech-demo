@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -7,7 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -77,9 +77,13 @@ export const PLAN_OPTIONS: string[] = [
 })
 export class CustomerCreateDialogComponent implements OnInit, OnDestroy {
   readonly dialogRef = inject(MatDialogRef<CustomerCreateDialogComponent>);
+  readonly customerData = inject<Customer | null>(MAT_DIALOG_DATA, {
+    optional: true,
+  });
   private readonly customerApi = inject(CustomerApiService);
   private readonly i18n = inject(I18nService);
 
+  readonly isEditMode = computed<boolean>(() => Boolean(this.customerData?.id));
   readonly matcher = new ShowOnDirtyErrorStateMatcher();
   readonly countries = COUNTRY_OPTIONS;
   readonly plans = PLAN_OPTIONS;
@@ -123,6 +127,16 @@ export class CustomerCreateDialogComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
+    if (this.customerData) {
+      this.form.patchValue({
+        companyName: this.customerData.companyName,
+        country: this.customerData.country,
+        taxId: this.customerData.taxId,
+        email: this.customerData.email,
+        selectedPlan: this.customerData.selectedPlan,
+      });
+    }
+
     this.countrySub = this.form.get('country')?.valueChanges.subscribe(() => {
       this.form.get('taxId')?.updateValueAndValidity();
     });
@@ -153,12 +167,16 @@ export class CustomerCreateDialogComponent implements OnInit, OnDestroy {
       selectedPlan: raw.selectedPlan,
     };
 
-    this.customerApi.create(payload).subscribe({
-      next: (createdCustomer: Customer) => {
+    const request$ = this.customerData?.id
+      ? this.customerApi.update(this.customerData.id, payload)
+      : this.customerApi.create(payload);
+
+    request$.subscribe({
+      next: (customer: Customer) => {
         this.submitting.set(false);
         this.success.set(true);
         setTimeout(() => {
-          this.dialogRef.close(createdCustomer);
+          this.dialogRef.close(customer);
         }, 600);
       },
       error: (err: unknown) => {

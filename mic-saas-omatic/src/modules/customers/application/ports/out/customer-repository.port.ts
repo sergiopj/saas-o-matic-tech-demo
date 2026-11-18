@@ -18,11 +18,7 @@ export type {
 export interface CustomerRepositoryPort {
   save(customer: Customer): Promise<Customer>;
   findById(id: string): Promise<Customer | null>;
-  findByTaxId(taxId: string): Promise<Customer | null>;
-  /**
-   * Dispatches paginated, filtered, and sorted queries.
-   * Supports both cohesive CustomerSearchCriteria parameter object and legacy positional parameters.
-   */
+  findByTaxId(taxId: string): Promise<Customer | null>; 
   search(
     criteriaOrTerm?: CustomerSearchCriteria | string,
     country?: string,

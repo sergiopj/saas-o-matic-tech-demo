@@ -187,6 +187,34 @@ describe('CustomerApiService', () => {
     });
   });
 
+  describe('update', () => {
+    it('should patch customer by id and return updated entity', () => {
+      const updatePayload: Partial<CustomerCreate> = {
+        companyName: 'Roams Telecom Updated',
+        email: 'billing@roams.es',
+      };
+      const updatedMock: Customer = {
+        ...mockCustomer,
+        companyName: 'Roams Telecom Updated',
+        email: 'billing@roams.es',
+      };
+
+      let result: Customer | undefined;
+
+      service.update('cust-123', updatePayload).subscribe((customer) => {
+        result = customer;
+      });
+
+      const req = httpTesting.expectOne(`${baseUrl}/cust-123`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual(updatePayload);
+      req.flush(updatedMock);
+
+      expect(result).toEqual(updatedMock);
+      expect(service.loading()).toBe(false);
+    });
+  });
+
   describe('error handling (RFC 7807 via errorInterceptor)', () => {
     it('should capture backend ProblemDetail error and update error signal', () => {
       const backendError: ProblemDetail = {
