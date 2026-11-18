@@ -6,7 +6,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CustomerApiService } from '../../services/customer-api.service';
 import {
   Customer,
@@ -19,8 +18,10 @@ import { CustomerCardComponent } from '../../components/customer-card/customer-c
 import { CustomerCreateDialogComponent } from '../../components/customer-create-dialog/customer-create-dialog.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
 import { LoadingStateComponent } from '../../../../shared/components/loading-state/loading-state.component';
+import { PaginatorComponent } from '../../../../shared/components/paginator/paginator.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { I18nService } from '../../../../core/services/i18n.service';
+import { ToastService } from '../../../../core/services/toast.service';
 
 export interface CountryFilterOption {
   code: string;
@@ -72,9 +73,9 @@ export const CUSTOMER_SORT_OPTIONS: readonly SortOptionItem[] = [
     CustomerCardComponent,
     ErrorBannerComponent,
     LoadingStateComponent,
+    PaginatorComponent,
     MatButtonModule,
     MatDialogModule,
-    MatSnackBarModule,
     MatIconModule,
     MatFormFieldModule,
     MatSelectModule,
@@ -89,7 +90,7 @@ export const CUSTOMER_SORT_OPTIONS: readonly SortOptionItem[] = [
 export class CustomerListComponent implements OnInit {
   readonly customerApi = inject(CustomerApiService);
   private readonly dialog = inject(MatDialog);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly toast = inject(ToastService);
   private readonly i18n = inject(I18nService);
 
   readonly customers = signal<Customer[]>([]);
@@ -97,60 +98,40 @@ export class CustomerListComponent implements OnInit {
   readonly selectedCountry = signal<string>('ALL');
   readonly initialLoading = signal<boolean>(true);
 
-  /**
-   * Scoped loading flag for the search bar: only triggers when actively searching by text.
-   * Prevents search bar spinner from activating during page navigation, filtering, or sorting.
-   */
   readonly isSearchingText = computed<boolean>(
     () => this.customerApi.loading() && Boolean(this.searchTerm().trim()),
   );
 
-  // Centralized fiscal country registry
   readonly availableCountries = signal<readonly string[]>(
     SUPPORTED_FISCAL_COUNTRIES,
   );
 
-  // Server-Side Sorting state
   readonly sortOptions = CUSTOMER_SORT_OPTIONS;
   readonly activeSortKey = signal<string>('recent');
 
-  // Pure Server-Side Pagination state
   readonly currentPage = signal<number>(1);
   readonly pageSize = signal<number>(8);
   readonly pageSizeOptions = [8, 12, 24];
   readonly totalCount = signal<number>(0);
 
-  /**
-   * Computes available country filter options using the canonical SSOT constants.
-   */
-  readonly countryFilters = computed<CountryFilterOption[]>(() => {
-    return [
-      {
-        code: 'ALL',
-        label: this.i18n.t('customers.filter.allCountries'),
-      },
-      ...SUPPORTED_FISCAL_COUNTRIES.map((code) => ({
-        code,
-        label: code,
-      })),
-    ];
-  });
-
-  readonly totalFiltered = computed<number>(() => this.totalCount());
-
-  /**
-   * Filtered list alias for backward compatibility and tests.
-   */
-  readonly filteredCustomers = computed<Customer[]>(() => this.customers());
+  readonly countryFilters = computed<CountryFilterOption[]>(() => [
+    {
+      code: 'ALL',
+      label: this.i18n.t('customers.filter.allCountries'),
+    },
+    ...SUPPORTED_FISCAL_COUNTRIES.map((code) => ({
+      code,
+      label: code,
+    })),
+  ]);
 
   readonly totalPages = computed<number>(() =>
     Math.max(1, Math.ceil(this.totalCount() / this.pageSize()))
   );
 
-  /**
-   * Under pure server-side pagination, the server only returns the current page's slice.
-   * This keeps DOM rendering minimal (e.g. 12 cards max) with zero client-side memory bloat.
-   */
+  // Backward-compatible aliases for templates and unit tests
+  readonly totalFiltered = computed<number>(() => this.totalCount());
+  readonly filteredCustomers = computed<Customer[]>(() => this.customers());
   readonly paginatedCustomers = computed<Customer[]>(() => this.customers());
 
   readonly displayedRange = computed<{
@@ -165,27 +146,10 @@ export class CustomerListComponent implements OnInit {
     return { start, end, total };
   });
 
-  readonly visiblePageNumbers = computed<number[]>(() => {
-    const total = this.totalPages();
-    const current = this.currentPage();
-    const delta = 2;
-    const min = Math.max(1, current - delta);
-    const max = Math.min(total, current + delta);
-    const pages: number[] = [];
-    for (let i = min; i <= max; i++) {
-      pages.push(i);
-    }
-    return pages;
-  });
-
   ngOnInit(): void {
     this.loadCustomers();
   }
 
-  /**
-   * Dispatches pure server-side paginated and sorted queries to the backend API.
-   * Only fetches the slice of records corresponding to the requested page and sort order.
-   */
   loadCustomers(
     page?: number,
     pageSize?: number,
@@ -227,39 +191,39 @@ export class CustomerListComponent implements OnInit {
 
   onSortChange(newSortKey: string): void {
     this.activeSortKey.set(newSortKey);
-    this.loadCustomers(
-      1,
-      this.pageSize(),
-      this.searchTerm(),
-      this.selectedCountry(),
-      newSortKey,
-    );
+    this.currentPage.set(1);
+    this.loadCustomers();
   }
 
   onSearchChange(term: string): void {
     this.searchTerm.set(term);
-    this.loadCustomers(1, this.pageSize(), term, this.selectedCountry());
+    this.currentPage.set(1);
+    this.loadCustomers();
   }
 
   onClearSearch(): void {
     this.searchTerm.set('');
-    this.loadCustomers(1, this.pageSize(), '', this.selectedCountry());
+    this.currentPage.set(1);
+    this.loadCustomers();
   }
 
   selectCountry(countryCode: string): void {
     this.selectedCountry.set(countryCode);
-    this.loadCustomers(1, this.pageSize(), this.searchTerm(), countryCode);
+    this.currentPage.set(1);
+    this.loadCustomers();
   }
 
   goToPage(page: number): void {
     if (page >= 1 && page <= this.totalPages() && page !== this.currentPage()) {
-      this.loadCustomers(
-        page,
-        this.pageSize(),
-        this.searchTerm(),
-        this.selectedCountry(),
-      );
+      this.currentPage.set(page);
+      this.loadCustomers();
     }
+  }
+
+  onPageSizeChange(newSize: number): void {
+    this.pageSize.set(newSize);
+    this.currentPage.set(1);
+    this.loadCustomers();
   }
 
   openCreateCustomerDialog(): void {
@@ -270,36 +234,10 @@ export class CustomerListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((createdCustomer: Customer | undefined) => {
       if (createdCustomer) {
-        if (
-          this.activeSortKey() === 'recent' &&
-          (this.selectedCountry() === 'ALL' || this.selectedCountry() === createdCustomer.country)
-        ) {
-          this.customers.update((prev) => [
-            createdCustomer,
-            ...prev.filter((c) => c.id !== createdCustomer.id),
-          ].slice(0, this.pageSize()));
-          this.totalCount.update((count) => count + 1);
-        }
-        this.loadCustomers(1);
-        this.snackBar.open(
-          this.i18n.t('customers.create.success'),
-          'OK',
-          {
-            duration: 4000,
-            horizontalPosition: 'center',
-            verticalPosition: 'bottom',
-          },
-        );
+        this.currentPage.set(1);
+        this.loadCustomers();
+        this.toast.success(this.i18n.t('customers.create.success'));
       }
     });
-  }
-
-  onPageSizeChange(newSize: number): void {
-    this.loadCustomers(
-      1,
-      newSize,
-      this.searchTerm(),
-      this.selectedCountry(),
-    );
   }
 }

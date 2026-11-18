@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from './toast.service';
 import { I18nService } from './i18n.service';
 import {
   EmailComposerDialogComponent,
@@ -20,7 +20,7 @@ export interface CustomerEmailTarget {
 })
 export class EmailComposerService {
   private readonly dialog = inject(MatDialog);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly toast = inject(ToastService);
   private readonly i18n = inject(I18nService);
 
   openForCustomer(
@@ -76,10 +76,6 @@ export class EmailComposerService {
   }
 
   private showSuccessToast(): void {
-    this.snackBar.open(this.i18n.t('customers.emailDialog.sentSuccess'), 'OK', {
-      duration: 4000,
-      horizontalPosition: 'center',
-      verticalPosition: 'bottom',
-    });
+    this.toast.success(this.i18n.t('customers.emailDialog.sentSuccess'));
   }
 }

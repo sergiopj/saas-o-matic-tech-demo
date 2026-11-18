@@ -45,6 +45,8 @@ Whenever you operate in this repository, you MUST strictly adhere to the followi
 ### D. Performance & Architecture
 - **Signals & Modern Standalone (Angular 19+)**: Use Angular Signals (`signal`, `computed`, `effect`) and standalone components. Avoid legacy NgModules. In Angular 19+, `standalone: true` is enabled by default across all `@Component`, `@Directive`, and `@Pipe` decorators: never write `standalone: true` explicitly as it is redundant boilerplate.
 - **Clean Signal State Mutations**: Prefer natural, readable signal updates (`signal.set(!signal())`) for boolean flag toggles over cryptic lambdas (`signal.update((v) => !v)`). Reserve `.update()` for actual transformations involving previous state calculations (e.g., array manipulations or arithmetic bounds).
+- **Centralized Feedback & Notification (`ToastService`)**: Never call `MatSnackBar.open(...)` directly inside components with manual positioning or duration parameters. Always use `ToastService` (`this.toast.success(...)`, `this.toast.error(...)`, `this.toast.show(...)`) to ensure a Single Source of Truth (SSOT) for toast notifications across the entire frontend.
+- **Component Decomposition & Reuse (`<app-paginator>`)**: Never duplicate pagination mathematics (`totalPages`, `visiblePageNumbers`, `displayedRange`) or pagination HTML markup in page components. Delegate pagination to the reusable `<app-paginator>` standalone component.
 - **Lazy Loading**: Heavy third-party integrations (e.g., Quill rich-text editor) must be lazily loaded in separate chunks to keep the initial main bundle under 165 kB.
 - **DOM Containment**: Apply `content-visibility: auto; contain-intrinsic-size: auto 240px;` on repeating card items to maximize 60 FPS rendering in large grids.
 

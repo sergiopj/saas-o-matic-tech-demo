@@ -16,12 +16,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { CustomerApiService } from '../../services/customer-api.service';
 import { SimulationApiService } from '../../../simulations/services/simulation-api.service';
 import { CurrencyService } from '../../../../core/services/currency.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { Customer } from '../../models/customer.model';
 import { Simulation, SimulationProjection } from '../../../simulations/models/simulation.model';
 import { projectSimulationCost } from '../../../simulations/utils/local-pricing-calculator';
@@ -72,7 +72,7 @@ import { EmailComposerService } from '../../../../core/services/email-composer.s
 export class CustomerDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly toast = inject(ToastService);
   private readonly i18n = inject(I18nService);
   private readonly emailComposer = inject(EmailComposerService);
   readonly customerApi = inject(CustomerApiService);
@@ -282,12 +282,12 @@ export class CustomerDetailComponent implements OnInit {
     this.saveSuccess.set(false);
     this.hasUserInteracted = true;
 
-    this.snackBar.open(
+    this.toast.show(
       this.i18n.t('simulation.history.loadedNotification', {
         users: sim.activeUsers,
       }),
       'OK',
-      { duration: 3000 }
+      { duration: 3000 },
     );
   }
 
@@ -318,7 +318,7 @@ export class CustomerDetailComponent implements OnInit {
           const errorMsg =
             err?.error?.detail ||
             this.i18n.t('simulation.form.savedError');
-          this.snackBar.open(errorMsg, 'OK', { duration: 5000 });
+          this.toast.error(errorMsg);
         },
       });
   }
@@ -343,15 +343,7 @@ export class CustomerDetailComponent implements OnInit {
     dialogRef.afterClosed().subscribe((updated: Customer | undefined) => {
       if (updated) {
         this.customer.set(updated);
-        this.snackBar.open(
-          this.i18n.t('customers.edit.success'),
-          'OK',
-          {
-            duration: 4000,
-            horizontalPosition: 'center',
-            verticalPosition: 'bottom',
-          },
-        );
+        this.toast.success(this.i18n.t('customers.edit.success'));
       }
     });
   }
