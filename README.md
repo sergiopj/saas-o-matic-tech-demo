@@ -218,17 +218,6 @@ npm run lint
 
 ---
 
-## 🐳 Despliegue con Docker
-
-Para levantar la solución completa en contenedores sin fricción:
-
-```bash
-# Desde la raíz del repositorio
-docker compose up --build
-```
-
----
-
 ## 📬 Documentación de la API y Pruebas
 
 - **Documentación Interactiva (Swagger UI):** `http://localhost:3000/docs`
