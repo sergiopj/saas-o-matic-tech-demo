@@ -57,10 +57,11 @@ describe('CustomerCreateDialogComponent', () => {
     expect(component.form.valid).toBe(false); // required fields empty
   });
 
-  it('should render 3D corporate customer badge image in dialog header', () => {
+  it('should render 3D corporate customer badge image in dialog header with localized alt text', () => {
     const badgeImg: HTMLImageElement | null = fixture.nativeElement.querySelector('.header-badge-img');
     expect(badgeImg).toBeTruthy();
     expect(badgeImg?.getAttribute('src')).toBe('images/corporate-customer-badge.jpg');
+    expect(badgeImg?.getAttribute('alt')).toBeTruthy();
   });
 
   it('should invalidate incorrect Spanish CIF and validate correct AEAT CIF', () => {
