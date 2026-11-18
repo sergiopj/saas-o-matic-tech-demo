@@ -15,7 +15,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
@@ -345,12 +345,24 @@ export class CustomerDetailComponent implements OnInit {
       panelClass: 'roams-email-dialog-panel',
     });
 
+    this.handleEmailDialogClose(dialogRef);
+  }
+
+  private handleEmailDialogClose(
+    dialogRef: MatDialogRef<EmailComposerDialogComponent>
+  ): void {
     dialogRef.afterClosed().subscribe((result: { sent?: boolean } | undefined) => {
       if (result?.sent) {
-        this.snackBar.open(this.i18n.t('customers.emailDialog.sentSuccess'), 'OK', {
-          duration: 4000,
-        });
+        this.showEmailSuccessToast();
       }
+    });
+  }
+
+  private showEmailSuccessToast(): void {
+    this.snackBar.open(this.i18n.t('customers.emailDialog.sentSuccess'), 'OK', {
+      duration: 4000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
     });
   }
 

@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Customer } from '../../models/customer.model';
@@ -71,12 +71,24 @@ export class CustomerCardComponent {
       panelClass: 'roams-email-dialog-panel',
     });
 
+    this.handleEmailDialogClose(dialogRef);
+  }
+
+  private handleEmailDialogClose(
+    dialogRef: MatDialogRef<EmailComposerDialogComponent>
+  ): void {
     dialogRef.afterClosed().subscribe((result: { sent?: boolean } | undefined) => {
       if (result?.sent) {
-        this.snackBar.open(this.i18n.t('customers.emailDialog.sentSuccess'), 'OK', {
-          duration: 4000,
-        });
+        this.showEmailSuccessToast();
       }
+    });
+  }
+
+  private showEmailSuccessToast(): void {
+    this.snackBar.open(this.i18n.t('customers.emailDialog.sentSuccess'), 'OK', {
+      duration: 4000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
     });
   }
 }

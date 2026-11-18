@@ -4993,3 +4993,24 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Jest Tests: **159 pruebas pasando al 100%** (30 suites).
   - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Eliminación de Cumulative Layout Shift (CLS) y elevación de la calidad percibida de UX a estándares de producción enterprise (60 FPS, feedback transicional explícito, actualización optimista instantánea).
+
+
+### 6.175. Refactorización a Métodos Cohesivos (SRP) del Manejo de Cierre y Toast de Diálogos
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario solicitó refactorizar la suscripción al cierre del modal de emails (`dialogRef.afterClosed().subscribe(...)`) extrayéndola a un método específico dentro del propio componente `.ts` para elevar la legibilidad y seguir directrices de Clean Code:
+  > *"PODEMOS LLEBVAR ESTO A UN METODO dentro del propio ts? dialogRef.afterClosed().subscribe((result: { sent?: boolean } | undefined) => { if (result?.sent) { this.snackBar.open(this.i18n.t('customers.emailDialog.sentSuccess'), 'OK', { duration: 4000, }); } });"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Descomposición en [customer-card.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-card/customer-card.component.ts):*
+     - `openEmailComposer(event: MouseEvent)`: se limita a construir el modelo de datos y delegar la apertura en `this.dialog.open(...)`.
+     - `private handleEmailDialogClose(dialogRef: MatDialogRef<EmailComposerDialogComponent>): void`: encapsula la suscripción al stream `afterClosed()` y la comprobación de `result?.sent`.
+     - `private showEmailSuccessToast(): void`: centraliza la invocación de `this.snackBar.open(...)` con tipografía accesible, posición inferior centrada (`horizontalPosition: 'center'`, `verticalPosition: 'bottom'`) y duración estándar de 4000ms.
+  2. *Replicación Homogénea en [customer-detail.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.ts):*
+     - Extendido el mismo patrón de métodos auxiliares privados al componente de detalle corporativo.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **254 pruebas pasando al 100%** (29 suites).
+  - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest Tests: **159 pruebas pasando al 100%** (30 suites).
+  - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Cumplimiento riguroso del Single Responsibility Principle (SRP): funciones declarativas de menos de 10 líneas, alta testeabilidad y código libre de efectos secundarios dispersos.
