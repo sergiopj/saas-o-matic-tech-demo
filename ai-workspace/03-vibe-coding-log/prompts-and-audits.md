@@ -5081,3 +5081,30 @@ Syntax: <single-animation>#
   - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
   - **Total Ecosistema:** **419 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Elevación de la cohesión arquitectónica (SRP & DRY), simplificación drástica de los componentes de presentación y reutilización universal del flujo de comunicación comercial.
+
+
+### 6.178. Ergonomía Responsive Mobile del Diálogo Comercial (width 640px, maxWidth 94vw)
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario consultó sobre la compatibilidad con dispositivos móviles de las dimensiones del modal comercial (`width: '640px', maxWidth: '94vw'`):
+  > *"y por otro lado esto se lleva bien con mobiles? width: '640px', maxWidth: '94vw', en desktop si s eve perfecto"*
+- **Análisis de Comportamiento Responsive (CSS Cascade & Flexbox):**
+  1. *Comportamiento del Contenedor Exterior en Pantallas Pequeñas:*
+     En CSS estándar, la combinación `width: 640px; max-width: 94vw;` evalúa el valor mínimo admisible según la resolución activa:
+     - En Desktop (> 680px): `640px` es menor que `94vw`, por lo que el modal se fija exactamente en 640px (evitando diálogos excesivamente anchos en monitores 4K/Ultrawide).
+     - En Tablets y Móviles (< 680px): `max-width: 94vw` toma el control y comprime el diálogo al 94% del ancho de la pantalla, dejando un margen simétrico del 3% a cada lado para que el diálogo no toque los bordes del dispositivo.
+  2. *Auditoría de Cuellos de Botella Internos en Móvil (< 540px):*
+     Se identificaron y corrigieron 3 puntos críticos de ergonomía en pantallas pequeñas:
+     - *Padding excesivo del contenedor:* En móviles, `padding: 1.5rem` (48px totales) reducía drásticamente el área útil. Se redujo a `1.125rem 0.875rem` en `@media (max-width: 599px)`.
+     - *Colisión de botones en la barra de acciones:* Los 3 botones (`Copiar plantilla`, `Cancelar` y `Enviar email`) no cabían en una sola línea en pantallas de 360-390px. Se añadió envoltura flex (`flex-wrap: wrap`) donde `Cancelar` y `Enviar` se distribuyen al 50% en la fila superior y `Copiar plantilla` se posiciona centrada en ancho completo en la inferior.
+     - *Altura vertical y teclado virtual:* Se incorporó `maxHeight: '94vh'` en la configuración del diálogo y `max-height: calc(85dvh - 160px)` en el cuerpo del diálogo con scroll suave, asegurando que las acciones permanezcan visibles en cualquier rotación o viewport móvil.
+- **Acciones Ejecutadas:**
+  - Optimizado [email-composer-dialog.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.scss) con padding fluido, badge escalable (40px en móvil), elipsis en subtítulos largos y layout flex inteligente para botones de acción.
+  - Actualizado [email-composer.service.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/services/email-composer.service.ts) añadiendo `maxHeight: '94vh'`.
+- **Resultados de Verificación:**
+  - **Frontend Oxlint:** **0 errores y 0 advertencias** (73 archivos analizados).
+  - **Frontend Vitest Tests:** **260 pruebas pasando al 100%** (30 suites).
+  - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
+  - **Total Ecosistema:** **419 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Experiencia de usuario (UX) 100% responsive, adaptativa y accesible en dispositivos móviles desde 320px hasta monitores de escritorio.

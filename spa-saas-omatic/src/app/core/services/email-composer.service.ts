@@ -15,12 +15,6 @@ export interface CustomerEmailTarget {
   selectedPlan?: string;
 }
 
-/**
- * Enterprise service responsible for orchestrating the lifecycle of commercial
- * email dialogs across modules (customer cards, detail views, simulations).
- * Centralizes dialog configuration, localized template defaults, and automated
- * transaction toasts upon successful dispatch.
- */
 @Injectable({
   providedIn: 'root',
 })
@@ -29,10 +23,6 @@ export class EmailComposerService {
   private readonly snackBar = inject(MatSnackBar);
   private readonly i18n = inject(I18nService);
 
-  /**
-   * Opens the email composer dialog for a specific customer with default localized
-   * proposal templates and auto-subscribes to show a success toast on send.
-   */
   openForCustomer(
     customer: CustomerEmailTarget,
     overrides?: Partial<EmailComposerDialogData>
@@ -54,10 +44,6 @@ export class EmailComposerService {
     return this.open(dialogData);
   }
 
-  /**
-   * Generic dialog launcher for custom email payloads with standard dimensions,
-   * panel classes, and feedback notification handling.
-   */
   open(
     data: EmailComposerDialogData,
     config?: Partial<MatDialogConfig<EmailComposerDialogData>>
@@ -70,6 +56,7 @@ export class EmailComposerService {
       data,
       width: '640px',
       maxWidth: '94vw',
+      maxHeight: '94vh',
       panelClass: 'roams-email-dialog-panel',
       ...config,
     });

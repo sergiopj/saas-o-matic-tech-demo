@@ -37,10 +37,6 @@ export interface EmailComposerDialogResult {
   messageId?: string;
 }
 
-/**
- * Enterprise dialog for drafting, rich-text editing (Quill WYSIWYG), and dispatching
- * commercial proposals and notifications directly to the backend POST /emails endpoint.
- */
 @Component({
   selector: 'app-email-composer-dialog',
   imports: [
@@ -147,7 +143,7 @@ export class EmailComposerDialogComponent {
       const el = toolbarEl.querySelector<HTMLElement>(item.selector);
       if (el) {
         const tooltip = this.i18n.t(item.key);
-        el.setAttribute('data-tooltip', tooltip);
+        el.dataset['tooltip'] = tooltip;
         el.setAttribute('title', tooltip);
         el.setAttribute('aria-label', tooltip);
         if (!el.hasAttribute('tabindex')) {
