@@ -11,5 +11,5 @@ export interface ProblemDetail {
   detail: string;
   instance: string;
   invalidParams?: ProblemDetailInvalidParam[];
-  timestamp: string;
+  timestamp?: string;
 }
