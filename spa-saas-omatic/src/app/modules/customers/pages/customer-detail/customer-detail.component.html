@@ -184,27 +184,27 @@
             <div class="breakdown-label">
               <span class="tier-tag t1">T1</span>
               <span>{{ 'simulation.breakdown.tier1' | translate }}</span>
-              <span class="tier-calc">({{ tier1Users() }} × 10 €)</span>
+              <span class="tier-calc">({{ tier1Users() }} × {{ 10 | localizedCurrency }})</span>
             </div>
-            <strong class="breakdown-val">{{ tier1Cost() | localizedCurrency:'EUR' }}</strong>
+            <strong class="breakdown-val">{{ tier1Cost() | localizedCurrency }}</strong>
           </div>
 
           <div class="breakdown-row tier-row">
             <div class="breakdown-label">
               <span class="tier-tag t2">T2</span>
               <span>{{ 'simulation.breakdown.tier2' | translate }}</span>
-              <span class="tier-calc">({{ tier2Users() }} × 8 €)</span>
+              <span class="tier-calc">({{ tier2Users() }} × {{ 8 | localizedCurrency }})</span>
             </div>
-            <strong class="breakdown-val">{{ tier2Cost() | localizedCurrency:'EUR' }}</strong>
+            <strong class="breakdown-val">{{ tier2Cost() | localizedCurrency }}</strong>
           </div>
 
           <div class="breakdown-row tier-row">
             <div class="breakdown-label">
               <span class="tier-tag t3">T3</span>
               <span>{{ 'simulation.breakdown.tier3' | translate }}</span>
-              <span class="tier-calc">({{ tier3Users() }} × 5 €)</span>
+              <span class="tier-calc">({{ tier3Users() }} × {{ 5 | localizedCurrency }})</span>
             </div>
-            <strong class="breakdown-val">{{ tier3Cost() | localizedCurrency:'EUR' }}</strong>
+            <strong class="breakdown-val">{{ tier3Cost() | localizedCurrency }}</strong>
           </div>
 
           <div class="breakdown-row tier-row capacity-tier-row">
@@ -220,7 +220,7 @@
 
           <div class="breakdown-row subtotal-row">
             <span>{{ 'simulation.breakdown.baseCost' | translate }}</span>
-            <strong>{{ projection().monthlyBaseCostEur | localizedCurrency:'EUR' }}</strong>
+            <strong>{{ projection().monthlyBaseCostEur | localizedCurrency }}</strong>
           </div>
 
           <div class="breakdown-row tax-row">
@@ -228,14 +228,14 @@
               {{ 'simulation.breakdown.tax' | translate }}
               ({{ taxPercentage() }}% {{ customer()?.country }})
             </span>
-            <strong>+{{ projection().taxAmountEur | localizedCurrency:'EUR' }}</strong>
+            <strong>+{{ projection().taxAmountEur | localizedCurrency }}</strong>
           </div>
 
           <div class="divider"></div>
 
           <div class="breakdown-row total-eur-row">
-            <span>{{ 'simulation.breakdown.total' | translate }}</span>
-            <strong class="eur-amount">{{ projection().totalCostEur | localizedCurrency:'EUR' }}</strong>
+            <span>{{ 'simulation.breakdown.total' | translate }} ({{ currencyService.selectedCurrency() }})</span>
+            <strong class="eur-amount">{{ projection().totalCostEur | localizedCurrency }}</strong>
           </div>
 
           <!-- Highlight Converted Amount in Active Currency -->
@@ -249,6 +249,9 @@
             </div>
             <span class="rate-indicator">
               1 EUR = {{ currencyService.currentRate().toFixed(4) }} {{ currencyService.selectedCurrency() }}
+              @if (currencyService.selectedCurrency() !== 'EUR') {
+                • Base: {{ projection().totalCostEur | localizedCurrency:'EUR' }}
+              }
             </span>
           </div>
         </div>

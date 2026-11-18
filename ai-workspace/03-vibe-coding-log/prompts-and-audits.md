@@ -3850,3 +3850,77 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
 - **Valor para la evaluación:** Garantía de que cualquier evaluador técnico que audite la arquitectura encuentre documentado el patrón de tolerancia a fallos en servicios externos y la experiencia de usuario resiliente.
+
+
+### 6.151. Conversión Reactiva Integral de Desglose de Facturación por Tramos y Subtotales a Divisa Seleccionada
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Al cambiar la divisa activa en la barra superior (por ejemplo, a dólares estadounidenses `USD`), el usuario detectó que el bloque destacado `"LIVE CONVERSION"` sí mostraba el total general convertido, pero todo el desglose superior de la tarjeta ("Proyección de Facturación Mensual") permanecía congelado en euros:
+  - T1: Tramo 1 mostraba `(10 × 10 €)` y `100,00 €`.
+  - T2: Tramo 2 mostraba `(40 × 8 €)` y `320,00 €`.
+  - T3: Tramo 3 mostraba `(8 × 5 €)` y `40,00 €`.
+  - Coste Base Mensual: `460,00 €`.
+  - Impuestos: `+96,60 €`.
+  - Total Facturable: `Total Facturable (EUR) 556,60 €`.
+  Esto causaba una flagrante inconsistencia visual y cognitiva para el usuario comercial, quien observaba valores en euros en la tabla superior y en dólares en la caja inferior.
+- **Feedback Humano (Tu criterio de consistencia matemática y experiencia de usuario):**
+  > *"al cambiar de moneda si me calcula en dolares el total pero no los tramos, coste, etc
+  > 
+  > Proyección de Facturación Mensual
+  > Acciona Soluciones S.A. • ES
+  > 
+  > T1
+  > Tramo 1 (hasta 10 usuarios a 10 €)
+  > (10 × 10 €)
+  > 100,00 €
+  > T2
+  > Tramo 2 (11 a 50 usuarios a 8 €)
+  > (40 × 8 €)
+  > 320,00 €
+  > T3
+  > Tramo 3 (más de 50 usuarios a 5 €)
+  > (8 × 5 €)
+  > 40,00 €
+  > INFRA
+  > Capacidad e infraestructura
+  > (498 GB • 15,000 calls)
+  > Incluido (0 €)
+  > Coste Base Mensual
+  > 460,00 €
+  > Impuestos (21% ES)
+  > +96,60 €
+  > Total Facturable (EUR)
+  > 556,60 €
+  > LIVE CONVERSION
+  > Total Convertid"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Eliminación del Forzado `'EUR'` en [customer-detail.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.html):*
+     - Se eliminó el parámetro explícito `'EUR'` en cada invocación de `| localizedCurrency:'EUR'`. Al invocarse sin parámetros secundarios (`| localizedCurrency`), el pipe lee de forma reactiva el signal `currencyService.selectedCurrency()` y aplica la tasa de cambio en vivo (`convert()`) con formateo nativo `Intl.NumberFormat` para la divisa seleccionada.
+     - Se dinamizó el cálculo unitario de cada tramo:
+       - T1: `({{ tier1Users() }} × {{ 10 | localizedCurrency }})` (ej. `10 × $10.80`).
+       - T2: `({{ tier2Users() }} × {{ 8 | localizedCurrency }})` (ej. `40 × $8.64`).
+       - T3: `({{ tier3Users() }} × {{ 5 | localizedCurrency }})` (ej. `8 × $5.40`).
+     - Se dinamizaron los importes de subtotales: `tier1Cost() | localizedCurrency`, `tier2Cost() | localizedCurrency`, `tier3Cost() | localizedCurrency`, `projection().monthlyBaseCostEur | localizedCurrency`, `projection().taxAmountEur | localizedCurrency` y `projection().totalCostEur | localizedCurrency`.
+     - En la fila total se muestra reactivamente el código de divisa activo: `{{ 'simulation.breakdown.total' | translate }} ({{ currencyService.selectedCurrency() }})`.
+  2. *Armonización Multilingüe Neutral en [translations.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/i18n/translations.ts):*
+     - Se actualizaron las 4 lenguas (`es`, `en`, `de`, `fr`):
+       - `simulation.breakdown.tier1`: Desvinculado de `a 10 €` / `@ €10` pasando a `Tramo 1 (hasta 10 usuarios)` / `Tier 1 (up to 10 users)` / `Stufe 1 (bis 10 Benutzer)` / `Palier 1 (jusqu’à 10 utilisateurs)`.
+       - `simulation.breakdown.tier2`: `Tramo 2 (11 a 50 usuarios)` / `Tier 2 (11 to 50 users)`.
+       - `simulation.breakdown.tier3`: `Tramo 3 (más de 50 usuarios)` / `Tier 3 (over 50 users)`.
+       - `simulation.breakdown.included`: `Incluido` / `Included` / `Inbegriffen` / `Inclus`.
+       - `simulation.breakdown.total`: `Total Facturable` / `Total Billed` / `Gesamtbetrag` / `Total Facturable`.
+  3. *Enriquecimiento de la Caja de Conversión en Vivo:*
+     - En el bloque `.converted-highlight-box`, además de la tasa de conversión `1 EUR = X.XXXX DIVISA`, si la divisa seleccionada es extranjera (`!== 'EUR'`) se muestra la referencia al importe base oficial en euros (`• Base: {{ projection().totalCostEur | localizedCurrency:'EUR' }}`).
+  4. *Ampliación de Pruebas Unitarias en [customer-detail.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.spec.ts):*
+     - Añadido caso de prueba que conmuta dinámicamente a `USD` (tasa 1.08) y comprueba en el DOM que:
+       - T1 muestra `$108.00` y unitario `$10.80`.
+       - Coste base muestra `$151.20`.
+       - Impuestos muestran `$31.75`.
+       - Total facturable muestra `$182.95` e indicador `(USD)`.
+       - La caja convertida muestra `$182.95`, tasa de cambio y base de referencia en EUR (`169,40 €`).
+- **Resultados de Verificación:**
+  - Frontend Vitest: **250 pruebas unitarias pasando al 100%** (29 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
+- **Valor para la evaluación:** Garantiza coherencia matemática y visual de extremo a extremo en escenarios de tarificación internacional multi-divisa.

@@ -186,6 +186,44 @@ describe('CustomerDetailComponent', () => {
     expect(proj.totalCostEur).toBe(169.4);
   });
 
+  it('should reactively update all breakdown tiers, unit prices, and subtotals when currency changes to USD', () => {
+    component.onUsersInputChange(15);
+    component.currencyService.setCurrency('EUR');
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const tier1Row = compiled.querySelector('.tier-row')!;
+    expect(tier1Row.textContent).toContain('100,00');
+
+    // Switch currency to USD
+    component.currencyService.setCurrency('USD');
+    fixture.detectChanges();
+
+    // Tier 1: 100 EUR * 1.08 = $108.00; Unit price: 10 EUR * 1.08 = $10.80
+    expect(tier1Row.textContent).toContain('$108.00');
+    expect(tier1Row.textContent).toContain('$10.80');
+
+    // Base cost: 140 EUR * 1.08 = $151.20
+    const baseCostRow = compiled.querySelector('.subtotal-row')!;
+    expect(baseCostRow.textContent).toContain('$151.20');
+
+    // Tax amount: 29.40 EUR * 1.08 = $31.75
+    const taxRow = compiled.querySelector('.tax-row')!;
+    expect(taxRow.textContent).toContain('$31.75');
+
+    // Total: 169.40 EUR * 1.08 = $182.95
+    const totalRow = compiled.querySelector('.total-eur-row')!;
+    expect(totalRow.textContent).toContain('$182.95');
+    expect(totalRow.textContent).toContain('(USD)');
+
+    // Converted highlight box displays rate and base EUR reference
+    const highlightBox = compiled.querySelector('.converted-highlight-box')!;
+    expect(highlightBox.textContent).toContain('$182.95');
+    expect(highlightBox.textContent).toContain('1 EUR = 1.0800 USD');
+    expect(highlightBox.textContent).toContain('Base:');
+    expect(highlightBox.textContent).toContain('169,40');
+  });
+
   it('should save simulation via API and refresh history', () => {
     component.onUsersInputChange(30);
     component.saveSimulation();
