@@ -4,6 +4,7 @@ import localeEs from '@angular/common/locales/es';
 import localeEn from '@angular/common/locales/en';
 import localeDe from '@angular/common/locales/de';
 import localeFr from '@angular/common/locales/fr';
+import { getSafeStorageItem, setSafeStorageItem } from '../utils/storage.util';
 import {
   SupportedLanguage,
   TranslationKey,
@@ -55,26 +56,14 @@ export class I18nService {
   setLanguage(lang: SupportedLanguage): void {
     if (lang in TRANSLATIONS) {
       this.currentLanguage.set(lang);
-      try {
-        if (typeof localStorage !== 'undefined') {
-          localStorage.setItem('saas_omatic_lang', lang);
-        }
-      } catch {
-        // Ignore in environments where storage access is restricted
-      }
+      setSafeStorageItem('saas_omatic_lang', lang);
     }
   }
 
   private detectLanguage(): SupportedLanguage {
-    try {
-      if (typeof localStorage !== 'undefined') {
-        const stored = localStorage.getItem('saas_omatic_lang') as SupportedLanguage | null;
-        if (stored && stored in TRANSLATIONS) {
-          return stored;
-        }
-      }
-    } catch {
-      // Ignore in environments where storage access is restricted
+    const stored = getSafeStorageItem('saas_omatic_lang') as SupportedLanguage | null;
+    if (stored && stored in TRANSLATIONS) {
+      return stored;
     }
 
     if (typeof navigator !== 'undefined' && navigator.language) {

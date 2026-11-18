@@ -7,6 +7,7 @@ import {
   PLATFORM_ID,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { getSafeStorageItem, setSafeStorageItem } from '../utils/storage.util';
 
 export type ThemeMode = 'light' | 'dark';
 
@@ -38,13 +39,9 @@ export class ThemeService {
     if (this.isBrowser && typeof window !== 'undefined' && window.matchMedia) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const listener = (e: MediaQueryListEvent) => {
-        try {
-          const stored = localStorage.getItem(THEME_STORAGE_KEY);
-          if (!stored) {
-            this.setTheme(e.matches ? 'dark' : 'light', false);
-          }
-        } catch {
-          // Ignore storage restrictions
+        const stored = getSafeStorageItem(THEME_STORAGE_KEY);
+        if (!stored) {
+          this.setTheme(e.matches ? 'dark' : 'light', false);
         }
       };
       if (mediaQuery.addEventListener) {
@@ -61,11 +58,7 @@ export class ThemeService {
   setTheme(theme: ThemeMode, persist = true): void {
     this.currentTheme.set(theme);
     if (persist && this.isBrowser) {
-      try {
-        localStorage.setItem(THEME_STORAGE_KEY, theme);
-      } catch {
-        // Ignore storage restrictions
-      }
+      setSafeStorageItem(THEME_STORAGE_KEY, theme);
     }
   }
 
@@ -73,16 +66,12 @@ export class ThemeService {
     if (!this.isBrowser) {
       return 'light';
     }
-    try {
-      const stored = localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null;
-      if (stored === 'light' || stored === 'dark') {
-        return stored;
-      }
-      if (typeof window !== 'undefined' && window.matchMedia) {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      }
-    } catch {
-      // Ignore storage restrictions
+    const stored = getSafeStorageItem(THEME_STORAGE_KEY) as ThemeMode | null;
+    if (stored === 'light' || stored === 'dark') {
+      return stored;
+    }
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
     return 'light';
   }
