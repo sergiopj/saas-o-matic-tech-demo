@@ -53,10 +53,7 @@
 
 .search-spinner {
   margin-right: 0.25rem;
-
-  ::ng-deep circle {
-    stroke: var(--roams-accent-blue) !important;
-  }
+  --mdc-circular-progress-active-indicator-color: var(--roams-accent-blue);
 }
 
 .clear-button {

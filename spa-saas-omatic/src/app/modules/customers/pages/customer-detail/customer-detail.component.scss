@@ -123,10 +123,11 @@
         }
       }
 
-      .edit-customer-btn {
+      .edit-customer-btn,
+      button.edit-customer-btn.mat-mdc-stroked-button {
         margin-left: auto;
-        border-color: var(--roams-border) !important;
-        color: var(--roams-accent-blue) !important;
+        border-color: var(--roams-border);
+        color: var(--roams-accent-blue);
         border-radius: var(--roams-radius-md);
         font-weight: 600;
         font-size: 0.8125rem;
@@ -139,7 +140,7 @@
 
         &:hover {
           background-color: var(--roams-surface);
-          border-color: var(--roams-accent-blue) !important;
+          border-color: var(--roams-accent-blue);
         }
 
         mat-icon {

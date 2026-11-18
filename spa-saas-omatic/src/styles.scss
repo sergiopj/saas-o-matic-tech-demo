@@ -60,49 +60,49 @@ body {
 
   /* Angular Material Dialogs & Overlays */
   .mat-mdc-dialog-container .mdc-dialog__surface {
-    background-color: var(--roams-surface) !important;
-    color: var(--roams-text-primary) !important;
+    background-color: var(--roams-surface);
+    color: var(--roams-text-primary);
   }
 
   .mat-mdc-menu-panel {
-    background-color: var(--roams-surface) !important;
-    border: 1px solid var(--roams-border) !important;
+    background-color: var(--roams-surface);
+    border: 1px solid var(--roams-border);
   }
 
   .mat-mdc-menu-item {
-    color: var(--roams-text-primary) !important;
+    color: var(--roams-text-primary);
 
     &:hover:not([disabled]) {
-      background-color: rgba(255, 255, 255, 0.05) !important;
+      background-color: rgba(255, 255, 255, 0.05);
     }
   }
 
   /* Quill Rich Text Editor (Snow Theme Dark Adaptation) */
   .ql-toolbar.ql-snow {
     background-color: var(--roams-surface);
-    border-color: var(--roams-border) !important;
+    border-color: var(--roams-border);
 
     .ql-stroke {
-      stroke: var(--roams-text-secondary) !important;
+      stroke: var(--roams-text-secondary);
     }
     .ql-fill {
-      fill: var(--roams-text-secondary) !important;
+      fill: var(--roams-text-secondary);
     }
     .ql-picker-label {
-      color: var(--roams-text-primary) !important;
+      color: var(--roams-text-primary);
     }
     .ql-picker-options {
-      background-color: var(--roams-surface) !important;
-      border-color: var(--roams-border) !important;
+      background-color: var(--roams-surface);
+      border-color: var(--roams-border);
     }
     .ql-picker-item {
-      color: var(--roams-text-primary) !important;
+      color: var(--roams-text-primary);
     }
   }
 
   .ql-container.ql-snow {
     background-color: var(--roams-bg-page);
-    border-color: var(--roams-border) !important;
-    color: var(--roams-text-primary) !important;
+    border-color: var(--roams-border);
+    color: var(--roams-text-primary);
   }
 }

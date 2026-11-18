@@ -127,7 +127,7 @@
   }
 }
 
-.form-field {
+mat-form-field.form-field {
   width: 100%;
   flex: 1;
 
@@ -141,46 +141,46 @@
 
   ::ng-deep {
     .mat-mdc-text-field-wrapper {
-      padding: 0 0.75rem !important;
+      padding: 0 0.75rem;
     }
 
     input.mat-mdc-input-element {
-      font-size: 0.875rem !important;
+      font-size: 0.875rem;
       color: var(--roams-text-primary);
 
       &::placeholder {
-        font-size: 0.8125rem !important;
-        color: var(--roams-text-muted) !important;
+        font-size: 0.8125rem;
+        color: var(--roams-text-muted);
         opacity: 0.85;
       }
     }
 
     .mat-mdc-select-value {
-      font-size: 0.875rem !important;
+      font-size: 0.875rem;
       color: var(--roams-text-primary);
     }
 
     .mat-mdc-floating-label {
-      font-size: 0.875rem !important;
+      font-size: 0.875rem;
     }
 
     .mat-mdc-form-field-subscript-wrapper {
-      position: relative !important;
-      height: auto !important;
+      position: relative;
+      height: auto;
       min-height: 1.25rem;
-      overflow: visible !important;
-      padding: 0.35rem 0.25rem 0.5rem 0.25rem !important;
-      box-sizing: border-box !important;
+      overflow: visible;
+      padding: 0.35rem 0.25rem 0.5rem 0.25rem;
+      box-sizing: border-box;
     }
 
     .mat-mdc-form-field-error-wrapper {
-      padding: 0 !important;
-      position: relative !important;
+      padding: 0;
+      position: relative;
     }
 
     mat-error {
-      display: block !important;
-      font-size: 0.75rem !important;
+      display: block;
+      font-size: 0.75rem;
       line-height: 1.35;
       color: var(--roams-status-error);
       word-break: break-word;
@@ -221,7 +221,7 @@
     color: var(--roams-text-secondary);
   }
 
-  .submit-btn {
+  button.action-btn.submit-btn.mat-mdc-flat-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -236,12 +236,12 @@
 
     &:disabled,
     &[disabled] {
-      background-color: var(--roams-bg-card) !important;
-      color: var(--roams-text-muted) !important;
-      border: 1px solid var(--roams-border) !important;
+      background-color: var(--roams-bg-card);
+      color: var(--roams-text-muted);
+      border: 1px solid var(--roams-border);
       opacity: 0.65;
-      cursor: not-allowed !important;
-      pointer-events: auto !important;
+      cursor: not-allowed;
+      pointer-events: auto;
 
       mat-icon {
         color: var(--roams-text-muted);

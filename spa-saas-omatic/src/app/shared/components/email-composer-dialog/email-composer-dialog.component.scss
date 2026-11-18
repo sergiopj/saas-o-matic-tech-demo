@@ -313,11 +313,11 @@
   }
 }
 
-.dialog-actions {
+mat-dialog-actions.mat-mdc-dialog-actions.dialog-actions {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 1.25rem 0 0 0 !important;
+  padding: 1.25rem 0 0 0;
   margin-top: 1rem;
   border-top: 1px solid var(--roams-border-light);
 
@@ -341,7 +341,7 @@
     flex: 1;
   }
 
-  .dispatch-btn {
+  button.dispatch-btn.mat-mdc-flat-button {
     background-color: var(--roams-accent-blue);
     color: var(--roams-text-inverse);
     gap: 0.5rem;
@@ -355,20 +355,20 @@
 
     &:disabled,
     &[disabled] {
-      background-color: var(--roams-bg-card) !important;
-      color: var(--roams-text-muted) !important;
-      border: 1px solid var(--roams-border) !important;
+      background-color: var(--roams-bg-card);
+      color: var(--roams-text-muted);
+      border: 1px solid var(--roams-border);
       opacity: 0.65;
-      cursor: not-allowed !important;
-      pointer-events: auto !important;
+      cursor: not-allowed;
+      pointer-events: auto;
 
       mat-icon {
         color: var(--roams-text-muted);
       }
     }
 
-    .btn-spinner ::ng-deep circle {
-      stroke: var(--roams-text-inverse);
+    .btn-spinner {
+      --mdc-circular-progress-active-indicator-color: var(--roams-text-inverse);
     }
   }
 }

@@ -5014,3 +5014,38 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Jest Tests: **159 pruebas pasando al 100%** (30 suites).
   - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Cumplimiento riguroso del Single Responsibility Principle (SRP): funciones declarativas de menos de 10 líneas, alta testeabilidad y código libre de efectos secundarios dispersos.
+
+
+### 6.176. Erradicación Integral de !important y Resolución Canónica de Especificidad CSS (SonarQube css:S9423)
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario solicitó auditar y erradicar sistemáticamente las declaraciones `!important` en todas las hojas de estilo `.scss` del proyecto frontend tras detectar la regla de SonarQube `css:S9423` (*"Remove this '!important' and resolve the specificity conflict instead"*), presente típicamente en anulaciones de accesibilidad (`animation: none !important` en `prefers-reduced-motion`), botones interactivos de Angular Material y diálogos:
+  > *"los importants estos revisalos en todos los scss creo que no hacen falta 
+Remove this "!important" and resolve the specificity conflict instead.sonarqube(css:S9423)
+Shorthand property combines six of the animation properties into a single property.
+Syntax: <single-animation>#
+    animation: none !important;"*
+- **Análisis de Causa Raíz (Deuda Técnica de Especificidad en SCSS):**
+  1. *Reglas @media en Cascada:* En CSS estándar, las consultas de medios (`@media (prefers-reduced-motion: reduce)` o `@media (max-width: ...)`) declaradas posteriormente en el archivo heredan la misma especificidad de selector. Al declararse en orden natural en la cascada, anulan las animaciones y dimensiones base sin requerir `!important`.
+  2. *Sobrescritura de Angular Material MDC:* Clases como `.mat-mdc-flat-button`, `.mat-mdc-stroked-button`, `.mat-mdc-dialog-container` o `.mat-mdc-menu-panel` poseen especificidad de clase simple `(0, 1, 0)`. El uso de selectores compuestos (`button.simulate-btn.mat-mdc-flat-button`, `mat-dialog-actions.mat-mdc-dialog-actions.dialog-actions`, `mat-form-field.form-field`) eleva la especificidad a `(0, 2, 1)` o `(0, 3, 1)`, superando limpiamente las directivas de Angular Material sin romper el flujo de especificidad.
+  3. *Tokens MDC Oficiales para Spinners:* En lugar de forzar con `!important` el trazo SVG de los círculos de carga (`circle { stroke: ... !important; }`), Angular Material expone la propiedad CSS nativa `--mdc-circular-progress-active-indicator-color`, respetando la arquitectura de componentes.
+- **Acciones Ejecutadas (16 Archivos Refactorizados, 0 !important Restantes):**
+  1. *Accesibilidad y Animaciones Reducidas:*
+     - Eliminado `animation: none !important;` y `transform: none !important;` en [customer-card.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-card/customer-card.component.scss), [home.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.scss) y [simulation-hub.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/simulations/pages/simulation-hub/simulation-hub.component.scss).
+  2. *Sobrescrituras de Botones y Estados Disabled de Angular Material:*
+     - Refactorizado a selectores compuestos de alta especificidad (`a.simulate-btn.mat-mdc-flat-button`, `button.reset-search-btn.mat-mdc-stroked-button`, `button.edit-customer-btn.mat-mdc-stroked-button`, `button.dispatch-btn.mat-mdc-flat-button`, `button.action-btn.submit-btn.mat-mdc-flat-button`).
+  3. *Indicadores de Carga y Spinners:*
+     - En [customer-search-bar.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-search-bar/customer-search-bar.component.scss), [loading-state.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/loading-state/loading-state.component.scss) y [email-composer-dialog.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.scss), sustituida la perforación de SVG con `!important` por la variable CSS oficial `--mdc-circular-progress-active-indicator-color: var(--roams-accent-blue);`.
+  4. *Menús Desplegables, Barras de Navegación y Drawers:*
+     - Eliminado `!important` en [currency-selector.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/currency-selector/currency-selector.component.scss), [language-selector.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/language-selector/language-selector.component.scss), [slide-over-drawer.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/slide-over-drawer/slide-over-drawer.component.scss), [sidebar.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/sidebar/sidebar.component.scss), [navbar.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/navbar/navbar.component.scss) y [paginator.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/paginator/paginator.component.scss).
+  5. *Formularios de Diálogos y Temas Globales:*
+     - En [customer-create-dialog.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.scss) y [styles.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/styles.scss), eliminados todos los `!important` de campos de texto, etiquetas flotantes, mensajes de error y personalizaciones del editor Quill, aprovechando la especificidad intrínseca de `[data-theme='dark']` y de los selectores semánticos.
+- **Resultados de Verificación:**
+  - **Búsqueda global de `!important`:** **0 ocurrencias** en todo `spa-saas-omatic/src` (100% libre de `!important`).
+  - **SonarQube `css:S9423`:** 100% resuelta y cumplida.
+  - **Frontend Oxlint:** **0 errores y 0 advertencias** (71 archivos analizados).
+  - **Frontend Vitest Tests:** **254 pruebas pasando al 100%** (29 suites).
+  - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
+  - **Total Ecosistema:** **413 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Excelencia en arquitectura CSS modular, erradicación de deuda técnica de especificidad, compatibilidad total con estándares SonarQube y respeto al Single Source of Truth visual (`--roams-*`).

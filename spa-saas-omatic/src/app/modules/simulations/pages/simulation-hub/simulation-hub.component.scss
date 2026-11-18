@@ -145,15 +145,16 @@
             }
 
             &:disabled,
-            &[disabled] {
-              background-color: var(--roams-border) !important;
-              color: var(--roams-text-muted) !important;
-              cursor: not-allowed !important;
-              box-shadow: none !important;
+            &[disabled],
+            &.mat-mdc-button-disabled {
+              background-color: var(--roams-border);
+              color: var(--roams-text-muted);
+              cursor: not-allowed;
+              box-shadow: none;
               opacity: 0.75;
 
               mat-icon {
-                color: var(--roams-text-muted) !important;
+                color: var(--roams-text-muted);
               }
             }
           }
@@ -234,7 +235,7 @@
   // Hide 3D illustration on smartphones to avoid visual clutter and maintain immediate form accessibility
   @media (max-width: 768px) {
     .launcher-content .launcher-visual-column {
-      display: none !important;
+      display: none;
     }
   }
 }
@@ -497,6 +498,6 @@
 @media (prefers-reduced-motion: reduce) {
   .coin-stack .coin,
   .users-cluster .user-glyph {
-    animation: none !important;
+    animation: none;
   }
 }

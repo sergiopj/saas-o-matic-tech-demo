@@ -6,10 +6,7 @@
   padding: 3.5rem 1rem;
   gap: 1rem;
   text-align: center;
-
-  ::ng-deep circle {
-    stroke: var(--roams-accent-blue) !important;
-  }
+  --mdc-circular-progress-active-indicator-color: var(--roams-accent-blue);
 
   .loading-message {
     margin: 0;

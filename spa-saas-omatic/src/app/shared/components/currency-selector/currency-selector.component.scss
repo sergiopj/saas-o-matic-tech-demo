@@ -4,23 +4,24 @@
   gap: 8px;
 }
 
-.currency-menu-trigger {
+.currency-menu-trigger,
+button.currency-menu-trigger.mat-mdc-button-base {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: var(--roams-bg-input-dark) !important;
-  color: var(--roams-text-inverse) !important;
-  border: 1px solid var(--roams-border-inverse) !important;
-  border-radius: var(--roams-radius-md) !important;
-  padding: 0 10px !important;
-  height: 40px !important;
-  min-width: auto !important;
+  background-color: var(--roams-bg-input-dark);
+  color: var(--roams-text-inverse);
+  border: 1px solid var(--roams-border-inverse);
+  border-radius: var(--roams-radius-md);
+  padding: 0 10px;
+  height: 40px;
+  min-width: auto;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.16) !important;
-    border-color: rgba(255, 255, 255, 0.35) !important;
+    background-color: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.35);
   }
 
   .currency-icon {
@@ -45,10 +46,10 @@
   }
 }
 
-::ng-deep .currency-menu-panel {
-  border-radius: var(--roams-radius-md) !important;
-  box-shadow: var(--roams-shadow-lg) !important;
-  border: 1px solid var(--roams-border) !important;
+::ng-deep .mat-mdc-menu-panel.currency-menu-panel {
+  border-radius: var(--roams-radius-md);
+  box-shadow: var(--roams-shadow-lg);
+  border: 1px solid var(--roams-border);
 
   .currency-menu-item {
     display: flex;

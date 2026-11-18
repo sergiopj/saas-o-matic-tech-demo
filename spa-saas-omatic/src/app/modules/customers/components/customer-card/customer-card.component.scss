@@ -32,8 +32,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .customer-card {
-    animation: none !important;
-    transition: none !important;
+    animation: none;
+    transition: none;
   }
 }
 
@@ -245,12 +245,13 @@
   display: flex;
 }
 
-.simulate-btn {
+.simulate-btn,
+a.simulate-btn.mat-mdc-flat-button {
   width: 100%;
-  min-height: 34px !important;
-  background-color: var(--roams-accent-blue) !important;
-  color: var(--roams-text-inverse) !important;
-  border-radius: var(--roams-radius-md) !important;
+  min-height: 34px;
+  background-color: var(--roams-accent-blue);
+  color: var(--roams-text-inverse);
+  border-radius: var(--roams-radius-md);
   font-weight: 600;
   font-size: 0.8rem;
   padding: 0.4rem 0.75rem;
@@ -263,7 +264,7 @@
   transition: background-color 0.15s ease, box-shadow 0.15s ease;
 
   &:hover {
-    background-color: var(--roams-primary) !important;
+    background-color: var(--roams-primary);
     box-shadow: 0 4px 8px rgba(16, 97, 226, 0.3);
   }
 

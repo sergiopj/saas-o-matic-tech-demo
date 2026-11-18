@@ -64,9 +64,10 @@
       color: var(--roams-text-primary);
     }
 
-    &.is-active {
-      background-color: var(--roams-accent-blue) !important;
-      color: var(--roams-text-inverse) !important;
+    &.is-active,
+    &.mat-mdc-button.is-active {
+      background-color: var(--roams-accent-blue);
+      color: var(--roams-text-inverse);
       font-weight: 700;
     }
   }

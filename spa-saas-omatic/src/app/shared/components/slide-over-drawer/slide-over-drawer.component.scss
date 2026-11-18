@@ -148,8 +148,8 @@
 
 @media (max-width: 768px) {
   .drawer-panel {
-    width: 100% !important;
-    max-width: 100vw !important;
+    width: 100%;
+    max-width: 100vw;
     border-left: none;
     border-right: none;
   }
@@ -169,8 +169,8 @@
 
 @media (max-width: 640px) {
   .drawer-panel {
-    width: 100% !important;
-    max-width: 100vw !important;
+    width: 100%;
+    max-width: 100vw;
     border-left: none;
     border-right: none;
   }

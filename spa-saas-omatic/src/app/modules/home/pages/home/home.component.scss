@@ -168,7 +168,7 @@
     padding: 1.15rem 1rem;
 
     .hero-visual {
-      display: none !important;
+      display: none;
     }
   }
 }
@@ -835,6 +835,6 @@
 @media (prefers-reduced-motion: reduce) {
   .coin-stack .coin,
   .users-cluster .user-glyph {
-    animation: none !important;
+    animation: none;
   }
 }

@@ -219,10 +219,11 @@
 }
 
 @media (max-width: 640px) {
-  .navbar-toolbar {
-    height: auto !important;
-    min-height: auto !important;
-    padding: 8px 0 !important;
+  .navbar-toolbar,
+  mat-toolbar.navbar-toolbar {
+    height: auto;
+    min-height: auto;
+    padding: 8px 0;
   }
 
   .navbar-container {
