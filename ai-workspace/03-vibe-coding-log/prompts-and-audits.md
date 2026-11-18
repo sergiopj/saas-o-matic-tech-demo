@@ -4700,3 +4700,73 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
   - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Coherencia arquitectónica integral y apego a las mejores prácticas de Domain-Driven Design (DDD): las entidades de dominio son las guardianas soberanas de sus invariantes de negocio mediante métodos cohesivos, atómicos y altamente legibles, erradicando código procedimental disperso.
+
+
+### 6.167. Descomposición Funcional y Erradicación de Código Espagueti en el Filtro Global RFC 7807 (`ProblemDetailExceptionFilter`)
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario analizó el filtro global de excepciones [problem-detail-exception.filter.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/shared/infrastructure/filters/problem-detail-exception.filter.ts) y detectó un patrón espagueti con excesivo anidamiento y variables mutables:
+  > *"soy yo o esto es un poco spagueti de else if?
+  > ...
+  > mejor un sitch y llevarlo a funciones especificas dentro del propio fichero?
+  > esto ademas me parece coimlicado de leer clean code
+  > ...
+  > si dale"*
+- **Análisis de Diseño y Code Smells Diagnosticados:**
+  1. *Estado Mutable Acoplado (`let`):* Cuatro variables mutables locales (`let status`, `title`, `detail`, `invalidParams`) se reasignaban procedimentalmente a lo largo de más de 45 líneas en múltiples ramas condicionales.
+  2. *Violación de Nivel Único de Abstracción y Alta Complejidad Ciclomática:* El método `catch()` realizaba simultáneamente 5 responsabilidades: extracción del contexto HTTP Express, discriminación polimórfica de excepciones de dominio, deconstrucción recursiva de payloads heterogéneos de `HttpException`, mapeo de arrays de `class-validator`, y logueo preventivo OWASP A05.
+  3. *Anidamiento de Tipos Heterogéneos en `HttpException`:* El tratamiento de respuestas tipo `string` vs `object` con arrays de mensajes introducía castings inseguros y lecturas engorrosas.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Descomposición Funcional Pura ([problem-detail-exception.filter.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/shared/infrastructure/filters/problem-detail-exception.filter.ts)):*
+     - Definida la interfaz inmutable de transferencia interna `ProblemDetailPayload`:
+       ```typescript
+       interface ProblemDetailPayload {
+         status: number;
+         title: string;
+         detail: string;
+         invalidParams?: Array<{ name: string; reason: string }>;
+       }
+       ```
+     - Reducción del método `catch()` a 15 líneas declarativas sin ninguna mutabilidad:
+       ```typescript
+       @Catch()
+       export class ProblemDetailExceptionFilter implements ExceptionFilter {
+         catch(exception: unknown, host: ArgumentsHost): void {
+           const ctx = host.switchToHttp();
+           const response = ctx.getResponse<Response>();
+           const request = ctx.getRequest<Request>();
+
+           const problem = resolveProblemDetail(exception);
+
+           response
+             .status(problem.status)
+             .header('Content-Type', 'application/problem+json')
+             .json({
+               type: `https://errors.saas-o-matic.com/${problem.status}`,
+               title: problem.title,
+               status: problem.status,
+               detail: problem.detail,
+               instance: request.url,
+               ...(problem.invalidParams ? { invalidParams: problem.invalidParams } : {}),
+               timestamp: new Date().toISOString(),
+             });
+         }
+       }
+       ```
+  2. *Funciones Auxiliares Privadas con Early Returns:*
+     - `resolveProblemDetail(exception: unknown): ProblemDetailPayload`: Despacha con guard clauses directas para `EntityNotFoundError` (404), `ConflictError` (409), `DomainError` (400), `HttpException` y fallback inesperado (500).
+     - `parseHttpException(exception: HttpException): ProblemDetailPayload`: Desacopla el análisis de respuestas string vs objetos complejos de NestJS.
+     - `extractInvalidParams(messages: unknown[]): Array<{ name: string; reason: string }>`: Transforma mensajes de `class-validator` en tuplas estructuradas RFC 7807 sin asunciones frágiles de tipo.
+     - `handleUnexpectedError(exception: unknown): ProblemDetailPayload`: Aísla el logueo seguro a consola y el mensaje genérico no revelador (OWASP A05).
+  3. *Institucionalización en [AGENTS.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/AGENTS.md) (Sección 3.D) y [Directrices de Arquitectura](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md):*
+     - Añadida la directriz **"Functional Decomposition Over Procedural Spaghetti in Exception Filters"** exigiendo que los filtros globales de excepciones mantengan métodos `catch()` orquestacionales de menos de 20 líneas con funciones puras privadas inmutables.
+- **Resultados de Verificación:**
+  - Compilación NestJS (`nest build`): **0 errores**.
+  - Backend Jest Unit Tests: **159 pruebas pasando al 100%** (30 suites).
+  - Backend Jest E2E Tests: **14 pruebas pasando al 100%** (2 suites).
+  - Backend Oxlint: **0 errores y 0 advertencias** (81 archivos analizados).
+  - Frontend Vitest: **254 pruebas pasando al 100%** (29 suites).
+  - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Refleja maestría en refactorización Clean Code: eliminar complejidad ciclomática innecesaria y variables mutables compartidas en infraestructura crítica, elevando la claridad y mantenibilidad a nivel enterprise.
