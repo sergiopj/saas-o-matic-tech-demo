@@ -26,6 +26,14 @@
     transform: scale(1.05);
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+
   &:focus-visible {
     box-shadow: 0 0 0 2px var(--roams-accent-blue);
   }
