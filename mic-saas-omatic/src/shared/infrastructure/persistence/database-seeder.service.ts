@@ -373,6 +373,9 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
+    if (process.env.SKIP_SEEDING === 'true') {
+      return;
+    }
     await this.seed(false);
   }
 

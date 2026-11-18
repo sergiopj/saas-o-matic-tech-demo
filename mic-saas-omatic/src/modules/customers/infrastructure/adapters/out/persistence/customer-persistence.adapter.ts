@@ -43,39 +43,66 @@ export class CustomerPersistenceAdapter implements CustomerRepositoryPort {
   async search(
     criteria: CustomerSearchCriteria = {},
   ): Promise<PaginatedResult<Customer>> {
-    const hasTerm = Boolean(criteria.term && criteria.term.trim());
-    const normalizedCountry =
-      criteria.country &&
-      criteria.country.trim() &&
-      criteria.country.trim().toUpperCase() !== 'ALL'
-        ? criteria.country.trim().toUpperCase()
-        : undefined;
+    const options: FindManyOptions<CustomerTypeOrmEntity> = {
+      order: this.buildSort(criteria),
+    };
 
-    let where:
-      | FindOptionsWhere<CustomerTypeOrmEntity>
-      | FindOptionsWhere<CustomerTypeOrmEntity>[]
-      | undefined;
-
-    if (!hasTerm && !normalizedCountry) {
-      where = undefined;
-    } else if (!hasTerm && normalizedCountry) {
-      where = { country: normalizedCountry };
-    } else {
-      const cleanTerm = `%${criteria.term!.trim()}%`;
-      const normalizedTaxTerm = `%${normalizeTaxId(criteria.term!)}%`;
-      where = normalizedCountry
-        ? [
-            { companyName: Like(cleanTerm), country: normalizedCountry },
-            { taxId: Like(normalizedTaxTerm), country: normalizedCountry },
-            { email: Like(cleanTerm), country: normalizedCountry },
-          ]
-        : [
-            { companyName: Like(cleanTerm) },
-            { taxId: Like(normalizedTaxTerm) },
-            { email: Like(cleanTerm) },
-          ];
+    const where = this.buildWhere(criteria);
+    if (where) {
+      options.where = where;
     }
 
+    this.applyPagination(options, criteria);
+
+    const [entities, total] = await this.repository.findAndCount(options);
+
+    return {
+      items: entities.map((entity) =>
+        CustomerPersistenceMapper.toDomain(entity),
+      ),
+      total,
+    };
+  }
+
+  private buildWhere(
+    criteria: CustomerSearchCriteria,
+  ):
+    | FindOptionsWhere<CustomerTypeOrmEntity>
+    | FindOptionsWhere<CustomerTypeOrmEntity>[]
+    | undefined {
+    const term = criteria.term?.trim();
+    const country = this.normalizeCountry(criteria.country);
+
+    if (!term) {
+      return country ? { country } : undefined;
+    }
+
+    const cleanTerm = `%${term}%`;
+    const normalizedTaxTerm = `%${normalizeTaxId(term)}%`;
+
+    if (country) {
+      return [
+        { companyName: Like(cleanTerm), country },
+        { taxId: Like(normalizedTaxTerm), country },
+        { email: Like(cleanTerm), country },
+      ];
+    }
+
+    return [
+      { companyName: Like(cleanTerm) },
+      { taxId: Like(normalizedTaxTerm) },
+      { email: Like(cleanTerm) },
+    ];
+  }
+
+  private normalizeCountry(country?: string): string | undefined {
+    const normalized = country?.trim().toUpperCase();
+    return normalized && normalized !== 'ALL' ? normalized : undefined;
+  }
+
+  private buildSort(
+    criteria: CustomerSearchCriteria,
+  ): FindManyOptions<CustomerTypeOrmEntity>['order'] {
     const fieldMap: Record<CustomerSortField, keyof CustomerTypeOrmEntity> = {
       companyName: 'companyName',
       createdAt: 'createdAt',
@@ -86,23 +113,23 @@ export class CustomerPersistenceAdapter implements CustomerRepositoryPort {
       criteria.sortBy && fieldMap[criteria.sortBy]
         ? fieldMap[criteria.sortBy]
         : 'createdAt';
-    const activeOrder: 'ASC' | 'DESC' =
-      criteria.sortOrder &&
-      (criteria.sortOrder.toUpperCase() === 'ASC' ||
-        criteria.sortOrder.toUpperCase() === 'DESC')
-        ? (criteria.sortOrder.toUpperCase() as 'ASC' | 'DESC')
-        : activeSortField === 'companyName'
-          ? 'ASC'
-          : 'DESC';
 
-    const options: FindManyOptions<CustomerTypeOrmEntity> = {
-      order: { [activeSortField]: activeOrder },
-    };
+    const requestedOrder = criteria.sortOrder?.toUpperCase();
+    let activeOrder: 'ASC' | 'DESC';
 
-    if (where) {
-      options.where = where;
+    if (requestedOrder === 'ASC' || requestedOrder === 'DESC') {
+      activeOrder = requestedOrder;
+    } else {
+      activeOrder = activeSortField === 'companyName' ? 'ASC' : 'DESC';
     }
 
+    return { [activeSortField]: activeOrder };
+  }
+
+  private applyPagination(
+    options: FindManyOptions<CustomerTypeOrmEntity>,
+    criteria: CustomerSearchCriteria,
+  ): void {
     if (
       criteria.page &&
       criteria.limit &&
@@ -112,14 +139,5 @@ export class CustomerPersistenceAdapter implements CustomerRepositoryPort {
       options.skip = (criteria.page - 1) * criteria.limit;
       options.take = criteria.limit;
     }
-
-    const [entities, total] = await this.repository.findAndCount(options);
-
-    return {
-      items: entities.map((entity) =>
-        CustomerPersistenceMapper.toDomain(entity),
-      ),
-      total,
-    };
   }
 }

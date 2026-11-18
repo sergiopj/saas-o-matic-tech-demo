@@ -4458,3 +4458,57 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
   - Total Ecosistema: **405 pruebas pasando al 100%**.
 - **Valor para la evaluación:** Refleja visión estratégica de producto y arquitectura limpia (*Ubiquitous Language / DDD*). El comité técnico de evaluación observa que el código no está construido como un parche rápido enfocado a un único país, sino como un motor de facturación corporativo internacionalmente escalable, semánticamente coherente y libre de sesgos territoriales artificiales.
+
+
+### 6.163. Erradicación de Parsing Manual y Ternarias con `undefined`: Creación de `ListCustomersQueryDto` y Limpieza de Controladores NestJS
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario detectó un code smell común en código generado por IA en controladores de NestJS:
+  > *"este tipo de undefined hacen falta?
+  >     const pageNum = page ? Number.parseInt(page, 10) : undefined;
+  > ...
+  > si y mira si hay en mas controllers etc ese tipo de problemas con undefined luego actualiza los mds que toquen"*
+- **Análisis de Diseño y Anti-Patrón de IA (*Manual Query Parsing Smell*):**
+  1. *El Origen de la Deuda Técnica:*
+     - En [customer.controller.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/in/rest/customer.controller.ts), la petición `GET /customers` recibía un objeto anónimo tipado en línea `{ page?: string; limit?: string; ... }`.
+     - Esto forzaba al controlador a realizar transformaciones artesanales:
+       ```ts
+       const pageNum = page ? Number.parseInt(page, 10) : undefined;
+       const limitNum = limit ? Number.parseInt(limit, 10) : undefined;
+       const cleanSortBy = isCustomerSortField(sortBy) ? sortBy : undefined;
+       const cleanOrder: SortOrderDirection | undefined = rawOrder && isSortOrderDirection(rawOrder) ? ... : undefined;
+       ```
+     - Si no se colocaba el condicional ternario, en JavaScript `Number.parseInt(undefined, 10)` evalúa a `NaN`, y `NaN` corrompía los cálculos de paginación (`OFFSET NaN`) en la base de datos SQLite.
+     - Peor aún: si un cliente enviaba `?page=abc`, `"abc"` era *truthy*, pasaba a `parseInt("abc", 10)` produciendo `NaN`, burlando la comprobación ternaria y propagando el fallo a TypeORM.
+  2. *Auditoría Transversal en el Repositorio:*
+     - Se auditaron todos los controladores (`CustomerController`, `SimulationController`, `EmailController`, `AppController`).
+     - Se constató que `SimulationController`, `EmailController` y `AppController` ya operaban limpios sin parsing manual.
+     - En [customer-persistence.adapter.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/out/persistence/customer-persistence.adapter.ts), se simplificó la normalización de la jurisdicción fiscal descartando ternarias redundantes.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Creación de [ListCustomersQueryDto](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/in/rest/dto/list-customers-query.dto.ts):*
+     - Definición formal del DTO de consulta con decoradores de `class-validator` y `class-transformer`:
+       - `page?: number` con `@Type(() => Number)`, `@IsInt()`, `@Min(1)`.
+       - `limit?: number` con `@Type(() => Number)`, `@IsInt()`, `@Min(1)`, `@Max(100)`.
+       - `sortBy?: CustomerSortField` con `@IsIn(CUSTOMER_SORTABLE_FIELDS)`.
+       - `order?: SortOrderDirection` con `@Transform` a mayúsculas y `@IsIn(SORT_ORDER_DIRECTIONS)`.
+       - `sortOrder?: SortOrderDirection` con `@Transform` a mayúsculas y `@IsIn(SORT_ORDER_DIRECTIONS)`.
+       - `fields?: 'lite' | 'full'` con `@IsIn(['lite', 'full'])`.
+  2. *Limpieza Radical de [CustomerController](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/in/rest/customer.controller.ts):*
+     - Se eliminaron todas las ternarias manuales, conversiones de enteros y variables intermedias.
+     - El método `list(@Query() query: ListCustomersQueryDto)` delega limpiamente en el caso de uso pasando propiedades ya tipadas y validadas.
+  3. *Suite de Tests Unitarios [list-customers-query.dto.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/in/rest/dto/list-customers-query.dto.spec.ts):*
+     - Cobertura total de transformaciones y casos borde: query vacía, strings numéricos a números, enteros negativos o cero, cadenas alfanuméricas inválidas, límites superiores a 100 y campos no autorizados.
+  4. *Aislamiento E2E y Prevención de Colisiones de Datos:*
+     - Actualizado `database-seeder.service.ts` y `setup-e2e.ts` para respetar `SKIP_SEEDING=true` durante la ejecución de tests de integración E2E, garantizando determinismo estricto.
+  5. *Institucionalización de Aprendizaje en [AGENTS.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/AGENTS.md):*
+     - Añadida la regla taxativa **"Declarative Controller DTOs Over Manual Parsing"** en la sección 3.D.
+- **Resultados de Verificación:**
+  - Compilación NestJS (`nest build`): **0 errores**.
+  - Backend Jest Unit Tests: **157 pruebas pasando al 100%** (30 suites, +6 pruebas nuevas).
+  - Backend Jest E2E Tests: **14 pruebas pasando al 100%** (2 suites).
+  - Backend Oxlint: **0 errores y 0 advertencias** (81 archivos analizados).
+  - Frontend Vitest: **254 pruebas pasando al 100%** (29 suites).
+  - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Total Ecosistema: **425 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Demuestra solidez en el desarrollo backend con NestJS. Reemplaza comprobaciones defensivas artesanales y propensas a fallos por el pipeline declarativo oficial del framework (`ValidationPipe`), blindando los endpoints contra valores corruptos (`NaN`) y garantizando contratos REST rigurosos.

@@ -1,6 +1,8 @@
 import { unlinkSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 process.env.DATABASE_NAME = 'saas_o_matic.test.sqlite';
+process.env.SKIP_SEEDING = 'true';
 
 const filesToClean = [
   'saas_o_matic.test.sqlite',
@@ -9,11 +11,14 @@ const filesToClean = [
 ];
 
 for (const file of filesToClean) {
-  if (existsSync(file)) {
-    try {
-      unlinkSync(file);
-    } catch {
-      // ignore
+  const candidates = [file, join(process.cwd(), 'mic-saas-omatic', file), join(process.cwd(), file)];
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      try {
+        unlinkSync(candidate);
+      } catch {
+        // ignore
+      }
     }
   }
 }

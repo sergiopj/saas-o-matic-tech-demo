@@ -104,7 +104,9 @@ mic-saas-omatic/
 │   │   │   │       │       ├── dto/
 │   │   │   │       │       │   ├── create-customer.dto.ts
 │   │   │   │       │       │   ├── update-customer.dto.ts
-│   │   │   │       │       │   └── customer-response.dto.ts
+│   │   │   │       │       │   ├── list-customers-query.dto.ts
+│   │   │   │       │       │   ├── customer-response.dto.ts
+│   │   │   │       │       │   └── customer-lite-response.dto.ts
 │   │   │   │       │       └── customer-rest.mapper.ts
 │   │   │   │       └── out/
 │   │   │   │           └── persistence/

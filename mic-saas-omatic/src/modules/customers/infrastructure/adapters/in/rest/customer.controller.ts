@@ -18,18 +18,9 @@ import { UpdateCustomerUseCase } from '../../../../application/use-cases/update-
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
-import { CustomerDetailResponseDto } from './dto/customer-detail-response.dto';
 import { CustomerLiteResponseDto } from './dto/customer-lite-response.dto';
-import {
-  isCustomerSortField,
-  isSortOrderDirection,
-} from '../../../../domain/models/customer-search-criteria.model';
-import type { SortOrderDirection } from '../../../../domain/models/customer-search-criteria.model';
+import { ListCustomersQueryDto } from './dto/list-customers-query.dto';
 
-/**
- * Primary inbound REST controller exposing Customer management endpoints.
- * Supports multi-parameter search, fiscal jurisdiction filtering, and RFC-compliant pagination.
- */
 @Controller('customers')
 export class CustomerController {
   constructor(
@@ -50,54 +41,33 @@ export class CustomerController {
 
   @Get()
   async list(
-    @Query()
-    query: {
-      search?: string;
-      country?: string;
-      page?: string;
-      limit?: string;
-      sortBy?: string;
-      order?: string;
-      sortOrder?: string;
-      fields?: string;
-    },
+    @Query() query: ListCustomersQueryDto,
     @Res({ passthrough: true }) res?: Response,
   ): Promise<CustomerResponseDto[] | CustomerLiteResponseDto[]> {
-    const { search, country, page, limit, sortBy, order, sortOrder, fields } =
-      query;
-    const pageNum = page ? Number.parseInt(page, 10) : undefined;
-    const limitNum = limit ? Number.parseInt(limit, 10) : undefined;
-
-    const cleanSortBy = isCustomerSortField(sortBy) ? sortBy : undefined;
-
-    const rawOrder = sortOrder || order;
-    const cleanOrder: SortOrderDirection | undefined =
-      rawOrder && isSortOrderDirection(rawOrder)
-        ? (rawOrder.toUpperCase() as SortOrderDirection)
-        : undefined;
+    const sortOrder = query.order ?? query.sortOrder;
 
     const { items, total } = await this.listCustomersUseCase.execute({
-      term: search,
-      country,
-      page: pageNum,
-      limit: limitNum,
-      sortBy: cleanSortBy,
-      sortOrder: cleanOrder,
+      term: query.search,
+      country: query.country,
+      page: query.page,
+      limit: query.limit,
+      sortBy: query.sortBy,
+      sortOrder,
     });
 
     if (res) {
       res.setHeader('X-Total-Count', total.toString());
-      if (pageNum) res.setHeader('X-Page', pageNum.toString());
-      if (limitNum) {
-        res.setHeader('X-Limit', limitNum.toString());
+      if (query.page) res.setHeader('X-Page', query.page.toString());
+      if (query.limit) {
+        res.setHeader('X-Limit', query.limit.toString());
         res.setHeader(
           'X-Total-Pages',
-          Math.max(1, Math.ceil(total / limitNum)).toString(),
+          Math.max(1, Math.ceil(total / query.limit)).toString(),
         );
       }
     }
 
-    if (fields === 'lite') {
+    if (query.fields === 'lite') {
       return items.map((item) => CustomerLiteResponseDto.fromDomain(item));
     }
 

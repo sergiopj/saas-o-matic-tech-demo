@@ -79,7 +79,7 @@ describe('CustomerController (Primary Adapter)', () => {
     } as any;
 
     const result = await controller.list(
-      { page: '2', limit: '10' },
+      { page: 2, limit: 10 },
       mockRes,
     );
 
@@ -92,8 +92,8 @@ describe('CustomerController (Primary Adapter)', () => {
 
   it('should pass validated sortBy and order parameters to use case', async () => {
     await controller.list({
-      page: '1',
-      limit: '10',
+      page: 1,
+      limit: 10,
       sortBy: 'companyName',
       order: 'ASC',
     });
