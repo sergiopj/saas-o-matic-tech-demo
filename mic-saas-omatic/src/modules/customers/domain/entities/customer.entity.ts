@@ -52,41 +52,19 @@ export class Customer {
     payload: CreateCustomerPayload,
     idGenerator: () => string,
   ): Customer {
-    const trimmedCompanyName = (payload.companyName || '').trim();
-    if (!trimmedCompanyName || trimmedCompanyName.length < 2) {
-      throw new DomainError('Company name must have at least 2 characters.');
-    }
-
-    const normalizedCountry = (payload.country || '').trim().toUpperCase();
-    if (!/^[A-Z]{2}$/.test(normalizedCountry)) {
-      throw new DomainError('Country must be a valid 2-letter ISO 3166-1 alpha-2 code.');
-    }
-
-    const normalizedTax = normalizeTaxId(payload.taxId);
-    if (!isValidTaxId(normalizedTax, normalizedCountry)) {
-      throw new DomainError(
-        `Invalid tax identifier '${payload.taxId}' for country '${normalizedCountry}'.`,
-      );
-    }
-
-    const trimmedEmail = (payload.email || '').trim().toLowerCase();
-    const emailRegex = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
-    if (!emailRegex.test(trimmedEmail)) {
-      throw new DomainError(`Invalid email address format '${payload.email}'.`);
-    }
-
-    const trimmedPlan = (payload.selectedPlan || '').trim();
-    if (!trimmedPlan || trimmedPlan.length < 2) {
-      throw new DomainError('Selected plan must have at least 2 characters.');
-    }
+    const companyName = Customer.validateCompanyName(payload.companyName);
+    const country = Customer.validateCountry(payload.country);
+    const taxId = Customer.validateTaxId(payload.taxId, country);
+    const email = Customer.validateEmail(payload.email);
+    const selectedPlan = Customer.validatePlan(payload.selectedPlan);
 
     return new Customer({
       id: payload.id || idGenerator(),
-      companyName: trimmedCompanyName,
-      taxId: normalizedTax,
-      email: trimmedEmail,
-      country: normalizedCountry,
-      selectedPlan: trimmedPlan,
+      companyName,
+      taxId,
+      email,
+      country,
+      selectedPlan,
       createdAt: new Date(),
     });
   }
@@ -98,48 +76,28 @@ export class Customer {
   public update(payload: UpdateCustomerPayload): Customer {
     const nextCompanyName =
       payload.companyName !== undefined
-        ? payload.companyName.trim()
+        ? Customer.validateCompanyName(payload.companyName)
         : this.companyName;
-    if (!nextCompanyName || nextCompanyName.length < 2) {
-      throw new DomainError('Company name must have at least 2 characters.');
-    }
 
     const nextCountry =
       payload.country !== undefined
-        ? payload.country.trim().toUpperCase()
+        ? Customer.validateCountry(payload.country)
         : this.country;
-    if (!/^[A-Z]{2}$/.test(nextCountry)) {
-      throw new DomainError(
-        'Country must be a valid 2-letter ISO 3166-1 alpha-2 code.',
-      );
-    }
 
     const nextTax =
-      payload.taxId !== undefined ? normalizeTaxId(payload.taxId) : this.taxId;
-    if (payload.taxId !== undefined || payload.country !== undefined) {
-      if (!isValidTaxId(nextTax, nextCountry)) {
-        throw new DomainError(
-          `Invalid tax identifier '${payload.taxId ?? nextTax}' for country '${nextCountry}'.`,
-        );
-      }
-    }
+      payload.taxId !== undefined || payload.country !== undefined
+        ? Customer.validateTaxId(payload.taxId ?? this.taxId, nextCountry)
+        : this.taxId;
 
     const nextEmail =
       payload.email !== undefined
-        ? payload.email.trim().toLowerCase()
+        ? Customer.validateEmail(payload.email)
         : this.email;
-    const emailRegex = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
-    if (!emailRegex.test(nextEmail)) {
-      throw new DomainError(`Invalid email address format '${payload.email}'.`);
-    }
 
     const nextPlan =
       payload.selectedPlan !== undefined
-        ? payload.selectedPlan.trim()
+        ? Customer.validatePlan(payload.selectedPlan)
         : this.selectedPlan;
-    if (!nextPlan || nextPlan.length < 2) {
-      throw new DomainError('Selected plan must have at least 2 characters.');
-    }
 
     return new Customer({
       id: this.id,
@@ -150,6 +108,51 @@ export class Customer {
       selectedPlan: nextPlan,
       createdAt: this.createdAt,
     });
+  }
+
+  // --- Domain Invariant Validators (SSOT) ---
+
+  private static validateCompanyName(companyName?: string): string {
+    const trimmed = (companyName || '').trim();
+    if (!trimmed || trimmed.length < 2) {
+      throw new DomainError('Company name must have at least 2 characters.');
+    }
+    return trimmed;
+  }
+
+  private static validateCountry(country?: string): string {
+    const normalized = (country || '').trim().toUpperCase();
+    if (!/^[A-Z]{2}$/.test(normalized)) {
+      throw new DomainError('Country must be a valid 2-letter ISO 3166-1 alpha-2 code.');
+    }
+    return normalized;
+  }
+
+  private static validateTaxId(rawTaxId: string, country: string): string {
+    const normalized = normalizeTaxId(rawTaxId);
+    if (!isValidTaxId(normalized, country)) {
+      throw new DomainError(
+        `Invalid tax identifier '${rawTaxId}' for country '${country}'.`,
+      );
+    }
+    return normalized;
+  }
+
+  private static validateEmail(email?: string): string {
+    const trimmed = (email || '').trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
+    if (!emailRegex.test(trimmed)) {
+      throw new DomainError(`Invalid email address format '${email}'.`);
+    }
+    return trimmed;
+  }
+
+  private static validatePlan(selectedPlan?: string): string {
+    const trimmed = (selectedPlan || '').trim();
+    if (!trimmed || trimmed.length < 2) {
+      throw new DomainError('Selected plan must have at least 2 characters.');
+    }
+    return trimmed;
   }
 
   public getId(): string {
