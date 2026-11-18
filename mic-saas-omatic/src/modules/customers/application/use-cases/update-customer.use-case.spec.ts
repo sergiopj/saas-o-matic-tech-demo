@@ -87,4 +87,17 @@ describe('UpdateCustomerUseCase', () => {
     expect(result.getCompanyName()).toBe('Acme Renamed');
     expect(mockRepository.save).toHaveBeenCalledTimes(1);
   });
+
+  it('should allow updating taxId when new taxId does not belong to any customer', async () => {
+    mockRepository.findById.mockResolvedValue(existingCustomer);
+    mockRepository.findByTaxId.mockResolvedValue(null);
+
+    const result = await useCase.execute('cust-100', {
+      taxId: 'DE999888777',
+      country: 'DE',
+    });
+
+    expect(result.getTaxId()).toBe('DE999888777');
+    expect(mockRepository.save).toHaveBeenCalledTimes(1);
+  });
 });

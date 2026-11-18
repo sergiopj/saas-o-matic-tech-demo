@@ -411,15 +411,13 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         customersCount++;
       }
 
-      if (customer) {
-        const existingSimulations = await this.simulationRepository.findByCustomerId(customer.getId());
-        const existingSimIds = new Set(existingSimulations.map((s) => s.getId()));
+      const existingSimulations = await this.simulationRepository.findByCustomerId(customer.getId());
+      const existingSimIds = new Set(existingSimulations.map((s) => s.getId()));
 
         for (const simDef of def.simulations) {
           if (!existingSimIds.has(simDef.id)) {
             const simulation = Simulation.create(
               {
-                id: simDef.id,
                 customerId: customer.getId(),
                 customerCountry: customer.getCountry(),
                 activeUsers: simDef.activeUsers,
@@ -433,7 +431,6 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           }
         }
       }
-    }
 
     this.logger.log(
       `Database seeding finished successfully: +${customersCount} customers, +${simulationsCount} simulations.`,

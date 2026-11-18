@@ -68,6 +68,26 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
     expect(result?.getCompanyName()).toBe('Telecom Corp');
   });
 
+  it('should find a customer by id and map to domain, or return null if not found', async () => {
+    const foundOrm = new CustomerTypeOrmEntity();
+    foundOrm.id = 'uuid-found';
+    foundOrm.companyName = 'Telecom Corp';
+    foundOrm.taxId = 'A12345674';
+    foundOrm.email = 'telecom@corp.es';
+    foundOrm.country = 'ES';
+    foundOrm.selectedPlan = 'Growth';
+    foundOrm.createdAt = sampleDate;
+
+    (mockTypeOrmRepo.findOne as jest.Mock).mockResolvedValueOnce(foundOrm);
+    const found = await adapter.findById('uuid-found');
+    expect(found).not.toBeNull();
+    expect(found?.getId()).toBe('uuid-found');
+
+    (mockTypeOrmRepo.findOne as jest.Mock).mockResolvedValueOnce(null);
+    const notFound = await adapter.findById('uuid-missing');
+    expect(notFound).toBeNull();
+  });
+
   it('should return all customers ordered by createdAt DESC when no filters provided', async () => {
     (mockTypeOrmRepo.findAndCount as jest.Mock).mockResolvedValue([[], 0]);
 
@@ -77,6 +97,23 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
     expect(mockTypeOrmRepo.findAndCount).toHaveBeenCalledWith({
       order: { createdAt: 'DESC' },
     });
+  });
+
+  it('should map found entities to domain items in search result', async () => {
+    const foundOrm = new CustomerTypeOrmEntity();
+    foundOrm.id = 'uuid-search';
+    foundOrm.companyName = 'Telecom Corp';
+    foundOrm.taxId = 'A12345674';
+    foundOrm.email = 'telecom@corp.es';
+    foundOrm.country = 'ES';
+    foundOrm.selectedPlan = 'Growth';
+    foundOrm.createdAt = sampleDate;
+
+    (mockTypeOrmRepo.findAndCount as jest.Mock).mockResolvedValue([[foundOrm], 1]);
+
+    const result = await adapter.search({ limit: 10 });
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].getId()).toBe('uuid-search');
   });
 
   it('should search with clean term for company, normalized term for taxId, and email', async () => {

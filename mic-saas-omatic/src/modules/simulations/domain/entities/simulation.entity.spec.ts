@@ -87,7 +87,7 @@ describe('Simulation Domain Entity (Pure TypeScript)', () => {
       expect(simulation.getTotalCost()).toBe(0);
     });
 
-    it('should throw DomainError when customerId is empty', () => {
+    it('should throw DomainError when customerId is empty or undefined', () => {
       expect(() =>
         Simulation.create(
           {
@@ -100,14 +100,40 @@ describe('Simulation Domain Entity (Pure TypeScript)', () => {
           idGenerator,
         ),
       ).toThrow(DomainError);
+
+      expect(() =>
+        Simulation.create(
+          {
+            customerId: undefined as any,
+            customerCountry: 'ES',
+            activeUsers: 10,
+            storageGb: 10,
+            apiCalls: 100,
+          },
+          idGenerator,
+        ),
+      ).toThrow(DomainError);
     });
 
-    it('should throw DomainError when customerCountry is invalid', () => {
+    it('should throw DomainError when customerCountry is invalid or undefined', () => {
       expect(() =>
         Simulation.create(
           {
             customerId: fakeCustomerId,
             customerCountry: 'ESP',
+            activeUsers: 10,
+            storageGb: 10,
+            apiCalls: 100,
+          },
+          idGenerator,
+        ),
+      ).toThrow(DomainError);
+
+      expect(() =>
+        Simulation.create(
+          {
+            customerId: fakeCustomerId,
+            customerCountry: undefined as any,
             activeUsers: 10,
             storageGb: 10,
             apiCalls: 100,
@@ -211,6 +237,24 @@ describe('Simulation Domain Entity (Pure TypeScript)', () => {
       expect(simulation.getId()).toBe('persisted-sim-1');
       expect(simulation.getCreatedAt()).toBe(fixedDate);
       expect(simulation.toJSON()).toEqual(props);
+    });
+
+    it('should default currency to EUR when not provided in reconstitute', () => {
+      const simulation = Simulation.reconstitute({
+        id: 'sim-no-currency',
+        customerId: fakeCustomerId,
+        activeUsers: 10,
+        storageGb: 10,
+        apiCalls: 1000,
+        monthlyBaseCost: 100,
+        taxRate: 0.21,
+        taxAmount: 21,
+        totalCost: 121,
+        currency: undefined as any,
+        createdAt: new Date(),
+      });
+
+      expect(simulation.getCurrency()).toBe('EUR');
     });
   });
 });

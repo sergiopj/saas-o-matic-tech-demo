@@ -90,6 +90,18 @@ describe('CustomerController (Primary Adapter)', () => {
     expect(mockRes.setHeader).toHaveBeenCalledWith('X-Total-Pages', '1');
   });
 
+  it('should set total count header when res is provided without page and limit', async () => {
+    const mockRes = {
+      setHeader: jest.fn(),
+    } as any;
+
+    await controller.list({}, mockRes);
+
+    expect(mockRes.setHeader).toHaveBeenCalledWith('X-Total-Count', '1');
+    expect(mockRes.setHeader).not.toHaveBeenCalledWith('X-Page', expect.anything());
+    expect(mockRes.setHeader).not.toHaveBeenCalledWith('X-Limit', expect.anything());
+  });
+
   it('should pass validated sortBy and order parameters to use case', async () => {
     await controller.list({
       page: 1,

@@ -120,6 +120,69 @@ describe('ProblemDetailExceptionFilter (RFC 7807)', () => {
     );
   });
 
+  it('should extract string detail when HttpException response is an object with message property', () => {
+    const objError = new HttpException(
+      { message: 'Unauthorized custom reason' },
+      HttpStatus.UNAUTHORIZED,
+    );
+
+    filter.catch(objError, mockHost);
+
+    expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
+    expect(mockResponse.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 401,
+        detail: 'Unauthorized custom reason',
+      }),
+    );
+  });
+
+  it('should fallback when HttpException getResponse returns null or non-object', () => {
+    class NullResponseException extends HttpException {
+      constructor() {
+        super(null as any, HttpStatus.BAD_REQUEST);
+      }
+      override getResponse() {
+        return null as any;
+      }
+    }
+
+    filter.catch(new NullResponseException(), mockHost);
+
+    expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    expect(mockResponse.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 400,
+        title: 'NullResponseException',
+      }),
+    );
+  });
+
+  it('should fallback to exception.message when payload.message is empty in object response', () => {
+    const objWithoutMsg = new HttpException({ error: 'CustomError' }, HttpStatus.BAD_REQUEST);
+    filter.catch(objWithoutMsg, mockHost);
+
+    expect(mockResponse.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'CustomError',
+        detail: objWithoutMsg.message,
+      }),
+    );
+  });
+
+  it('should fallback to field name when message begins with space', () => {
+    const spaceMsgError = new BadRequestException({
+      message: [' '],
+    });
+    filter.catch(spaceMsgError, mockHost);
+
+    expect(mockResponse.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        invalidParams: [{ name: 'field', reason: ' ' }],
+      }),
+    );
+  });
+
   it('should not leak internal error message on 500 error', () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const unexpectedError = new Error('SQLite database table locked internal secret');

@@ -155,5 +155,75 @@ describe('Customer Domain Entity (Pure TypeScript)', () => {
     it('should throw DomainError when updating with short company name', () => {
       expect(() => customer.update({ companyName: ' ' })).toThrow(DomainError);
     });
+
+    it('should throw DomainError when selected plan has fewer than 2 characters', () => {
+      expect(() => customer.update({ selectedPlan: 'A' })).toThrow(DomainError);
+      expect(() => customer.update({ selectedPlan: '  ' })).toThrow(DomainError);
+    });
+
+    it('should throw DomainError when required fields are undefined in create', () => {
+      expect(() =>
+        Customer.create(
+          {
+            companyName: undefined as any,
+            taxId: 'B12345674',
+            email: 'contact@acme.com',
+            country: 'ES',
+            selectedPlan: 'Pro',
+          },
+          mockIdGenerator,
+        ),
+      ).toThrow(DomainError);
+
+      expect(() =>
+        Customer.create(
+          {
+            companyName: 'Acme',
+            taxId: 'B12345674',
+            email: undefined as any,
+            country: 'ES',
+            selectedPlan: 'Pro',
+          },
+          mockIdGenerator,
+        ),
+      ).toThrow(DomainError);
+
+      expect(() =>
+        Customer.create(
+          {
+            companyName: 'Acme',
+            taxId: 'B12345674',
+            email: 'contact@acme.com',
+            country: undefined as any,
+            selectedPlan: 'Pro',
+          },
+          mockIdGenerator,
+        ),
+      ).toThrow(DomainError);
+
+      expect(() =>
+        Customer.create(
+          {
+            companyName: 'Acme',
+            taxId: 'B12345674',
+            email: 'contact@acme.com',
+            country: 'ES',
+            selectedPlan: undefined as any,
+          },
+          mockIdGenerator,
+        ),
+      ).toThrow(DomainError);
+    });
+
+    it('should convert customer to JSON properties representation', () => {
+      const json = customer.toJSON();
+      expect(json.id).toBe(fakeId);
+      expect(json.companyName).toBe('Acme Corp');
+      expect(json.taxId).toBe('B12345674');
+      expect(json.email).toBe('contact@acme.com');
+      expect(json.country).toBe('ES');
+      expect(json.selectedPlan).toBe('Pro');
+      expect(json.createdAt).toEqual(customer.getCreatedAt());
+    });
   });
 });

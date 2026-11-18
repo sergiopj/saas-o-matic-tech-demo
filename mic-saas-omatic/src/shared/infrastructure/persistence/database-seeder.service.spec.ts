@@ -25,10 +25,10 @@ describe('DatabaseSeederService', () => {
     service = new DatabaseSeederService(mockCustomerRepo, mockSimulationRepo);
   });
 
-  it('should skip seeding if database already has customers and force is false', async () => {
+  it('should skip seeding if database already has customers and force is default false', async () => {
     mockCustomerRepo.search.mockResolvedValueOnce({ items: [], total: 10 });
 
-    const result = await service.seed(false);
+    const result = await service.seed();
 
     expect(result.customersCount).toBe(10);
     expect(result.simulationsCount).toBe(0);
@@ -55,6 +55,16 @@ describe('DatabaseSeederService', () => {
     await service.onApplicationBootstrap();
 
     expect(seedSpy).toHaveBeenCalledWith(false);
+  });
+
+  it('should skip seeding on application bootstrap if SKIP_SEEDING is true', async () => {
+    process.env.SKIP_SEEDING = 'true';
+    const seedSpy = jest.spyOn(service, 'seed');
+
+    await service.onApplicationBootstrap();
+
+    expect(seedSpy).not.toHaveBeenCalled();
+    delete process.env.SKIP_SEEDING;
   });
 
   it('should skip already existing simulations for an existing customer during force seed', async () => {
@@ -91,5 +101,26 @@ describe('DatabaseSeederService', () => {
     expect(mockCustomerRepo.save).not.toHaveBeenCalled();
     // Only missing simulations are saved
     expect(result.simulationsCount).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should find existing customer by taxId when not found by id during seed', async () => {
+    mockCustomerRepo.search.mockResolvedValueOnce({ items: [], total: 0 });
+    const firstSeed = SEED_CUSTOMERS[0];
+    const existingCustomer = Customer.reconstitute({
+      id: firstSeed.id,
+      companyName: firstSeed.companyName,
+      taxId: firstSeed.taxId,
+      email: firstSeed.email,
+      country: firstSeed.country,
+      selectedPlan: firstSeed.selectedPlan,
+      createdAt: firstSeed.createdAt,
+    });
+
+    mockCustomerRepo.findById.mockResolvedValue(null);
+    mockCustomerRepo.findByTaxId.mockResolvedValue(existingCustomer);
+    mockSimulationRepo.findByCustomerId.mockResolvedValue([]);
+
+    const result = await service.seed(true);
+    expect(result.customersCount).toBe(0);
   });
 });

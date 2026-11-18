@@ -64,4 +64,9 @@ describe('ListCustomersQueryDto (Validation & Transformation Layer)', () => {
     const errors = await validate(dto);
     expect(errors.some((e) => e.property === 'order')).toBe(true);
   });
+
+  it('should pass through non-string order value without erroring in transformer', () => {
+    const dto = plainToInstance(ListCustomersQueryDto, { order: 123 });
+    expect(dto.order).toBe(123 as any);
+  });
 });

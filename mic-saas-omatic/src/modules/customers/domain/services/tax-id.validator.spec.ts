@@ -95,6 +95,12 @@ describe('TaxIdValidator & Sanitization (Domain Layer)', () => {
   });
 
   describe('Input normalization and edge cases', () => {
+    it('should return false when rawTaxId or country is empty or missing', () => {
+      expect(isValidTaxId('', 'ES')).toBe(false);
+      expect(isValidTaxId('B12345674', '')).toBe(false);
+      expect(isValidTaxId('  ', '  ')).toBe(false);
+    });
+
     it('should handle un-normalized inputs gracefully when called through isValidTaxId', () => {
       expect(isValidTaxId('  b - 12345674 ', 'es')).toBe(true);
       expect(isValidTaxId('12345678-z', 'ES')).toBe(true);

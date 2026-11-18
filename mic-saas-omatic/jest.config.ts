@@ -25,8 +25,9 @@ const config: Config = {
   transformIgnorePatterns: [],
   collectCoverageFrom: [
     'src/**/*.(t|j)s',
-    'libs/**/*.(t|j)s',
-    'apps/**/*.(t|j)s',
+    '!src/main.ts',
+    '!src/seed.ts',
+    '!src/data-source.ts',
   ],
   coverageDirectory: './coverage',
   testEnvironment: 'node',
