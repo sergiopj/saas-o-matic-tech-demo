@@ -3,7 +3,7 @@
     <div class="header-titles-group">
       <img
         src="images/simulations-badge.jpg"
-        alt="Centro de Simulaciones"
+        [alt]="'simulations.hub.badgeAlt' | translate"
         class="simulations-badge-img"
         width="64"
         height="64"
@@ -68,7 +68,7 @@
       <div class="launcher-visual-column">
         <img
           src="images/simulations-illustration.jpg"
-          alt="SaaS Dynamic Billing Algorithm Simulator"
+          [alt]="'simulations.hub.illustrationAlt' | translate"
           class="simulations-illustration"
           loading="eager"
         />
@@ -83,7 +83,7 @@
     <div class="tiers-grid">
       <div class="tier-card t1">
         <div class="tier-header">
-          <span class="badge">Tramo 1</span>
+          <span class="badge">{{ 'simulation.tiers.tier1Badge' | translate }}</span>
           <div class="price-stack-group">
             <div class="coin-stack stack-t1" aria-hidden="true">
               <span class="coin c1"></span>
@@ -96,17 +96,17 @@
           </div>
         </div>
         <div class="tier-range-row">
-          <h3 class="tier-range">0 a 10 usuarios</h3>
-          <div class="users-cluster cluster-t1" aria-hidden="true" title="0 a 10 usuarios">
+          <h3 class="tier-range">{{ 'simulation.tiers.tier1Range' | translate }}</h3>
+          <div class="users-cluster cluster-t1" aria-hidden="true" [attr.title]="'simulation.tiers.tier1Range' | translate">
             <mat-icon class="user-glyph u1">person</mat-icon>
           </div>
         </div>
-        <p class="tier-desc">Tarificación base por asiento para pequeñas implantaciones o fases piloto iniciales.</p>
+        <p class="tier-desc">{{ 'simulation.tiers.tier1HubDesc' | translate }}</p>
       </div>
 
       <div class="tier-card t2">
         <div class="tier-header">
-          <span class="badge">Tramo 2</span>
+          <span class="badge">{{ 'simulation.tiers.tier2Badge' | translate }}</span>
           <div class="price-stack-group">
             <div class="coin-stack stack-t2" aria-hidden="true">
               <span class="coin c1"></span>
@@ -117,19 +117,19 @@
           </div>
         </div>
         <div class="tier-range-row">
-          <h3 class="tier-range">11 a 50 usuarios</h3>
-          <div class="users-cluster cluster-t2" aria-hidden="true" title="11 a 50 usuarios">
+          <h3 class="tier-range">{{ 'simulation.tiers.tier2Range' | translate }}</h3>
+          <div class="users-cluster cluster-t2" aria-hidden="true" [attr.title]="'simulation.tiers.tier2Range' | translate">
             <mat-icon class="user-glyph u1">person</mat-icon>
             <mat-icon class="user-glyph u2">person</mat-icon>
             <mat-icon class="user-glyph u3">person</mat-icon>
           </div>
         </div>
-        <p class="tier-desc">Descuento de volumen automático acumulativo para medianas empresas en expansión.</p>
+        <p class="tier-desc">{{ 'simulation.tiers.tier2HubDesc' | translate }}</p>
       </div>
 
       <div class="tier-card t3">
         <div class="tier-header">
-          <span class="badge">Tramo 3</span>
+          <span class="badge">{{ 'simulation.tiers.tier3Badge' | translate }}</span>
           <div class="price-stack-group">
             <div class="coin-stack stack-t3" aria-hidden="true">
               <span class="coin c1"></span>
@@ -139,8 +139,8 @@
           </div>
         </div>
         <div class="tier-range-row">
-          <h3 class="tier-range">Más de 50 usuarios</h3>
-          <div class="users-cluster cluster-t3" aria-hidden="true" title="Más de 50 usuarios">
+          <h3 class="tier-range">{{ 'simulation.tiers.tier3Range' | translate }}</h3>
+          <div class="users-cluster cluster-t3" aria-hidden="true" [attr.title]="'simulation.tiers.tier3Range' | translate">
             <mat-icon class="user-glyph u1">person</mat-icon>
             <mat-icon class="user-glyph u2">person</mat-icon>
             <mat-icon class="user-glyph u3">person</mat-icon>
@@ -148,7 +148,7 @@
             <mat-icon class="user-glyph u5">person</mat-icon>
           </div>
         </div>
-        <p class="tier-desc">Máxima optimización de costes para despliegues corporativos masivos a escala global.</p>
+        <p class="tier-desc">{{ 'simulation.tiers.tier3HubDesc' | translate }}</p>
       </div>
     </div>
   </section>

@@ -5330,3 +5330,55 @@ Syntax: <single-animation>#
   - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
   - **Total Ecosistema:** **425 pruebas unitarias automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Demostración de arquitectura senior mediante eliminación agresiva de duplicación, modularidad de componentes y encapsulación de servicios transversales.
+
+
+### 6.186. Auditoría Exhaustiva de Frontend y Erradicación de Textos Hardcodeados (`alt`, `title`, Tramos y Formularios)
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario detectó textos literales no traducidos en las plantillas del frontend, comenzando por el atributo `alt="Clientes Corporativos"` en el badge corporativo de la lista de clientes, e instruyó una revisión exhaustiva de todo el código de la SPA:
+  > *"mas traducciones o textos harcodeados como por ejemplo
+  > 
+  >         alt="Clientes Corporativos"
+  > revisa todo el front bien"*
+- **Análisis de Olor a Código e Inconsistencias Detectadas:**
+  1. *Atributos `alt` en Imágenes y Badges:* Múltiples etiquetas `<img>` tenían literales fijos en español o inglés sin usar el pipe de internacionalización:
+     - `customer-list.component.html`: `alt="Clientes Corporativos"`.
+     - `customer-detail.component.html`: `alt="Corporate Client Headquarters"`.
+     - `home.component.html`: `alt="SaaS-O-Matic Intelligent Billing Architecture"`.
+     - `simulation-hub.component.html`: `alt="Centro de Simulaciones"` y `alt="SaaS Dynamic Billing Algorithm Simulator"`.
+     - `email-composer-dialog.component.html`: `alt="Redactar Correo Comercial"`.
+  2. *Atributos `title` y Badges en Visualizaciones de Tramos:*
+     - En `customer-detail.component.html`: `title="Tramo 1 (0–10)"`, `title="Tramo 2 (11–50)"`, `title="Tramo 3 (>50)"`.
+     - En `home.component.html`: `0–10 usuarios • 10 €/u`, `title="0–10 usuarios"`, etc.
+     - En `simulation-hub.component.html`: toda la sección de referencia de tramos (Tramo 1/2/3, rangos y descripciones funcionales completas) estaba hardcodeada en español.
+  3. *Subtítulo Dinámico del Historial de Simulaciones:*
+     - En `customer-detail.component.html`: cadenas procedurales `X de Y presupuestos (filtrados)` y `X presupuestos registrados para esta cuenta` sin parametrizar mediante i18n.
+     - Encabezado de tabla `<th>Storage / API</th>` sin clave i18n.
+     - Etiqueta de badge `LIVE CONVERSION`.
+  4. *Selectores y Placeholders de Jurisdicción Fiscal en Alta de Clientes:*
+     - En `customer-create-dialog.component.ts`: el array `COUNTRY_OPTIONS` contenía nombres en idiomas locales fijos y placeholders con el prefijo español `'Ej. B12345674'`.
+     - En `customer-list.component.ts`: las opciones del selector de países mostraban únicamente el código ISO crudo sin el nombre internacionalizado de la jurisdicción.
+- **Acciones Ejecutadas:**
+  1. *Expansión del Diccionario Cuatrilingüe ([translations.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/i18n/translations.ts)):*
+     - Añadidas 26 nuevas claves de traducción completas y simétricas a través de los 4 idiomas soportados (`es`, `en`, `de`, `fr`):
+       - Claves de accesibilidad e imágenes: `'customers.badge.alt'`, `'customerDetail.badge.alt'`, `'home.hero.imgAlt'`, `'simulations.hub.badgeAlt'`, `'simulations.hub.illustrationAlt'`, `'customers.emailDialog.badgeAlt'`.
+       - Claves de tramos y rangos: `'simulation.tiers.tier1Title'`, `'simulation.tiers.tier2Title'`, `'simulation.tiers.tier3Title'`, `'simulation.tiers.tier1Badge'`, `'simulation.tiers.tier2Badge'`, `'simulation.tiers.tier3Badge'`, `'simulation.tiers.tier1Range'`, `'simulation.tiers.tier2Range'`, `'simulation.tiers.tier3Range'`, `'simulation.tiers.tier1HubDesc'`, `'simulation.tiers.tier2HubDesc'`, `'simulation.tiers.tier3HubDesc'`.
+       - Descripciones y contadores: `'home.pricing.tier1Desc'`, `'home.pricing.tier2Desc'`, `'home.pricing.tier3Desc'`, `'simulation.history.countFiltered'`, `'simulation.history.countAll'`, `'simulation.history.storageApi'`, `'simulation.breakdown.liveConversion'`.
+       - Jurisdicciones y prefijos: `'countries.ES'`, `'countries.DE'`, `'countries.FR'`, `'countries.GB'`, `'countries.US'`, `'countries.IT'`, `'countries.CH'`, `'countries.SE'` y `'customers.create.examplePrefix'`.
+  2. *Refactorización de Plantillas y Componentes:*
+     - [customer-list.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-list/customer-list.component.html): `[alt]="'customers.badge.alt' | translate"`.
+     - [customer-list.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-list/customer-list.component.ts): `countryFilters` formateado reactivamente con `${code} - ${this.i18n.t(('countries.' + code) as TranslationKey)}`.
+     - [customer-detail.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.html): `[alt]`, `[attr.title]`, `liveConversion`, encabezado de tabla y contadores de filtrado con interpolación reactiva.
+     - [home.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.html): `[alt]`, títulos descriptivos de los clústeres de usuarios y textos de tramos con pipes de traducción.
+     - [simulation-hub.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/simulations/pages/simulation-hub/simulation-hub.component.html): Erradicados todos los textos en español estáticos; todas las tarjetas de tramos y descripciones ahora emplean `| translate`.
+     - [email-composer-dialog.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.html): `[alt]="'customers.emailDialog.badgeAlt' | translate"`.
+     - [customer-create-dialog.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.ts): Desacoplado el prefijo "Ej." en favor de `${this.i18n.t('customers.create.examplePrefix')} ${exampleId}`, y nombres de países con `nameKey: 'countries.XX'`.
+  3. *Actualización de Normativa en [AGENTS.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/AGENTS.md):*
+     - Ampliada la regla 2.C para exigir cobertura absoluta de i18n en textos alternativos de imagen (`[alt]`), tooltips nativos (`[attr.title]`) y elementos visuales.
+- **Resultados de Verificación:**
+  - **Frontend Oxlint:** **0 errores y 0 advertencias** (75 archivos analizados).
+  - **Frontend Vitest Tests:** **266 pruebas pasando al 100%** (31 suites).
+  - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
+  - **Total Ecosistema:** **425 pruebas unitarias automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Garantiza una experiencia de usuario y de accesibilidad (WCAG / a11y) de grado bancario internacional, donde ningún usuario de habla inglesa, alemana o francesa se encuentra con textos hardcodeados en español.

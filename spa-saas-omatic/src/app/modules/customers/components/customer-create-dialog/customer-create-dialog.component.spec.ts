@@ -85,7 +85,7 @@ describe('CustomerCreateDialogComponent', () => {
     expect(taxControl?.hasError('invalidSpanishTaxId')).toBe(true);
 
     countryControl?.setValue('DE');
-    expect(component.taxIdPlaceholder()).toBe('Ej. DE999888777');
+    expect(component.taxIdPlaceholder()).toContain('DE999888777');
     expect(taxControl?.hasError('invalidTaxId')).toBe(false); // valid under DE
 
     // Short ID under DE gives invalidInternationalTaxId

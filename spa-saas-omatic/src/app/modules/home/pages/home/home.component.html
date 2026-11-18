@@ -22,7 +22,7 @@
     <div class="hero-visual">
       <img
         src="images/hero-illustration.jpg"
-        alt="SaaS-O-Matic Intelligent Billing Architecture"
+        [alt]="'home.hero.imgAlt' | translate"
         class="hero-illustration"
         loading="eager"
       />
@@ -114,10 +114,10 @@
         <div class="tier-badge">T1</div>
         <div class="tier-info">
           <span class="tier-name">{{ 'home.pricing.tier1' | translate }}</span>
-          <span class="tier-desc">0–10 usuarios • 10 €/u</span>
+          <span class="tier-desc">{{ 'home.pricing.tier1Desc' | translate }}</span>
         </div>
         <div class="tier-visual-group">
-          <div class="users-cluster cluster-t1" aria-hidden="true" title="0–10 usuarios">
+          <div class="users-cluster cluster-t1" aria-hidden="true" [attr.title]="'simulation.tiers.tier1Range' | translate">
             <mat-icon class="user-glyph u1">person</mat-icon>
           </div>
           <div class="coin-stack stack-t1" aria-hidden="true">
@@ -134,10 +134,10 @@
         <div class="tier-badge">T2</div>
         <div class="tier-info">
           <span class="tier-name">{{ 'home.pricing.tier2' | translate }}</span>
-          <span class="tier-desc">11–50 usuarios • 8 €/u</span>
+          <span class="tier-desc">{{ 'home.pricing.tier2Desc' | translate }}</span>
         </div>
         <div class="tier-visual-group">
-          <div class="users-cluster cluster-t2" aria-hidden="true" title="11–50 usuarios">
+          <div class="users-cluster cluster-t2" aria-hidden="true" [attr.title]="'simulation.tiers.tier2Range' | translate">
             <mat-icon class="user-glyph u1">person</mat-icon>
             <mat-icon class="user-glyph u2">person</mat-icon>
             <mat-icon class="user-glyph u3">person</mat-icon>
@@ -154,10 +154,10 @@
         <div class="tier-badge">T3</div>
         <div class="tier-info">
           <span class="tier-name">{{ 'home.pricing.tier3' | translate }}</span>
-          <span class="tier-desc">>50 usuarios • 5 €/u</span>
+          <span class="tier-desc">{{ 'home.pricing.tier3Desc' | translate }}</span>
         </div>
         <div class="tier-visual-group">
-          <div class="users-cluster cluster-t3" aria-hidden="true" title=">50 usuarios">
+          <div class="users-cluster cluster-t3" aria-hidden="true" [attr.title]="'simulation.tiers.tier3Range' | translate">
             <mat-icon class="user-glyph u1">person</mat-icon>
             <mat-icon class="user-glyph u2">person</mat-icon>
             <mat-icon class="user-glyph u3">person</mat-icon>

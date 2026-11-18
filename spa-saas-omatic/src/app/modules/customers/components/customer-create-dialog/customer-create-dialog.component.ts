@@ -36,14 +36,14 @@ export interface CountryOption {
 }
 
 export const COUNTRY_OPTIONS: CountryOption[] = [
-  { code: 'ES', nameKey: 'España', flag: '🇪🇸', placeholder: 'Ej. B12345674' },
-  { code: 'DE', nameKey: 'Deutschland', flag: '🇩🇪', placeholder: 'Ej. DE999888777' },
-  { code: 'FR', nameKey: 'France', flag: '🇫🇷', placeholder: 'Ej. FR45801234567' },
-  { code: 'GB', nameKey: 'United Kingdom', flag: '🇬🇧', placeholder: 'Ej. GB123456789' },
-  { code: 'US', nameKey: 'United States', flag: '🇺🇸', placeholder: 'Ej. US123456789' },
-  { code: 'IT', nameKey: 'Italia', flag: '🇮🇹', placeholder: 'Ej. IT12345678901' },
-  { code: 'CH', nameKey: 'Schweiz', flag: '🇨🇭', placeholder: 'Ej. CHE123456789' },
-  { code: 'SE', nameKey: 'Sverige', flag: '🇸🇪', placeholder: 'Ej. SE123456789001' },
+  { code: 'ES', nameKey: 'countries.ES', flag: '🇪🇸', placeholder: 'B12345674' },
+  { code: 'DE', nameKey: 'countries.DE', flag: '🇩🇪', placeholder: 'DE999888777' },
+  { code: 'FR', nameKey: 'countries.FR', flag: '🇫🇷', placeholder: 'FR45801234567' },
+  { code: 'GB', nameKey: 'countries.GB', flag: '🇬🇧', placeholder: 'GB123456789' },
+  { code: 'US', nameKey: 'countries.US', flag: '🇺🇸', placeholder: 'US123456789' },
+  { code: 'IT', nameKey: 'countries.IT', flag: '🇮🇹', placeholder: 'IT12345678901' },
+  { code: 'CH', nameKey: 'countries.CH', flag: '🇨🇭', placeholder: 'CHE123456789' },
+  { code: 'SE', nameKey: 'countries.SE', flag: '🇸🇪', placeholder: 'SE123456789001' },
 ];
 
 export const PLAN_OPTIONS: string[] = [
@@ -92,7 +92,8 @@ export class CustomerCreateDialogComponent implements OnInit, OnDestroy {
   readonly selectedCountryCode = signal<string>('ES');
   readonly taxIdPlaceholder = computed<string>(() => {
     const selected = this.countries.find((c) => c.code === this.selectedCountryCode());
-    return selected ? selected.placeholder : 'Ej. B12345674';
+    const exampleId = selected ? selected.placeholder : 'B12345674';
+    return `${this.i18n.t('customers.create.examplePrefix')} ${exampleId}`;
   });
 
   readonly submitting = signal<boolean>(false);

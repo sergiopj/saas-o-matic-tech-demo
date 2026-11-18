@@ -71,7 +71,7 @@
             @for (c of countries; track c.code) {
               <mat-option [value]="c.code">
                 <span class="option-flag">{{ c.flag }}</span>
-                <span>{{ c.nameKey }}</span>
+                <span>{{ c.nameKey | translate }}</span>
               </mat-option>
             }
           </mat-select>

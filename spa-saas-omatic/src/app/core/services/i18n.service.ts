@@ -12,16 +12,12 @@ import {
   LanguageOption,
 } from '../i18n/translations';
 
-// Register Angular locale formatting packages for international DatePipe and CurrencyPipe
 registerLocaleData(localeEs, 'es');
 registerLocaleData(localeEn, 'en');
 registerLocaleData(localeDe, 'de');
 registerLocaleData(localeFr, 'fr');
 
-/**
- * Enterprise internationalization service managing reactive application locale,
- * browser language auto-detection, and dictionary interpolation.
- */
+
 @Injectable({
   providedIn: 'root',
 })

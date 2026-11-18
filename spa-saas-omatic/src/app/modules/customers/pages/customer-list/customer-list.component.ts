@@ -21,6 +21,7 @@ import { LoadingStateComponent } from '../../../../shared/components/loading-sta
 import { PaginatorComponent } from '../../../../shared/components/paginator/paginator.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { I18nService } from '../../../../core/services/i18n.service';
+import { TranslationKey } from '../../../../core/i18n/translations';
 import { ToastService } from '../../../../core/services/toast.service';
 
 export interface CountryFilterOption {
@@ -121,7 +122,7 @@ export class CustomerListComponent implements OnInit {
     },
     ...SUPPORTED_FISCAL_COUNTRIES.map((code) => ({
       code,
-      label: code,
+      label: `${code} - ${this.i18n.t(`countries.${code}` as TranslationKey)}`,
     })),
   ]);
 

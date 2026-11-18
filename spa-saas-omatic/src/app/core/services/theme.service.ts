@@ -92,7 +92,7 @@ export class ThemeService {
       return;
     }
     const root = document.documentElement;
-    root.setAttribute('data-theme', theme);
+    root.dataset['theme'] = theme;
     if (theme === 'dark') {
       root.classList.add('dark-theme');
       if (document.body) {
