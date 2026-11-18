@@ -151,10 +151,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.dragStartX = event.clientX;
   }
 
-  onMouseMove(_event: MouseEvent): void {
-    // Mouse move handling during drag
-  }
-
   onMouseUp(event: MouseEvent): void {
     if (!this.isDragging()) return;
     this.isDragging.set(false);

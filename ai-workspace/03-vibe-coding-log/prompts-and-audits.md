@@ -5415,3 +5415,29 @@ Syntax: <single-animation>#
   - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
   - **Total Ecosistema:** **425 pruebas unitarias automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Demuestra disciplina en la separación de responsabilidades y modularidad en servicios Angular, manteniendo firmas predecibles y libres de duplicación.
+
+
+### 6.188. Auditoría y Eliminación de Código Muerto y Overhead de Eventos en `HomeComponent` (`onMouseMove`)
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario detectó un método sospechoso en [home.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.ts) y preguntó si tenía alguna utilidad real o constituía código muerto:
+  > *"esto hace algo? o es codigo muerto 
+  > 
+  > onMouseMove(_event: MouseEvent): void {
+  >     // Mouse move handling during drag
+  >   }"*
+- **Análisis de Olor a Código e Impacto de Rendimiento:**
+  1. *Código Muerto y Vacío:* El método `onMouseMove` contenía únicamente un comentario y ningún efecto secundario o mutación de estado.
+  2. *Overhead Crítico de Renderizado (High-Frequency Event Binding):* En [home.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.html), el elemento `.slider-viewport` mantenía la directiva `(mousemove)="onMouseMove($event)"`. Este evento nativo se dispara a tasas de 60 a 120 Hz con cada movimiento del ratón sobre el carrusel de clientes, provocando ciclos de escucha y comprobación en Angular completamente estériles.
+  3. *Innecesariedad en la Lógica de Swipe/Drag:* El deslizador interactivo calcula la distancia de arrastre comparando la coordenada inicial registrada en `onMouseDown` con la coordenada final en `onMouseUp` (`const diff = this.dragStartX - event.clientX`). `onMouseMove` no intervenía en absoluto en el cálculo.
+- **Acciones Ejecutadas:**
+  1. *Eliminación del Binding de Plantilla:* Suprimido `(mousemove)="onMouseMove($event)"` de [home.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.html).
+  2. *Eliminación del Método en TypeScript:* Suprimido `onMouseMove` de [home.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.ts).
+  3. *Limpieza de Pruebas Unitarias:* Eliminada la llamada artificial en [home.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.spec.ts).
+- **Resultados de Verificación:**
+  - **Frontend Oxlint:** **0 errores y 0 advertencias** (75 archivos analizados).
+  - **Frontend Vitest Tests:** **266 pruebas pasando al 100%** (31 suites).
+  - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
+  - **Total Ecosistema:** **425 pruebas unitarias automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Demuestra observancia rigurosa de las directrices de eficiencia frontend y Clean Code, eliminando escuchas de eventos de alta frecuencia innecesarias para garantizar fluidez a 60 FPS.

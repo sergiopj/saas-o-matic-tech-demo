@@ -212,7 +212,6 @@ describe('HomeComponent', () => {
     // Mouse drag left (diff > 40 -> next): advances by full visible batch of 2
     component.onMouseDown({ button: 0, clientX: 200 } as MouseEvent);
     expect(component.isDragging()).toBe(true);
-    component.onMouseMove({ clientX: 150 } as MouseEvent);
     component.onMouseUp({ clientX: 120 } as MouseEvent);
     expect(component.isDragging()).toBe(false);
     expect(component.currentSlideIndex()).toBe(2);
