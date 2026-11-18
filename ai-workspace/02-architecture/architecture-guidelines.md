@@ -59,8 +59,7 @@ Para garantizar mantenibilidad, testabilidad y aislamiento estricto de las regla
 ┌────────────────────────────────────────────────────────────────────────┐
 │                             DOMAIN LAYER                               │
 │       (Pure TypeScript - Zero Framework & Zero DB Dependencies)        │
-│  - Entities: Customer, Simulation                                      │
-│  - Value Objects: TaxId, CountryCode                                   │
+│  - Entities & Models: Customer, Simulation, CustomerSearchCriteria     │
 │  - Domain Services: PricingEngineService, SpanishFiscalValidator       │
 │  - Domain Exceptions: InvalidFiscalIdException, etc.                   │
 └────────────────────────────────────────────────────────────────────────┘
@@ -78,10 +77,10 @@ mic-saas-omatic/
 │   │   │   ├── domain/                                      # DOMINIO PURO
 │   │   │   │   ├── entities/
 │   │   │   │   │   └── customer.entity.ts
-│   │   │   │   ├── value-objects/
-│   │   │   │   │   └── tax-id.vo.ts                         # Normalización y validación
+│   │   │   │   ├── models/
+│   │   │   │   │   └── customer-search-criteria.model.ts    # Parameter Object y Type Guards SSOT
 │   │   │   │   ├── services/
-│   │   │   │   │   └── spanish-fiscal.validator.ts          # Algoritmos DNI / NIE / CIF
+│   │   │   │   │   └── spanish-fiscal.validator.ts          # Algoritmos DNI / NIE / CIF y saneamiento NIF
 │   │   │   │   └── exceptions/
 │   │   │   │       ├── invalid-fiscal-id.exception.ts
 │   │   │   │       ├── customer-not-found.exception.ts

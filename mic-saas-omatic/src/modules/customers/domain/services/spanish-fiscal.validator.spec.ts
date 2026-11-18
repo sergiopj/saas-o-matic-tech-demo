@@ -3,10 +3,10 @@ import {
   isValidDni,
   isValidNie,
   isValidCif,
+  normalizeTaxId,
 } from './spanish-fiscal.validator';
-import { normalizeTaxId } from '../value-objects/tax-id.vo';
 
-describe('SpanishFiscalValidator & TaxId VO (Domain Layer)', () => {
+describe('SpanishFiscalValidator & TaxId Sanitization (Domain Layer)', () => {
   describe('normalizeTaxId', () => {
     it('should trim, convert to uppercase, and strip hyphens and spaces', () => {
       expect(normalizeTaxId('  b-12345674  ')).toBe('B12345674');

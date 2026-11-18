@@ -1,4 +1,13 @@
-import { normalizeTaxId } from '../value-objects/tax-id.vo';
+/**
+ * Normalizes a tax identifier by trimming, converting to uppercase,
+ * and stripping internal hyphens and spaces.
+ */
+export function normalizeTaxId(rawTaxId: string): string {
+  if (!rawTaxId || typeof rawTaxId !== 'string') {
+    return '';
+  }
+  return rawTaxId.trim().toUpperCase().replace(/[\s-]/g, '');
+}
 
 // Modulo 23 control letter sequence for Spanish DNI/NIE
 const DNI_LETTERS = 'TRWAGMYFPDXBNJZSQVHLCKE';

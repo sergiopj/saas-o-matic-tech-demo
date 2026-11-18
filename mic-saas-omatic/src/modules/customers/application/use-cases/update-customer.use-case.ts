@@ -9,7 +9,7 @@ import {
   ConflictError,
   EntityNotFoundError,
 } from '../../../../shared/domain/domain.exception';
-import { normalizeTaxId } from '../../domain/value-objects/tax-id.vo';
+import { normalizeTaxId } from '../../domain/services/spanish-fiscal.validator';
 
 @Injectable()
 export class UpdateCustomerUseCase {

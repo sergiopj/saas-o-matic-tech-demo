@@ -1,5 +1,7 @@
-import { normalizeTaxId } from '../value-objects/tax-id.vo';
-import { isValidTaxId } from '../services/spanish-fiscal.validator';
+import {
+  normalizeTaxId,
+  isValidTaxId,
+} from '../services/spanish-fiscal.validator';
 import { DomainError } from '../../../../shared/domain/domain.exception';
 
 export interface CustomerProperties {

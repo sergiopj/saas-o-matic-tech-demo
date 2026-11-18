@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CUSTOMER_REPOSITORY_PORT } from '../ports/out/customer-repository.port';
 import type { CustomerRepositoryPort } from '../ports/out/customer-repository.port';
 import { Customer } from '../../domain/entities/customer.entity';
-import { normalizeTaxId } from '../../domain/value-objects/tax-id.vo';
+import { normalizeTaxId } from '../../domain/services/spanish-fiscal.validator';
 import { ConflictError } from '../../../../shared/domain/domain.exception';
 
 export interface CreateCustomerCommand {

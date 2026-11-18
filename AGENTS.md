@@ -63,6 +63,14 @@ Whenever you operate in this repository, you MUST strictly adhere to the followi
 - **SQLite WAL Mode**: Configure SQLite with `enableWAL: true` for high-concurrency non-blocking reads and writes.
 - **Standardized Errors**: Translate all exceptions to IETF RFC 7807 Problem Details (`application/problem+json`).
 
+### D. Anti-Overengineering, Clean Code & Pragmatism
+- **No Pretentious Value Objects without Business Behavior**: Do NOT create empty wrapper classes, `.vo.ts` files, or dedicated orphan folders for trivial string trimming or basic regex sanitization. Use clean, focused utility functions within the relevant domain service (e.g., `normalizeTaxId` inside `spanish-fiscal.validator.ts`) unless a Value Object genuinely encapsulates rich invariants and is actively used across entities.
+- **Zero Dead Code & Zero Unused Artifacts**: Never create or leave uninstantiated classes, unused interfaces, or orphaned methods. If code is unreferenced, delete it immediately.
+- **Single-Purpose Function Signatures**: When refactoring to Parameter Objects (e.g., `CustomerSearchCriteria`), completely eliminate legacy positional parameters and runtime type-sniffing shims (`typeof arg === 'object'`). Keep signatures lean, predictable, and single-purpose.
+- **DRY Domain Invariants**: Encapsulate domain validation rules in cohesive private static helper methods within the entity rather than duplicating validation lines across `create()` and `update()`.
+- **Information Hiding & Scope**: Do not indiscriminately export helper functions. Export only the public contract of the module; keep internal algorithmic helpers module-private (unexported).
+- **Natural Engineering Comments**: Write natural, concise developer comments in English explaining domain constraints without AI-generated boilerplate, robotic academic tones, or decorative comment banners.
+
 ---
 
 ## 4. Code Quality & Linting
