@@ -5163,3 +5163,30 @@ Syntax: <single-animation>#
   - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
   - **Total Ecosistema:** **418 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Aplicación rigurosa del principio KISS (Keep It Simple, Stupid) y de usabilidad espacial, reduciendo código muerto y eliminando recalculos reactivos innecesarios.
+
+
+### 6.181. Refactorización Clean Code de Mutaciones Booleanas en Signals: Erradicación de Lambdas Robóticas
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario detectó una expresión sintáctica en la conmutación de estado del sidebar que consideró artificiosa y con olor a código generado por IA sin naturalidad humana:
+  > *"no entiendo muy bien esta logica this.isCollapsed.update((v) => !v); muy robotico ia lo veo"*
+- **Análisis de Arquitectura y Code Smell (Overengineering en Angular Signals):**
+  1. *El dilema `.update()` vs `.set()` en Flags Booleanos:*
+     - La API de `WritableSignal` de Angular ofrece dos métodos de escritura: `.set(value)` y `.update(updaterFn)`.
+     - `.update()` está concebido para transformaciones de estructuras complejas dependientes del estado previo (por ejemplo, calcular límites matemáticos `Math.min(curr + step, max)`, o añadir elementos inmutables a colecciones `prev => [...prev, item]`).
+     - Utilizar `.update((v) => !v)` para conmutar un simple booleano (`true`/`false`) introduce una función anónima lambda con nombres de parámetro crípticos de una sola letra (`v`), forzando al lector a interpretar el closure en lugar de leer una sentencia semántica directa.
+  2. *Sintaxis Natural y Humana:*
+     - La expresión `this.isCollapsed.set(!this.isCollapsed());` se lee en lenguaje natural: *"establecer isCollapsed al inverso del valor actual de isCollapsed"*.
+     - Es un patrón estándar en el ecosistema de TypeScript y Angular, elimina closures intermedios y no requiere descifrar variables anónimas.
+- **Acciones Ejecutadas:**
+  - En [sidebar.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/sidebar/sidebar.component.ts): Refactorizado `toggleCollapse()` sustituyendo `this.isCollapsed.update((v) => !v);` por `this.isCollapsed.set(!this.isCollapsed());`.
+  - En [navbar.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/navbar/navbar.component.ts): Refactorizado `toggleMobileMenu()` sustituyendo `this.isMobileMenuOpen.update((open) => !open);` por `this.isMobileMenuOpen.set(!this.isMobileMenuOpen());`.
+  - En [navbar.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/navbar/navbar.component.scss): Eliminado `!important` en `@media (prefers-reduced-motion: reduce)` resolviendo advertencia SonarQube `css:S9423`.
+  - En [AGENTS.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/AGENTS.md#L43-L47): Añadida la regla explícita de *Clean Signal State Mutations* prohibiendo el uso de lambdas de una sola letra para toggles binarios.
+- **Resultados de Verificación:**
+  - **Frontend Oxlint:** **0 errores y 0 advertencias** (73 archivos analizados).
+  - **Frontend Vitest Tests:** **259 pruebas pasando al 100%** (30 suites).
+  - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
+  - **Total Ecosistema:** **418 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Legibilidad impecable del código, eliminación de tics o patrones sintácticos artificiales generados por IA, y consistencia idiomática en toda la arquitectura de Signals.

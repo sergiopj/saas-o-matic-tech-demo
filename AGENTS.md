@@ -42,6 +42,7 @@ Whenever you operate in this repository, you MUST strictly adhere to the followi
 
 ### D. Performance & Architecture
 - **Signals & Standalone**: Use Angular Signals (`signal`, `computed`, `effect`) and standalone components. Avoid legacy NgModules.
+- **Clean Signal State Mutations**: Prefer natural, readable signal updates (`signal.set(!signal())`) for boolean flag toggles over cryptic lambdas (`signal.update((v) => !v)`). Reserve `.update()` for actual transformations involving previous state calculations (e.g., array manipulations or arithmetic bounds).
 - **Lazy Loading**: Heavy third-party integrations (e.g., Quill rich-text editor) must be lazily loaded in separate chunks to keep the initial main bundle under 165 kB.
 - **DOM Containment**: Apply `content-visibility: auto; contain-intrinsic-size: auto 240px;` on repeating card items to maximize 60 FPS rendering in large grids.
 

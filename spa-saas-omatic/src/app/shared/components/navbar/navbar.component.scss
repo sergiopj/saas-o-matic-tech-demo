@@ -198,6 +198,12 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .mobile-nav-panel {
+    animation: none;
+  }
+}
+
 @media (max-width: 768px) {
   .mobile-menu-btn {
     display: inline-flex;

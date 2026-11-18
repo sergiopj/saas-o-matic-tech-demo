@@ -30,10 +30,6 @@ export const APP_NAV_ITEMS: readonly NavItem[] = [
   },
 ] as const;
 
-/**
- * Responsive lateral sidebar providing direct navigation to modules:
- * Home Overview (/home), Corporate Customers (/customers), and Simulations Studio (/simulations).
- */
 @Component({
   selector: 'app-sidebar',
   imports: [
@@ -54,6 +50,6 @@ export class SidebarComponent {
   readonly navItems = APP_NAV_ITEMS;
 
   toggleCollapse(): void {
-    this.isCollapsed.update((v) => !v);
+    this.isCollapsed.set(!this.isCollapsed());
   }
 }
