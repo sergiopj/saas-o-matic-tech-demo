@@ -5142,3 +5142,24 @@ Syntax: <single-animation>#
   - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
   - **Total Ecosistema:** **419 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Coherencia de diseño de nivel enterprise, erradicación total de hardcodeo de color, soporte visual impecable en temas Claro y Oscuro, y gobernanza documental exhaustiva.
+
+
+### 6.180. Simplificación Clean Code y Usabilidad en Selector de Idiomas: Orden Estable
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario seleccionó la Opción C de usabilidad y Clean Code para [language-selector.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/language-selector/language-selector.component.ts), erradicando la reordenación dinámica de idiomas y consumiendo directamente la colección estática:
+  > *"aplica esta Opción C: Mantener orden estable (La más limpia en UX). Si los idiomas ya tienen su indicador visual de activo (check), no ordenar nada y usar this.languages directamente en el template elimina complejidad, ahorra un computed() y proporciona una experiencia más predecible."*
+- **Análisis de UX y Principio de Menor Sorpresa (Clean Code):**
+  1. *Estabilidad Espacial:* En interfaces de usuario, alterar el orden de los elementos en un menú desplegable cada vez que se selecciona uno desorienta la memoria espacial del usuario.
+  2. *Eliminación de Complejidad Innecesaria:* La señal computada `sortedLanguages` realizaba dos búsquedas en la colección (`find` + `filter`) para forzar al idioma activo al índice 0. Dado que el elemento activo ya cuenta con feedback visual explícito (icono `check` a la derecha y clase `.active-item` con fondo azul sutil), la reordenación era redundante.
+- **Acciones Ejecutadas:**
+  - En [language-selector.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/language-selector/language-selector.component.ts): Eliminado el bloque `sortedLanguages = computed(...)` y la importación de `computed`. El componente queda reducido a 30 líneas puramente declarativas.
+  - En [language-selector.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/language-selector/language-selector.component.html): Reemplazada la iteración por `@for (lang of languages; track lang.code)`.
+  - En [language-selector.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/language-selector/language-selector.component.spec.ts): Actualizadas las aserciones para verificar el orden estable de la colección oficial y la delegación al servicio de internacionalización.
+- **Resultados de Verificación:**
+  - **Frontend Oxlint:** **0 errores y 0 advertencias** (73 archivos analizados).
+  - **Frontend Vitest Tests:** **259 pruebas pasando al 100%** (30 suites).
+  - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
+  - **Total Ecosistema:** **418 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Aplicación rigurosa del principio KISS (Keep It Simple, Stupid) y de usabilidad espacial, reduciendo código muerto y eliminando recalculos reactivos innecesarios.

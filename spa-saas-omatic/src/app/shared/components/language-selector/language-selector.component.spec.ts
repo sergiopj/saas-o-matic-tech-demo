@@ -44,24 +44,13 @@ describe('LanguageSelectorComponent', () => {
     });
   });
 
-  it('should provide language options catalog matching project configuration SSOT', () => {
+  it('should provide language options catalog matching project configuration SSOT in stable order', () => {
     expect(component.languages).toEqual(SUPPORTED_LANGUAGES);
   });
 
-  it('should always place the currently active language first in sortedLanguages', () => {
-    SUPPORTED_LANGUAGES.forEach(({ code }) => {
-      component.setLanguage(code);
-      fixture.detectChanges();
-
-      const sorted = component.sortedLanguages();
-      expect(sorted[0].code).toBe(code);
-      expect(sorted.length).toBe(SUPPORTED_LANGUAGES.length);
-    });
-  });
-
-  it('should fallback to all languages when active language is not found in catalog', () => {
-    (i18nService.currentLanguage as any).set?.('xx');
-    fixture.detectChanges();
-    expect(component.sortedLanguages()).toEqual(component.languages);
+  it('should delegate setLanguage call to I18nService directly', () => {
+    const serviceSpy = vi.spyOn(i18nService, 'setLanguage');
+    component.setLanguage('de');
+    expect(serviceSpy).toHaveBeenCalledWith('de');
   });
 });

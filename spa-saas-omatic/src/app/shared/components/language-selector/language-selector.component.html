@@ -11,7 +11,7 @@
 </button>
 
 <mat-menu #langMenu="matMenu" class="lang-menu-panel" xPosition="before">
-  @for (lang of sortedLanguages(); track lang.code) {
+  @for (lang of languages; track lang.code) {
     <button
       mat-menu-item
       class="lang-menu-item"
