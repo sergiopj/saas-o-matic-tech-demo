@@ -92,7 +92,7 @@
       .country-badge {
         font-size: 0.75rem;
         font-weight: 700;
-        background-color: rgba(16, 97, 226, 0.08);
+        background-color: var(--roams-accent-blue-subtle);
         color: var(--roams-accent-blue);
         padding: 0.2rem 0.55rem;
         border-radius: 6px;
@@ -108,17 +108,17 @@
         letter-spacing: 0.06em;
 
         &.plan-enterprise {
-          background-color: rgba(139, 92, 246, 0.12);
+          background-color: var(--roams-accent-purple-subtle);
           color: var(--roams-accent-purple);
         }
 
         &.plan-pro {
-          background-color: rgba(16, 97, 226, 0.12);
+          background-color: var(--roams-accent-blue-subtle-hover);
           color: var(--roams-accent-blue);
         }
 
         &.plan-starter {
-          background-color: rgba(100, 116, 139, 0.12);
+          background-color: var(--roams-bg-card);
           color: var(--roams-text-secondary);
         }
       }

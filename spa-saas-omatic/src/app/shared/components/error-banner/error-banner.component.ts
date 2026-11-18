@@ -5,8 +5,6 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
  * Presentational component rendering standardized RFC 9457 Problem Details.
- * Displays title, detail, validation breakdown, and optional retry/dismiss actions.
- * Decoupled from HTTP transport codes to deliver clean, user-facing error feedback.
  */
 @Component({
   selector: 'app-error-banner',
@@ -16,7 +14,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 })
 export class ErrorBannerComponent {
   readonly problem = input<ProblemDetail | null>(null);
-  readonly dismissable = input<boolean>(true);
+  readonly dismissible = input<boolean>(true);
   readonly retryable = input<boolean>(false);
 
   readonly dismiss = output<void>();

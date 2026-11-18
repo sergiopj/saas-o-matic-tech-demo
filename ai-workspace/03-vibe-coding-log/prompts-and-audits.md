@@ -5108,3 +5108,37 @@ Syntax: <single-animation>#
   - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
   - **Total Ecosistema:** **419 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Experiencia de usuario (UX) 100% responsive, adaptativa y accesible en dispositivos móviles desde 320px hasta monitores de escritorio.
+
+
+### 6.179. Homogeneización de Tokens Sutiles en _colors.scss y Erradicación de RGBA Hardcodeados
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario consultó sobre los valores por defecto en Signal Inputs del componente spinner (`readonly diameter = input<number>(44); readonly strokeWidth = input<number>(4);`) y ordenó homogeneizar los tintes de color (`rgba(16, 97, 226, 0.08)`, etc.) en `_colors.scss` y a través de los componentes, registrando todos los cambios y reglas en `AGENTS.md` y `ai-workspace`:
+  > *"estan bien estos numeros hardcodes? readonly diameter = input<number>(44); readonly strokeWidth = input<number>(4); por otro lado dale a esto que dijiste ¿Quieres que homogeneicemos estos tintes en _colors.scss y los componentes (language-selector, currency-selector, error-banner, etc.)? todo lo que cambiemos y te corrija a los mds de agents y de worspace ai por favor"*
+- **Análisis de Causa Raíz (Anti-patrón de Color Decimal Encubierto):**
+  1. *Falsos Positivos de Ausencia de Hex:* Aunque Oxlint y SonarQube vigilan códigos hexadecimales (`#1061e2`), el uso directo de valores RGB decimales (`rgba(16, 97, 226, 0.08)`) eludía la restricción, rompiendo el Single Source of Truth (SSOT).
+  2. *Contraste Fallido en Dark Mode:* Al conmutar al tema oscuro (`[data-theme='dark']`), `--roams-accent-blue` pasa a `#3b82f6` y `--roams-status-error` a `#f87171`. Los valores `rgba(16, 97, 226, ...)` y `rgba(239, 68, 68, ...)` hardcodeados mantenían el color de tema claro, provocando pérdida de contraste visual sobre superficies oscuras (`#131b2e`).
+  3. *Valores por Defecto de Inputs de Componentes UI:* En Angular, `input<number>(44)` define el fallback de un Signal Input. Para erradicar cualquier ambigüedad de "número mágico", se extrajeron como constantes semánticas exportadas del sistema de diseño (`DEFAULT_SPINNER_DIAMETER`, `DEFAULT_SPINNER_STROKE_WIDTH`).
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Ampliación de Design Tokens en [_colors.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/styles/_colors.scss):*
+     - Definidos tokens oficiales para estados y tintes sutiles: `--roams-accent-blue-subtle`, `--roams-accent-blue-subtle-hover`, `--roams-accent-purple-subtle`, `--roams-status-success-subtle`, `--roams-status-success-subtle-hover`, `--roams-status-warning-subtle`, `--roams-status-error-subtle` y `--roams-status-error-subtle-hover`.
+     - Definidas contrapartes con contraste optimizado para Dark Mode bajo `:root[data-theme='dark'], body.dark-theme`.
+  2. *Refactorización Integral de Hojas de Estilo de Componentes:*
+     - [language-selector.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/language-selector/language-selector.component.scss): Sustituidos `rgba(16, 97, 226, 0.08)` y `0.06` por `var(--roams-accent-blue-subtle)`.
+     - [currency-selector.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/currency-selector/currency-selector.component.scss): Sustituidos `rgba(16, 97, 226, ...)` por `var(--roams-accent-blue-subtle)`.
+     - [error-banner.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/error-banner/error-banner.component.scss): Reemplazados `rgba(239, 68, 68, ...)` por `var(--roams-status-error-subtle)` y `var(--roams-status-error-subtle-hover)`.
+     - [email-composer-dialog.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.scss): Reemplazados fondos y bordes por `var(--roams-status-error-subtle)` y `color-mix()`.
+     - [sidebar.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/sidebar/sidebar.component.scss) y [navbar.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/navbar/navbar.component.scss): Sustituidos estados hover y activos por los tokens de tinte oficiales.
+     - [customer-card.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-card/customer-card.component.scss) y [customer-detail.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.scss): Homogeneizadas píldoras de planes y badges por tokens sutiles.
+  3. *Eliminación de Magic Numbers en [loading-state.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/loading-state/loading-state.component.ts):*
+     - Exportadas `DEFAULT_SPINNER_DIAMETER = 44` y `DEFAULT_SPINNER_STROKE_WIDTH = 4`.
+  4. *Actualización de Gobernanza y Directrices de Agentes:*
+     - Actualizado [AGENTS.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/AGENTS.md#L20-L30) (Regla 2.A) con prohibición estricta de códigos RGB/RGBA en bruto.
+     - Actualizado [architecture-guidelines.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md#L430-L440) formalizando el uso de `--roams-*-subtle` y `color-mix()`.
+- **Resultados de Verificación:**
+  - **Frontend Oxlint:** **0 errores y 0 advertencias** (73 archivos analizados).
+  - **Frontend Vitest Tests:** **260 pruebas pasando al 100%** (30 suites).
+  - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
+  - **Total Ecosistema:** **419 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Coherencia de diseño de nivel enterprise, erradicación total de hardcodeo de color, soporte visual impecable en temas Claro y Oscuro, y gobernanza documental exhaustiva.

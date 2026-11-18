@@ -58,7 +58,7 @@ button.lang-menu-trigger.mat-mdc-button-base {
       font-size: 0.75rem;
       font-weight: 700;
       color: var(--roams-accent-blue);
-      background-color: rgba(16, 97, 226, 0.08);
+      background-color: var(--roams-accent-blue-subtle);
       padding: 2px 6px;
       border-radius: 4px;
       letter-spacing: 0.03em;
@@ -84,7 +84,7 @@ button.lang-menu-trigger.mat-mdc-button-base {
     &.active-item {
       font-weight: 600;
       color: var(--roams-accent-blue);
-      background-color: rgba(16, 97, 226, 0.06);
+      background-color: var(--roams-accent-blue-subtle);
 
       .item-label {
         color: var(--roams-accent-blue);

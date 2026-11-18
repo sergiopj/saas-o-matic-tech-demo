@@ -81,6 +81,17 @@ $roams-border-inverse: rgba(255, 255, 255, 0.2); // Subtle border for dark input
   --roams-border: #{$roams-border};
   --roams-border-light: #{$roams-border-light};
   --roams-border-inverse: #{$roams-border-inverse};
+
+  /* Subtle Backgrounds & State Tints (SSOT for badges, active states, hovers & alerts) */
+  --roams-accent-blue-subtle: rgba(16, 97, 226, 0.08);
+  --roams-accent-blue-subtle-hover: rgba(16, 97, 226, 0.14);
+  --roams-accent-purple-subtle: rgba(139, 92, 246, 0.12);
+  --roams-status-success-subtle: rgba(16, 185, 129, 0.08);
+  --roams-status-success-subtle-hover: rgba(16, 185, 129, 0.16);
+  --roams-status-warning-subtle: rgba(245, 158, 11, 0.08);
+  --roams-status-warning-subtle-hover: rgba(245, 158, 11, 0.16);
+  --roams-status-error-subtle: rgba(239, 68, 68, 0.08);
+  --roams-status-error-subtle-hover: rgba(239, 68, 68, 0.16);
 }
 
 // Dark Mode Overrides (SSOT Dynamic Theming via CSS Custom Properties)
@@ -120,6 +131,17 @@ body.dark-theme {
   --roams-status-warning: #fbbf24;
   --roams-status-error: #f87171;
   --roams-status-info: #38bdf8;
+
+  /* Subtle Backgrounds & State Tints (Optimized for Dark Canvas Contrast) */
+  --roams-accent-blue-subtle: rgba(59, 130, 246, 0.15);
+  --roams-accent-blue-subtle-hover: rgba(59, 130, 246, 0.24);
+  --roams-accent-purple-subtle: rgba(167, 139, 250, 0.18);
+  --roams-status-success-subtle: rgba(52, 211, 153, 0.15);
+  --roams-status-success-subtle-hover: rgba(52, 211, 153, 0.24);
+  --roams-status-warning-subtle: rgba(251, 191, 36, 0.15);
+  --roams-status-warning-subtle-hover: rgba(251, 191, 36, 0.24);
+  --roams-status-error-subtle: rgba(248, 113, 113, 0.15);
+  --roams-status-error-subtle-hover: rgba(248, 113, 113, 0.24);
 
   /* Tactile Coin Visual Tokens */
   --roams-coin-gold: #fbbf24;

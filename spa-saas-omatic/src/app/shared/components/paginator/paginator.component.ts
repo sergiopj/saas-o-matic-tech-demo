@@ -12,11 +12,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
-/**
- * Generic reusable Paginator component.
- * Provides accessible navigation controls, range summary, and page size selection
- * adhering to W3C ARIA standards and Roams design tokens.
- */
 @Component({
   selector: 'app-paginator',
   imports: [

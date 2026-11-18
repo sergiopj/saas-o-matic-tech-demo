@@ -59,7 +59,7 @@
     font-weight: 700;
     letter-spacing: 0.04em;
     color: var(--roams-accent-blue);
-    background-color: rgba(16, 97, 226, 0.1);
+    background-color: var(--roams-accent-blue-subtle);
     padding: 0.25rem 0.55rem;
     border-radius: 9999px;
     white-space: nowrap;
@@ -76,7 +76,7 @@
 
   &:hover {
     color: var(--roams-accent-blue);
-    background-color: rgba(16, 97, 226, 0.08);
+    background-color: var(--roams-accent-blue-subtle);
   }
 }
 
@@ -103,7 +103,7 @@
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--roams-text-secondary);
-  transition: all 0.15s ease-in-out;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
 
   .nav-icon {
     font-size: 1.3rem;
@@ -121,7 +121,7 @@
 
   &:hover {
     color: var(--roams-accent-blue);
-    background-color: rgba(16, 97, 226, 0.06);
+    background-color: var(--roams-accent-blue-subtle);
 
     .nav-icon {
       color: var(--roams-accent-blue);
@@ -130,7 +130,7 @@
 
   &.active {
     color: var(--roams-accent-blue);
-    background-color: rgba(16, 97, 226, 0.1);
+    background-color: var(--roams-accent-blue-subtle-hover);
     font-weight: 600;
 
     .nav-icon {
@@ -154,7 +154,7 @@
     text-decoration: none;
     padding: 0.35rem 0.6rem;
     border-radius: var(--roams-radius-sm);
-    transition: all 0.15s ease-in-out;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
 
     .footer-copy {
       color: var(--roams-text-secondary);
@@ -167,10 +167,14 @@
       height: 0.95rem;
       color: var(--roams-text-muted);
       transition: color 0.15s ease-in-out, transform 0.15s ease-in-out;
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
     }
 
     &:hover {
-      background-color: rgba(16, 97, 226, 0.06);
+      background-color: var(--roams-accent-blue-subtle);
 
       .footer-copy {
         color: var(--roams-accent-blue);

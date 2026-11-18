@@ -1,7 +1,7 @@
 .error-banner {
   margin: 1rem 0;
   padding: 1rem 1.25rem;
-  background-color: rgba(239, 68, 68, 0.06);
+  background-color: var(--roams-status-error-subtle);
   border: 1px solid var(--roams-status-error);
   border-left-width: 5px;
   border-radius: var(--roams-radius-md);
@@ -11,6 +11,10 @@
   flex-direction: column;
   gap: 0.75rem;
   animation: fadeIn 0.2s ease-in-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 }
 
 .error-banner-header {
@@ -85,7 +89,7 @@
   transition: background-color 0.15s ease, color 0.15s ease;
 
   &:hover {
-    background-color: rgba(239, 68, 68, 0.12);
+    background-color: var(--roams-status-error-subtle-hover);
     color: var(--roams-status-error);
   }
 

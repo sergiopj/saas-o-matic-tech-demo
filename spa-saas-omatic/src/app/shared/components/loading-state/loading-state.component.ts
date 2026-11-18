@@ -1,6 +1,9 @@
 import { Component, input } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+export const DEFAULT_SPINNER_DIAMETER = 44;
+export const DEFAULT_SPINNER_STROKE_WIDTH = 4;
+
 @Component({
   selector: 'app-loading-state',
   imports: [MatProgressSpinnerModule],
@@ -9,6 +12,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 })
 export class LoadingStateComponent {
   readonly message = input<string>('');
-  readonly diameter = input<number>(44);
-  readonly strokeWidth = input<number>(4);
+  readonly diameter = input<number>(DEFAULT_SPINNER_DIAMETER);
+  readonly strokeWidth = input<number>(DEFAULT_SPINNER_STROKE_WIDTH);
 }

@@ -18,10 +18,11 @@ Whenever you operate in this repository, you MUST strictly adhere to the followi
 ## 2. Frontend Guidelines (`spa-saas-omatic` / Angular 22)
 
 ### A. Styling & Design Tokens (SSOT in `src/styles/_colors.scss`)
-- **Strict Prohibition of Hardcoded Hex Colors**: Never use direct hex color codes (e.g., `#1061e2`, `#64748b`, `#ffffff`) inside component `.scss` files.
+- **Strict Prohibition of Hardcoded Hex & Raw RGB/RGBA Colors**: Never use direct hex color codes (e.g., `#1061e2`, `#64748b`, `#ffffff`) or raw decimal RGB/RGBA values (e.g., `rgba(16, 97, 226, 0.08)`, `rgba(239, 68, 68, 0.12)`) inside component `.scss` files. These violate the Single Source of Truth (SSOT) and break Dark Theme dynamic contrast. For subtle highlights, active states, chips, and alerts, use the official `--roams-*-subtle` tokens (e.g., `--roams-accent-blue-subtle`, `--roams-status-error-subtle`) or modern CSS `color-mix(in srgb, var(--roams-token) X%, transparent)`.
 - **Strict Prohibition of Variable Fallbacks**: Never declare fallback hex values in CSS variables (e.g., `var(--roams-text-secondary, #64748b)` or `var(--roams-accent-blue, #1061e2)`). Fallbacks violate the Single Source of Truth (SSOT), break theming, and duplicate declarations. Always invoke tokens cleanly: `color: var(--roams-text-secondary);`.
 - **Roams Brand Tokens**: Use the official `--roams-*` tokens defined in `src/styles/_colors.scss`:
   - Brand: `--roams-primary`, `--roams-primary-light`, `--roams-primary-dark`, `--roams-accent-blue`, `--roams-accent-blue-hover`, `--roams-accent-cyan`, `--roams-accent-purple`.
+  - Subtle Tints & Highlights: `--roams-accent-blue-subtle`, `--roams-accent-blue-subtle-hover`, `--roams-accent-purple-subtle`, `--roams-status-success-subtle`, `--roams-status-warning-subtle`, `--roams-status-error-subtle`, `--roams-status-error-subtle-hover`.
   - Surfaces: `--roams-bg-page`, `--roams-bg-card`, `--roams-surface`, `--roams-bg-input-dark`.
   - Typography: `--roams-text-primary`, `--roams-text-secondary`, `--roams-text-muted`, `--roams-text-inverse`.
   - Feedback: `--roams-status-success`, `--roams-status-warning`, `--roams-status-error`, `--roams-status-info`.

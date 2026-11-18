@@ -168,7 +168,7 @@
 
     &:hover {
       color: var(--roams-accent-blue);
-      background-color: rgba(16, 97, 226, 0.06);
+      background-color: var(--roams-accent-blue-subtle);
 
       .mobile-nav-icon {
         color: var(--roams-accent-blue);
@@ -177,7 +177,7 @@
 
     &.active {
       color: var(--roams-accent-blue);
-      background-color: rgba(16, 97, 226, 0.1);
+      background-color: var(--roams-accent-blue-subtle-hover);
       font-weight: 600;
 
       .mobile-nav-icon {

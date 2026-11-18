@@ -34,6 +34,14 @@
     flex-shrink: 0;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+
+      &:hover {
+        transform: none;
+      }
+    }
+
     @media (max-width: 599px) {
       width: 40px;
       height: 40px;
@@ -102,8 +110,8 @@
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   border-radius: var(--roams-radius-sm);
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: var(--roams-status-error-subtle);
+  border: 1px solid color-mix(in srgb, var(--roams-status-error) 25%, transparent);
   color: var(--roams-status-error);
   font-size: 0.875rem;
 }

@@ -427,8 +427,9 @@ spa-saas-omatic/
   - **Geometría y Elevación:**
     - `--roams-radius-sm`: `8px`, `--roams-radius-md`: `12px`, `--roams-radius-lg`: `16px`.
     - `--roams-shadow-sm`, `--roams-shadow-md`, `--roams-shadow-lg`.
-- **Cascada Nativa, Cero Hardcodeo y Prohibición de Fallbacks Hexadecimales:**
-  - Queda terminantemente prohibido incluir valores hexadecimales directos (`#1061e2`, `#64748b`, `#ffffff`) en los archivos `.scss` de los componentes.
+- **Cascada Nativa, Cero Hardcodeo y Prohibición de Fallbacks Hexadecimales o RGB/RGBA en Bruto:**
+  - Queda terminantemente prohibido incluir valores hexadecimales directos (`#1061e2`, `#64748b`, `#ffffff`) o valores decimales RGB/RGBA en bruto (`rgba(16, 97, 226, 0.08)`, `rgba(239, 68, 68, 0.12)`) en los archivos `.scss` de los componentes.
+  - **Uso Obligatorio de Tokens de Tintes Sutiles o `color-mix()`**: Para badges, chips, alertas, fondos de selección y estados activos, se deben consumir exclusivamente los tokens de tinte definidos en `_colors.scss` (`--roams-accent-blue-subtle`, `--roams-status-error-subtle`, `--roams-status-success-subtle`, etc.) o la función nativa estándar `color-mix(in srgb, var(--roams-token) X%, transparent)`. Esto asegura coherencia de marca, adaptación automática en Modo Oscuro (Dark Theme) y cero números mágicos.
   - **Regla estricta contra fallbacks en `var()`**: No se permiten declaraciones como `var(--roams-text-secondary, #64748b)` ni `var(--roams-accent-blue, #1061e2)`. Incluir códigos de color en el segundo parámetro de `var()` duplica la declaración de colores, crea múltiples fuentes de verdad no sincronizadas y rompe la capacidad del sistema para re-tematizarse dinámicamente.
   - La invocación debe ser estrictamente canónica: `color: var(--roams-text-secondary);`. Si se requiere el color en SCSS en tiempo de compilación (ej. para funciones `color.adjust()` o gradientes SCSS), se debe importar `@use 'colors' as c;` y consumir `$c.roams-*`.
 - **Diseño Mobile-First y Responsividad Total:**

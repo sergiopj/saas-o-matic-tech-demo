@@ -135,7 +135,7 @@ describe('ErrorBannerComponent', () => {
 
   it('should not render close button when dismissable is false', () => {
     componentRef.setInput('problem', mockClientProblem);
-    componentRef.setInput('dismissable', false);
+    componentRef.setInput('dismissible', false);
     fixture.detectChanges();
 
     const closeBtn = fixture.nativeElement.querySelector('.dismiss-btn');
