@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
 import { CustomerListComponent } from './customer-list.component';
 import { I18nService } from '../../../../core/services/i18n.service';
@@ -446,8 +447,11 @@ describe('CustomerListComponent', () => {
     expect(dialogSpy).toHaveBeenCalled();
   });
 
-  it('should reload customers on page 1 when CustomerCreateDialogComponent returns newly created customer', () => {
+  it('should reload customers on page 1 and open snackBar toast when CustomerCreateDialogComponent returns newly created customer', () => {
     const dialog = (component as any).dialog;
+    const snackBar = fixture.debugElement.injector.get(MatSnackBar);
+    const snackBarSpy = vi.spyOn(snackBar, 'open');
+
     vi.spyOn(dialog, 'open').mockReturnValue({
       afterClosed: () => of(mockCustomers[0]),
     } as any);
@@ -459,5 +463,14 @@ describe('CustomerListComponent', () => {
     );
     req.flush(mockCustomers, { headers: { 'x-total-count': '2' } });
     expect(component.customers().length).toBe(2);
+    expect(snackBarSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      'OK',
+      expect.objectContaining({
+        duration: 4000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+      }),
+    );
   });
 });

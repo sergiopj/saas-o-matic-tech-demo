@@ -4932,3 +4932,37 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Frontend Vitest: **254 pruebas pasando al 100%** (29 suites).
   - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Diagnóstico arquitectónico de alta precisión en el ecosistema NestJS/TypeScript: comprensión profunda del ciclo de vida de los decoradores, metadata reflection y type erasure, resolviendo un error crítico de integración frontend-backend sin tocar el código cliente.
+
+
+### 6.173. Homologación de Feedback UX: Cierre Inmediato de Modal y Toast Inferior en Create / Update
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario solicitó unificar la experiencia de usuario (UX) para que tanto el alta como la edición de clientes corporativos repliquen exactamente el comportamiento del envío de propuestas comerciales por email: cierre instantáneo del modal tras la respuesta positiva de la API y despliegue de una notificación toast inferior (`MatSnackBar`) centrada:
+  > *"una cosita que es una bobada pero queda bien al mandar un email se cierra el modal y aparece un toast inferior quiero el mismo comportamiento para update y create de nuevos lcientes corporativos"*
+- **Análisis de UX y Diagnóstico de Comportamiento:**
+  1. *Disparidad en Patrones Transaccionales:*
+     Al enviar correos (`EmailComposerDialogComponent`), el diálogo se cierra inmediatamente (`dialogRef.close(...)`) y el componente padre invoca el toast inferior mediante `MatSnackBar` con duración de 4 segundos y posición inferior centrada (`verticalPosition: 'bottom'`).
+     En cambio, en el formulario de creación/edición de clientes (`CustomerCreateDialogComponent`), la confirmación se mostraba de forma provisional en un banner interno, reteniendo el modal abierto durante 600ms con un `setTimeout` y sin emitir un toast en el listado de clientes.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Cierre Inmediato en [customer-create-dialog.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.ts):*
+     Eliminado el retardo de 600ms (`setTimeout`), ejecutando `this.dialogRef.close(customer)` de manera sincrónica al recibir la confirmación de la API.
+  2. *Toast Inferior de Creación en [customer-list.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-list/customer-list.component.ts):*
+     Inyectado `MatSnackBar`, importado `MatSnackBarModule` y disparado el toast en `afterClosed()`:
+     ```typescript
+     this.snackBar.open(this.i18n.t('customers.create.success'), 'OK', {
+       duration: 4000,
+       horizontalPosition: 'center',
+       verticalPosition: 'bottom',
+     });
+     ```
+  3. *Unificación de Parámetros en [customer-detail.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.ts):*
+     Homologado el toast de actualización con `horizontalPosition: 'center'` y `verticalPosition: 'bottom'`.
+  4. *Actualización de Suites de Pruebas:*
+     Adaptados [customer-create-dialog.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.spec.ts) y [customer-list.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-list/customer-list.component.spec.ts) para certificar el cierre sin retardo y la llamada con parámetros estándar al snackbar.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **254 pruebas pasando al 100%** (29 suites).
+  - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest Tests: **159 pruebas pasando al 100%** (30 suites).
+  - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Consistencia de diseño e interacción (UI/UX SSOT): unificación rigurosa de los patrones de confirmación transaccional y notificaciones toast en toda la plataforma.

@@ -371,7 +371,11 @@ export class CustomerDetailComponent implements OnInit {
         this.snackBar.open(
           this.i18n.t('customers.edit.success'),
           'OK',
-          { duration: 4000 },
+          {
+            duration: 4000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+          },
         );
       }
     });

@@ -5,6 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CustomerApiService } from '../../services/customer-api.service';
 import {
   Customer,
@@ -72,6 +73,7 @@ export const CUSTOMER_SORT_OPTIONS: readonly SortOptionItem[] = [
     LoadingStateComponent,
     MatButtonModule,
     MatDialogModule,
+    MatSnackBarModule,
     MatIconModule,
     MatFormFieldModule,
     MatSelectModule,
@@ -85,6 +87,7 @@ export const CUSTOMER_SORT_OPTIONS: readonly SortOptionItem[] = [
 export class CustomerListComponent implements OnInit {
   readonly customerApi = inject(CustomerApiService);
   private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
   private readonly i18n = inject(I18nService);
 
   readonly customers = signal<Customer[]>([]);
@@ -266,6 +269,15 @@ export class CustomerListComponent implements OnInit {
     dialogRef.afterClosed().subscribe((createdCustomer: Customer | undefined) => {
       if (createdCustomer) {
         this.loadCustomers(1);
+        this.snackBar.open(
+          this.i18n.t('customers.create.success'),
+          'OK',
+          {
+            duration: 4000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+          },
+        );
       }
     });
   }

@@ -186,9 +186,7 @@ export class CustomerCreateDialogComponent implements OnInit, OnDestroy {
       next: (customer: Customer) => {
         this.submitting.set(false);
         this.success.set(true);
-        setTimeout(() => {
-          this.dialogRef.close(customer);
-        }, 600);
+        this.dialogRef.close(customer);
       },
       error: (err: unknown) => {
         this.submitting.set(false);

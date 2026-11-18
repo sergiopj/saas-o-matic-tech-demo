@@ -111,9 +111,7 @@ describe('CustomerCreateDialogComponent', () => {
     expect(component.form.get('email')?.dirty).toBe(true);
   });
 
-  it('should submit valid payload, set success state, and close dialog after timeout', () => {
-    vi.useFakeTimers();
-
+  it('should submit valid payload, set success state, and close dialog immediately', () => {
     component.form.setValue({
       companyName: ' Telefónica Soluciones S.A.U. ',
       country: 'ES',
@@ -135,11 +133,7 @@ describe('CustomerCreateDialogComponent', () => {
       email: 'contacto@telefonica.es',
       selectedPlan: 'Enterprise Scale',
     });
-
-    vi.advanceTimersByTime(700);
     expect(mockDialogRef.close).toHaveBeenCalledWith(sampleCustomer);
-
-    vi.useRealTimers();
   });
 
   it('should handle API error and display ProblemDetail message', () => {
@@ -205,9 +199,7 @@ describe('CustomerCreateDialogComponent', () => {
       expect(editComponent.form.valid).toBe(true);
     });
 
-    it('should call customerApi.update instead of create when submitting in edit mode', () => {
-      vi.useFakeTimers();
-
+    it('should call customerApi.update instead of create when submitting in edit mode and close dialog immediately', () => {
       editComponent.form.patchValue({
         companyName: 'Acme Solutions Updated',
       });
@@ -222,11 +214,7 @@ describe('CustomerCreateDialogComponent', () => {
         selectedPlan: 'Growth Pro',
       });
       expect(mockCustomerApi.create).not.toHaveBeenCalled();
-
-      vi.advanceTimersByTime(700);
       expect(mockDialogRef.close).toHaveBeenCalledWith(sampleCustomer);
-
-      vi.useRealTimers();
     });
   });
 });
