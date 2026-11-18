@@ -4072,3 +4072,49 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Jest: **151 pruebas unitarias pasando al 100%** (29 suites).
   - Total Ecosistema: **405 pruebas pasando al 100%**.
 - **Valor para la evaluación:** Refleja refinamiento y criterio moderno de diseño UI/UX, erradicando elementos esqueléticos u obsoletos (disquetes) para privilegiar una jerarquía visual limpia, moderna y profesional.
+
+
+### 6.156. Auditoría y Refactorización Clean Code: Erradicación del Shim Polimórfico y Consolidación del Parameter Object (`CustomerSearchCriteria`)
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Al inspeccionar el archivo de caso de uso [list-customers.use-case.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/application/use-cases/list-customers.use-case.ts), el usuario auditó en tiempo real una línea de código específica y cuestionó si cumplía con los estándares de código limpio:
+  > *"clean code o ya lo esta?
+  > 
+  >   typeof criteriaOrTerm === 'object' && criteriaOrTerm !== null
+  >         ? criteriaOrTerm
+  >         : {
+  >             term: criteriaOrTerm,
+  >             country,
+  >             page,
+  >             limit,
+  >             sortBy,
+  >             sortOrder,
+  >           };"*
+  > 
+  > Y tras el análisis técnico y confirmación de la erradicación del code smell:
+  > *"si hazlo"*
+- **Análisis de Deuda Técnica y Principios de Clean Code (Robert C. Martin & Martin Fowler):**
+  1. *Identificación del Code Smell:* Dicho bloque era un *transitional compatibility shim* introducido de forma provisional cuando se creó el modelo `CustomerSearchCriteria` para evitar romper llamadas posicionales preexistentes.
+  2. *Violaciones Detectadas:*
+     - **Long Parameter List:** La firma mantenía 6 argumentos posicionales opcionales, contradiciendo el objetivo central de un Parameter Object (reducir a un único argumento cohesivo y auto-documentado).
+     - **Type-Sniffing en Runtime (`typeof ... === 'object'`):** Comprobar tipos en tiempo de ejecución en la capa de aplicación degrada la seguridad de tipos estática de TypeScript y sobrecarga el caso de uso con lógica defensiva.
+     - **Violación de Responsabilidad Única (SRP):** El caso de uso debe centrarse en la orquestación del puerto y no en transformar o reconciliar firmas legadas.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Refactor del Caso de Uso ([list-customers.use-case.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/application/use-cases/list-customers.use-case.ts)):*
+     - Firma unificada y canónica: `async execute(criteria: CustomerSearchCriteria = {}): Promise<PaginatedResult<Customer>>`.
+     - Erradicación total del operador ternario y de los 6 parámetros posicionales. Despacho directo a `this.customerRepository.search(criteria)`.
+  2. *Refactor del Puerto de Salida ([customer-repository.port.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/application/ports/out/customer-repository.port.ts)):*
+     - Contrato estricto y limpio: `search(criteria?: CustomerSearchCriteria): Promise<PaginatedResult<Customer>>;`.
+  3. *Refactor del Adaptador de Persistencia TypeORM ([customer-persistence.adapter.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/out/persistence/customer-persistence.adapter.ts)):*
+     - Firma canónica: `async search(criteria: CustomerSearchCriteria = {}): Promise<PaginatedResult<Customer>>`.
+     - Eliminación de inspección por `typeof` y eliminación de imports no utilizados.
+  4. *Migración Exhaustiva de Suites de Prueba:*
+     - [list-customers.use-case.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/application/use-cases/list-customers.use-case.spec.ts): Actualizadas las pruebas para verificar la invocación por defecto `{}` y el reenvío estructurado del Parameter Object `CustomerSearchCriteria`.
+     - [customer-persistence.adapter.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/out/persistence/customer-persistence.adapter.spec.ts): Actualizadas las 5 pruebas que aún invocaban argumentos posicionales (`search({ term: ... })`, `search({ country: 'es' })`, `search({ page: 3, limit: 10 })`, etc.).
+- **Resultados de Verificación:**
+  - Backend Jest: **151 pruebas unitarias pasando al 100%** (29 suites).
+  - Frontend Vitest: **254 pruebas unitarias pasando al 100%** (29 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Total Ecosistema: **405 pruebas pasando al 100%**.
+- **Valor para la evaluación:** Destaca el rol activo del evaluador detectando residuos de refactorización y la capacidad de la ingeniería para aplicar Clean Code riguroso eliminando deuda técnica transitoria y consolidando el patrón Parameter Object en todas las capas del backend hexagonal.

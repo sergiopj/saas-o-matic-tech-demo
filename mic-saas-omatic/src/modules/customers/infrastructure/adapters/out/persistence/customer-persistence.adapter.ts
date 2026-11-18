@@ -5,7 +5,6 @@ import type {
   CustomerRepositoryPort,
   PaginatedResult,
   CustomerSortField,
-  SortOrderDirection,
   CustomerSearchCriteria,
 } from '../../../../application/ports/out/customer-repository.port';
 import { Customer } from '../../../../domain/entities/customer.entity';
@@ -42,25 +41,8 @@ export class CustomerPersistenceAdapter implements CustomerRepositoryPort {
   }
 
   async search(
-    criteriaOrTerm?: CustomerSearchCriteria | string,
-    country?: string,
-    page?: number,
-    limit?: number,
-    sortBy?: CustomerSortField,
-    sortOrder?: SortOrderDirection,
+    criteria: CustomerSearchCriteria = {},
   ): Promise<PaginatedResult<Customer>> {
-    const criteria: CustomerSearchCriteria =
-      typeof criteriaOrTerm === 'object' && criteriaOrTerm !== null
-        ? criteriaOrTerm
-        : {
-            term: criteriaOrTerm,
-            country,
-            page,
-            limit,
-            sortBy,
-            sortOrder,
-          };
-
     const hasTerm = Boolean(criteria.term && criteria.term.trim());
     const normalizedCountry =
       criteria.country &&

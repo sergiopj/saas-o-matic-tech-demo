@@ -82,7 +82,7 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
   it('should search with clean term for company, normalized term for taxId, and email', async () => {
     (mockTypeOrmRepo.findAndCount as jest.Mock).mockResolvedValue([[], 0]);
 
-    await adapter.search('  b - 1234  ');
+    await adapter.search({ term: '  b - 1234  ' });
 
     expect(mockTypeOrmRepo.findAndCount).toHaveBeenCalledWith({
       where: [
@@ -97,7 +97,7 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
   it('should filter strictly by fiscal jurisdiction when only country is provided', async () => {
     (mockTypeOrmRepo.findAndCount as jest.Mock).mockResolvedValue([[], 0]);
 
-    await adapter.search(undefined, 'es');
+    await adapter.search({ country: 'es' });
 
     expect(mockTypeOrmRepo.findAndCount).toHaveBeenCalledWith({
       where: { country: 'ES' },
@@ -108,7 +108,7 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
   it('should combine text search and country filter in where conditions', async () => {
     (mockTypeOrmRepo.findAndCount as jest.Mock).mockResolvedValue([[], 0]);
 
-    await adapter.search('Roams', 'es');
+    await adapter.search({ term: 'Roams', country: 'es' });
 
     expect(mockTypeOrmRepo.findAndCount).toHaveBeenCalledWith({
       where: [
@@ -123,7 +123,7 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
   it('should ignore country filter when country is ALL', async () => {
     (mockTypeOrmRepo.findAndCount as jest.Mock).mockResolvedValue([[], 0]);
 
-    await adapter.search(undefined, 'ALL');
+    await adapter.search({ country: 'ALL' });
 
     expect(mockTypeOrmRepo.findAndCount).toHaveBeenCalledWith({
       order: { createdAt: 'DESC' },
@@ -133,7 +133,7 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
   it('should apply pagination options with skip and take', async () => {
     (mockTypeOrmRepo.findAndCount as jest.Mock).mockResolvedValue([[], 50]);
 
-    const result = await adapter.search(undefined, undefined, 3, 10);
+    const result = await adapter.search({ page: 3, limit: 10 });
 
     expect(result.total).toBe(50);
     expect(mockTypeOrmRepo.findAndCount).toHaveBeenCalledWith({
