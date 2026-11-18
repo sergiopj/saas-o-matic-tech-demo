@@ -76,7 +76,7 @@ export const TRANSLATIONS = {
     'customers.create.errRequired': 'Este campo es obligatorio.',
     'customers.create.errTaxId': 'El identificador fiscal no es válido según el algoritmo de control de la AEAT.',
     'customers.create.errTaxIdEs': 'El DNI, NIE o CIF no es válido según el algoritmo de control de la AEAT (ej. B12345674).',
-    'customers.create.errTaxIdIntl': 'El identificador fiscal no es válido para la jurisdicción seleccionada (ej. DE999888777).',
+    'customers.create.errTaxIdIntl': 'El identificador fiscal no es válido para la jurisdicción seleccionada (ej. {{example}}).',
     'customers.create.errEmail': 'Formato no válido (ejemplo: contacto@empresa.com).',
     'customers.create.errMinLength': 'Debe contener al menos 2 caracteres.',
     'customers.create.disabledHint': 'Completa y valida todos los campos obligatorios para habilitar el registro.',

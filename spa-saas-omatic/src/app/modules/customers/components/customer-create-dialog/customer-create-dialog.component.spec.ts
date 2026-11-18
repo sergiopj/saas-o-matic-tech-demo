@@ -105,6 +105,26 @@ describe('CustomerCreateDialogComponent', () => {
     expect(taxControl?.dirty).toBe(true);
   });
 
+  it('should interpolate country-specific placeholder example in invalidInternationalTaxId error message', () => {
+    const countryControl = component.form.get('country');
+    const taxControl = component.form.get('taxId');
+
+    countryControl?.setValue('FR');
+    expect(component.taxIdExample()).toBe('FR45801234567');
+    expect(component.taxIdPlaceholder()).toContain('FR45801234567');
+
+    taxControl?.setValue('F');
+    taxControl?.markAsDirty();
+    fixture.detectChanges();
+
+    expect(taxControl?.hasError('invalidInternationalTaxId')).toBe(true);
+
+    const errorEl = fixture.nativeElement.querySelector('mat-error');
+    expect(errorEl).toBeTruthy();
+    expect(errorEl.textContent).toContain('FR45801234567');
+    expect(errorEl.textContent).not.toContain('DE999888777');
+  });
+
   it('should reject invalid RFC 5322 emails and accept valid ones', () => {
     const emailControl = component.form.get('email');
     emailControl?.setValue('invalid-email');

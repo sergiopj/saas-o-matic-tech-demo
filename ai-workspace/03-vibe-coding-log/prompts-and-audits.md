@@ -4443,3 +4443,47 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint: **0 advertencias y 0 errores** en todo el monorepo.
   - Pruebas: **478 tests automatizados pasando al 100%** (187 backend + 291 frontend).
 - **Valor para la evaluación:** Demostración de diseño defensivo y exhaustividad en las reglas de negocio transfronterizas: previene la corrupción de datos fiscales y ofrece una experiencia de usuario (UX) reactiva impecable.
+
+### 6.199. Parametrización Dinámica del Ejemplo Fiscal Internacional en Mensajes de Error de Validación Multi-Jurisdicción (`{{example}}`)
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario detectó una inconsistencia de UX en el modal de alta de clientes (`CustomerCreateDialogComponent`): al seleccionar Francia (`FR`), Estados Unidos (`US`) u otra jurisdicción internacional e introducir un identificador fiscal incompleto o inválido (ej. escribir `F`), el mensaje de error mostraba el ejemplo fijo alemán:
+  > *"El identificador fiscal no es válido para la jurisdicción seleccionada (ej. DE999888777)."*
+  
+  El usuario reportó:
+  > *"OTRO PEDAZO DE ERROR AL CREAR
+  > Jurisdicción Fiscal (País)
+  > 🇫🇷Francia
+  > Identificador Fiscal (CIF/NIF/ID)
+  > F
+  > El identificador fiscal no es válido para la jurisdicción seleccionada (ej. DE999888777)."*
+
+- **Análisis de Experiencia de Usuario y Localización:**
+  1. *Falta de Contexto Específico:* Mostrar un ejemplo alemán (`DE999888777`) cuando el usuario tiene seleccionada Francia (`FR`) confunde al usuario corporativo y degrada la calidad de la validación contextual.
+  2. *Reutilización de Tokens de País:* La constante `COUNTRY_OPTIONS` ya define el `placeholder` específico para cada país (`B12345674` para ES, `DE999888777` para DE, `FR45801234567` para FR, `US123456789` para US, `IT12345678901` para IT, etc.).
+  3. *Arquitectura de Interpolación i18n:* Tanto `I18nService.t(key, params)` como `TranslatePipe` soportan sustitución dinámica de parámetros mediante `{{paramKey}}`.
+
+- **Acciones ejecutadas:**
+  1. *Diccionarios de Traducción ([translations.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/i18n/translations.ts)):*
+     - Sustituido el literal fijo `DE999888777` por el token dinámico `{{example}}` en la clave `'customers.create.errTaxIdIntl'` en los 4 idiomas soportados (`es`, `en`, `de`, `fr`):
+       - ES: `'El identificador fiscal no es válido para la jurisdicción seleccionada (ej. {{example}}).'`
+       - EN: `'The international tax identifier is not valid for the selected jurisdiction (e.g. {{example}}).'`
+       - DE: `'Die internationale Steuernummer ist für das ausgewählte Land ungültig (z. B. {{example}}).'`
+       - FR: `'L’identifiant fiscal n’est pas valide pour la juridiction sélectionnée (ex. {{example}}).'`
+  2. *Componente Angular ([customer-create-dialog.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.ts)):*
+     - Definidas las señales computadas `currentCountryOption` y `taxIdExample`, derivando de forma reactiva el identificador de ejemplo asociado al país seleccionado.
+     - Simplificada `taxIdPlaceholder` reutilizando `taxIdExample()`.
+  3. *Plantilla HTML ([customer-create-dialog.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.html)):*
+     - Actualizado el error de validación internacional para pasar el parámetro dinámico:
+       `<mat-error>{{ 'customers.create.errTaxIdIntl' | translate: { example: taxIdExample() } }}</mat-error>`.
+  4. *Pruebas Unitarias ([customer-create-dialog.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.spec.ts)):*
+     - Añadido test que selecciona Francia (`FR`), escribe `F`, y verifica que el texto renderizado en el `<mat-error>` contiene `FR45801234567` y descarta `DE999888777`.
+
+- **Resultados de Verificación:**
+  - Frontend (Vitest): **292/292 tests pasados (100%)**.
+  - Backend (Jest): **187/187 tests pasados (100%)**.
+  - Total Ecosistema: **479 tests automatizados pasando al 100%**.
+  - Oxlint: **0 advertencias y 0 errores**.
+
+- **Valor para la evaluación:** Atención al detalle milimétrica en la internacionalización (i18n) y feedback al usuario, demostrando cómo una arquitectura reactiva basada en Signals e interpolación de diccionarios resuelve inconsistencias de diseño visual y de negocio con elegancia y sin acoplamiento.

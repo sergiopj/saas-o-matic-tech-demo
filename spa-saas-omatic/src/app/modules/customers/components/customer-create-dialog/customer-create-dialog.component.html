@@ -97,7 +97,7 @@
           } @else if (form.get('taxId')?.hasError('invalidSpanishTaxId')) {
             <mat-error>{{ 'customers.create.errTaxIdEs' | translate }}</mat-error>
           } @else if (form.get('taxId')?.hasError('invalidInternationalTaxId')) {
-            <mat-error>{{ 'customers.create.errTaxIdIntl' | translate }}</mat-error>
+            <mat-error>{{ 'customers.create.errTaxIdIntl' | translate: { example: taxIdExample() } }}</mat-error>
           } @else if (form.get('taxId')?.hasError('invalidTaxId')) {
             <mat-error>{{ 'customers.create.errTaxId' | translate }}</mat-error>
           }

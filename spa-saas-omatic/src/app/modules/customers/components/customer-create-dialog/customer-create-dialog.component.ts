@@ -90,11 +90,15 @@ export class CustomerCreateDialogComponent implements OnInit, OnDestroy {
   readonly plans = PLAN_OPTIONS;
 
   readonly selectedCountryCode = signal<string>('ES');
-  readonly taxIdPlaceholder = computed<string>(() => {
-    const selected = this.countries.find((c) => c.code === this.selectedCountryCode());
-    const exampleId = selected ? selected.placeholder : 'B12345674';
-    return `${this.i18n.t('customers.create.examplePrefix')} ${exampleId}`;
-  });
+  readonly currentCountryOption = computed<CountryOption | undefined>(() =>
+    this.countries.find((c) => c.code === this.selectedCountryCode())
+  );
+  readonly taxIdExample = computed<string>(() =>
+    this.currentCountryOption()?.placeholder ?? 'B12345674'
+  );
+  readonly taxIdPlaceholder = computed<string>(() =>
+    `${this.i18n.t('customers.create.examplePrefix')} ${this.taxIdExample()}`
+  );
 
   readonly submitting = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
