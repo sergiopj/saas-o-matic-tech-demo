@@ -4,9 +4,9 @@ import {
   isValidNie,
   isValidCif,
   normalizeTaxId,
-} from './spanish-fiscal.validator';
+} from './tax-id.validator';
 
-describe('SpanishFiscalValidator & TaxId Sanitization (Domain Layer)', () => {
+describe('TaxIdValidator & Sanitization (Domain Layer)', () => {
   describe('normalizeTaxId', () => {
     it('should trim, convert to uppercase, and strip hyphens and spaces', () => {
       expect(normalizeTaxId('  b-12345674  ')).toBe('B12345674');

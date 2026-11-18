@@ -1,7 +1,7 @@
 import {
   normalizeTaxId,
   isValidTaxId,
-} from '../services/spanish-fiscal.validator';
+} from '../services/tax-id.validator';
 import { DomainError } from '../../../../shared/domain/domain.exception';
 
 export interface CustomerProperties {

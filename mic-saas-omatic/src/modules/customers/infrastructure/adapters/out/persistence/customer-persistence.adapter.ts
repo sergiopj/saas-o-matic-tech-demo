@@ -8,7 +8,7 @@ import type {
   CustomerSearchCriteria,
 } from '../../../../application/ports/out/customer-repository.port';
 import { Customer } from '../../../../domain/entities/customer.entity';
-import { normalizeTaxId } from '../../../../domain/services/spanish-fiscal.validator';
+import { normalizeTaxId } from '../../../../domain/services/tax-id.validator';
 import { CustomerTypeOrmEntity } from './customer.typeorm-entity';
 import { CustomerPersistenceMapper } from './customer-persistence.mapper';
 

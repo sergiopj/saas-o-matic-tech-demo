@@ -60,7 +60,7 @@ Para garantizar mantenibilidad, testabilidad y aislamiento estricto de las regla
 │                             DOMAIN LAYER                               │
 │       (Pure TypeScript - Zero Framework & Zero DB Dependencies)        │
 │  - Entities & Models: Customer, Simulation, CustomerSearchCriteria     │
-│  - Domain Services: PricingEngineService, SpanishFiscalValidator       │
+│  - Domain Services: PricingEngineService, TaxIdValidator               │
 │  - Domain Exceptions: InvalidFiscalIdException, etc.                   │
 └────────────────────────────────────────────────────────────────────────┘
 ```
@@ -80,7 +80,7 @@ mic-saas-omatic/
 │   │   │   │   ├── models/
 │   │   │   │   │   └── customer-search-criteria.model.ts    # Parameter Object y Type Guards SSOT
 │   │   │   │   ├── services/
-│   │   │   │   │   └── spanish-fiscal.validator.ts          # Algoritmos DNI / NIE / CIF y saneamiento NIF
+│   │   │   │   │   └── tax-id.validator.ts                  # Algoritmos DNI / NIE / CIF, validación internacional y saneamiento NIF
 │   │   │   │   └── exceptions/
 │   │   │   │       ├── invalid-fiscal-id.exception.ts
 │   │   │   │       ├── customer-not-found.exception.ts
@@ -1063,7 +1063,7 @@ Para resolver este defecto visual de forma universal y elegante:
 ### 4.1 Pirámide de Pruebas
 1. **Tests Unitarios de Dominio (Jest):**
    - Cobertura total de:
-     - `SpanishFiscalValidator` (DNI, NIE y CIF válidos/inválidos con algoritmo real y normalización).
+     - `TaxIdValidator` (DNI, NIE y CIF válidos/inválidos con algoritmo AEAT real, validación internacional y normalización).
      - `PricingEngineService` (casos canónicos $u=0, 10, 15, 50, 60$).
      - `TaxCalculatorService` (ES 21%, DE 19%, FR 20%, IT 22%, GB 20%, US 0%, resto UE 0%, resto mundo 0%).
 2. **Tests de Casos de Uso:**
