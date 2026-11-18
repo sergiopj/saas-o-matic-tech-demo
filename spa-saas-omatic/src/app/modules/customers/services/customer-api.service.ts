@@ -57,28 +57,7 @@ export class CustomerApiService {
     this.loading.set(true);
     this.error.set(null);
 
-    let params = new HttpParams();
-    if (term && term.trim()) {
-      params = params.set('search', term.trim());
-    }
-    if (country && country.trim() && country.trim().toUpperCase() !== 'ALL') {
-      params = params.set('country', country.trim().toUpperCase());
-    }
-    if (page && page > 0) {
-      params = params.set('page', page.toString());
-    }
-    if (limit && limit > 0) {
-      params = params.set('limit', limit.toString());
-    }
-    if (sortBy) {
-      params = params.set('sortBy', sortBy);
-    }
-    if (order) {
-      params = params.set('order', order);
-    }
-    if (fields) {
-      params = params.set('fields', fields);
-    }
+    const params = this.buildSearchParams(term, country, page, limit, sortBy, order, fields);
 
     return this.http
       .get<T[]>(this.baseUrl, { params, observe: 'response' })
@@ -97,6 +76,50 @@ export class CustomerApiService {
         }),
         finalize(() => this.loading.set(false))
       );
+  }
+
+  private buildSearchParams(
+    term?: string,
+    country?: string,
+    page?: number,
+    limit?: number,
+    sortBy?: CustomerSortBy,
+    order?: SortOrder,
+    fields?: 'lite' | 'full',
+  ): HttpParams {
+    let params = new HttpParams();
+
+    const cleanTerm = term?.trim();
+    if (cleanTerm) {
+      params = params.set('search', cleanTerm);
+    }
+
+    const cleanCountry = country?.trim().toUpperCase();
+    if (cleanCountry && cleanCountry !== 'ALL') {
+      params = params.set('country', cleanCountry);
+    }
+
+    if (page && page > 0) {
+      params = params.set('page', page.toString());
+    }
+
+    if (limit && limit > 0) {
+      params = params.set('limit', limit.toString());
+    }
+
+    if (sortBy) {
+      params = params.set('sortBy', sortBy);
+    }
+
+    if (order) {
+      params = params.set('order', order);
+    }
+
+    if (fields) {
+      params = params.set('fields', fields);
+    }
+
+    return params;
   }
 
   /**

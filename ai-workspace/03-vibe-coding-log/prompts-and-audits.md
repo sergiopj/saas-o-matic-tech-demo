@@ -5382,3 +5382,36 @@ Syntax: <single-animation>#
   - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
   - **Total Ecosistema:** **425 pruebas unitarias automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Garantiza una experiencia de usuario y de accesibilidad (WCAG / a11y) de grado bancario internacional, donde ningún usuario de habla inglesa, alemana o francesa se encuentra con textos hardcodeados en español.
+
+
+### 6.187. Refactorización Clean Code en `CustomerApiService`: Extracción Cohesiva de `buildSearchParams`
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario detectó que el método `search` en [customer-api.service.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/services/customer-api.service.ts) acumulaba un bloque procedimental de serialización de parámetros HTTP mezclado con la orquestación de la petición:
+  > *"esta parte no puede llevarse a una funcion privada o algo asi en el propio servicio?
+  > 
+  > let params = new HttpParams();
+  >     if (term?.trim()) {
+  >       params = params.set('search', term.trim());
+  >     }
+  >     if (country?.trim() && country.trim().toUpperCase() !== 'ALL') {
+  >       params = params.set('country', country.trim().toUpperCase());
+  >     }
+  >     ..."*
+- **Análisis de Olor a Código (Code Smell Identificado):**
+  1. *Violación del Principio de Responsabilidad Única (SRP):* El método `search` gestionaba simultáneamente dos niveles de abstracción:
+     - Alto nivel: orquestación de señales reactivas (`loading`, `error`), invocación del cliente HTTP y encadenamiento de operadores reactivos (`map`, `tap`, `catchError`, `finalize`).
+     - Bajo nivel: mutación procedimental de `HttpParams` a través de 7 ramas `if` independientes con transformaciones de cadenas (*trim*, *toUpperCase*) y conversiones numéricas a string.
+- **Acciones Ejecutadas:**
+  1. *Extracción del Método Privado Cohesivo `buildSearchParams`:*
+     - Creado `private buildSearchParams(term?: string, country?: string, page?: number, limit?: number, sortBy?: CustomerSortBy, order?: SortOrder, fields?: 'lite' | 'full'): HttpParams` en [customer-api.service.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/services/customer-api.service.ts).
+     - La función privada asume la responsabilidad exclusiva de serializar y normalizar los parámetros de consulta HTTP.
+  2. *Reducción y Claridad en `search`:*
+     - El método `search` delega la obtención de parámetros en una sola línea declarativa (`const params = this.buildSearchParams(...)`), quedando reducido a un flujo lineal y legible de orquestación pura.
+- **Resultados de Verificación:**
+  - **Frontend Oxlint:** **0 errores y 0 advertencias** (75 archivos analizados).
+  - **Frontend Vitest Tests:** **266 pruebas pasando al 100%** (31 suites).
+  - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
+  - **Total Ecosistema:** **425 pruebas unitarias automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Demuestra disciplina en la separación de responsabilidades y modularidad en servicios Angular, manteniendo firmas predecibles y libres de duplicación.
