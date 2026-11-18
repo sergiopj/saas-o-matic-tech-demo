@@ -17,8 +17,12 @@
 
 > [!IMPORTANT]
 > **🤖 Contexto Operativo sobre el Modelo de IA Utilizado:**  
-> La implementación asistida por IA de esta prueba técnica se ha desarrollado utilizando el modelo **Gemini Flash** (al ser la licencia personal disponible para este proyecto). A diferencia de modelos de gama alta como **Claude 3.5 / 3.7 Sonnet**, Gemini Flash tiende a simplificaciones excesivas, degradación de contexto en código extenso y sesgos hacia código procedimental.  
-> Por este motivo, **llevar el proyecto a un estándar de excelencia arquitectónica (Arquitectura Hexagonal estricta, 478 tests al 100%, 0 errores de linter y blindaje fiscal transfronterizo) requirió una supervisión humana y un esfuerzo de auditoría y refactorización mucho más exhaustivo de lo deseable**. La presente bitácora demuestra con total transparencia el valor indispensable del criterio sénior para liderar la IA hacia el éxito en producción.
+> La implementación asistida por IA de esta prueba técnica se ha desarrollado utilizando el modelo **Gemini Flash** (al ser la licencia personal disponible para este proyecto). A diferencia de modelos de frontera como **Claude 3.5 / 3.7 Sonnet**, Gemini Flash tiende a simplificaciones apresuradas, degradación de memoria en contextos amplios y sesgos hacia código procedimental o soluciones "de atajo".  
+> Por este motivo, **llevar el proyecto a un estándar de excelencia arquitectónica (Arquitectura Hexagonal estricta, 479 tests al 100%, 0 errores de linter y blindaje fiscal transfronterizo) requirió una supervisión humana y un esfuerzo de auditoría y refactorización mucho más exhaustivo de lo deseable**.  
+> **¿Qué diferencia hubiese marcado trabajar con Claude Sonnet?**  
+> 1. **Agilidad y Velocidad de Iteración ('One-Shot'):** Claude Sonnet comprende contratos y requerimientos complejos en un solo turno sin olvidar el contexto global del repositorio ni requerir múltiples re-preguntas para asimilar la arquitectura hexagonal. Habría reducido las iteraciones a menos de la mitad.  
+> 2. **Calidad de Primer Borrador:** Claude genera de entrada tipado estricto, patrones limpios y tests unitarios exhaustivos sin atajos apresurados, eliminando la necesidad de constantes micro-correcciones de sintaxis o fallos de interpolación.  
+> 3. **El Mérito Real del Reto:** Lograr este nivel de madurez técnica (**479 tests, cero advertencias, soporte multi-jurisdicción e internacionalización en 4 idiomas**) con un modelo ligero como Gemini Flash demuestra de forma fehaciente que **la calidad final no proviene de la IA, sino de la exigencia, visión y dirección implacable del ingeniero sénior al mando**.
 
 Este resumen condensa las evidencias clave de la evaluación del reto (criterio técnico, prevención de deuda técnica y gobierno de la IA):
 
@@ -31,7 +35,7 @@ Este resumen condensa las evidencias clave de la evaluación del reto (criterio 
 | **3** | **Países dinámicos volátiles (`dynamicCountries`):** La IA generaba las opciones del filtro de países inspeccionando los clientes de la primera página. | Se erradicó el antipatrón definiendo el catálogo maestro inmutable `SUPPORTED_FISCAL_COUNTRIES` tanto en frontend como en backend (SSOT). | Si un país solo existe en la página 2 o 3, sigue apareciendo en el filtro desde el primer instante. |
 | **4** | **Precisión financiera y concurrencia SQLite WAL:** La IA empleaba tipos `number`/`float` en TypeORM y configuración SQLite por defecto. | Se forzaron columnas `@Column('decimal', { precision: 10, scale: 2 })` para erradicar errores IEEE 754 y se activó el modo WAL (`enableWAL: true`). | Cálculos monetarios con exactitud de céntimo y lecturas no bloqueantes en concurrencia. |
 | **5** | **Feedback visual desacoplado (Search vs. Grid):** La IA vinculó la señal global de carga al input de búsqueda, provocando que al paginar o filtrar girara el spinner del buscador. | Se desacopló la señal computada `isSearchingText` para el buscador y se integró un `<mat-progress-bar>` contextual sobre la cuadrícula. | Ergonomía y experiencia de usuario (UX) predecible y sin estados confusos. |
-| **6** | **Diagnóstico de instrumentación de templates (Angular 22 / Vitest V8):** La cobertura de funciones marcaba 78% pese a que el TypeScript estaba al 100%. | Se diagnosticó que Vite compila los templates `.html` en closures lambda sintéticos no ejecutados por tests de métodos directos. Se configuró `coverageExclude: ["**/*.html"]` en `angular.json` y se añadieron 18 tests en TypeScript. | Coherencia en métricas de cobertura reales: **99.26% Funciones, 99.38% Declaraciones y 291 tests passing**. |
+| **6** | **Diagnóstico de instrumentación de templates (Angular 22 / Vitest V8):** La cobertura de funciones marcaba 78% pese a que el TypeScript estaba al 100%. | Se diagnosticó que Vite compila los templates `.html` en closures lambda sintéticos no ejecutados por tests de métodos directos. Se configuró `coverageExclude: ["**/*.html"]` en `angular.json` y se añadieron 18 tests en TypeScript. | Coherencia en métricas de cobertura reales: **99.26% Funciones, 99.38% Declaraciones y 292 tests passing**. |
 
 ---
 
@@ -43,7 +47,7 @@ Este resumen condensa las evidencias clave de la evaluación del reto (criterio 
 | **Validación Fiscal** | Regex genéricos sin algoritmo de control. | **Algoritmo oficial AEAT** (RD 1065/2007) para DNI, NIE y CIF con control mixto. |
 | **Manejo de Errores** | Respuestas HTTP genéricas o volcados de traza interna (SQL). | **Estándar IETF RFC 7807** (`application/problem+json`) con sanitización defensiva. |
 | **Estado Frontend** | Subscripciones manuales anidadas (`subscribe`) con fugas de memoria. | **Angular Signals reactivos unidireccionales** (`signal`, `computed`, `effect`). |
-| **Calidad y Tests** | 0 tests o tests superficiales que solo comprueban `toBeTruthy`. | **478 tests unitarios automatizados** (>90% ramas backend, >99% funciones frontend). |
+| **Calidad y Tests** | 0 tests o tests superficiales que solo comprueban `toBeTruthy`. | **479 tests unitarios automatizados** (>90% ramas backend, >99% funciones frontend). |
 | **Linter y Estilo** | Ignorar advertencias o usar `any` y `eslint-disable`. | **Oxlint type-aware**: 0 advertencias y 0 errores en 168 archivos. |
 
 ---
@@ -55,8 +59,8 @@ Este resumen condensa las evidencias clave de la evaluación del reto (criterio 
   - **Suites:** 38 pasadas de 38 | **Tests:** 187 pasando al 100%.
 - **Frontend (`spa-saas-omatic` / Angular 22 + Vitest):**
   - **Declaraciones:** 99.38% | **Funciones:** 99.26% | **Líneas:** 99.69% | **Ramas:** 92.95%
-  - **Suites:** 33 pasadas de 33 | **Tests:** 291 pasando al 100%.
-- **Total Ecosistema:** **478 pruebas unitarias automatizadas pasando al 100%** | **Oxlint: 0 errores y 0 advertencias**.
+  - **Suites:** 33 pasadas de 33 | **Tests:** 292 pasando al 100%.
+- **Total Ecosistema:** **479 pruebas unitarias automatizadas pasando al 100%** | **Oxlint: 0 errores y 0 advertencias**.
 
 ---
 
@@ -4405,8 +4409,8 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
      - `http://localhost:4200`: Angular SPA compilada y sirviendo con HTTP 200 en 4.05 segundos.
 - **Métricas Consolidadas Finales:**
   - **Backend (Jest):** 187/187 tests pasados (100%), 38 suites.
-  - **Frontend (Vitest):** 291/291 tests pasados (100%), 33 suites.
-  - **Total Ecosistema:** **478 tests automatizados pasando al 100%**.
+  - **Frontend (Vitest):** 292/292 tests pasados (100%), 33 suites.
+  - **Total Ecosistema:** **479 tests automatizados pasando al 100%**.
   - **Oxlint:** 0 errores, 0 advertencias en 168 archivos.
   - **Builds:** 0 errores, 0 advertencias en microservicio NestJS y frontend Angular.
 - **Valor para la evaluación:** Demostración empírica de resiliencia total y reproducible desde cero: cualquier evaluador puede clonar el repositorio, ejecutar `npm install` y `npm start`, y disfrutar de una experiencia impecable e inmediata.

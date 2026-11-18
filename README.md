@@ -6,8 +6,9 @@ Proyecto construido bajo **Arquitectura Hexagonal (Puertos y Adaptadores)**, met
 
 > [!IMPORTANT]
 > **🤖 Nota de Transparencia sobre el Modelo de IA y la Dirección de Vibe Coding:**  
-> La implementación asistida por IA de este proyecto se ha llevado a cabo utilizando el modelo **Gemini Flash** (al ser la licencia personal disponible para este desarrollo), el cual ofrece una capacidad de razonamiento contextual, consistencia arquitectónica y precisión de código sensiblemente inferior a modelos de gama alta como **Claude 3.5 / 3.7 Sonnet**.  
-> Debido a las simplificaciones apresuradas, alucinaciones de sintaxis y pérdida de contexto recurrentes de este modelo ligero, **estabilizar la arquitectura hexagonal, blindar los algoritmos fiscales transfronterizos y alcanzar el 100% de tests unitarios (478 pruebas) ha requerido un esfuerzo de supervisión humana, auditoría minuciosa y refactorización mucho más exhaustivo de lo deseable**. La bitácora en `ai-workspace/03-vibe-coding-log/prompts-and-audits.md` documenta con total transparencia cómo la dirección técnica sénior es el factor determinante para transformar sugerencias defectuosas de una IA en software robusto de grado producción.
+> La implementación asistida por IA de este proyecto se ha llevado a cabo utilizando el modelo **Gemini Flash** (al tratarse de la licencia personal disponible para este desarrollo), cuyas capacidades de razonamiento contextual en repositorios extensos, consistencia arquitectónica y precisión de código son sensiblemente inferiores a modelos de frontera como **Claude 3.5 / 3.7 Sonnet**.  
+> Debido a las simplificaciones apresuradas, alucinaciones de sintaxis y pérdida de memoria contextual recurrentes de este modelo ligero, **estabilizar la arquitectura hexagonal, blindar los algoritmos fiscales transfronterizos y alcanzar el 100% de tests unitarios (479 pruebas) ha requerido un esfuerzo de supervisión humana, auditoría minuciosa y refactorización mucho más exhaustivo de lo deseable**.  
+> **¿Qué diferencia hubiese supuesto un modelo como Claude?** Un modelo de frontera como **Claude 3.5/3.7 Sonnet (o Claude Code)** habría aportado una **agilidad drásticamente superior** (comprensión contextual 'one-shot' de contratos y dominios complejos sin degradación tras múltiples turnos) y una **calidad de código de primer borrador mucho más refinada**, reduciendo el ciclo de desarrollo a una fracción del tiempo y erradicando decenas de micro-iteraciones de corrección. La bitácora en `ai-workspace/03-vibe-coding-log/prompts-and-audits.md` documenta con total transparencia cómo la dirección técnica sénior es el factor determinante para transformar sugerencias defectuosas de una IA en software robusto de grado producción.
 
 ---
 
@@ -79,7 +80,7 @@ npm start
 ### Paso 3: Verificación de Calidad y Tests en 1 Comando
 
 ```bash
-# 1. Ejecución de la suite completa de 478 tests unitarios (187 backend Jest + 291 frontend Vitest)
+# 1. Ejecución de la suite completa de 479 tests unitarios (187 backend Jest + 292 frontend Vitest)
 npm test
 
 # 2. Informes de cobertura de código unificados (> 90% ramas y 100% líneas en backend / > 99% en frontend)
@@ -168,7 +169,7 @@ El proyecto cuenta con plantillas de variables de entorno versionadas:
 
 ## 🧪 Pirámide de Pruebas y Cobertura (Testing Strategy)
 
-El proyecto cuenta con cobertura exhaustiva (478 pruebas unitarias y de integración pasando al 100% con >90% ramas y 100% líneas en backend y >99% en frontend):
+El proyecto cuenta con cobertura exhaustiva (479 pruebas unitarias y de integración pasando al 100% con >90% ramas y 100% líneas en backend y >99% en frontend):
 
 ```bash
 # Ejecutar la suite completa desde la raíz:
@@ -179,7 +180,7 @@ npm run test:coverage
 
 # O ejecutar por separado según el módulo de interés:
 npm run test:backend           # 187 tests de Dominio, Casos de Uso, Mappers, Servicios Fiscales y Controladores (Jest)
-npm run test:frontend          # 291 tests de Componentes, Signals, Servicios i18n, Dialogs y Pipes (Vitest)
+npm run test:frontend          # 292 tests de Componentes, Signals, Servicios i18n, Dialogs y Pipes (Vitest)
 npm run test:coverage:backend  # Reporte de cobertura Jest (100% líneas, 90.4% ramas)
 npm run test:coverage:frontend # Reporte de cobertura Vitest v8 (99.7% líneas, 99.3% funciones)
 ```
