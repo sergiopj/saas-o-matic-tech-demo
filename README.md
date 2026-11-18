@@ -4,6 +4,11 @@
 
 Proyecto construido bajo **Arquitectura Hexagonal (Puertos y Adaptadores)**, metodología **Spec-Driven Development (API-First)** y desarrollo asistido por IA auditado (**Vibe Coding** con control de calidad continuo).
 
+> [!IMPORTANT]
+> **🤖 Nota de Transparencia sobre el Modelo de IA y la Dirección de Vibe Coding:**  
+> La implementación asistida por IA de este proyecto se ha llevado a cabo utilizando el modelo **Gemini Flash** (al ser la licencia personal disponible para este desarrollo), el cual ofrece una capacidad de razonamiento contextual, consistencia arquitectónica y precisión de código sensiblemente inferior a modelos de gama alta como **Claude 3.5 / 3.7 Sonnet**.  
+> Debido a las simplificaciones apresuradas, alucinaciones de sintaxis y pérdida de contexto recurrentes de este modelo ligero, **estabilizar la arquitectura hexagonal, blindar los algoritmos fiscales transfronterizos y alcanzar el 100% de tests unitarios (478 pruebas) ha requerido un esfuerzo de supervisión humana, auditoría minuciosa y refactorización mucho más exhaustivo de lo deseable**. La bitácora en `ai-workspace/03-vibe-coding-log/prompts-and-audits.md` documenta con total transparencia cómo la dirección técnica sénior es el factor determinante para transformar sugerencias defectuosas de una IA en software robusto de grado producción.
+
 ---
 
 ## 📁 Estructura del Repositorio

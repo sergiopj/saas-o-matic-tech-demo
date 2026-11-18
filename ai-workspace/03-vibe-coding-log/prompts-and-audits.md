@@ -15,6 +15,11 @@
 
 # PARTE I: Resumen Ejecutivo para la Entrevista (Lectura en 2 min)
 
+> [!IMPORTANT]
+> **🤖 Contexto Operativo sobre el Modelo de IA Utilizado:**  
+> La implementación asistida por IA de esta prueba técnica se ha desarrollado utilizando el modelo **Gemini Flash** (al ser la licencia personal disponible para este proyecto). A diferencia de modelos de gama alta como **Claude 3.5 / 3.7 Sonnet**, Gemini Flash tiende a simplificaciones excesivas, degradación de contexto en código extenso y sesgos hacia código procedimental.  
+> Por este motivo, **llevar el proyecto a un estándar de excelencia arquitectónica (Arquitectura Hexagonal estricta, 478 tests al 100%, 0 errores de linter y blindaje fiscal transfronterizo) requirió una supervisión humana y un esfuerzo de auditoría y refactorización mucho más exhaustivo de lo deseable**. La presente bitácora demuestra con total transparencia el valor indispensable del criterio sénior para liderar la IA hacia el éxito en producción.
+
 Este resumen condensa las evidencias clave de la evaluación del reto (criterio técnico, prevención de deuda técnica y gobierno de la IA):
 
 ### 1. Las 6 Intervenciones Críticas del Director de Orquesta frente a la IA
