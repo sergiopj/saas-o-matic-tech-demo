@@ -3,7 +3,6 @@ import {
   Component,
   OnDestroy,
   OnInit,
-  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -18,6 +17,7 @@ import { CustomerLite, SUPPORTED_FISCAL_COUNTRIES } from '../../../customers/mod
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { LoadingStateComponent } from '../../../../shared/components/loading-state/loading-state.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
+import { CustomerCarouselComponent } from '../../components/customer-carousel/customer-carousel.component';
 
 /**
  * Executive Home Dashboard providing real-time KPIs, recently registered corporate accounts,
@@ -34,6 +34,7 @@ import { ErrorBannerComponent } from '../../../../shared/components/error-banner
     TranslatePipe,
     LoadingStateComponent,
     ErrorBannerComponent,
+    CustomerCarouselComponent,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
@@ -56,25 +57,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly countriesFillAngle = signal<number>(0);
   readonly tiersFillAngle = signal<number>(0);
 
-  // Responsive Carousel Slide Signals
-  readonly currentSlideIndex = signal<number>(0);
-  readonly visibleCardsCount = signal<number>(3);
-
-  readonly maxSlideIndex = computed(() => {
-    const total = this.recentCustomers().length;
-    const visible = this.visibleCardsCount();
-    return Math.max(0, total - visible);
-  });
-
-  private touchStartX = 0;
   private readonly animationFrameIds: number[] = [];
-  private readonly resizeHandler = () => this.updateVisibleCount();
 
   ngOnInit(): void {
-    this.updateVisibleCount();
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', this.resizeHandler);
-    }
     this.loadRecentCustomers();
     this.animateKpi(
       this.supportedCountriesCount,
@@ -89,9 +74,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('resize', this.resizeHandler);
-    }
     for (const id of this.animationFrameIds) {
       cancelAnimationFrame(id);
     }
@@ -110,79 +92,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         );
       },
     });
-  }
-
-  slideNext(): void {
-    const step = this.visibleCardsCount();
-    this.currentSlideIndex.update((curr) => Math.min(curr + step, this.maxSlideIndex()));
-  }
-
-  slidePrev(): void {
-    const step = this.visibleCardsCount();
-    this.currentSlideIndex.update((curr) => {
-      const remainder = curr % step;
-      const decrement = remainder === 0 ? step : remainder;
-      return Math.max(curr - decrement, 0);
-    });
-  }
-
-  onTouchStart(event: TouchEvent): void {
-    this.touchStartX = event.changedTouches[0].clientX;
-  }
-
-  onTouchEnd(event: TouchEvent): void {
-    const touchEndX = event.changedTouches[0].clientX;
-    const diff = this.touchStartX - touchEndX;
-    if (Math.abs(diff) > 40) {
-      if (diff > 0) {
-        this.slideNext();
-      } else {
-        this.slidePrev();
-      }
-    }
-  }
-
-  readonly isDragging = signal<boolean>(false);
-  private dragStartX = 0;
-
-  onMouseDown(event: MouseEvent): void {
-    if (event.button !== 0) return;
-    this.isDragging.set(true);
-    this.dragStartX = event.clientX;
-  }
-
-  onMouseUp(event: MouseEvent): void {
-    if (!this.isDragging()) return;
-    this.isDragging.set(false);
-    const diff = this.dragStartX - event.clientX;
-    if (Math.abs(diff) > 40) {
-      if (diff > 0) {
-        this.slideNext();
-      } else {
-        this.slidePrev();
-      }
-    }
-  }
-
-  onMouseLeave(): void {
-    if (this.isDragging()) {
-      this.isDragging.set(false);
-    }
-  }
-
-  private updateVisibleCount(): void {
-    if (typeof window === 'undefined') return;
-    const width = window.innerWidth;
-    if (width < 640) {
-      this.visibleCardsCount.set(1);
-    } else if (width < 1024) {
-      this.visibleCardsCount.set(2);
-    } else {
-      this.visibleCardsCount.set(3);
-    }
-    if (this.currentSlideIndex() > this.maxSlideIndex()) {
-      this.currentSlideIndex.set(this.maxSlideIndex());
-    }
   }
 
   /**

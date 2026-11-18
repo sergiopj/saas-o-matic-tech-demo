@@ -1,0 +1,62 @@
+<div class="carousel-outer-wrapper">
+  @if (customers().length > 1) {
+    <button
+      mat-icon-button
+      type="button"
+      class="carousel-arrow-btn prev"
+      (click)="slidePrev()"
+      [disabled]="currentSlideIndex() === 0"
+      [attr.aria-label]="'home.recent.prev' | translate"
+    >
+      <mat-icon aria-hidden="true">chevron_left</mat-icon>
+    </button>
+  }
+
+  <div
+    class="slider-viewport"
+    [class.is-dragging]="isDragging()"
+    (touchstart)="onTouchStart($event)"
+    (touchend)="onTouchEnd($event)"
+    (mousedown)="onMouseDown($event)"
+    (mouseup)="onMouseUp($event)"
+    (mouseleave)="onMouseLeave()"
+  >
+    <div
+      class="slider-track"
+      [style.--slider-index]="currentSlideIndex()"
+    >
+      @for (customer of customers(); track customer.id) {
+        <article class="customer-lite-card">
+          <div class="lite-card-header">
+            <div class="lite-avatar">{{ customer.companyName.charAt(0).toUpperCase() }}</div>
+            <div class="lite-info">
+              <h3 class="lite-company" [title]="customer.companyName">{{ customer.companyName }}</h3>
+              <span class="country-badge">{{ customer.country }}</span>
+            </div>
+          </div>
+          <div class="lite-card-actions">
+            <a mat-flat-button [routerLink]="['/customers', customer.id]" class="lite-simulate-btn">
+              <span class="btn-inner">
+                <mat-icon aria-hidden="true">calculate</mat-icon>
+                <span>{{ 'home.recent.simulate' | translate }}</span>
+              </span>
+            </a>
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+
+  @if (customers().length > 1) {
+    <button
+      mat-icon-button
+      type="button"
+      class="carousel-arrow-btn next"
+      (click)="slideNext()"
+      [disabled]="currentSlideIndex() >= maxSlideIndex()"
+      [attr.aria-label]="'home.recent.next' | translate"
+    >
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+    </button>
+  }
+</div>
