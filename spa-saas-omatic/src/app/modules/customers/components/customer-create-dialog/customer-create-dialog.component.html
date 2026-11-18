@@ -38,7 +38,7 @@
   <mat-dialog-content class="dialog-content">
     <form [formGroup]="form" (ngSubmit)="onSubmit()" id="customer-create-form" class="customer-form" novalidate>
       <div class="form-row full-width">
-        <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+        <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic" floatLabel="always">
           <mat-label>{{ 'customers.create.companyName' | translate }}</mat-label>
           <input
             matInput
@@ -59,7 +59,7 @@
       </div>
 
       <div class="form-row two-columns">
-        <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+        <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic" floatLabel="always">
           <mat-label>{{ 'customers.create.country' | translate }}</mat-label>
           <mat-select formControlName="country" [errorStateMatcher]="matcher" required>
             @for (c of countries; track c.code) {
@@ -75,7 +75,7 @@
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+        <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic" floatLabel="always">
           <mat-label>{{ 'customers.create.taxId' | translate }}</mat-label>
           <input
             matInput
@@ -100,7 +100,7 @@
       </div>
 
       <div class="form-row two-columns">
-        <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+        <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic" floatLabel="always">
           <mat-label>{{ 'customers.create.email' | translate }}</mat-label>
           <input
             matInput
@@ -119,7 +119,7 @@
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+        <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic" floatLabel="always">
           <mat-label>{{ 'customers.create.plan' | translate }}</mat-label>
           <mat-select formControlName="selectedPlan" [errorStateMatcher]="matcher" required>
             @for (plan of plans; track plan) {

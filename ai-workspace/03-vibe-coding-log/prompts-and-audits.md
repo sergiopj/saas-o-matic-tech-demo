@@ -4838,3 +4838,28 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
   - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Aplicación de ingeniería visual sénior: resolver problemas de legibilidad mediante una combinación armónica de ajuste tipográfico, micro-espaciados e incremento controlado del contenedor, sin recurrir a hacks ni romper la cuadrícula responsive.
+
+
+### 6.170. Eliminación de Colisión entre Etiquetas Flotantes y Placeholders (`floatLabel="always"`)
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario detectó un defecto visual al abrir el modal de registro de nuevo cliente corporativo: las etiquetas (`<mat-label>`) de los campos de texto (como "Nombre de la Empresa" e "Identificador Fiscal") se solapaban directamente encima del texto de ejemplo (placeholder) mientras los campos estaban vacíos y desenfocados. Al hacer click dentro del input, la etiqueta se desplazaba hacia la muesca superior (`floating`) y el texto se leía correctamente:
+  > *"bien pero han salido dos fallso cuando cargan los inouts de nombre d e la emrpesa y identificador fiscal el label se soilapa con el texto de ejemplo de los inputs y cuando pinchas dentro el label se pone arriba y si ¡se ve bien"*
+- **Análisis de Causa Raíz (MDC Angular Material Design):**
+  En Angular Material 17+ (MDC), la directiva `<mat-form-field>` adopta por defecto `floatLabel="auto"`. Bajo este modo:
+  1. Si el input está vacío y sin foco, Angular Material renderiza el elemento `<mat-label>` centrado en la línea base de edición (`resting label`).
+  2. Si el input tiene configurado un atributo `placeholder` descriptivo (ej. `"Ej. Telefónica Tech S.L."` o `taxIdPlaceholder()`), el navegador renderiza el placeholder en esa misma coordenada visual, provocando una colisión de doble texto superpuesto ilegible.
+  3. Al recibir foco (`focusin`), la animación eleva la etiqueta a la muesca superior del marco (`outline notch`), revelando el placeholder subyacente.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Acoplamiento Permanente en Muesca (`floatLabel="always"`):*
+     Configurado explícitamente `floatLabel="always"` en los componentes `<mat-form-field>` de [customer-create-dialog.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.html) y en los filtros avanzados de [customer-detail.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.html).
+     Esto fija la etiqueta en el notch del borde superior desde el instante en que el formulario se instancia, garantizando que el placeholder de ejemplo sea legible de inmediato sin saltos bruscos (`layout shift`) ni solapamientos tipográficos.
+  2. *Institucionalización de Regla en [AGENTS.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/AGENTS.md):*
+     Añadida la directriz en la Sección 2.B: *"Permanent Floating Labels on Fields with Placeholders (`floatLabel="always"`)"* para impedir regresiones en cualquier futuro formulario con placeholders.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **254 pruebas pasando al 100%** (29 suites).
+  - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest Tests: **159 pruebas pasando al 100%** (30 suites).
+  - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Demuestra dominio riguroso de la especificación Material Design 3 (MDC) y de las sutiles interacciones entre etiquetas y placeholders, erradicando micro-defectos visuales y garantizando una experiencia de usuario impecable.

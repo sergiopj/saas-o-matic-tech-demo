@@ -33,6 +33,7 @@ Whenever you operate in this repository, you MUST strictly adhere to the followi
 - **Email Validation**: Enforce RFC 5322 regex validation pattern with TLD requirement of at least 2 characters.
 - **Accessible Feedback**: Display descriptive `<mat-error>` messages with multi-language i18n support (`es`, `en`, `de`, `fr`).
 - **Dynamic Locale-Aware Fiscal Inputs**: When forms include fiscal jurisdiction selectors (e.g. `country`), both the field placeholder (`[placeholder]="taxIdPlaceholder()"`) and validation error feedback (`invalidSpanishTaxId` vs `invalidInternationalTaxId`) must be reactive and context-aware. Never display Spain-specific AEAT error text or CIF examples when an international jurisdiction is selected (e.g. Germany, France, US); provide localized examples (e.g., DE999888777) and tailored error messages explaining character length requirements (5-20 alphanumeric characters).
+- **Permanent Floating Labels on Fields with Placeholders (`floatLabel="always"`)**: When a `<mat-form-field>` has both a `<mat-label>` and an `<input [placeholder]="...">`, always set `floatLabel="always"`. This prevents the floating label from resting at the baseline over the placeholder text when the field is empty and unfocused, eliminating text collision and visual jank.
 
 ### C. Web Accessibility (W3C A11y Standards)
 - **First Rule of ARIA (Native Elements First)**: Do NOT use `role="status"` on generic `<div>` tags. Use native HTML5 `<output class="..." aria-live="polite">` elements (resolves SonarQube `Web:S6819`).
