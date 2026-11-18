@@ -137,7 +137,7 @@
             font-size: 0.95rem;
             border-radius: 10px;
             gap: 0.5rem;
-            transition: all 0.2s ease-in-out;
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
 
             &:hover:not(:disabled) {
               background-color: var(--roams-accent-blue-hover);
@@ -345,7 +345,7 @@
     &:hover {
       border-color: var(--roams-accent-blue);
       transform: translateY(-2px);
-      transition: all 0.25s ease;
+      transition: border-color 0.25s ease, transform 0.25s ease;
 
       .coin-stack .coin:last-child {
         transform: translateY(-3px);
@@ -367,17 +367,17 @@
     }
 
     &.t1 .badge {
-      background-color: rgba(16, 97, 226, 0.1);
+      background-color: color-mix(in srgb, var(--roams-accent-blue) 10%, transparent);
       color: var(--roams-accent-blue);
     }
 
     &.t2 .badge {
-      background-color: rgba(16, 185, 129, 0.1);
+      background-color: color-mix(in srgb, var(--roams-status-success) 10%, transparent);
       color: var(--roams-status-success);
     }
 
     &.t3 .badge {
-      background-color: rgba(245, 158, 11, 0.1);
+      background-color: color-mix(in srgb, var(--roams-status-warning) 10%, transparent);
       color: var(--roams-status-warning);
     }
 
@@ -398,7 +398,7 @@
       background-color: var(--roams-bg-page);
       border: 1px solid var(--roams-border-light);
       box-shadow: var(--roams-shadow-sm);
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 
       .user-glyph {
         font-size: 1.15rem;
@@ -407,7 +407,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         animation: userPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 
         &:not(:first-child) {
@@ -416,7 +416,7 @@
       }
 
       &.cluster-t1 {
-        border-color: rgba(16, 97, 226, 0.25);
+        border-color: color-mix(in srgb, var(--roams-accent-blue) 25%, transparent);
         .user-glyph {
           color: var(--roams-accent-blue);
           animation-delay: 0.15s;
@@ -424,7 +424,7 @@
       }
 
       &.cluster-t2 {
-        border-color: rgba(16, 185, 129, 0.25);
+        border-color: color-mix(in srgb, var(--roams-status-success) 25%, transparent);
         .user-glyph {
           color: var(--roams-status-success);
           &.u1 { animation-delay: 0.15s; }
@@ -434,7 +434,7 @@
       }
 
       &.cluster-t3 {
-        border-color: rgba(245, 158, 11, 0.25);
+        border-color: color-mix(in srgb, var(--roams-status-warning) 25%, transparent);
         .user-glyph {
           color: var(--roams-status-warning);
           &.u1 { animation-delay: 0.10s; }

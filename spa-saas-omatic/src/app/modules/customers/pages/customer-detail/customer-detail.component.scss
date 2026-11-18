@@ -356,20 +356,20 @@
       font-weight: 700;
       background-color: var(--roams-border);
       color: var(--roams-text-muted);
-      transition: all 0.2s ease-in-out;
+      transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 
       &.t1.is-active {
-        background-color: rgba(16, 97, 226, 0.2);
+        background-color: color-mix(in srgb, var(--roams-accent-blue) 20%, transparent);
         color: var(--roams-accent-blue);
       }
 
       &.t2.is-active {
-        background-color: rgba(16, 185, 129, 0.2);
+        background-color: color-mix(in srgb, var(--roams-status-success) 20%, transparent);
         color: var(--roams-status-success);
       }
 
       &.t3.is-active {
-        background-color: rgba(245, 158, 11, 0.2);
+        background-color: color-mix(in srgb, var(--roams-status-warning) 20%, transparent);
         color: var(--roams-status-warning);
       }
     }
@@ -669,7 +669,7 @@
       border-radius: var(--roams-radius-md);
       color: var(--roams-text-primary);
       font-weight: 600;
-      transition: all 0.2s ease;
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 
       &:hover {
         background-color: var(--roams-bg-page);
@@ -679,7 +679,7 @@
       &.has-active-filters {
         border-color: var(--roams-accent-blue);
         color: var(--roams-accent-blue);
-        background-color: rgba(16, 97, 226, 0.06);
+        background-color: var(--roams-accent-blue-subtle);
       }
 
       .active-badge {

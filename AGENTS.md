@@ -28,6 +28,7 @@ Whenever you operate in this repository, you MUST strictly adhere to the followi
   - Feedback: `--roams-status-success`, `--roams-status-warning`, `--roams-status-error`, `--roams-status-info`.
   - Borders: `--roams-border`, `--roams-border-light`, `--roams-border-inverse`.
 - **Zero Tailwind**: Do not install or introduce Tailwind CSS. Rely exclusively on modular SCSS (7-1 pattern) and Angular Material.
+- **Strict Prohibition of Generic Transitions (`transition: all`)**: Never use `transition: all` or unspecified transitions without explicit property targets. Always declare the exact CSS properties that animate (e.g., `transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;`). This avoids unnecessary browser layout repaints/reflows and complies with SonarQube rule `css:S9449` ("Specify which properties should transition so future style changes do not animate unexpectedly").
 
 ### B. Form Validation & Reactive State
 - **Instant Dirty Validation**: Use `ShowOnDirtyErrorStateMatcher` with reactive `FormControl` so validation errors trigger immediately as the user types (`control.dirty`), rather than waiting for blur.

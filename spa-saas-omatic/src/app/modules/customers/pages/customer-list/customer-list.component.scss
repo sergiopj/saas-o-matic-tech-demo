@@ -390,7 +390,7 @@ button.reset-search-btn.mat-mdc-stroked-button {
 
   .page-nav-btn {
     color: var(--roams-text-secondary);
-    transition: all 0.2s ease;
+    transition: color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
 
     &:not([disabled]):hover {
       color: var(--roams-accent-blue);
@@ -416,7 +416,7 @@ button.reset-search-btn.mat-mdc-stroked-button {
     font-weight: 500;
     color: var(--roams-text-secondary);
     border-radius: var(--roams-radius-md);
-    transition: all 0.2s ease;
+    transition: color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 
     &:hover {
       background-color: var(--roams-bg-page);
@@ -428,7 +428,7 @@ button.reset-search-btn.mat-mdc-stroked-button {
       background-color: var(--roams-accent-blue);
       color: var(--roams-text-inverse);
       font-weight: 700;
-      box-shadow: 0 2px 6px rgba(16, 97, 226, 0.25);
+      box-shadow: 0 2px 6px color-mix(in srgb, var(--roams-accent-blue) 25%, transparent);
     }
   }
 }

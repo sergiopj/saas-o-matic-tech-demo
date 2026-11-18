@@ -5190,3 +5190,36 @@ Syntax: <single-animation>#
   - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
   - **Total Ecosistema:** **418 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Legibilidad impecable del código, eliminación de tics o patrones sintácticos artificiales generados por IA, y consistencia idiomática en toda la arquitectura de Signals.
+
+
+### 6.182. Auditoría de Linters vs SonarQube: Detección y Erradicación Integral de Transiciones Genéricas (SonarQube css:S9449)
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario detectó advertencias de SonarQube en el editor Visual Studio Code respecto a propiedades de transición genéricas y consultó por qué no se detectaba en el comando de consola del linter:
+  > *"veo este tipo de warings en los scss Specify which properties should transition so future style changes do not animate unexpectedly.sonarqube(css:S9449) Shorthand property combines four of the transition properties into a single property. Widely available across major browsers (Baseline since 2015) Syntax: <single-transition># esto no deberia detectarse al lanzar el linter? o me equivoco, esta alineado el linter con lo que nos dice el visual studio code?"*
+- **Análisis de Causa Raíz (Diferenciación entre Oxlint y SonarLint):**
+  1. *El Alcance de Oxlint:* En `spa-saas-omatic/package.json`, el comando `"lint"` ejecuta `oxlint --type-aware src/`. Oxlint es un linter ultrarrápido desarrollado en Rust enfocado exclusivamente en ASTs de ECMAScript/TypeScript (`.ts`, `.js`). Oxlint **no analiza hojas de estilo CSS o SCSS**.
+  2. *El Origen de la Alerta en VS Code:* La alerta proviene de la extensión SonarLint/SonarQube instalada en el editor del desarrollador, cuyo analizador de CSS evalúa reglas de calidad en tiempo real sobre ficheros `.scss`.
+  3. *Fundamento Técnico de la Regla `css:S9449`:*
+     - La declaración `transition: all 0.2s ease` (o transiciones abreviadas sin especificar propiedades) obliga al motor de renderizado del navegador a calcular matrices de interpolación para **todas** las propiedades CSS animables del elemento.
+     - Si en el futuro se añade o modifica dinámicamente una propiedad de diseño (`padding`, `margin`, `width`, `top`), el navegador intentará animarla inesperadamente, provocando saltos de maquetación (*layout shifts*) y degradación de los Core Web Vitals (CLS/INP).
+- **Acciones Ejecutadas:**
+  1. *Auditoría y Erradicación en 8 Archivos SCSS (17 Ocurrencias Refactorizadas):*
+     - [navbar.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/navbar/navbar.component.scss): Sustituido `transition: all 0.15s ease-in-out` por `transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out`.
+     - [language-selector.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/language-selector/language-selector.component.scss): Sustituido `transition: all 0.2s ease` por `transition: background-color 0.2s ease, border-color 0.2s ease`, y homogeneizados colores hover con `color-mix()`.
+     - [currency-selector.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/currency-selector/currency-selector.component.scss): Sustituido `transition: all 0.2s ease` por `transition: background-color 0.2s ease, border-color 0.2s ease`, y homogeneizados colores hover con `color-mix()`.
+     - [email-composer-dialog.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/email-composer-dialog/email-composer-dialog.component.scss): Sustituido `transition: all 0.15s ease` por `transition: color 0.15s ease, background-color 0.15s ease`.
+     - [customer-detail.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.scss): Sustituidos en `.bar-segment` y `.filter-trigger-btn` por propiedades explícitas (`background-color`, `border-color`, `color`), saneando además valores `rgba(...)` residuales con `color-mix()`.
+     - [customer-list.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-list/customer-list.component.scss): Sustituidos en controles de paginación por `color`, `background-color`, `opacity` y `box-shadow`.
+     - [home.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.scss): Reemplazados los 5 puntos en botones héroe, clusters de usuarios y flechas de carrusel por propiedades explícitas (`transform`, `filter`, `background-color`, `box-shadow`, `border-color`, `opacity`).
+     - [simulation-hub.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/simulations/pages/simulation-hub/simulation-hub.component.scss): Reemplazados los 4 puntos en botón de lanzamiento, clusters de tramos y tarjetas por propiedades quirúrgicas.
+  2. *Gobernanza en [AGENTS.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/AGENTS.md#L30-L33):*
+     - Incorporada la regla obligatoria *Strict Prohibition of Generic Transitions (`transition: all`)* en la Sección 2.A para asegurar que ningún agente futuro reintroduzca transiciones genéricas.
+- **Resultados de Verificación:**
+  - **Ocurrencias de `transition: all` restantes:** **0 en todo el repositorio**.
+  - **Frontend Oxlint:** **0 errores y 0 advertencias**.
+  - **Frontend Vitest Tests:** **259 pruebas pasando al 100%** (30 suites).
+  - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
+  - **Total Ecosistema:** **418 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Cero advertencias en SonarQube/SonarLint, máximo rendimiento de renderizado en el navegador (evitando repaints masivos) y alineación técnica total entre herramientas de análisis estático y el IDE.
