@@ -4,7 +4,6 @@ import { Repository, Like, FindManyOptions, FindOptionsWhere } from 'typeorm';
 import type {
   CustomerRepositoryPort,
   PaginatedResult,
-  CustomerSortField,
   CustomerSearchCriteria,
 } from '../../../../application/ports/out/customer-repository.port';
 import { Customer } from '../../../../domain/entities/customer.entity';
@@ -103,27 +102,11 @@ export class CustomerPersistenceAdapter implements CustomerRepositoryPort {
   private buildSort(
     criteria: CustomerSearchCriteria,
   ): FindManyOptions<CustomerTypeOrmEntity>['order'] {
-    const fieldMap: Record<CustomerSortField, keyof CustomerTypeOrmEntity> = {
-      companyName: 'companyName',
-      createdAt: 'createdAt',
-      country: 'country',
-      taxId: 'taxId',
-    };
-    const activeSortField =
-      criteria.sortBy && fieldMap[criteria.sortBy]
-        ? fieldMap[criteria.sortBy]
-        : 'createdAt';
+    const field = criteria.sortBy ?? 'createdAt';
+    const defaultDirection = field === 'companyName' ? 'ASC' : 'DESC';
+    const direction = criteria.sortOrder ?? defaultDirection;
 
-    const requestedOrder = criteria.sortOrder?.toUpperCase();
-    let activeOrder: 'ASC' | 'DESC';
-
-    if (requestedOrder === 'ASC' || requestedOrder === 'DESC') {
-      activeOrder = requestedOrder;
-    } else {
-      activeOrder = activeSortField === 'companyName' ? 'ASC' : 'DESC';
-    }
-
-    return { [activeSortField]: activeOrder };
+    return { [field]: direction };
   }
 
   private applyPagination(

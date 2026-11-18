@@ -4512,3 +4512,75 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
   - Total Ecosistema: **425 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Demuestra solidez en el desarrollo backend con NestJS. Reemplaza comprobaciones defensivas artesanales y propensas a fallos por el pipeline declarativo oficial del framework (`ValidationPipe`), blindando los endpoints contra valores corruptos (`NaN`) y garantizando contratos REST rigurosos.
+
+
+### 6.164. Erradicación de Ceremonia Procedimental: Purga de Aliases Duplicados en DTOs y Sustitución de `buildSort` Procedural por Inmutabilidad Funcional
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario analizó con agudeza varios fragmentos sospechosos de sobreingeniería y baja calidad estética en el código:
+  > *"no entiendo esto
+  >  @IsOptional()
+  >   @IsIn(['lite', 'full'])
+  >   fields?: 'lite' | 'full';
+  > ni estas comparaciones de string y pasarlo a uppercase lo mismo esta bien pero no se
+  > @IsOptional()
+  >   @Transform(({ value }: { value: unknown }) =>
+  >     typeof value === 'string' ? (value.toUpperCase() as SortOrderDirection) : value,
+  >   )
+  >   @IsIn(SORT_ORDER_DIRECTIONS)
+  >   order?: SortOrderDirection;
+  >   sortOrder?: SortOrderDirection;
+  > ...
+  > esto esta bien? lo veo poco clean code pero no se
+  >  if (requestedOrder === 'ASC' || requestedOrder === 'DESC') {
+  >       activeOrder = requestedOrder;
+  >     } else {
+  >       activeOrder = activeSortField === 'companyName' ? 'ASC' : 'DESC';
+  >     }
+  > ...
+  > si aplicalo en customer-persistence.adapter.ts, junto con la limpieza del DTO anterior (ListCustomersQueryDto), y lo incorporemos a AGENTS.md y a la bitácora de auditoría?"*
+- **Análisis de Diseño y Anti-Patrones de IA Detectados:**
+  1. *El Anti-Patrón del "Alias Duplicado" en DTOs:*
+     - Mantener simultáneamente `order` y `sortOrder` en el DTO de entrada HTTP era redundante y confuso. OpenAPI y el cliente Angular envían `order`. El DTO debe exponer un único contrato canónico (`order`).
+     - El decorador `@Transform` contenía sobrecargas de tipos `{ value }: { value: unknown }` y casting innecesario `as SortOrderDirection`.
+  2. *El Anti-Patrón del "Diccionario Espejo Identidad" (`fieldMap`):*
+     - En [customer-persistence.adapter.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/out/persistence/customer-persistence.adapter.ts), la IA había definido un mapa de 8 líneas `fieldMap = { companyName: 'companyName', ... }` que asignaba cada clave exactamente a sí misma ($k \mapsto k$), añadiendo complejidad sin valor de traducción.
+  3. *El Anti-Patrón de Mutación Procedural con `let`:*
+     - Se utilizaba `let activeOrder: 'ASC' | 'DESC'` mutado dentro de bifurcaciones `if / else` con una ternaria anidada en el `else`.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Refactorización Declarativa de [customer-persistence.adapter.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/out/persistence/customer-persistence.adapter.ts):*
+     - Sustituido el bloque procedural de 25 líneas por 4 líneas inmutables puras con operador de coalescencia nula:
+       ```ts
+       private buildSort(
+         criteria: CustomerSearchCriteria,
+       ): FindManyOptions<CustomerTypeOrmEntity>['order'] {
+         const field = criteria.sortBy ?? 'createdAt';
+         const defaultDirection = field === 'companyName' ? 'ASC' : 'DESC';
+         const direction = criteria.sortOrder ?? defaultDirection;
+
+         return { [field]: direction };
+       }
+       ```
+     - Eliminado `fieldMap` y las variables mutables `let activeOrder`.
+  2. *Limpieza de [ListCustomersQueryDto](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/in/rest/dto/list-customers-query.dto.ts):*
+     - Eliminada la propiedad redundante `sortOrder`.
+     - Simplificado `@Transform` para normalizar cadenas a mayúsculas limpiamente sin casts forzados.
+     - Documentado el propósito de `fields?: 'lite' | 'full'` como proyección de lectura (*Sparse Fieldset*) para selectores rápidos.
+  3. *Unificación en [CustomerController](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/in/rest/customer.controller.ts):*
+     - Mapeo directo de `sortOrder: query.order` hacia el caso de uso sin dobles resoluciones.
+  4. *Incorporación de Reglas de Aprendizaje en [AGENTS.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/AGENTS.md) (Sección 3.D):*
+     - **Clean DTO Contracts Without Redundant Aliases:** Prohibido duplicar propiedades alias en DTOs.
+     - **No Identity Mirror Dictionaries or Procedural Order Mutations:** Prohibido crear diccionarios espejo $k \mapsto k$ y mutaciones procedurales con `let` para resolver ordenaciones por defecto.
+  5. *Higiene en Pruebas Unitarias:*
+     - Añadido test en `customer-persistence.adapter.spec.ts` para verificar el orden por defecto `ASC` en `companyName`.
+     - Eliminado `await` innecesario sobre función síncrona en `send-email.use-case.spec.ts` resolviendo la advertencia de Oxlint.
+- **Resultados de Verificación:**
+  - Compilación NestJS (`nest build`): **0 errores**.
+  - Backend Jest Unit Tests: **158 pruebas pasando al 100%** (30 suites, +1 prueba de ordenación por defecto).
+  - Backend Jest E2E Tests: **14 pruebas pasando al 100%** (2 suites).
+  - Backend Oxlint: **0 errores y 0 advertencias** (81 archivos analizados).
+  - Frontend Vitest: **254 pruebas pasando al 100%** (29 suites).
+  - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Total Ecosistema: **426 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Refleja la mentalidad de ingeniería sénior: no conformarse con que el código "funcione", sino eliminar sistemáticamente sobreingeniería residual, estructuras procedimentales arcaicas y ceremonias de diccionario espejo, alcanzando máxima elegancia y legibilidad declarativa.

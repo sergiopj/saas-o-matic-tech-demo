@@ -167,4 +167,16 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
       take: 10,
     });
   });
+
+  it('should default sort direction to ASC when sorting by companyName without sortOrder', async () => {
+    (mockTypeOrmRepo.findAndCount as jest.Mock).mockResolvedValue([[], 0]);
+
+    await adapter.search({ sortBy: 'companyName' });
+
+    expect(mockTypeOrmRepo.findAndCount).toHaveBeenCalledWith(
+      expect.objectContaining({
+        order: { companyName: 'ASC' },
+      }),
+    );
+  });
 });

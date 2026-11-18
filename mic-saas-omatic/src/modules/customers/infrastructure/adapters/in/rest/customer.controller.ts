@@ -44,15 +44,13 @@ export class CustomerController {
     @Query() query: ListCustomersQueryDto,
     @Res({ passthrough: true }) res?: Response,
   ): Promise<CustomerResponseDto[] | CustomerLiteResponseDto[]> {
-    const sortOrder = query.order ?? query.sortOrder;
-
     const { items, total } = await this.listCustomersUseCase.execute({
       term: query.search,
       country: query.country,
       page: query.page,
       limit: query.limit,
       sortBy: query.sortBy,
-      sortOrder,
+      sortOrder: query.order,
     });
 
     if (res) {

@@ -42,20 +42,15 @@ export class ListCustomersQueryDto {
   @IsIn(CUSTOMER_SORTABLE_FIELDS)
   sortBy?: CustomerSortField;
 
+  // Normalizes query string values like 'asc'/'desc' to uppercase to match domain directions
   @IsOptional()
   @Transform(({ value }: { value: unknown }) =>
-    typeof value === 'string' ? (value.toUpperCase() as SortOrderDirection) : value,
+    typeof value === 'string' ? value.toUpperCase() : value,
   )
   @IsIn(SORT_ORDER_DIRECTIONS)
   order?: SortOrderDirection;
 
-  @IsOptional()
-  @Transform(({ value }: { value: unknown }) =>
-    typeof value === 'string' ? (value.toUpperCase() as SortOrderDirection) : value,
-  )
-  @IsIn(SORT_ORDER_DIRECTIONS)
-  sortOrder?: SortOrderDirection;
-
+  // Read-model projection: 'lite' returns only id, companyName, and country for high-performance dropdowns
   @IsOptional()
   @IsIn(['lite', 'full'])
   fields?: 'lite' | 'full';
