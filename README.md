@@ -69,10 +69,10 @@ npm start
 ### Paso 3: Verificación de Calidad y Tests en 1 Comando
 
 ```bash
-# 1. Ejecución de la suite completa de 352 tests unitarios (128 backend Jest + 224 frontend Vitest)
+# 1. Ejecución de la suite completa de 475 tests unitarios (184 backend Jest + 291 frontend Vitest)
 npm test
 
-# 2. Informes de cobertura de código unificados (> 90% en backend y > 95% en frontend)
+# 2. Informes de cobertura de código unificados (> 90% ramas y 100% líneas en backend / > 99% en frontend)
 npm run test:coverage
 
 # 3. Análisis estático ultra-rápido con Oxlint (0 errores, 0 advertencias)
@@ -158,20 +158,20 @@ El proyecto cuenta con plantillas de variables de entorno versionadas:
 
 ## 🧪 Pirámide de Pruebas y Cobertura (Testing Strategy)
 
-El proyecto cuenta con cobertura exhaustiva (284 pruebas unitarias y de integración pasando al 100% con 90% en backend y 93% en frontend):
+El proyecto cuenta con cobertura exhaustiva (475 pruebas unitarias y de integración pasando al 100% con >90% ramas y 100% líneas en backend y >99% en frontend):
 
 ```bash
 # Ejecutar la suite completa desde la raíz:
 npm test
 
-# Ejecutar el informe de cobertura unificado (90.0% backend / 93.0% frontend):
+# Ejecutar el informe de cobertura unificado:
 npm run test:coverage
 
 # O ejecutar por separado según el módulo de interés:
-npm run test:backend           # 123 tests de Dominio, Casos de Uso, Mappers, Servicios Fiscales y E2E
-npm run test:frontend          # 161 tests de Componentes, Signals, Servicios i18n, Dialogs y Pipes (Vitest)
-npm run test:coverage:backend  # Reporte de cobertura Jest (90.0% líneas)
-npm run test:coverage:frontend # Reporte de cobertura Vitest v8 (93.0% líneas)
+npm run test:backend           # 184 tests de Dominio, Casos de Uso, Mappers, Servicios Fiscales y Controladores (Jest)
+npm run test:frontend          # 291 tests de Componentes, Signals, Servicios i18n, Dialogs y Pipes (Vitest)
+npm run test:coverage:backend  # Reporte de cobertura Jest (100% líneas, 90.4% ramas)
+npm run test:coverage:frontend # Reporte de cobertura Vitest v8 (99.7% líneas, 99.3% funciones)
 ```
 
 ### Detalle por subsistema:
@@ -232,5 +232,5 @@ En cumplimiento con los criterios de evaluación del reto (35% Planificación y 
 
 1. **[`01-specs/`](ai-workspace/01-specs/)**: Especificaciones funcionales rigurosas (`functional-specs.md`), reglas fiscales (DNI/NIE/CIF y tramos graduales) y contrato `openapi.yaml`.
 2. **[`02-architecture/`](ai-workspace/02-architecture/)**: Directrices de Arquitectura Hexagonal (`architecture-guidelines.md`), principios SOLID, árbol canónico, decisiones de concurrencia y gobernanza de IA (Sección 6).
-3. **[`03-vibe-coding-log/`](ai-workspace/03-vibe-coding-log/)**: Bitácora cronológica auditada (`prompts-and-audits.md`) con las dos dimensiones del rol de Director de Orquesta: inputs estratégicos de arquitectura y auditoría continua de calidad frente a los sesgos de la IA.
+3. **[`03-vibe-coding-log/`](ai-workspace/03-vibe-coding-log/)**: Bitácora cronológica auditada (`prompts-and-audits.md`) encabezada por un **Resumen Ejecutivo de 2 minutos para el evaluador** (con los 6 momentos críticos donde el criterio senior corrigió a la IA y tabla comparativa), seguido del apéndice de auditoría forense paso a paso.
 4. **Gobernanza Persistente del Agente de IA**: Configuración universal viva en la raíz con [`AGENTS.md`](AGENTS.md) y [`.agents/rules/coding-standards.md`](.agents/rules/coding-standards.md), reconocida automáticamente por los principales agentes de desarrollo (Google Antigravity, Cursor, Claude Code, Gemini CLI, Copilot) para forzar el cumplimiento incondicional de los estándares de calidad.
