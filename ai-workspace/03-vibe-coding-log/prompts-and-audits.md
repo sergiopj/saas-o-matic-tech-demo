@@ -4136,9 +4136,6 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
 
 - **Fecha:** 18 de noviembre de 2026.
 - **Contexto / Desafío:**
-  El usuario señaló que [home.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/home/pages/home/home.component.ts) acumulaba demasiada lógica acoplada de deslizamiento, arrastre y animaciones:
-  > *"Revisando `HomeComponent`, observo que la vista acumula demasiadas responsabilidades: mezcla la presentación del dashboard y métricas KPI con la matemática de deslizamiento, listeners de redimensionado y eventos táctiles del carrusel. Aplica descomposición de componentes: extrae el carrusel a un componente de presentación reutilizable e independiente (`CustomerCarouselComponent`)."*
-- **Análisis de Olor a Código (Code Smell Identificado):**
   1. *Violación del Principio de Responsabilidad Única (SRP):* `HomeComponent` actuaba como controlador de página ejecutiva (carga de métricas, KPIs animados, enlaces rápidos) y simultáneamente como un motor de física de carrusel (gestión de coordenadas de arrastre con ratón, gestos táctiles en móvil, cálculo de límites `maxSlideIndex`, listener global de `resize` sobre `window` y 240 líneas de CSS específicas de la botonera y las tarjetas).
   2. *Acoplamiento Visual y Matemático:* Las matemáticas de deslizamiento por bloques según el ancho de pantalla (`visibleCardsCount`) ensuciaban el ciclo de vida y los tests de la vista Home.
 - **Acciones Ejecutadas:**
