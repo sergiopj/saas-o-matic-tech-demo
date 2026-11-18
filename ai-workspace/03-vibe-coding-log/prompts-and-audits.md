@@ -4350,3 +4350,33 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
   - **Total Ecosistema:** **428 pruebas unitarias automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Cobertura del 100% de accesibilidad WCAG / W3C con i18n completa en todas las imágenes de la aplicación, eliminando cualquier cadena literal residual.
+
+
+### 6.191. Refactorización Clean Code: Simplificación de Cláusula de Guarda en `LocalizedCurrencyPipe`
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario consultó si la condición de guarda en [localized-currency.pipe.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/pipes/localized-currency.pipe.ts#L12-L16) era mejorable bajo principios Clean Code:
+  > *"clean code ?
+  > 
+  >  if (amountInEur === null || amountInEur === undefined || Number.isNaN(amountInEur)) {
+  >       return '—';
+  >     }"*
+- **Análisis de Olor a Código (Code Smell):**
+  1. *Comprobación Procedimental Redundante:* La condición `amountInEur === null || amountInEur === undefined` repite explícitamente ambas comprobaciones por separado cuando en el ecosistema estándar de JavaScript/TypeScript el modismo oficial e idiomático (permitido y recomendado por ESLint y Oxlint) es `amountInEur == null`, el cual abarca tanto `null` como `undefined` en una sola comparación concisa.
+  2. *Vulnerabilidad ante Valores No Finitos:* Comprobar únicamente `Number.isNaN` deja desprotegido el formateador ante valores extremos como `Infinity` o `-Infinity`, que generarían cadenas anómalas como `∞ €` o `Infinity €`.
+  3. *Inferencia de Tipos de TypeScript:* Al usar `amountInEur == null || !Number.isFinite(amountInEur)`, el primer operando estrecha el tipo de `amountInEur` a `number`, permitiendo a `Number.isFinite` validar la finitud matemática del número y descartar `NaN`, `+Infinity` y `-Infinity` limpiamente.
+- **Solución Aplicada:**
+  - Sustituida la condición triple por:
+    ```typescript
+    if (amountInEur == null || !Number.isFinite(amountInEur)) {
+      return '—';
+    }
+    ```
+  - Ampliada la suite de pruebas en [localized-currency.pipe.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/pipes/localized-currency.pipe.spec.ts) para verificar que valores como `Infinity` y `-Infinity` también devuelven `'—'`.
+- **Resultados de Verificación:**
+  - **Frontend Oxlint:** **0 errores y 0 advertencias** (77 archivos analizados).
+  - **Frontend Vitest Tests:** **269 pruebas pasando al 100%** (32 suites).
+  - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
+  - **Total Ecosistema:** **428 pruebas unitarias automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Demuestra dominio idiomático del lenguaje (TypeScript / ECMAScript moderno), reduciendo ruido sintáctico procedural y fortaleciendo la robustez del cálculo financiero ante casos extremos.
