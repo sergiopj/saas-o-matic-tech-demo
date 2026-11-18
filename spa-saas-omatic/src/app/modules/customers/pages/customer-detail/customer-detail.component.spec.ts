@@ -275,7 +275,7 @@ describe('CustomerDetailComponent', () => {
 
   it('should trigger snackBar toast when email dialog returns sent: true in detail view', () => {
     const dialog = TestBed.inject(MatDialog);
-    const snackBar = fixture.debugElement.injector.get(MatSnackBar);
+    const snackBar = TestBed.inject(MatSnackBar);
     const snackBarSpy = vi.spyOn(snackBar, 'open');
     vi.spyOn(dialog, 'open').mockReturnValue({
       afterClosed: () => of({ sent: true, recipient: 'test@example.com' }),

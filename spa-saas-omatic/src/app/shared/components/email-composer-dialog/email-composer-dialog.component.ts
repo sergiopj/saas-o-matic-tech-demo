@@ -31,6 +31,12 @@ export interface EmailComposerDialogData {
   htmlBody?: string;
 }
 
+export interface EmailComposerDialogResult {
+  sent: boolean;
+  recipient?: string;
+  messageId?: string;
+}
+
 /**
  * Enterprise dialog for drafting, rich-text editing (Quill WYSIWYG), and dispatching
  * commercial proposals and notifications directly to the backend POST /emails endpoint.

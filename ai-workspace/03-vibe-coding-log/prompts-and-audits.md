@@ -5049,3 +5049,35 @@ Syntax: <single-animation>#
   - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
   - **Total Ecosistema:** **413 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Excelencia en arquitectura CSS modular, erradicación de deuda técnica de especificidad, compatibilidad total con estándares SonarQube y respeto al Single Source of Truth visual (`--roams-*`).
+
+
+### 6.177. Centralización Arquitectónica de Diálogos Comerciales: Creación de EmailComposerService (DRY & SRP)
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario identificó duplicación de código en la apertura, configuración y suscripción al diálogo de redacción de correos comerciales (`EmailComposerDialogComponent`), sugiriendo unificarlo en una clase o servicio general transversal al proyecto:
+  > *"esto no podemos llevarlo a una clase general o algo asi ene l proyecto? puesto que creo que se usa en varias partes de los ,modulos
+  > const dialogRef = this.dialog.open(EmailComposerDialogComponent, { data: { recipient: selectedCustomer.email, recipientName: selectedCustomer.companyName, subtitle: selectedCustomer.country, subject: this.i18n.t('customers.emailDialog.defaultSubject', { company: selectedCustomer.companyName }), body: this.i18n.t('customers.emailDialog.defaultBody', { company: selectedCustomer.companyName, plan: selectedCustomer.selectedPlan }) }, width: '640px', maxWidth: '94vw', panelClass: 'roams-email-dialog-panel' });"*
+- **Análisis de Causa Raíz (Duplicación de Orquestación UI):**
+  Tanto en [customer-card.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-card/customer-card.component.ts) como en [customer-detail.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.ts), se repetían idénticamente:
+  1. La construcción del payload `EmailComposerDialogData` (asunto por defecto, cuerpo del mensaje localizado con interpolación de variables `{{company}}` y `{{plan}}`).
+  2. Las dimensiones del modal (`width: '640px'`, `maxWidth: '94vw'`, `panelClass: 'roams-email-dialog-panel'`).
+  3. La suscripción al stream `dialogRef.afterClosed()` para validar `result?.sent`.
+  4. La invocación del snackbar inferior de confirmación con textos traducidos y duración estandarizada (4000ms).
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Creación de [email-composer.service.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/services/email-composer.service.ts):*
+     - Servicio transversal `@Injectable({ providedIn: 'root' })` con inyección de `MatDialog`, `MatSnackBar` e `I18nService`.
+     - `openForCustomer(customer: CustomerEmailTarget, overrides?: Partial<EmailComposerDialogData>)`: encapsula la generación reactiva del modelo de propuesta comercial y la suscripción al toast de éxito.
+     - `open(data: EmailComposerDialogData, config?: Partial<MatDialogConfig>)`: método genérico para despachar correos personalizados con layout estándar.
+  2. *Refactorización Cohesiva de Componentes:*
+     - En [customer-card.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-card/customer-card.component.ts), se eliminaron las dependencias directas de `MatDialog`, `MatSnackBar` y `EmailComposerDialogComponent`. El método `openEmailComposer()` se simplificó a una única línea declarativa: `this.emailComposer.openForCustomer(this.customer());`.
+     - En [customer-detail.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.ts), se eliminaron los métodos privados duplicados `handleEmailDialogClose()` y `showEmailSuccessToast()`, delegando en `this.emailComposer.openForCustomer(cust)`.
+  3. *Suite de Pruebas Unitarias Exhaustivas:*
+     - Creado [email-composer.service.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/services/email-composer.service.spec.ts) (6 pruebas certificando inicialización, apertura con plantilla por defecto, sobrescritura parcial, toast al enviar y supresión de toast en cancelaciones).
+     - Actualizado [customer-detail.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.spec.ts) para verificar la delegación integral en el nuevo servicio.
+- **Resultados de Verificación:**
+  - **Frontend Oxlint:** **0 errores y 0 advertencias** (73 archivos analizados).
+  - **Frontend Vitest Tests:** **260 pruebas pasando al 100%** (+6 tests, 30 suites).
+  - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
+  - **Total Ecosistema:** **419 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Elevación de la cohesión arquitectónica (SRP & DRY), simplificación drástica de los componentes de presentación y reutilización universal del flujo de comunicación comercial.

@@ -15,8 +15,8 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { CustomerApiService } from '../../services/customer-api.service';
@@ -29,11 +29,11 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { LocalizedCurrencyPipe } from '../../../../shared/pipes/localized-currency.pipe';
 import { LoadingStateComponent } from '../../../../shared/components/loading-state/loading-state.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
-import { EmailComposerDialogComponent } from '../../../../shared/components/email-composer-dialog/email-composer-dialog.component';
 import { CustomerCreateDialogComponent } from '../../components/customer-create-dialog/customer-create-dialog.component';
 import { SlideOverDrawerComponent } from '../../../../shared/components/slide-over-drawer/slide-over-drawer.component';
 import { PaginatorComponent } from '../../../../shared/components/paginator/paginator.component';
 import { I18nService } from '../../../../core/services/i18n.service';
+import { EmailComposerService } from '../../../../core/services/email-composer.service';
 
 /**
  * Customer Detail view and Interactive Simulation Studio.
@@ -56,7 +56,6 @@ import { I18nService } from '../../../../core/services/i18n.service';
     MatFormFieldModule,
     MatInputModule,
     MatTooltipModule,
-    MatSnackBarModule,
     MatDatepickerModule,
     TranslatePipe,
     LocalizedCurrencyPipe,
@@ -75,6 +74,7 @@ export class CustomerDetailComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly i18n = inject(I18nService);
+  private readonly emailComposer = inject(EmailComposerService);
   readonly customerApi = inject(CustomerApiService);
   readonly simulationApi = inject(SimulationApiService);
   readonly currencyService = inject(CurrencyService);
@@ -326,44 +326,7 @@ export class CustomerDetailComponent implements OnInit {
   openEmailComposer(): void {
     const cust = this.customer();
     if (!cust) return;
-
-    const dialogRef = this.dialog.open(EmailComposerDialogComponent, {
-      data: {
-        recipient: cust.email,
-        recipientName: cust.companyName,
-        subtitle: cust.country,
-        subject: this.i18n.t('customers.emailDialog.defaultSubject', {
-          company: cust.companyName,
-        }),
-        body: this.i18n.t('customers.emailDialog.defaultBody', {
-          company: cust.companyName,
-          plan: cust.selectedPlan,
-        }),
-      },
-      width: '640px',
-      maxWidth: '94vw',
-      panelClass: 'roams-email-dialog-panel',
-    });
-
-    this.handleEmailDialogClose(dialogRef);
-  }
-
-  private handleEmailDialogClose(
-    dialogRef: MatDialogRef<EmailComposerDialogComponent>
-  ): void {
-    dialogRef.afterClosed().subscribe((result: { sent?: boolean } | undefined) => {
-      if (result?.sent) {
-        this.showEmailSuccessToast();
-      }
-    });
-  }
-
-  private showEmailSuccessToast(): void {
-    this.snackBar.open(this.i18n.t('customers.emailDialog.sentSuccess'), 'OK', {
-      duration: 4000,
-      horizontalPosition: 'center',
-      verticalPosition: 'bottom',
-    });
+    this.emailComposer.openForCustomer(cust);
   }
 
   openEditCustomerDialog(): void {
