@@ -4330,3 +4330,53 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
   - Total Ecosistema: **405 pruebas pasando al 100%**.
 - **Valor para la evaluación:** Refleja la colaboración evaluador-arquitecto para transformar un validador funcional pero monolítico en un módulo funcional limpio, declarativo, testeable por piezas y altamente performante.
+
+
+### 6.159. Auditoría y Refactorización Clean Code: Descomposición Funcional Cohesiva y Optimización del Validador Fiscal (`spanish-fiscal.validator.ts`)
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario analizó el validador fiscal del dominio [spanish-fiscal.validator.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/domain/services/spanish-fiscal.validator.ts) y propuso modularizarlo descomponiendo las validaciones en funciones especializadas dentro del mismo fichero con comentarios técnicos naturales en inglés:
+  > *"creo que en este validador lo mismo quizas si lo ves bien se puedan sacar distintas fiunciones que validen en el mismo fichero o no lo ve snecesario?
+  > ...
+  > si aplicalo y ademas pon pequeños comentarios en ingles de que hace cada validacion pero que no se note que se hacen tan ia roboticos"*
+- **Análisis de Diseño y Principios Clean Code:**
+  1. *Acoplamiento Algorítmico en `isValidCif`:* La función original concentraba la validación por expresión regular, el cálculo aritmético de ponderación de la AEAT (suma de pares e impares reducidos mod 10) y la lógica de clasificación de tipo de sociedad (tipos K, P, Q, S con letra; A, B, E, H con número; resto mixto).
+  2. *Duplicación entre DNI y NIE:* Ambos formatos compartían la lógica de módulo 23 para obtener la letra de control a partir de una secuencia numérica.
+  3. *Optimización de Memoria y Runtimes:* Las expresiones regulares y arrays de tipos se creaban dinámicamente en el heap en cada invocación; se requería elevarlos a constantes inmutables precompiladas y usar `Set.prototype.has` para búsquedas en tiempo constante $O(1)$.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Descomposición en Funciones de Responsabilidad Única ([spanish-fiscal.validator.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/domain/services/spanish-fiscal.validator.ts)):*
+     - `getDniControlLetter(numericPart: number): string`: Función pura que computa la letra oficial del DNI/NIE por módulo 23 (reutilizada por DNI y NIE sin duplicidad).
+     - `calculateCifChecksum(digits: string): CifChecksum`: Encapsula exclusivamente el algoritmo matemático oficial de la AEAT, retornando `{ controlDigit, controlLetter }`.
+     - `matchesCifControl(firstLetter, controlChar, checksum): boolean`: Aplica las reglas de correspondencia según la forma jurídica de la entidad.
+     - `isValidSpanishTaxId(normalizedTaxId: string): boolean`: Agrupador limpio para documentos españoles (DNI, NIE o CIF).
+... [truncated for diff preview]
+
+
+### 6.160. Auditoría de Encapsulamiento e Information Hiding: Delimitación de Visibilidad Pública vs. Privada en `spanish-fiscal.validator.ts`
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario planteó una duda arquitectónica sobre el alcance (*scope*) y la visibilidad de las funciones recién descompuestas en [spanish-fiscal.validator.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/domain/services/spanish-fiscal.validator.ts):
+  > *"esas funciones validadoras necesitan ser exportadas? o private para usarse solo en esta clase, eso no lo tengo muy claro lo mismo lo hiciste bien ya"*
+- **Análisis de Diseño y Principios de Encapsulamiento (Information Hiding - David Parnas):**
+  1. *Fuga de la API Pública:* Exportar indiscriminadamente funciones de apoyo interno ensucia la superficie de la API del módulo de dominio y tienta a otros consumidores a acoplarse a detalles de implementación que deberían ser privados.
+  2. *Delimitación de la Superficie Pública:*
+     - **Exportadas (API Pública del Servicio de Dominio):**
+       - `isValidTaxId(rawTaxId, country)`: El contrato consumido por la entidad `Customer`.
+       - `isValidDni(normalizedId)`, `isValidNie(normalizedId)`, `isValidCif(normalizedId)`: Las tres especificaciones formales de identificación fiscal española, auditadas y probadas por `spanish-fiscal.validator.spec.ts`.
+     - **Privadas al Módulo (Sin `export`):**
+       - `getDniControlLetter`: Fontanería matemática módulo 23.
+       - `calculateCifChecksum` e interfaz `CifChecksum`: Algoritmo aritmético de ponderación interno de la AEAT.
+       - `matchesCifControl`: Lógica de correspondencia de caracteres de control por tipo de sociedad.
+       - `isValidSpanishTaxId` e `isValidInternationalTaxId`: Despachadores de conveniencia internos.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Eliminación de `export`:* Se retiró la cláusula `export` de `getDniControlLetter`, `CifChecksum`, `calculateCifChecksum`, `matchesCifControl`, `isValidSpanishTaxId` e `isValidInternationalTaxId`.
+  2. *Encapsulamiento Robusto:* Las funciones auxiliares quedan estrictamente confinadas como funciones privadas del archivo TypeScript (*module-private*), manteniendo una API pública compacta y limpia.
+- **Resultados de Verificación:**
+  - Compilación NestJS (`nest build`): **0 errores**.
+  - Backend Jest: **151 pruebas unitarias pasando al 100%** (29 suites).
+  - Frontend Vitest: **254 pruebas unitarias pasando al 100%** (29 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Total Ecosistema: **405 pruebas pasando al 100%**.
+- **Valor para la evaluación:** Refuerza la madurez en el principio de menor privilegio (*Least Privilege*) y el encapsulamiento formal en TypeScript, distinguiendo con precisión qué partes de un servicio de dominio pertenecen al contrato público y cuáles deben permanecer como detalles privados de implementación.

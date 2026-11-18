@@ -27,7 +27,7 @@ const NIE_PREFIX_MAP: Record<string, string> = {
 /**
  * Computes the official DNI/NIE control letter via modulo 23.
  */
-export function getDniControlLetter(numericPart: number): string {
+function getDniControlLetter(numericPart: number): string {
   return DNI_LETTERS[numericPart % 23] ?? '';
 }
 
@@ -62,7 +62,7 @@ export function isValidNie(normalizedId: string): boolean {
   return getDniControlLetter(numericPart) === actualLetter;
 }
 
-export interface CifChecksum {
+interface CifChecksum {
   controlDigit: number;
   controlLetter: string;
 }
@@ -70,7 +70,7 @@ export interface CifChecksum {
 /**
  * Calculates AEAT control values from the 7-digit body of a CIF.
  */
-export function calculateCifChecksum(digits: string): CifChecksum {
+function calculateCifChecksum(digits: string): CifChecksum {
   // Sum even-indexed positions (1-based positions 2, 4, 6)
   const evenSum =
     Number.parseInt(digits.charAt(1), 10) +
@@ -94,7 +94,7 @@ export function calculateCifChecksum(digits: string): CifChecksum {
 /**
  * Verifies whether the control character matches the expected type for the entity letter.
  */
-export function matchesCifControl(
+function matchesCifControl(
   firstLetter: string,
   controlChar: string,
   checksum: CifChecksum,
@@ -132,7 +132,7 @@ export function isValidCif(normalizedId: string): boolean {
 /**
  * Checks if the identifier matches any valid Spanish tax format (DNI, NIE, or CIF).
  */
-export function isValidSpanishTaxId(normalizedTaxId: string): boolean {
+function isValidSpanishTaxId(normalizedTaxId: string): boolean {
   return (
     isValidDni(normalizedTaxId) ||
     isValidNie(normalizedTaxId) ||
@@ -143,7 +143,7 @@ export function isValidSpanishTaxId(normalizedTaxId: string): boolean {
 /**
  * Checks generic international tax format (5-20 alphanumeric characters).
  */
-export function isValidInternationalTaxId(normalizedTaxId: string): boolean {
+function isValidInternationalTaxId(normalizedTaxId: string): boolean {
   return INTERNATIONAL_TAX_ID_REGEX.test(normalizedTaxId);
 }
 
