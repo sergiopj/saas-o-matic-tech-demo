@@ -19,9 +19,9 @@ export class SimulationPersistenceAdapter implements SimulationRepositoryPort {
     return SimulationPersistenceMapper.toDomain(saved);
   }
 
-  async findByCustomerId(customerId: string): Promise<Simulation[]> {
+  async findByCustomerId(customerId?: string): Promise<Simulation[]> {
     const records = await this.repository.find({
-      where: { customerId },
+      ...(customerId ? { where: { customerId } } : {}),
       order: { createdAt: 'DESC' },
     });
     return records.map((record) => SimulationPersistenceMapper.toDomain(record));

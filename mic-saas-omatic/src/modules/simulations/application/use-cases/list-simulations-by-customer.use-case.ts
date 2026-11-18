@@ -10,7 +10,7 @@ export class ListSimulationsByCustomerUseCase {
     private readonly simulationRepository: SimulationRepositoryPort,
   ) {}
 
-  public async execute(customerId: string): Promise<Simulation[]> {
+  public async execute(customerId?: string): Promise<Simulation[]> {
     return this.simulationRepository.findByCustomerId(customerId);
   }
 }

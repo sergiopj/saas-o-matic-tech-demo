@@ -70,4 +70,12 @@ describe('SimulationController (Primary Adapter)', () => {
     expect(response[0].customerId).toBe('customer-uuid-1');
     expect(response[0].currency).toBe('EUR');
   });
+
+  it('should return all simulations when customerId is omitted', async () => {
+    const response = await controller.findByCustomer();
+
+    expect(mockListSimulationsByCustomerUseCase.execute).toHaveBeenCalledWith(undefined);
+    expect(response).toHaveLength(1);
+    expect(response[0].id).toBe('sim-uuid-1');
+  });
 });

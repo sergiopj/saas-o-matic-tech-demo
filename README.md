@@ -74,7 +74,7 @@ npm start
 ### Paso 3: Verificación de Calidad y Tests en 1 Comando
 
 ```bash
-# 1. Ejecución de la suite completa de 475 tests unitarios (184 backend Jest + 291 frontend Vitest)
+# 1. Ejecución de la suite completa de 478 tests unitarios (187 backend Jest + 291 frontend Vitest)
 npm test
 
 # 2. Informes de cobertura de código unificados (> 90% ramas y 100% líneas en backend / > 99% en frontend)
@@ -163,7 +163,7 @@ El proyecto cuenta con plantillas de variables de entorno versionadas:
 
 ## 🧪 Pirámide de Pruebas y Cobertura (Testing Strategy)
 
-El proyecto cuenta con cobertura exhaustiva (475 pruebas unitarias y de integración pasando al 100% con >90% ramas y 100% líneas en backend y >99% en frontend):
+El proyecto cuenta con cobertura exhaustiva (478 pruebas unitarias y de integración pasando al 100% con >90% ramas y 100% líneas en backend y >99% en frontend):
 
 ```bash
 # Ejecutar la suite completa desde la raíz:
@@ -173,7 +173,7 @@ npm test
 npm run test:coverage
 
 # O ejecutar por separado según el módulo de interés:
-npm run test:backend           # 184 tests de Dominio, Casos de Uso, Mappers, Servicios Fiscales y Controladores (Jest)
+npm run test:backend           # 187 tests de Dominio, Casos de Uso, Mappers, Servicios Fiscales y Controladores (Jest)
 npm run test:frontend          # 291 tests de Componentes, Signals, Servicios i18n, Dialogs y Pipes (Vitest)
 npm run test:coverage:backend  # Reporte de cobertura Jest (100% líneas, 90.4% ramas)
 npm run test:coverage:frontend # Reporte de cobertura Vitest v8 (99.7% líneas, 99.3% funciones)

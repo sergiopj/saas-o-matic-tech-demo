@@ -50,4 +50,11 @@ describe('ListSimulationsByCustomerUseCase', () => {
 
     expect(result).toHaveLength(0);
   });
+
+  it('should return simulations when customerId is omitted', async () => {
+    const result = await useCase.execute();
+
+    expect(mockSimulationRepository.findByCustomerId).toHaveBeenCalledWith(undefined);
+    expect(result).toHaveLength(1);
+  });
 });

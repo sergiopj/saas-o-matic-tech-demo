@@ -4,5 +4,5 @@ export const SIMULATION_REPOSITORY_PORT = Symbol('SIMULATION_REPOSITORY_PORT');
 
 export interface SimulationRepositoryPort {
     save(simulation: Simulation): Promise<Simulation>;
-    findByCustomerId(customerId: string): Promise<Simulation[]>;
+    findByCustomerId(customerId?: string): Promise<Simulation[]>;
 }

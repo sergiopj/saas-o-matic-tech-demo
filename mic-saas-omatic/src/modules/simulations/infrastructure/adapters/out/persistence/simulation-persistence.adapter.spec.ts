@@ -109,4 +109,15 @@ describe('SimulationPersistenceAdapter (Secondary Adapter)', () => {
       order: { createdAt: 'DESC' },
     });
   });
+
+  it('should find all simulations without customer filter when customerId is omitted', async () => {
+    (mockTypeOrmRepo.find as jest.Mock).mockResolvedValue([]);
+
+    const results = await adapter.findByCustomerId();
+
+    expect(results).toEqual([]);
+    expect(mockTypeOrmRepo.find).toHaveBeenCalledWith({
+      order: { createdAt: 'DESC' },
+    });
+  });
 });
