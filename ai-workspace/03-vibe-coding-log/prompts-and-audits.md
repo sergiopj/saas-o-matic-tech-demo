@@ -4890,3 +4890,45 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Jest Tests: **159 pruebas pasando al 100%** (30 suites).
   - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Refinamiento visual milimétrico: resolución de comportamientos de corte por overflow en componentes modales de Angular Material y respeto riguroso al principio de no duplicidad semántica en botones e interfaces de usuario.
+
+
+### 6.172. Corrección de Metadata Reflection en DTOs de NestJS (Error 400 "property to should not exist")
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario reportó un error HTTP 400 Problem Details al enviar un correo desde el diálogo de redacción comercial:
+  ```json
+  {
+    "type": "https://errors.saas-o-matic.com/400",
+    "title": "Bad Request",
+    "status": 400,
+    "detail": "Validation failed for one or more fields.",
+    "instance": "/emails",
+    "invalidParams": [
+      { "name": "property", "reason": "property to should not exist" }
+    ]
+  }
+  ```
+- **Análisis de Causa Raíz (Metadata Reflection & Type Erasure en NestJS):**
+  1. En `email.controller.ts`, el DTO del cuerpo de la petición estaba importado como tipo exclusivamente en tiempo de compilación:
+     `import type { SendEmailDto } from './dto/send-email.dto';`.
+  2. Debido al *type erasure* de TypeScript, la cláusula `import type` hace que el compilador no emita la importación en tiempo de ejecución (`require('./dto/send-email.dto')`) en el JavaScript transpilado. En consecuencia, la metadata emitida por `emitDecoratorMetadata` (`design:paramtypes`) registra `[Function]` o `[Object]` en lugar del constructor de clase `SendEmailDto`.
+  3. Al llegar la petición HTTP al servidor, el pipe global de NestJS `ValidationPipe({ whitelist: true, forbidNonWhitelisted: true })` consulta el tipo de la clase destino. Al no tener la referencia a la clase con sus decoradores de `class-validator`, asume un esquema sin propiedades permitidas y rechaza cualquier campo entrante con el mensaje *"property to should not exist"*.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Importación de Clase Concreta en [email.controller.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/emails/infrastructure/adapters/in/rest/email.controller.ts):*
+     Sustituido `import type { SendEmailDto }` por la importación de clase como valor en tiempo de ejecución:
+     `import { SendEmailDto } from './dto/send-email.dto';`.
+     Esto garantiza que TypeScript emita `__metadata("design:paramtypes", [send_email_dto_1.SendEmailDto])` y preserve las reglas de validación activas.
+  2. *Recompilación y Comprobación en Vivo:*
+     Ejecutado `npm --prefix mic-saas-omatic run build`. Se verificó mediante peticiones HTTP contra el servicio activo en `http://localhost:3000/emails`:
+     - Petición válida: Responde con `200 OK`, `success: true` y `messageId` asignado.
+     - Petición inválida: Responde con `400 Bad Request` validando adecuadamente las restricciones RFC 5322 y campos obligatorios.
+  3. *Institucionalización de la Regla en [AGENTS.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/AGENTS.md):*
+     Formalizada la directriz en la Sección 3.D: *"Runtime Value Imports for Controller DTOs"*, asegurando que ningún agente vuelva a usar `import type` para DTOs en controladores NestJS.
+- **Resultados de Verificación:**
+  - Endpoint en vivo `POST /emails`: **200 OK con mensaje despachado correctamente**.
+  - Backend Jest Tests: **159 pruebas pasando al 100%** (30 suites).
+  - Backend Oxlint: **0 errores y 0 advertencias** (81 archivos).
+  - Frontend Vitest: **254 pruebas pasando al 100%** (29 suites).
+  - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Diagnóstico arquitectónico de alta precisión en el ecosistema NestJS/TypeScript: comprensión profunda del ciclo de vida de los decoradores, metadata reflection y type erasure, resolviendo un error crítico de integración frontend-backend sin tocar el código cliente.

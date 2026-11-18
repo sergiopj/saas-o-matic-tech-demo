@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import type { SendEmailDto } from './dto/send-email.dto';
+import { SendEmailDto } from './dto/send-email.dto';
 import type { SendEmailResult } from '../../../../application/use-cases/send-email.use-case';
 import { SendEmailUseCase } from '../../../../application/use-cases/send-email.use-case';
 
