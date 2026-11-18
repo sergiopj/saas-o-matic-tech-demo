@@ -22,10 +22,12 @@ describe('LocalizedCurrencyPipe', () => {
     currencyService = TestBed.inject(CurrencyService);
   });
 
-  it('should return em-dash for null, undefined or NaN values', () => {
+  it('should return em-dash for null, undefined, NaN or non-finite values', () => {
     expect(pipe.transform(null)).toBe('—');
     expect(pipe.transform(undefined)).toBe('—');
     expect(pipe.transform(NaN)).toBe('—');
+    expect(pipe.transform(Infinity)).toBe('—');
+    expect(pipe.transform(-Infinity)).toBe('—');
   });
 
   it('should format amount in EUR using Spanish locale formatting (1250,50 €)', () => {

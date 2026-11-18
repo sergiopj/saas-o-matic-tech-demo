@@ -10,7 +10,7 @@ export class LocalizedCurrencyPipe implements PipeTransform {
   private readonly currencyService = inject(CurrencyService);
 
   transform(amountInEur: number | null | undefined, overrideCurrency?: CurrencyCode): string {
-    if (amountInEur === null || amountInEur === undefined || Number.isNaN(amountInEur)) {
+    if (amountInEur == null || !Number.isFinite(amountInEur)) {
       return '—';
     }
 
