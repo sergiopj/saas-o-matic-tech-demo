@@ -36,7 +36,7 @@ export interface CountryOption {
 }
 
 export const COUNTRY_OPTIONS: CountryOption[] = [
-  { code: 'ES', nameKey: 'España', flag: '🇪🇸', placeholder: 'Ej. B12345674 o 12345678Z' },
+  { code: 'ES', nameKey: 'España', flag: '🇪🇸', placeholder: 'Ej. B12345674' },
   { code: 'DE', nameKey: 'Deutschland', flag: '🇩🇪', placeholder: 'Ej. DE999888777' },
   { code: 'FR', nameKey: 'France', flag: '🇫🇷', placeholder: 'Ej. FR45801234567' },
   { code: 'GB', nameKey: 'United Kingdom', flag: '🇬🇧', placeholder: 'Ej. GB123456789' },

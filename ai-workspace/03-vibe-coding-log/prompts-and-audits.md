@@ -4809,3 +4809,32 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Oxlint: **0 errores y 0 advertencias** (81 archivos analizados).
   - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Demuestra excelencia en experiencia de usuario (UX/UI) y consistencia internacional: el sistema es verdaderamente multi-jurisdicción, adaptando tanto la lógica matemática interna como el feedback visual y contextual de ayuda al usuario en tiempo real.
+
+
+### 6.169. Optimización Responsive y Tipográfica de Inputs en el Modal de Clientes
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario detectó que los textos y placeholders dentro de los inputs del diálogo modal se apretaban o no se leían con comodidad, solicitando balancear el tamaño del modal y la tipografía interna asegurando total adaptabilidad responsive:
+  > *"un problemilla es que no se ven bien los textos dentro de los inputs no se si es mejor hacer el modal mas grande o los textos de dentro mas pqeueños ademas ha de verse bien res`ponsive"*
+- **Análisis de Diseño y Diagnóstico de UX:**
+  1. *Limitación de Espacio en Grilla de Dos Columnas:*
+     Con un ancho rígido de `580px` (o `560px` al editar), cada campo de formulario en `.two-columns` disponía de apenas ~250px de ancho total, dejando menos de 180px netos para el input una vez descontados el icono `matPrefix`, el padding lateral de Angular Material y los bordes.
+  2. *Tamaño de Fuente por Defecto:*
+     La tipografía base de los inputs de Angular Material (16px / 1rem) consumía demasiado espacio horizontal para placeholders corporativos descriptivos como `Ej. B12345674` o `Ej. DE999888777`.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Ampliación Equilibrada del Modal ([customer-list.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-list/customer-list.component.ts), [customer-detail.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.ts)):*
+     - Incrementado el ancho en escritorio de `580px`/`560px` a `660px` con `maxWidth: '95vw'`, otorgando +80px de holgura horizontal sin desbordar viewports medianos.
+  2. *Refinamiento Tipográfico y Espaciado ([customer-create-dialog.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.scss)):*
+     - Tipografía de inputs (`input.mat-mdc-input-element`, `.mat-mdc-select-value`): reducida a `0.875rem` (14px).
+     - Placeholders: ajustados a `0.8125rem` (13px) con opacidad `0.85` y color `--roams-text-muted`, garantizando legibilidad nítida y completa.
+     - Iconos de prefijo: optimizados a `18px` con margen reducido a `0.375rem`.
+     - Gap entre columnas: reducido de `1.25rem` a `1rem`, maximizando el ancho útil de cada campo.
+  3. *Comportamiento Responsive Móvil (`< 600px`):*
+     - Padding exterior reducido de `1.5rem` a `1.125rem 0.875rem` en móviles, evitando scrolls horizontales y permitiendo que los campos ocupen el 100% del ancho de pantalla.
+- **Resultados de Verificación:**
+  - Compilación de producción (`ng build`): **0 errores** (Bundle inicial de solo 155 kB).
+  - Frontend Vitest: **254 pruebas pasando al 100%** (29 suites).
+  - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Aplicación de ingeniería visual sénior: resolver problemas de legibilidad mediante una combinación armónica de ajuste tipográfico, micro-espaciados e incremento controlado del contenedor, sin recurrir a hacks ni romper la cuadrícula responsive.

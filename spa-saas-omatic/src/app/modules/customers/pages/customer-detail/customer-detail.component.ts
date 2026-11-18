@@ -359,7 +359,7 @@ export class CustomerDetailComponent implements OnInit {
     if (!cust) return;
 
     const dialogRef = this.dialog.open(CustomerCreateDialogComponent, {
-      width: '560px',
+      width: '660px',
       maxWidth: '95vw',
       panelClass: 'corporate-dialog-panel',
       data: cust,

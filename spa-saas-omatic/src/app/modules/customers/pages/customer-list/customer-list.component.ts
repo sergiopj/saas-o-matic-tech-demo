@@ -259,7 +259,7 @@ export class CustomerListComponent implements OnInit {
 
   openCreateCustomerDialog(): void {
     const dialogRef = this.dialog.open(CustomerCreateDialogComponent, {
-      width: '580px',
+      width: '660px',
       maxWidth: '95vw',
     });
 
