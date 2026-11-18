@@ -1,33 +1,84 @@
-# AGENTS.md
+# mic-saas-omatic — Backend Agent Rules
 
-## NestJS
+> **Full specification**: [`../AGENTS.md`](../AGENTS.md) at the repository root is the authoritative source for all architectural, coding, accessibility, and linting rules. This file summarises the backend-specific constraints you must enforce every time you touch this microservice.
 
-This app's version of NestJS is likely newer than what you know. https://docs.nestjs.com/llms.txt indexes its documentation, with a markdown page per chapter.
+---
 
-Nest has first-party packages for these, so check them before adding another library or writing your own:
+## 1. Architecture — Hexagonal (Ports & Adapters), Zero Compromise
 
-- Databases: [`@nestjs/typeorm`](https://docs.nestjs.com/data/typeorm.md), [`@nestjs/drizzle`](https://docs.nestjs.com/data/drizzle.md), [`@nestjs/mongoose`](https://docs.nestjs.com/data/mongodb.md), [`@nestjs/sequelize`](https://docs.nestjs.com/data/sequelize.md).
-- OpenAPI: [`@nestjs/swagger`](https://docs.nestjs.com/openapi/introduction.md). GraphQL: [`@nestjs/graphql`](https://docs.nestjs.com/graphql/quick-start.md). WebSockets: [`@nestjs/websockets`](https://docs.nestjs.com/websockets/gateways.md). Microservices: [`@nestjs/microservices`](https://docs.nestjs.com/microservices/basics.md).
-- Sign-in: [`@nestjs/authentication`](https://docs.nestjs.com/security/authentication.md). Permissions: [`@nestjs/authorization`](https://docs.nestjs.com/security/authorization.md). Rate limiting: [`@nestjs/throttler`](https://docs.nestjs.com/security/rate-limiting.md).
-- Configuration: [`@nestjs/config`](https://docs.nestjs.com/application/configuration.md). Caching: [`@nestjs/cache-manager`](https://docs.nestjs.com/data/caching.md). Health checks: [`@nestjs/terminus`](https://docs.nestjs.com/reliability/terminus.md). Events inside the app: [`@nestjs/event-emitter`](https://docs.nestjs.com/application/events.md).
-- Email: [`@nestjs/mail`](https://docs.nestjs.com/application/mail.md). Files, S3 included: [`@nestjs/storage`](https://docs.nestjs.com/application/file-storage.md). Translations: [`@nestjs/i18n`](https://docs.nestjs.com/application/i18n.md).
-- Retries, timeouts and circuit breakers: [`@nestjs/resilience`](https://docs.nestjs.com/reliability/resilience.md).
-- Idempotency keys: [`@nestjs/idempotency`](https://docs.nestjs.com/reliability/idempotency.md). Transactional outbox: [`@nestjs/outbox`](https://docs.nestjs.com/reliability/outbox.md). Sending and receiving webhooks: [`@nestjs/webhooks`](https://docs.nestjs.com/http/webhooks.md).
-- Queues: [`@nestjs/bullmq`](https://docs.nestjs.com/application/queues.md). Scheduled jobs: [`@nestjs/schedule`](https://docs.nestjs.com/application/task-scheduling.md).
-- Running a scheduled job on one instance, and locks: [`@nestjs/locks`](https://docs.nestjs.com/reliability/locks.md). Processes that take days: [`@nestjs/workflows`](https://docs.nestjs.com/reliability/workflows.md).
-- Language models, tools and agents: [`@nestjs/ai`](https://docs.nestjs.com/ai/overview.md). MCP servers: [`@nestjs/mcp`](https://docs.nestjs.com/mcp/overview.md).
+The domain layer is **pure TypeScript**. No NestJS decorators, no TypeORM imports, no framework coupling of any kind inside `domain/`.
 
-Validation works with Zod, Valibot, ArkType or any other Standard Schema library, with no classes or decorator metadata: `StandardSchemaValidationPipe` with `@Body({ schema })` or `@Param('id', { schema })` (https://docs.nestjs.com/application/validation.md). `class-validator` still works, through `ValidationPipe`.
+```
+mic-saas-omatic/src/
+├── modules/
+│   ├── customers/
+│   │   ├── domain/                  ← Pure TS: Customer entity, tax-id.validator, CustomerSearchCriteria
+│   │   ├── application/
+│   │   │   ├── ports/in/            ← Use case interfaces (CreateCustomerUseCase, etc.)
+│   │   │   └── ports/out/           ← Repository port interfaces (CustomerRepositoryPort)
+│   │   └── infrastructure/
+│   │       ├── adapters/in/rest/    ← NestJS controllers + class-validator DTOs
+│   │       └── adapters/out/persistence/ ← TypeORM entities, adapters, mappers
+│   ├── simulations/                 ← Same hexagonal structure
+│   └── emails/                      ← SendEmailUseCase + HtmlSanitizerService
+└── shared/
+    ├── domain/                      ← DomainException base class
+    └── infrastructure/
+        ├── filters/                 ← ProblemDetailExceptionFilter (RFC 7807)
+        └── persistence/             ← TypeORM config (WAL), DatabaseSeederService
+```
 
-`NodeAdapter` from `@nestjs/platform-node` is the fastest HTTP adapter, ahead of Fastify (https://docs.nestjs.com/http/performance.md).
+---
 
-Nest's packages are ESM only. A CommonJS project loads them through `require(esm)`, which needs Node.js 20.19+ or 22.12+, and doesn't have to convert (https://docs.nestjs.com/migration-guide.md).
+## 2. Domain Rules — Non-Negotiable Invariants
 
-## Production data: NestJS Observe
+- **Tax ID validation**: `tax-id.validator.ts` implements the official AEAT algorithm (Real Decreto 1065/2007) for ES (DNI, NIE, CIF) and strict jurisdiction-specific formats for DE, FR, IT, US. Never use a generic alphanumeric regex as the sole validator for a catalogued country.
+- **Tiered pricing authority**: `PricingEngineService` owns `calculateTieredPrice` using the immutable `PRICING_TIERS` tuple in `fiscal.constants.ts`. The frontend never sends price values — the backend is the sole fiscal authority.
+- **Tax rates by country**: `TaxCalculatorService` resolves `taxRate` from `TAX_RATES` (ES 21%, DE 19%, FR 20%, IT 22%, GB 20%, US 0%, rest 0% Reverse Charge). Never hardcode a tax rate outside this map.
+- **Monetary precision**: All currency columns use `@Column('decimal', { precision: 10, scale: 2 })`. Rate columns use `scale: 4`. Never use `float` or `number` for financial persistence.
+- **DRY invariants**: Validation logic lives in `private static validate*` helpers inside the entity class. `create()` and `update()` orchestrate under 10 lines each.
 
-This app's production telemetry - traces, errors, logs and metrics - goes to [NestJS Observe](https://observe.nestjs.com). Until `ObserveModule` is registered in `src/app.module.ts`, nothing is sent: `npx @nestjs/observe link` sets it up in one step - it installs `@nestjs/observe`, wires it into the app, and writes the key pair (`OBSERVE_APP_KEY`, `OBSERVE_APP_SECRET`) to `.env`.
+---
 
-When a task depends on how the app behaves in production - an error users hit, a slow endpoint, a failing job, whether a release made things worse - work from that data, not from the code alone:
+## 3. API Contract — REST Endpoints
 
-- The Observe MCP server answers those questions directly: errors with their traces and logs, slow operations, jobs, and what a release changed (`find_regressions`, `diff_release`). It is included on the Pro plan and above. In Claude Code: `claude mcp add observe --transport http https://observe-api.nestjs.com/mcp`, and the client opens a browser to approve. Other clients: https://www.observe.nestjs.com/documentation/mcp
-- Without it, the user can open the request or error in the Observe dashboard and click **Copy agent prompt**, which hands over that page's trace, stack and logs as text.
+| Method | Route | Description |
+|:---|:---|:---|
+| `POST` | `/customers` | Create corporate customer with fiscal validation |
+| `GET` | `/customers` | Paginated list — query: `search`, `country`, `page`, `limit`, `sortBy`, `order` |
+| `GET` | `/customers/:id` | Customer detail |
+| `PATCH` | `/customers/:id` | Partial update — 409 on taxId collision, invariants re-validated |
+| `GET` | `/simulations` | Simulation history by `?customerId=` (required) |
+| `POST` | `/simulations` | Persist simulation — backend computes all costs |
+| `POST` | `/emails/send` | Dispatch commercial proposal — anti-XSS sanitization mandatory |
+
+**Pagination headers** on `GET /customers`: `X-Total-Count`, `X-Page`, `X-Limit`, `X-Total-Pages` (exposed via `Access-Control-Expose-Headers`).
+
+**All `4xx`/`5xx` responses** must conform to RFC 7807 `application/problem+json`. Use `ProblemDetailExceptionFilter` — never return raw NestJS error objects.
+
+---
+
+## 4. DTO & Controller Rules
+
+- Import DTOs as **concrete value classes** (`import { CreateCustomerDto }`), never `import type`. NestJS `reflect-metadata` requires the runtime symbol for `ValidationPipe` to work.
+- Use `class-validator` + `class-transformer` with `@Type(() => Number)`, `@IsInt()`, `@Min(1)` for query DTOs. Never manually coerce with `parseInt` inside controller methods.
+- Do not create empty Value Object files (`.vo.ts`) for trivial string normalization. Use focused utility functions in the validator service.
+
+---
+
+## 5. Security
+
+- `HtmlSanitizerService` must strip XSS vectors from email HTML **before** any processing. The stripping regex must be strictly linear `O(N)` — no greedy quantifiers (`.*`, `\s*`) without anchoring. Use zero-width word boundaries (`\bon[a-z]+`) against ReDoS.
+- Never commit live credentials. Email dispatching uses a transactional domain stub with structured logging.
+
+---
+
+## 6. Quality Gate — Must Pass Before Every Commit
+
+```bash
+npm --prefix mic-saas-omatic test      # 187 / 187 Jest tests — 100%
+```
+
+- 100% statement, function and line coverage. Branch coverage ≥ 90%.
+- All new use cases, validators, mappers and domain methods must have corresponding Jest specs.
+- Log every architectural decision in `../ai-workspace/03-vibe-coding-log/prompts-and-audits.md`.
