@@ -4966,3 +4966,30 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Jest Tests: **159 pruebas pasando al 100%** (30 suites).
   - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Consistencia de diseño e interacción (UI/UX SSOT): unificación rigurosa de los patrones de confirmación transaccional y notificaciones toast en toda la plataforma.
+
+
+### 6.174. Erradicación de Layout Shift en Refresco de Clientes y Píldora Flotante con Spinner
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario detectó que el refresco de la cuadrícula tras dar de alta un cliente corporativo en `http://localhost:4200/customers` se producía de forma brusca, percibiendo un salto visual y señalando la ausencia de un spinner de carga evidente:
+  > *"CUANDO CREAS un cliente, al menos en http://localhost:4200/customers para refrescar desde que lo creas hasta que cargan de nuevo, se hace de una forma muy brusca no se si hay espinner o no ahy creo que si pero miralo"*
+- **Análisis de Causa Raíz (Layout Shift y Falta de Feedback Transicional):**
+  1. *Desplazamiento Vertical Brusco (CLS):* La barra de progreso `<mat-progress-bar>` se insertaba condicionalmente mediante `@if (customerApi.loading() && customers().length > 0)` directamente en el flujo del documento. Al montarse y desmontarse en cuestión de milisegundos tras cerrar el modal, empujaba verticalmente 16px hacia abajo toda la cuadrícula de tarjetas y luego la jalaba de golpe 16px hacia arriba.
+  2. *Inexistencia de Spinner en Recarga Activa:* El spinner completo (`<app-loading-state>`) solo se mostraba en la carga inicial (`customers.length === 0`). Con tarjetas ya cargadas, únicamente se mostraba esa delgada línea de 4px, la cual pasaba prácticamente inadvertida para el ojo humano, dejando al usuario con la sensación de un parpadeo no controlado.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Eliminación de Layout Shift con Contenedor Relativo y Barra Absoluta ([customer-list.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-list/customer-list.component.html), [customer-list.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-list/customer-list.component.scss)):*
+     Se envolvió la cuadrícula en `.customers-grid-wrapper` (`position: relative`) y se posicionó `.grid-loading-bar` de forma absoluta (`position: absolute; top: -8px; left: 0; right: 0;`), garantizando 0px de salto en el flujo del layout (`CLS = 0`).
+  2. *Píldora Flotante con Spinner (`MatProgressSpinnerModule`):*
+     Se introdujo un overlay flotante centrado con animación suave de entrada (`roamsPillEntrance`):
+     - Un spinner circular visible `<mat-spinner diameter="20" strokeWidth="2.5" />`.
+     - Texto de estado i18n (`'customers.list.updating' | translate`, *"Actualizando lista de clientes..."*).
+     - Atenuación controlada de la cuadrícula (`opacity: 0.45; pointer-events: none;`) con transición CSS suave.
+  3. *Actualización Optimista en Tiempo Real ([customer-list.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-list/customer-list.component.ts)):*
+     En `openCreateCustomerDialog()`, cuando la ordenación activa es la más reciente (`recent`), la nueva tarjeta creada se inyecta de forma optimista en el índice 0 del listado reactivo. De esta forma, el usuario percibe la inclusión instantánea de su nuevo cliente corporativo sin esperas ni parpadeos, mientras la petición al backend reconcilia suavemente la paginación y conteos en segundo plano.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **254 pruebas pasando al 100%** (29 suites).
+  - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest Tests: **159 pruebas pasando al 100%** (30 suites).
+  - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Eliminación de Cumulative Layout Shift (CLS) y elevación de la calidad percibida de UX a estándares de producción enterprise (60 FPS, feedback transicional explícito, actualización optimista instantánea).

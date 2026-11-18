@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CustomerApiService } from '../../services/customer-api.service';
@@ -78,6 +79,7 @@ export const CUSTOMER_SORT_OPTIONS: readonly SortOptionItem[] = [
     MatFormFieldModule,
     MatSelectModule,
     MatProgressBarModule,
+    MatProgressSpinnerModule,
     TranslatePipe,
   ],
   templateUrl: './customer-list.component.html',
@@ -268,6 +270,16 @@ export class CustomerListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((createdCustomer: Customer | undefined) => {
       if (createdCustomer) {
+        if (
+          this.activeSortKey() === 'recent' &&
+          (this.selectedCountry() === 'ALL' || this.selectedCountry() === createdCustomer.country)
+        ) {
+          this.customers.update((prev) => [
+            createdCustomer,
+            ...prev.filter((c) => c.id !== createdCustomer.id),
+          ].slice(0, this.pageSize()));
+          this.totalCount.update((count) => count + 1);
+        }
         this.loadCustomers(1);
         this.snackBar.open(
           this.i18n.t('customers.create.success'),

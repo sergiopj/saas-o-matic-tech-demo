@@ -222,16 +222,66 @@
   border-radius: 9999px;
 }
 
+.customers-grid-wrapper {
+  position: relative;
+  min-height: 220px;
+}
+
 .grid-loading-bar {
-  margin-bottom: 0.75rem;
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
   border-radius: var(--roams-radius-full);
   overflow: hidden;
-  height: 4px;
+  height: 3px;
+  z-index: 10;
 
   mat-progress-bar {
     --mdc-linear-progress-active-indicator-color: var(--roams-accent-blue);
-    --mdc-linear-progress-track-color: rgba(16, 97, 226, 0.12);
-    height: 4px;
+    --mdc-linear-progress-track-color: var(--roams-border-light);
+    height: 3px;
+  }
+}
+
+.grid-loading-overlay {
+  position: absolute;
+  top: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  pointer-events: none;
+  animation: roamsPillEntrance 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  .refreshing-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.45rem 1.125rem;
+    background-color: var(--roams-surface);
+    border: 1px solid var(--roams-border);
+    border-radius: var(--roams-radius-full);
+    box-shadow: var(--roams-shadow-md);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--roams-text-primary);
+
+    mat-spinner {
+      circle {
+        stroke: var(--roams-accent-blue);
+      }
+    }
+  }
+}
+
+@keyframes roamsPillEntrance {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -6px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
   }
 }
 

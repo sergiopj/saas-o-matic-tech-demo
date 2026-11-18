@@ -115,17 +115,26 @@
     </div>
     }
   } @else {
-  @if (customerApi.loading() && customers().length > 0) {
-  <div class="grid-loading-bar" role="progressbar" [attr.aria-label]="'customers.list.updating' | translate">
-    <mat-progress-bar mode="indeterminate" />
-  </div>
-  }
+  <div class="customers-grid-wrapper">
+    @if (customerApi.loading() && customers().length > 0) {
+    <div class="grid-loading-bar" role="progressbar" [attr.aria-label]="'customers.list.updating' | translate">
+      <mat-progress-bar mode="indeterminate" />
+    </div>
 
-  <main class="customers-grid" [class.is-searching]="customerApi.loading()" [attr.aria-busy]="customerApi.loading()">
-    @for (customer of paginatedCustomers(); track customer.id) {
-    <app-customer-card [customer]="customer" />
+    <div class="grid-loading-overlay" aria-live="polite">
+      <div class="refreshing-pill">
+        <mat-spinner diameter="20" strokeWidth="2.5" />
+        <span>{{ 'customers.list.updating' | translate }}</span>
+      </div>
+    </div>
     }
-  </main>
+
+    <main class="customers-grid" [class.is-searching]="customerApi.loading()" [attr.aria-busy]="customerApi.loading()">
+      @for (customer of paginatedCustomers(); track customer.id) {
+      <app-customer-card [customer]="customer" />
+      }
+    </main>
+  </div>
 
   @if (totalPages() > 1 || totalFiltered() > 6) {
   <nav class="pagination-container" [attr.aria-label]="'pagination.aria' | translate">
