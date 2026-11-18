@@ -19,25 +19,33 @@ export class UpdateCustomerUseCase {
   ) {}
 
   async execute(id: string, payload: UpdateCustomerPayload): Promise<Customer> {
-    const existing = await this.customerRepository.findById(id);
-    if (!existing) {
+    const customer = await this.customerRepository.findById(id);
+    if (!customer) {
       throw new EntityNotFoundError('Customer', id);
     }
 
     if (payload.taxId) {
-      const normalizedTax = normalizeTaxId(payload.taxId);
-      if (normalizedTax !== existing.getTaxId()) {
-        const duplicate =
-          await this.customerRepository.findByTaxId(normalizedTax);
-        if (duplicate && duplicate.getId() !== id) {
-          throw new ConflictError(
-            `A customer with taxId '${normalizedTax}' already exists.`,
-          );
-        }
-      }
+      await this.ensureUniqueTaxId(payload.taxId, customer);
     }
 
-    const updated = existing.update(payload);
+    const updated = customer.update(payload);
     return this.customerRepository.save(updated);
+  }
+
+  private async ensureUniqueTaxId(
+    newTaxId: string,
+    currentCustomer: Customer,
+  ): Promise<void> {
+    const normalizedTax = normalizeTaxId(newTaxId);
+    if (normalizedTax === currentCustomer.getTaxId()) {
+      return;
+    }
+
+    const duplicate = await this.customerRepository.findByTaxId(normalizedTax);
+    if (duplicate && duplicate.getId() !== currentCustomer.getId()) {
+      throw new ConflictError(
+        `A customer with taxId '${normalizedTax}' already exists.`,
+      );
+    }
   }
 }

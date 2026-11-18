@@ -377,7 +377,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
   }
 
   async seed(force = false): Promise<{ customersCount: number; simulationsCount: number }> {
-    const existing = await this.customerRepository.search(undefined, undefined, 1, 1);
+    const existing = await this.customerRepository.search({ page: 1, limit: 1 });
     if (!force && existing.total > 0) {
       this.logger.log(`Database already populated (${existing.total} customers). Skipping auto-seed.`);
       return { customersCount: existing.total, simulationsCount: 0 };
