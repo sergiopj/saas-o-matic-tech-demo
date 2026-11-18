@@ -18,6 +18,7 @@
     "test:coverage:frontend": "npm --prefix spa-saas-omatic run test:coverage",
     "test:cov": "npm run test:coverage",
     "lint": "npm --prefix mic-saas-omatic run lint && npm --prefix spa-saas-omatic run lint",
+    "seed": "npm --prefix mic-saas-omatic run seed",
     "build": "npm --prefix mic-saas-omatic run build && npm --prefix spa-saas-omatic run build"
   },
   "devDependencies": {

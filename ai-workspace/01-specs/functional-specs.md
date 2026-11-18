@@ -335,3 +335,28 @@ Cuando se consulta `GET /customers`, el controlador primario inyecta las siguien
 | **Separación de Bounded Contexts** | `GET /simulations?customerId=` separado | Desacopla `Customers` de `Simulations` evitando dependencias circulares (`forwardRef`). El frontend compone ambos recursos en paralelo. |
 | **Ciclo de Vida de Clientes: Actualización vs. Borrado** | Implementación de `PATCH /customers/:id` y preservación de registros (No Hard Delete) | En plataformas financieras de tarificación y facturación SaaS, la eliminación física (`DELETE`) es un anti-patrón crítico porque destruye la pista de auditoría contable/fiscal y rompe la integridad referencial de las simulaciones y facturas históricas. Se implementa actualización parcial (`PATCH`) con preservación inmutable del histórico. |
 | **Evolución de Esquema y Migraciones** | SQLite WAL + Seeder Idempotente (Local) / Expand-Contract (Producción) | Garantiza evaluación sin fricción en local preservando datos persistidos (`nullable`/`default`), y prescribe el ciclo de vida de migraciones DDL formales en producción. |
+
+---
+
+## 7. Estrategia de Datos y Experiencia del Evaluador (Auto-Seeder Idempotente)
+
+### 7.1. El Problema del "Empty State" en la Evaluación de Retos Técnicos
+En pruebas técnicas con persistencia embebida (como SQLite), los ficheros de base de datos (`*.sqlite`) se excluyen habitualmente del control de versiones por higiene de Git (evitando binarios corruptos o bloqueos entre sistemas operativos). Si el evaluador clona el repositorio y levanta la aplicación sobre una base de datos vacía:
+- La cuadrícula de clientes no puede mostrar la **paginación server-side** (páginas 1, 2, 3).
+- El **carrusel responsive** del Dashboard queda vacío o deshabilitado al no haber clientes que deslizar.
+- Los **filtros de jurisdicción fiscal** (España, Alemania, Francia, Estados Unidos, etc.) no devuelven registros.
+- El **buscador reactivo** por nombre o CIF no tiene datos contra los que contrastar.
+- El comercial/evaluador se vería forzado a crear manualmente 15 o 20 clientes antes de poder juzgar la interfaz.
+
+### 7.2. Solución de Arquitectura: Auto-Seeding Idempotente en el Arranque
+Para erradicar esta fricción y garantizar una **experiencia de evaluación inmediata ("Zero-Config DX")**, el backend implementa el servicio `DatabaseSeederService` suscrito al hook del ciclo de vida `OnApplicationBootstrap` de NestJS:
+1. **Inspección no destructiva de volumen:** Al iniciar el servidor, el seeder ejecuta una consulta rápida `search({ page: 1, limit: 1 })`.
+2. **Auto-poblado condicional:** Si detecta 0 clientes (`total === 0`), puebla de forma transparente y estructurada el catálogo inicial. Si la base de datos ya contiene registros, omite la operación (`Skipping auto-seed`), respetando las modificaciones o altas creadas por el usuario.
+3. **Reseteo bajo demanda:** Se expone el script `npm --prefix mic-saas-omatic run seed` (o `npm run seed` en la raíz) por si el evaluador desea restablecer el catálogo de fábrica en cualquier momento.
+4. **Control por variable de entorno:** El flag `SKIP_SEEDING=true` permite silenciar el seeder en entornos de CI/CD o pruebas de integración que requieran arranques totalmente vírgenes.
+
+### 7.3. Composición del Catálogo Maestro Pre-cargado
+El catálogo incluye **18 clientes corporativos internacionales** y **19 simulaciones históricas pre-calculadas**:
+- **Jurisdicciones variadas:** España (`ES`), Alemania (`DE`), Francia (`FR`), Estados Unidos (`US`), Italia (`IT`), Reino Unido (`GB`).
+- **Identificadores fiscales 100% matemáticamente válidos:** CIFs y NIFs verificados algorítmicamente según el Real Decreto 1065/2007 de la AEAT (Telefónica `A28010833`, Inditex `A15075062`, Mercadona `A46103834`, SEAT `A08004558`, Santander `A39000013`, Celonis `DE315935872`, Snowflake `US824219503`, etc.).
+- **Simulaciones pre-calculadas:** Clientes con 0, 1 y múltiples simulaciones históricas para validar el estudio de costes, el recálculo interactivo en vivo y la pre-carga de propuestas comerciales por email.

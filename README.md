@@ -64,6 +64,11 @@ npm start
 >   - Documentación Interactiva (Swagger UI): **`http://localhost:3000/docs`**
 > - 🟪 **`[SPA]` Frontend (Angular 22):** Disponible de inmediato en **`http://localhost:4200`**
 
+> [!TIP]
+> **📦 Auto-Seeder Idempotente al Arrancar (Zero-Config DX):**  
+> No necesitas ejecutar ningún comando de base de datos ni scripts de seed manuales. Al arrancar por primera vez, el backend detecta automáticamente que la base de datos SQLite está vacía y puebla **18 clientes corporativos internacionales** (Telefónica, Inditex, Mercadona, SEAT, Santander, Celonis, Doctolib, Snowflake...) con **CIFs válidos de la AEAT** y sus correspondientes simulaciones históricas.  
+> Esto permite que el evaluador pueda probar desde el primer segundo la **paginación server-side (páginas 1, 2 y 3 con 8 clientes/pág.)**, el **carrusel responsive**, los **filtros multi-país (ES, DE, FR, US, IT...)**, el **buscador reactivo** y el **estudio de simulación**. Si en algún momento deseas resetear los datos de fábrica, puedes ejecutar `npm run seed`.
+
 ---
 
 ### Paso 3: Verificación de Calidad y Tests en 1 Comando
