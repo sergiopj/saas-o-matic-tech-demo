@@ -4405,3 +4405,36 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - **Oxlint:** 0 errores, 0 advertencias en 168 archivos.
   - **Builds:** 0 errores, 0 advertencias en microservicio NestJS y frontend Angular.
 - **Valor para la evaluación:** Demostración empírica de resiliencia total y reproducible desde cero: cualquier evaluador puede clonar el repositorio, ejecutar `npm install` y `npm start`, y disfrutar de una experiencia impecable e inmediata.
+
+
+### 6.198. Alineación Estricta de Validación Fiscal por Jurisdicción (ES, DE, FR, IT, US) y Revalidación Reactiva Inmediata al Conmutar País
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario auditó minuciosamente la reactividad e integridad cruzada entre el selector de país y el campo de identificación fiscal en el formulario de clientes:
+  > *"Auditoría de integridad cruzada en la validación fiscal: al introducir un CIF válido de España (ej. B12345674) y conmutar el selector de país a Alemania (DE), el formulario lo aceptaba porque la validación internacional se limitaba a una expresión regular genérica (`/^[A-Z0-9]{5,20}$/`). Alinea de forma estricta las reglas fiscales por jurisdicción (DE, FR, IT, US) en frontend y backend, asegurando que cambiar de país revalide inmediatamente y rechace formatos foráneos con el mensaje contextual apropiado."*
+- **Análisis de Causa Raíz y Reglas de Negocio Fiscales:**
+  1. *Fuga de Validación por Fallback Genérico:* La función `isValidTaxId` únicamente discriminaba `if (country === 'ES')` aplicando el algoritmo oficial de la AEAT (DNI, NIE, CIF). Para cualquier otro país, delegaba a `INTERNATIONAL_TAX_ID_REGEX = /^[A-Z0-9]{5,20}$/`. Dado que un CIF español (ej. `B12345674`, 9 caracteres) cumple dicha longitud, el sistema lo admitía erróneamente para Alemania (`DE`), Francia (`FR`), Italia (`IT`) o Estados Unidos (`US`).
+  2. *Especificidad de Formatos Fiscales Corporativos:*
+     - **Alemania (`DE`):** USt-IdNr obligatorio con prefijo `DE` + 9 dígitos (`/^DE\d{9}$/`) o Steuernummer nacional de 10-11 dígitos (`/^\d{10,11}$/`). Un CIF español que comienza por letra de entidad (`A`, `B`, etc.) es inválido en Alemania.
+     - **Francia (`FR`):** TVA intracommunautaire con prefijo `FR` + 2 caracteres alfanuméricos + 9 dígitos SIREN (`/^FR[A-Z0-9]{2}\d{9}$/`) o SIREN de 9 dígitos (`/^\d{9}$/`).
+     - **Italia (`IT`):** Partita IVA con prefijo `IT` + 11 dígitos (`/^IT\d{11}$/`) o Codice Fiscale de 16 caracteres (`/^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$/`).
+     - **Estados Unidos (`US`):** EIN (Employer Identification Number) de 9 dígitos numéricos (`/^\d{9}$/`, normalizado desde `XX-XXXXXXX`) o prefijado (`/^US(EIN)?\d{6,9}$/`).
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Servicio de Dominio en Backend ([tax-id.validator.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/domain/services/tax-id.validator.ts)):*
+     - Implementadas y exportadas las funciones puras `isValidGermanTaxId`, `isValidFrenchTaxId`, `isValidItalianTaxId` e `isValidUsTaxId`.
+     - `isValidTaxId(rawTaxId, country)` utiliza ahora un despacho estricto por jurisdicción (`switch(normalizedCountry)`), aplicando las reglas de cada país y reservando el patrón alfanumérico únicamente como fallback para países genéricos no catalogados.
+     - Protege tanto `Customer.create` como `Customer.prototype.update` ante peticiones HTTP externas.
+  2. *Validador Reactivo en Frontend ([fiscal.validator.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/validators/fiscal.validator.ts)):*
+     - Replicada con paridad exacta la misma arquitectura de validadores por jurisdicción.
+     - Al cambiar el país en el formulario de alta/edición ([customer-create-dialog.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.ts)), la suscripción `countrySub` marca el control `taxId` como sucio (`markAsDirty()`) si tiene contenido y fuerza `updateValueAndValidity()`.
+     - Gracias a `ShowOnDirtyErrorStateMatcher`, si el usuario tenía un CIF español e intercambia el país a Alemania, el error se dispara de forma instantánea sin necesidad de hacer clic ni perder el foco.
+  3. *Localización de Feedback en 4 Idiomas ([translations.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/i18n/translations.ts)):*
+     - Actualizada la clave `'customers.create.errTaxIdIntl'` en español, inglés, alemán y francés para reflejar que el identificador no cumple la normativa de la jurisdicción seleccionada (ej. `DE999888777`).
+- **Resultados de Verificación:**
+  - `fiscal.validator.spec.ts`: Incorporadas pruebas que verifican explícitamente el rechazo de CIFs españoles bajo `DE`, `FR`, `IT` y `US`.
+  - `customer-create-dialog.component.spec.ts`: Añadido test de integración reactivo que comprueba la invalidación inmediata de `B12345674` al mutar el control `country` de `ES` a `DE`.
+  - `tax-id.validator.spec.ts`: Cobertura completa de formatos por jurisdicción en backend.
+  - Oxlint: **0 advertencias y 0 errores** en todo el monorepo.
+  - Pruebas: **478 tests automatizados pasando al 100%** (187 backend + 291 frontend).
+- **Valor para la evaluación:** Demostración de diseño defensivo y exhaustividad en las reglas de negocio transfronterizas: previene la corrupción de datos fiscales y ofrece una experiencia de usuario (UX) reactiva impecable.

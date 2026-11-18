@@ -81,7 +81,48 @@ export function isValidCif(normalized: string): boolean {
 }
 
 /**
+ * Validates German tax identifiers:
+ * - USt-IdNr (VAT): 'DE' prefix followed by 9 digits (e.g., DE999888777).
+ * - Steuernummer: 10 or 11 numeric digits.
+ */
+export function isValidGermanTaxId(normalized: string): boolean {
+  return /^DE\d{9}$/.test(normalized) || /^\d{10,11}$/.test(normalized);
+}
+
+/**
+ * Validates French tax identifiers:
+ * - TVA intracommunautaire: 'FR' prefix followed by 2 alphanumeric characters and 9 digits (e.g., FR45801234567).
+ * - SIREN: 9 numeric digits.
+ */
+export function isValidFrenchTaxId(normalized: string): boolean {
+  return /^FR[A-Z0-9]{2}\d{9}$/.test(normalized) || /^\d{9}$/.test(normalized);
+}
+
+/**
+ * Validates Italian tax identifiers:
+ * - Partita IVA: 'IT' prefix followed by 11 digits (e.g., IT12345678901), or 11 digits without IT.
+ * - Codice Fiscale: 16 alphanumeric characters.
+ */
+export function isValidItalianTaxId(normalized: string): boolean {
+  return (
+    /^IT\d{11}$/.test(normalized) ||
+    /^\d{11}$/.test(normalized) ||
+    /^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$/.test(normalized)
+  );
+}
+
+/**
+ * Validates US tax identifiers:
+ * - Employer Identification Number (EIN): 9 numeric digits (normalized from XX-XXXXXXX, e.g., 123456789),
+ *   or format prefixed with US / USEIN (e.g., USEIN123456).
+ */
+export function isValidUsTaxId(normalized: string): boolean {
+  return /^\d{9}$/.test(normalized) || /^US(EIN)?\d{6,9}$/.test(normalized);
+}
+
+/**
  * Universal fiscal ID check for Spanish or International entities.
+ * Dispatches to jurisdiction-specific rules for ES, DE, FR, IT, US or generic fallback.
  */
 export function isValidTaxId(taxId: string, country: string): boolean {
   const normalized = normalizeTaxId(taxId);
@@ -91,11 +132,20 @@ export function isValidTaxId(taxId: string, country: string): boolean {
     return false;
   }
 
-  if (normalizedCountry === 'ES') {
-    return isValidDni(normalized) || isValidNie(normalized) || isValidCif(normalized);
+  switch (normalizedCountry) {
+    case 'ES':
+      return isValidDni(normalized) || isValidNie(normalized) || isValidCif(normalized);
+    case 'DE':
+      return isValidGermanTaxId(normalized);
+    case 'FR':
+      return isValidFrenchTaxId(normalized);
+    case 'IT':
+      return isValidItalianTaxId(normalized);
+    case 'US':
+      return isValidUsTaxId(normalized);
+    default:
+      return /^[A-Z0-9]{5,20}$/.test(normalized);
   }
-
-  return /^[A-Z0-9]{5,20}$/.test(normalized);
 }
 
 /**

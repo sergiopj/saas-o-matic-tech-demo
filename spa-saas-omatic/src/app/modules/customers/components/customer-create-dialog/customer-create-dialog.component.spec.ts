@@ -93,6 +93,16 @@ describe('CustomerCreateDialogComponent', () => {
     taxControl?.setValue('B1');
     expect(taxControl?.hasError('invalidTaxId')).toBe(true);
     expect(taxControl?.hasError('invalidInternationalTaxId')).toBe(true);
+
+    // Spanish CIF B12345674 is valid under ES, but switching country to DE must immediately invalidate it
+    countryControl?.setValue('ES');
+    taxControl?.setValue('B12345674');
+    expect(taxControl?.valid).toBe(true);
+
+    countryControl?.setValue('DE');
+    expect(taxControl?.hasError('invalidTaxId')).toBe(true);
+    expect(taxControl?.hasError('invalidInternationalTaxId')).toBe(true);
+    expect(taxControl?.dirty).toBe(true);
   });
 
   it('should reject invalid RFC 5322 emails and accept valid ones', () => {

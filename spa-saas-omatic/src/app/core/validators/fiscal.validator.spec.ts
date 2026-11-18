@@ -63,11 +63,22 @@ describe('Fiscal Validator (AEAT Algorithm)', () => {
       expect(isValidTaxId('B12345679', 'ES')).toBe(false);
     });
 
-    it('should check alphanumeric 5-20 characters for international countries', () => {
+    it('should validate jurisdiction-specific tax ID formats for DE, FR, IT, US', () => {
       expect(isValidTaxId('DE999888777', 'DE')).toBe(true);
+      expect(isValidTaxId('FR45801234567', 'FR')).toBe(true);
+      expect(isValidTaxId('IT12345678901', 'IT')).toBe(true);
       expect(isValidTaxId('123456789', 'US')).toBe(true);
-      expect(isValidTaxId('AB', 'US')).toBe(false); // too short
-      expect(isValidTaxId('A'.repeat(25), 'US')).toBe(false); // too long
+
+      // Rejects Spanish CIF B12345674 under international jurisdictions
+      expect(isValidTaxId('B12345674', 'DE')).toBe(false);
+      expect(isValidTaxId('B12345674', 'FR')).toBe(false);
+      expect(isValidTaxId('B12345674', 'IT')).toBe(false);
+      expect(isValidTaxId('B12345674', 'US')).toBe(false);
+
+      // Other generic countries fallback to alphanumeric 5-20
+      expect(isValidTaxId('GENERIC12345', 'PT')).toBe(true);
+      expect(isValidTaxId('AB', 'PT')).toBe(false); // too short
+      expect(isValidTaxId('A'.repeat(25), 'PT')).toBe(false); // too long
       expect(isValidTaxId('DE@!#$', 'DE')).toBe(false); // invalid chars
     });
   });
@@ -103,8 +114,14 @@ describe('Fiscal Validator (AEAT Algorithm)', () => {
           invalidSpanishTaxId: true,
         });
 
-        // Too short international ID fails under DE with invalidInternationalTaxId
+        // Spanish CIF fails under DE with invalidInternationalTaxId
         country = 'DE';
+        expect(validator(new FormControl('B12345674'))).toEqual({
+          invalidTaxId: true,
+          invalidInternationalTaxId: true,
+        });
+
+        // Too short international ID fails under DE with invalidInternationalTaxId
         expect(validator(new FormControl('B1'))).toEqual({
           invalidTaxId: true,
           invalidInternationalTaxId: true,

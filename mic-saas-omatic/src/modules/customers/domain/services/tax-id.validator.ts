@@ -139,6 +139,46 @@ export function isValidCif(normalizedId: string): boolean {
 }
 
 /**
+ * Checks German tax format:
+ * - USt-IdNr (VAT): 'DE' prefix followed by 9 digits (e.g. DE999888777).
+ * - Steuernummer: 10 or 11 numeric digits.
+ */
+export function isValidGermanTaxId(normalizedTaxId: string): boolean {
+  return /^DE\d{9}$/.test(normalizedTaxId) || /^\d{10,11}$/.test(normalizedTaxId);
+}
+
+/**
+ * Checks French tax format:
+ * - TVA intracommunautaire: 'FR' prefix followed by 2 alphanumeric characters and 9 digits (e.g. FR45801234567).
+ * - SIREN: 9 numeric digits.
+ */
+export function isValidFrenchTaxId(normalizedTaxId: string): boolean {
+  return /^FR[A-Z0-9]{2}\d{9}$/.test(normalizedTaxId) || /^\d{9}$/.test(normalizedTaxId);
+}
+
+/**
+ * Checks Italian tax format:
+ * - Partita IVA: 'IT' prefix followed by 11 digits (e.g. IT12345678901), or 11 digits without IT.
+ * - Codice Fiscale: 16 alphanumeric characters.
+ */
+export function isValidItalianTaxId(normalizedTaxId: string): boolean {
+  return (
+    /^IT\d{11}$/.test(normalizedTaxId) ||
+    /^\d{11}$/.test(normalizedTaxId) ||
+    /^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$/.test(normalizedTaxId)
+  );
+}
+
+/**
+ * Checks US tax format:
+ * - Employer Identification Number (EIN): 9 numeric digits (normalized from XX-XXXXXXX, e.g. 123456789),
+ *   or format prefixed with US / USEIN (e.g. USEIN123456).
+ */
+export function isValidUsTaxId(normalizedTaxId: string): boolean {
+  return /^\d{9}$/.test(normalizedTaxId) || /^US(EIN)?\d{6,9}$/.test(normalizedTaxId);
+}
+
+/**
  * Checks if the identifier matches any valid Spanish tax format (DNI, NIE, or CIF).
  */
 function isValidSpanishTaxId(normalizedTaxId: string): boolean {
@@ -157,7 +197,7 @@ function isValidInternationalTaxId(normalizedTaxId: string): boolean {
 }
 
 /**
- * Main dispatch validator supporting Spanish AEAT algorithms and international IDs.
+ * Main dispatch validator supporting Spanish AEAT algorithms and jurisdiction-specific tax IDs.
  */
 export function isValidTaxId(rawTaxId: string, country: string): boolean {
   const normalized = normalizeTaxId(rawTaxId);
@@ -167,9 +207,18 @@ export function isValidTaxId(rawTaxId: string, country: string): boolean {
     return false;
   }
 
-  if (normalizedCountry === 'ES') {
-    return isValidSpanishTaxId(normalized);
+  switch (normalizedCountry) {
+    case 'ES':
+      return isValidSpanishTaxId(normalized);
+    case 'DE':
+      return isValidGermanTaxId(normalized);
+    case 'FR':
+      return isValidFrenchTaxId(normalized);
+    case 'IT':
+      return isValidItalianTaxId(normalized);
+    case 'US':
+      return isValidUsTaxId(normalized);
+    default:
+      return isValidInternationalTaxId(normalized);
   }
-
-  return isValidInternationalTaxId(normalized);
 }

@@ -150,7 +150,11 @@ export class CustomerCreateDialogComponent implements OnInit, OnDestroy {
 
     this.countrySub = this.form.get('country')?.valueChanges.subscribe((code) => {
       this.selectedCountryCode.set(code ?? 'ES');
-      this.form.get('taxId')?.updateValueAndValidity();
+      const taxControl = this.form.get('taxId');
+      if (taxControl?.value) {
+        taxControl.markAsDirty();
+      }
+      taxControl?.updateValueAndValidity();
     });
   }
 

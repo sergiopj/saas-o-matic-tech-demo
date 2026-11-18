@@ -109,15 +109,24 @@ describe('TaxIdValidator & Sanitization (Domain Layer)', () => {
   });
 
   describe('International tax identifiers (country != ES)', () => {
-    it('should accept valid foreign alphanumeric tax IDs between 5 and 20 chars', () => {
+    it('should validate jurisdiction-specific tax formats for DE, FR, IT, US', () => {
       expect(isValidTaxId('DE123456789', 'DE')).toBe(true);
+      expect(isValidTaxId('FR45801234567', 'FR')).toBe(true);
+      expect(isValidTaxId('IT12345678901', 'IT')).toBe(true);
+      expect(isValidTaxId('123456789', 'US')).toBe(true);
       expect(isValidTaxId('US-EIN-123456', 'US')).toBe(true); // normalized to USEIN123456
       expect(isValidTaxId('GB999999973', 'GB')).toBe(true);
       expect(isValidTaxId('CHE123456789', 'CH')).toBe(true);
+
+      // Rejects Spanish CIF B12345674 under international jurisdictions
+      expect(isValidTaxId('B12345674', 'DE')).toBe(false);
+      expect(isValidTaxId('B12345674', 'FR')).toBe(false);
+      expect(isValidTaxId('B12345674', 'IT')).toBe(false);
+      expect(isValidTaxId('B12345674', 'US')).toBe(false);
     });
 
     it('should reject foreign tax IDs shorter than 5 chars or containing invalid characters', () => {
-      expect(isValidTaxId('A12', 'US')).toBe(false); // too short
+      expect(isValidTaxId('A12', 'PT')).toBe(false); // too short
       expect(isValidTaxId('INVALID@TAX#', 'FR')).toBe(false); // special characters
     });
   });
