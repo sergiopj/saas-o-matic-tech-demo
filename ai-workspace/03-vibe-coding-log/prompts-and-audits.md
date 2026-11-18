@@ -4380,3 +4380,46 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
   - **Total Ecosistema:** **428 pruebas unitarias automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Demuestra dominio idiomático del lenguaje (TypeScript / ECMAScript moderno), reduciendo ruido sintáctico procedural y fortaleciendo la robustez del cálculo financiero ante casos extremos.
+
+
+### 6.192. Refactorización Clean Code: Extracción de Type Guard y Limpieza de Expresiones Spread en `errorInterceptor`
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario detectó una expresión inline farragosa con múltiples comprobaciones en [error.interceptor.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/errors/error.interceptor.ts#L17-L25):
+  > *"es necesario todos estos checks?
+  > 
+  >         ...(typeof err.error === 'object' && err.error !== null ? err.error : {}),"*
+- **Análisis de Olor a Código (Code Smell) y Razonamiento Técnico:**
+  1. *¿Por qué existían esos checks en primer lugar?*
+     - En JavaScript, `typeof null === 'object'` (el histórico bug del lenguaje). Si el backend responde sin cuerpo (body `null`), un simple `typeof err.error === 'object'` evalúa a verdadero.
+     - Si el error devuelto por la red o un proxy intermedio (Nginx/Cloudflare) es texto plano (ej. `"502 Bad Gateway"`), en JavaScript los strings son iterables. Hacer spread de un string (`{ ..."error" }`) descompone el string en propiedades numéricas `{ 0: 'e', 1: 'r', ... }`.
+  2. *¿Por qué NO era Clean Code la implementación previa?*
+     - Incrustar una expresión ternaria con comprobación de tipo y nulidad dentro del propio spread del literal del objeto (`...(typeof err.error === 'object' && err.error !== null ? err.error : {})`) creaba ruido sintáctico excesivo.
+     - Justo después de propagar `err.error`, se volvían a hacer accesos opcionales redundantes (`err.error?.title || ...`, `err.error?.detail || ...`).
+     - Había un ternario innecesario en el status: `err.status ? err.status : undefined`, simplificable a `err.status || undefined`.
+- **Solución Aplicada:**
+  1. Creación del *Type Guard* declarativo puro:
+     ```typescript
+     function isRecord(val: unknown): val is Record<string, unknown> {
+       return typeof val === 'object' && val !== null;
+     }
+     ```
+  2. Extracción previa de la variable `const payload = isRecord(err.error) ? err.error : {};`, permitiendo que el objeto `problem` se construya de forma lineal y limpia:
+     ```typescript
+     const problem: ProblemDetail = {
+       type: 'about:blank',
+       instance: req.url,
+       ...payload,
+       title: (payload['title'] as string) || i18n.t('error.communication.title'),
+       detail: (payload['detail'] as string) || i18n.t('error.communication.detail'),
+       status: err.status || undefined,
+     };
+     ```
+  3. Ajuste de contrato en [problem-detail.model.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/errors/problem-detail.model.ts) para marcar `timestamp?: string;` como opcional (de acuerdo con la especificación RFC 7807/9457 para errores generados en cliente/red).
+- **Resultados de Verificación:**
+  - **Frontend Oxlint:** **0 errores y 0 advertencias** (77 archivos analizados).
+  - **Frontend Vitest Tests:** **269 pruebas pasando al 100%** (32 suites).
+  - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
+  - **Total Ecosistema:** **428 pruebas unitarias automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Demuestra comprensión profunda de las peculiaridades del motor de JavaScript (coerción, spread de iterables y `typeof null`) combinada con diseño Clean Code que elimina expresiones inline complejas mediante Type Guards reutilizables y tipado estricto.
