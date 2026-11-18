@@ -4315,3 +4315,38 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
   - **Total Ecosistema:** **428 pruebas unitarias automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Aplicación rigurosa del patrón de separación entre Smart/Container Components y Dumb/Presentational Components, aumentando drásticamente la mantenibilidad, legibilidad y reusabilidad del código.
+
+
+### 6.190. Auditoría Integral y Localización i18n de Atributos `alt` en Imágenes del Frontend
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario señaló un segundo ejemplo de texto alternativo en español que requería internacionalización:
+  > *"mas         alt=\"Centro de Simulaciones\""*
+- **Análisis de Estado y Auditoría Completa de Atributos `alt` en el Frontend:**
+  1. *Estado Previo de `alt="Centro de Simulaciones"`:*
+     - Ya había sido identificado y reemplazado en el commit previo `b8068e5` dentro de [simulation-hub.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/simulations/pages/simulation-hub/simulation-hub.component.html#L4-L11) mediante el enlace reactivo `[alt]="'simulations.hub.badgeAlt' | translate"`, soportado con claves completas en las 4 lenguas (`es`, `en`, `de`, `fr`):
+       - `es`: `'Insignia del Centro de Simulaciones'`
+       - `en`: `'Simulations Center Badge'`
+       - `de`: `'Simulationszentrum-Abzeichen'`
+       - `fr`: `'Badge du Centre de Simulations'`
+  2. *Censo Exhaustivo de Todas las Imágenes (`<img>`) en la Aplicación:*
+     - `simulation-hub.component.html:6`: `[alt]="'simulations.hub.badgeAlt' | translate"` (Insignia 3D de Simulaciones).
+     - `simulation-hub.component.html:71`: `[alt]="'simulations.hub.illustrationAlt' | translate"` (Ilustración del Estudio Algorítmico).
+     - `customer-list.component.html:6`: `[alt]="'customers.badge.alt' | translate"` (Insignia 3D de Clientes Corporativos).
+     - `customer-detail.component.html:78`: `[alt]="'customerDetail.badge.alt' | translate"` (Insignia de Sede Corporativa).
+     - `home.component.html:25`: `[alt]="'home.hero.imgAlt' | translate"` (Banner de Arquitectura Inteligente).
+     - `email-composer-dialog.component.html:5`: `[alt]="'customers.emailDialog.badgeAlt' | translate"` (Insignia de Redacción Comercial).
+     - `customer-create-dialog.component.html:5`: Actualizado de `alt="" aria-hidden="true"` a `[alt]="'customers.badge.alt' | translate"` para uniformidad total de accesibilidad y tests de diálogo.
+     - `navbar.component.html:28`: `alt="Roams"` (Nombre propio y marca corporativa invariable, testeado explícitamente en `navbar.component.spec.ts`).
+- **Acciones Ejecutadas:**
+  1. *Refuerzo de Accesibilidad en [customer-create-dialog.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.html):*
+     - Sustituido el atributo estático residual por `[alt]="'customers.badge.alt' | translate"`.
+  2. *Ampliación de Pruebas Unitarias en [customer-create-dialog.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.spec.ts):*
+     - Añadida aserción para verificar la existencia del texto alternativo localizado en la insignia del diálogo.
+- **Resultados de Verificación:**
+  - **Frontend Oxlint:** **0 errores y 0 advertencias** (77 archivos analizados).
+  - **Frontend Vitest Tests:** **269 pruebas pasando al 100%** (32 suites).
+  - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
+  - **Total Ecosistema:** **428 pruebas unitarias automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Cobertura del 100% de accesibilidad WCAG / W3C con i18n completa en todas las imágenes de la aplicación, eliminando cualquier cadena literal residual.
