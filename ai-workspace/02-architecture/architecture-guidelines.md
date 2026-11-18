@@ -28,6 +28,9 @@ Para garantizar mantenibilidad, testabilidad y aislamiento estricto de las regla
 9. **Autoridad Fiscal del Servidor y Principio Open/Closed en Tarifas (Pricing Governance):**
    - El frontend comercial solo tiene potestad para manipular variables de volumen (`activeUsers`, `storageGb`, `apiCalls`). Las tarifas y límites de los tramos (10 €, 8 €, 5 €) son inmutables en cliente y se gobiernan de forma autoritativa en el backend para prevenir manipulaciones de precios y garantizar coherencia con la política financiera de la compañía.
    - El motor de tarificación (`calculateTieredPrice`) desacopla el algoritmo acumulativo de la matriz de precios (`PRICING_TIERS`), cumpliendo el principio **Open/Closed (OCP)**: si en el futuro la empresa modifica una tarifa (ej. subir el Tramo 3 de 5 € a 6 €) o añade un cuarto tramo corporativo, el motor no requiere reescritura de código, sino únicamente actualizar la tupla central de configuración fiscal.
+10. **Encapsulación DRY de Invariantes de Dominio en Entidades:**
+   - Las reglas de validación de invariantes de negocio (ej. validación de país ISO, normalización de identificador fiscal, límites numéricos enteros y no negatividad de métricas de almacenamiento y llamadas a API) se encapsulan en métodos privados estáticos auxiliares (`private static validate*`) dentro de la propia entidad de dominio (`Customer.entity.ts`, `Simulation.entity.ts`).
+   - El método factoría `create()` o de mutación `update()` se limita a orquestar la invocación de estas validaciones y la instanciación de la entidad en menos de 10 líneas de código, garantizando alta legibilidad, cumplimiento del principio de responsabilidad única (SRP) y prevención de código duplicado.
 
 
 ---

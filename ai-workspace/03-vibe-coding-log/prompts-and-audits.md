@@ -4630,3 +4630,73 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
   - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Demuestra dominio riguroso de seguridad de aplicaciones (AppSec) y rendimiento algorítmico, resolviendo de forma limpia y verificada una vulnerabilidad real de denegación de servicio por expresiones regulares (ReDoS) detectada por herramientas de análisis estático de nivel empresarial como SonarQube.
+
+
+### 6.166. Refactorización Clean Code de Invariantes de Dominio en la Entidad `Simulation`: Encapsulación en Métodos Estáticos Privados Auxiliares
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario identificó un bloque de validaciones procedimentales en línea dentro del método factoría `Simulation.create()` y solicitó aplicar el mismo patrón arquitectónico Clean Code previamente establecido en `Customer.entity.ts`:
+  > *"te suena este tipo de validaciones como lo refactorizamos clean code antes?
+  > const trimmedCustomerId = (payload.customerId || '').trim();
+  > if (!trimmedCustomerId) { throw new DomainError('Customer ID is required.'); }
+  > const normalizedCountry = (payload.customerCountry || '').trim().toUpperCase();
+  > if (!/^[A-Z]{2}$/.test(normalizedCountry)) { throw new DomainError('Customer country must be a valid 2-letter ISO code.'); }
+  > if (!Number.isInteger(payload.activeUsers) || payload.activeUsers < 0) { ... }
+  > ...
+  > si hazlo y siempre actualiza todos los mds que hagan falta los de workspace ai y los agents mds"*
+- **Análisis de Diseño y Principios Clean Code:**
+  1. *Violación de Nivel Único de Abstracción (SLAP - Single Level of Abstraction Principle):*
+     El método `Simulation.create()` mezclaba simultáneamente el saneamiento de cadenas, comprobaciones aritméticas y regex, cálculos de tarificación escalonada y cálculo de desglose impositivo con la instanciación de la entidad.
+  2. *Reusabilidad y Extensibilidad del Dominio:*
+     Si la entidad `Simulation` necesita incorporar en el futuro métodos de recálculo o actualización parcial (e.g. `recalculate()`), las reglas de validación de métricas quedarían duplicadas o dispersas.
+  3. *Alineación con el Patrón Establecido en `Customer.entity.ts`:*
+     En la entidad `Customer`, las invariantes de negocio se modularizaron en `private static validateCompanyName`, `validateCountry`, `validateTaxId`, etc. `Simulation` requería una simetría arquitectónica exacta.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Factoría Orquestadora Concisa ([simulation.entity.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/simulations/domain/entities/simulation.entity.ts)):*
+     El método estático `create()` quedó reducido a una orquestación limpia y declarativa de apenas 10 líneas:
+     ```typescript
+     public static create(payload: CreateSimulationPayload, idGenerator: () => string): Simulation {
+       const customerId = Simulation.validateCustomerId(payload.customerId);
+       const customerCountry = Simulation.validateCountry(payload.customerCountry);
+       const activeUsers = Simulation.validateActiveUsers(payload.activeUsers);
+       const storageGb = Simulation.validateStorageGb(payload.storageGb);
+       const apiCalls = Simulation.validateApiCalls(payload.apiCalls);
+
+       const monthlyBaseCost = calculateTieredPrice(activeUsers);
+       const taxRate = getTaxRate(customerCountry);
+       const { taxAmount, totalCost } = calculateTaxBreakdown(monthlyBaseCost, taxRate);
+
+       return new Simulation({
+         id: payload.id || idGenerator(),
+         customerId,
+         activeUsers,
+         storageGb,
+         apiCalls,
+         monthlyBaseCost,
+         taxRate,
+         taxAmount,
+         totalCost,
+         currency: 'EUR',
+         createdAt: new Date(),
+       });
+     }
+     ```
+  2. *Encapsulación de Invariantes en Métodos Privados Estáticos Cohesivos:*
+     - `Simulation.validateCustomerId(customerId?: string): string`: Limpia espacios y verifica presencia obligatoria.
+     - `Simulation.validateCountry(country?: string): string`: Normaliza a mayúsculas y valida código ISO 3166-1 alpha-2 de 2 caracteres.
+     - `Simulation.validateActiveUsers(activeUsers: number): number`: Valida número entero positivo o cero.
+     - `Simulation.validateStorageGb(storageGb: number): number`: Valida tipo numérico, descarta `NaN` y asegura no negatividad.
+     - `Simulation.validateApiCalls(apiCalls: number): number`: Valida número entero positivo o cero.
+  3. *Institucionalización en [AGENTS.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/AGENTS.md) y [Directrices de Arquitectura](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md):*
+     - Actualizada la regla **3.D DRY Domain Invariants** en `AGENTS.md` citando a `Simulation` y `Customer` como implementaciones canónicas de referencia.
+     - Incorporada la Regla de Oro 10 en `architecture-guidelines.md` documentando la encapsulación DRY de invariantes de dominio en métodos auxiliares estáticos privados.
+- **Resultados de Verificación:**
+  - Compilación NestJS (`nest build`): **0 errores**.
+  - Backend Jest Unit Tests: **159 pruebas pasando al 100%** (30 suites).
+  - Backend Jest E2E Tests: **14 pruebas pasando al 100%** (2 suites).
+  - Backend Oxlint: **0 errores y 0 advertencias** (81 archivos analizados).
+  - Frontend Vitest: **254 pruebas pasando al 100%** (29 suites).
+  - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Coherencia arquitectónica integral y apego a las mejores prácticas de Domain-Driven Design (DDD): las entidades de dominio son las guardianas soberanas de sus invariantes de negocio mediante métodos cohesivos, atómicos y altamente legibles, erradicando código procedimental disperso.

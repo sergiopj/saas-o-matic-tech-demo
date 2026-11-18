@@ -56,42 +56,22 @@ export class Simulation {
     payload: CreateSimulationPayload,
     idGenerator: () => string,
   ): Simulation {
-    const trimmedCustomerId = (payload.customerId || '').trim();
-    if (!trimmedCustomerId) {
-      throw new DomainError('Customer ID is required.');
-    }
+    const customerId = Simulation.validateCustomerId(payload.customerId);
+    const customerCountry = Simulation.validateCountry(payload.customerCountry);
+    const activeUsers = Simulation.validateActiveUsers(payload.activeUsers);
+    const storageGb = Simulation.validateStorageGb(payload.storageGb);
+    const apiCalls = Simulation.validateApiCalls(payload.apiCalls);
 
-    const normalizedCountry = (payload.customerCountry || '').trim().toUpperCase();
-    if (!/^[A-Z]{2}$/.test(normalizedCountry)) {
-      throw new DomainError('Customer country must be a valid 2-letter ISO code.');
-    }
-
-    if (!Number.isInteger(payload.activeUsers) || payload.activeUsers < 0) {
-      throw new DomainError('Active users must be an integer greater than or equal to 0.');
-    }
-
-    if (
-      typeof payload.storageGb !== 'number' ||
-      Number.isNaN(payload.storageGb) ||
-      payload.storageGb < 0
-    ) {
-      throw new DomainError('Storage GB must be a number greater than or equal to 0.');
-    }
-
-    if (!Number.isInteger(payload.apiCalls) || payload.apiCalls < 0) {
-      throw new DomainError('API calls must be an integer greater than or equal to 0.');
-    }
-
-    const monthlyBaseCost = calculateTieredPrice(payload.activeUsers);
-    const taxRate = getTaxRate(normalizedCountry);
+    const monthlyBaseCost = calculateTieredPrice(activeUsers);
+    const taxRate = getTaxRate(customerCountry);
     const { taxAmount, totalCost } = calculateTaxBreakdown(monthlyBaseCost, taxRate);
 
     return new Simulation({
       id: payload.id || idGenerator(),
-      customerId: trimmedCustomerId,
-      activeUsers: payload.activeUsers,
-      storageGb: payload.storageGb,
-      apiCalls: payload.apiCalls,
+      customerId,
+      activeUsers,
+      storageGb,
+      apiCalls,
       monthlyBaseCost,
       taxRate,
       taxAmount,
@@ -103,6 +83,47 @@ export class Simulation {
 
   public static reconstitute(props: SimulationProperties): Simulation {
     return new Simulation(props);
+  }
+
+  private static validateCustomerId(customerId?: string): string {
+    const trimmed = (customerId || '').trim();
+    if (!trimmed) {
+      throw new DomainError('Customer ID is required.');
+    }
+    return trimmed;
+  }
+
+  private static validateCountry(country?: string): string {
+    const normalized = (country || '').trim().toUpperCase();
+    if (!/^[A-Z]{2}$/.test(normalized)) {
+      throw new DomainError('Customer country must be a valid 2-letter ISO code.');
+    }
+    return normalized;
+  }
+
+  private static validateActiveUsers(activeUsers: number): number {
+    if (!Number.isInteger(activeUsers) || activeUsers < 0) {
+      throw new DomainError('Active users must be an integer greater than or equal to 0.');
+    }
+    return activeUsers;
+  }
+
+  private static validateStorageGb(storageGb: number): number {
+    if (
+      typeof storageGb !== 'number' ||
+      Number.isNaN(storageGb) ||
+      storageGb < 0
+    ) {
+      throw new DomainError('Storage GB must be a number greater than or equal to 0.');
+    }
+    return storageGb;
+  }
+
+  private static validateApiCalls(apiCalls: number): number {
+    if (!Number.isInteger(apiCalls) || apiCalls < 0) {
+      throw new DomainError('API calls must be an integer greater than or equal to 0.');
+    }
+    return apiCalls;
   }
 
   public getId(): string {
