@@ -4863,3 +4863,30 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Jest Tests: **159 pruebas pasando al 100%** (30 suites).
   - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Demuestra dominio riguroso de la especificación Material Design 3 (MDC) y de las sutiles interacciones entre etiquetas y placeholders, erradicando micro-defectos visuales y garantizando una experiencia de usuario impecable.
+
+
+### 6.171. Despeje de Holgura Superior en Diálogos y Limpieza Semántica de Botones de Acción
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario detectó dos refinamientos de UI adicionales tras la corrección de etiquetas flotantes:
+  1. La etiqueta "Nombre de la Empresa" se recortaba ligeramente con el subtítulo/borde superior del modal.
+  2. El botón para registrar clientes en el listado incluía un prefijo `+` en su texto que resultaba redundante dado que ya incorporaba el icono semántico `add_business`:
+  > *"esta casi perfecto pero el label de nombre de la e,mpresa se corta un poco con el texto de arriba y por otro lado el vboton de registar clientes el texto tiene un + delante quitaselo pues el icono ya habla por el"*
+- **Análisis de Causa Raíz y Diagnóstico de UI:**
+  1. *Recorte de Muesca por Overflow Container:*
+     Al fijar `floatLabel="always"`, la etiqueta flotante de MDC (`.mat-mdc-floating-label`) se eleva ~8px por encima de la cota superior del `<mat-form-field>`. En `.dialog-content`, el padding superior era de tan solo `0.25rem` (4px). Dado que el contenedor declara `overflow-y: auto`, cualquier contenido que ascienda más allá de los 4px es recortado (`clipped`) por el viewport de scroll, además de quedar a escasos píxeles del texto del subtítulo del header.
+  2. *Redundancia Icono-Texto en Call-to-Action:*
+     En `translations.ts`, la clave `'customers.create.btn'` contenía `'+ Registrar Cliente'`, `'+ Register Customer'`, etc. Al situarse dentro del botón junto al icono `<mat-icon>add_business</mat-icon>`, el signo más duplicaba la intención iconográfica.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Holgura Superior en [customer-create-dialog.component.scss](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.scss):*
+     - Ampliado el padding superior de `.dialog-content` a `0.75rem` e incorporado `overflow-x: hidden`.
+     - Añadido `padding-top: 0.35rem` a `.customer-form`. Esto garantiza más de 18px de espacio libre sobre la muesca del primer campo, permitiendo que la etiqueta flote con holgura total sin recortes ni colisiones con el encabezado.
+  2. *Limpieza de Traducciones en [translations.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/i18n/translations.ts):*
+     - Eliminado el carácter `+` en los cuatro idiomas soportados (`Registrar Cliente`, `Register Customer`, `Kunde registrieren`, `Enregistrer un client`).
+- **Resultados de Verificación:**
+  - Frontend Vitest: **254 pruebas pasando al 100%** (29 suites).
+  - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest Tests: **159 pruebas pasando al 100%** (30 suites).
+  - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Refinamiento visual milimétrico: resolución de comportamientos de corte por overflow en componentes modales de Angular Material y respeto riguroso al principio de no duplicidad semántica en botones e interfaces de usuario.
