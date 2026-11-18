@@ -271,6 +271,104 @@
             },
             "description": "Verifica que consultar un UUID inexistente devuelve 404 Not Found bajo el estándar RFC 7807."
           }
+        },
+        {
+          "name": "GET List Paginated & Filtered (Page 1, Limit 8, ES)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/customers?page=1&limit=8&country=ES&sortBy=createdAt&order=DESC",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Número de página actual (1-based)"
+                },
+                {
+                  "key": "limit",
+                  "value": "8",
+                  "description": "Registros por página (devuelve cabeceras X-Total-Count, X-Page, X-Total-Pages)"
+                },
+                {
+                  "key": "country",
+                  "value": "ES",
+                  "description": "Filtro por código ISO de jurisdicción fiscal"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "description": "Campo de ordenación en servidor"
+                },
+                {
+                  "key": "order",
+                  "value": "DESC",
+                  "description": "Dirección de orden (ASC | DESC)"
+                }
+              ]
+            },
+            "description": "Recupera clientes con paginación server-side, filtro de país y ordenación por SQL."
+          }
+        },
+        {
+          "name": "PATCH Update Customer",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"selectedPlan\": \"Enterprise Global (Updated)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers/{{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers",
+                "{{customerId}}"
+              ]
+            },
+            "description": "Actualiza campos mutables de la ficha del cliente (plan contratado, razón social, etc.)."
+          }
+        },
+        {
+          "name": "PATCH Update Customer (404 - Not Found)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"selectedPlan\": \"Starter\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers/00000000-0000-4000-8000-000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers",
+                "00000000-0000-4000-8000-000000000000"
+              ]
+            },
+            "description": "Verifica que intentar actualizar un cliente inexistente responde 404 Not Found bajo RFC 7807."
+          }
         }
       ]
     },
@@ -403,6 +501,80 @@
               ]
             },
             "description": "Recupera todas las simulaciones asociadas al cliente ordenadas cronológicamente por createdAt desc."
+          }
+        },
+        {
+          "name": "GET List All Simulations (Global History)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/simulations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulations"
+              ]
+            },
+            "description": "Recupera el histórico global de simulaciones registradas en el sistema ordenadas por fecha de creación desc."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Emails",
+      "item": [
+        {
+          "name": "POST Send Commercial Proposal Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"billing@roams.es\",\n  \"subject\": \"Propuesta de Optimización SaaS-O-Matic\",\n  \"htmlBody\": \"<h2>Estimado cliente</h2><p>Le remitimos la simulación de costes calculada para 50 usuarios corporativos.</p><ul><li>Coste Base: 420.00 €</li><li>IVA (21% ES): 88.20 €</li><li><strong>Total Mensual: 508.20 €</strong></li></ul>\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emails",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "emails"
+              ]
+            },
+            "description": "Envía una propuesta comercial transaccional con contenido enriquecido HTML sanitizado contra XSS mediante HtmlSanitizerService."
+          }
+        },
+        {
+          "name": "POST Send Email (400 - Invalid Recipient / Empty Body)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"not-a-valid-email\",\n  \"subject\": \"\",\n  \"htmlBody\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emails",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "emails"
+              ]
+            },
+            "description": "Verifica que el interceptor ValidationPipe rechaza direcciones de correo inválidas (RFC 5322) y campos vacíos con 400 Problem Details."
           }
         }
       ]
