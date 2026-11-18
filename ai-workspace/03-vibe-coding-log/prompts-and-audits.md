@@ -4423,3 +4423,36 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
   - **Total Ecosistema:** **428 pruebas unitarias automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Demuestra comprensión profunda de las peculiaridades del motor de JavaScript (coerción, spread de iterables y `typeof null`) combinada con diseño Clean Code que elimina expresiones inline complejas mediante Type Guards reutilizables y tipado estricto.
+
+
+### 6.193. Refactorización Clean Code: Erradicación de Bloques `catch` Vacíos Mediante Utilidad de Almacenamiento Seguro (`storage.util.ts`)
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario detectó bloques `try/catch` vacíos repetitivos en [theme.service.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/services/theme.service.ts#L46-L68):
+  > *"veo cvatch vacios en theme service
+  > 
+  >  } catch {
+  >         // Ignore storage restrictions
+  >       }"*
+- **Análisis de Olor a Código (Code Smell Identificado):**
+  1. *Violación de SonarQube (`typescript:S2486`):* Los bloques `catch` vacíos u ocultos (*empty/swallowed catch blocks*) son considerados un antipatrón porque silencian fallos indiscriminadamente y aumentan el acoplamiento a las APIs de bajo nivel del navegador.
+  2. *Duplicación de Código (Violación DRY):* El mismo patrón `try { localStorage... } catch { }` estaba replicado 3 veces en `ThemeService` y 2 veces en `I18nService`.
+  3. *Justificación Técnica de los Fallos en `localStorage`:* En navegadores modernos, acceder a `localStorage` lanza `SecurityError` / `DOMException` en entornos con privacidad reforzada (modo incógnito con cookies de terceros bloqueadas, iframes con `sandbox` sin `allow-same-origin`) o `QuotaExceededError` cuando la cuota de almacenamiento se agota. La degradación debe ser elegante y no lanzar excepciones no capturadas.
+- **Solución Arquitectónica Aplicada:**
+  1. *Creación de [storage.util.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/utils/storage.util.ts):*
+     - Funciones puras modulares `getSafeStorageItem(key)` y `setSafeStorageItem(key, value)`.
+     - Encapsulan de forma segura la interacción con `localStorage`, degradando a `null` o no-op cuando el acceso está restringido por el navegador o la cuota.
+  2. *Suite de Pruebas Automatizadas [storage.util.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/utils/storage.util.spec.ts):*
+     - Comprueba el guardado y recuperación normal.
+     - Simula `DOMException('SecurityError')` al invocar `localStorage.getItem` y comprueba que devuelve `null` sin fallar.
+     - Simula `DOMException('QuotaExceededError')` al invocar `localStorage.setItem` y comprueba que no lanza excepción.
+  3. *Limpieza de Servicios:*
+     - [theme.service.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/services/theme.service.ts): Eliminados los 3 bloques `try/catch`.
+     - [i18n.service.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/services/i18n.service.ts): Eliminados los 2 bloques `try/catch`.
+- **Resultados de Verificación:**
+  - **Frontend Oxlint:** **0 errores y 0 advertencias** (79 archivos analizados).
+  - **Frontend Vitest Tests:** **273 pruebas unitarias pasando al 100%** (33 suites, +4 nuevas pruebas netas de almacenamiento seguro).
+  - **Backend Jest Tests:** **159 pruebas unitarias pasando al 100%** (30 suites).
+  - **Total Ecosistema:** **432 pruebas unitarias automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Transición de código defensivo fragmentado y repetitivo a una utilidad de infraestructura limpia (Single Responsibility Principle + DRY), mejorando la legibilidad de los servicios reactivos de estado.
