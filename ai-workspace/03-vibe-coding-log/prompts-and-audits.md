@@ -4007,3 +4007,44 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
   - Total de Pruebas Automatizadas del Ecosistema: **405 pruebas pasando al 100%**.
 - **Valor para la evaluación:** Refleja madurez de arquitectura sénior al contrastar y justificar técnicamente por qué no implementar borrados físicos en sistemas contables/financieros, implementando una arquitectura de mutación hexagonal elegante, un diálogo de UI bimodal de alta reusabilidad (DRY) y cero deuda técnica.
+
+
+### 6.154. Refinamiento de Tooltips de Estado Online/Offline del Selector de Divisas y Arquitectura de Peticiones Singleton
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario solicitó simplificar y acortar los textos informativos del indicador de conectividad de la API externa de tipos de cambio (`open.er-api.com`), especificando de manera directa si el servicio se encuentra en estado *Online* u *Offline*, y planteó la duda operativa sobre si al navegar entre páginas de la aplicación se realizan llamadas continuas a la API externa:
+  > *"me gustaria un texto mas breve y que ponga estado online o offline segun el caso, me comentaste que la nube verde es que la api externa estaba online?
+  > Tipos de cambio actualizados en vivo vía open.er-api.com
+  > dime como funciona exactamente al entrar en alguna pagiuna se pide a la api externa oi que?"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Refinamiento de Microcopia Multilingüe ([translations.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/i18n/translations.ts)):*
+     - Sustitución de textos verbosos por etiquetas breves y directas con prefijo de estado:
+       - **Online (Verde `cloud_done`):**
+         - ES: `API Online: Tipos de cambio en vivo`
+         - EN: `API Online: Live exchange rates`
+         - DE: `API Online: Live-Wechselkurse`
+         - FR: `API Online: Taux en direct`
+       - **Offline / Error (Ámbar `cloud_off`):**
+         - ES: `API Offline: Usando tipos en caché`
+         - EN: `API Offline: Using cached rates`
+         - DE: `API Offline: Ausweichkurse aktiv`
+         - FR: `API Offline: Taux de secours en cache`
+       - **Connecting (Cian rotatorio `sync`):**
+         - ES: `Conectando: Actualizando divisas...`
+         - EN: `Connecting: Updating rates...`
+         - DE: `Verbindung: Kurse werden geladen...`
+         - FR: `Connexion: Mise à jour...`
+  2. *Arquitectura de Peticiones Singleton y Cero Sobrecarga de Navegación:*
+     - `CurrencyService` (`providedIn: 'root'`) es un singleton en memoria. Su constructor dispara `fetchRates()` una sola vez durante el bootstrap de la aplicación o primera renderización del Navbar.
+     - Los tipos de cambio se custodian en un Angular Signal reactivo (`rates = signal(...)`).
+     - Al cambiar de página (`/home` $\leftrightarrow$ `/customers` $\leftrightarrow$ `/simulations`), no se emiten peticiones de red adicionales; el cálculo de conversión y tramos se resuelve síncronamente en 0 ms en memoria.
+     - Previene problemas de *rate limiting* (HTTP 429) y garantiza operación 100% fluida.
+  3. *Cobertura de Pruebas Unitarias:*
+     - Actualizada suite [currency-selector.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/currency-selector/currency-selector.component.spec.ts) para verificar la concordancia con el nuevo texto conciso `API Offline: Using cached rates`.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **254 pruebas unitarias pasando al 100%** (29 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest: **151 pruebas unitarias pasando al 100%** (29 suites).
+  - Total Ecosistema: **405 pruebas pasando al 100%**.
+- **Valor para la evaluación:** Refuerza la claridad ergonómica de la interfaz de usuario con microcopia directa (*API Online* / *API Offline*), respaldada por una arquitectura eficiente de consumo de APIs externas mediante Angular Signals y ciclo de vida Singleton.

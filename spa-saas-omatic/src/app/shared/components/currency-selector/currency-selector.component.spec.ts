@@ -70,7 +70,7 @@ describe('CurrencySelectorComponent', () => {
 
     // 4. English toggle
     i18nService.setLanguage('en');
-    expect(component.statusTooltip()).toContain('Exchange rates API unavailable');
+    expect(component.statusTooltip()).toContain('API Offline: Using cached rates');
   });
 
   it('should render sync icon when loading and cloud_off icon when error in template', () => {
