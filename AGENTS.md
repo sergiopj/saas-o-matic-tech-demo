@@ -39,6 +39,7 @@ Whenever you operate in this repository, you MUST strictly adhere to the followi
 
 ### C. Web Accessibility (W3C A11y Standards)
 - **First Rule of ARIA (Native Elements First)**: Do NOT use `role="status"` on generic `<div>` tags. Use native HTML5 `<output class="..." aria-live="polite">` elements (resolves SonarQube `Web:S6819`).
+- **Full i18n on ARIA Attributes**: All accessibility labels (`aria-label`, `aria-description`, tooltips) MUST use dynamic localized strings via `[attr.aria-label]="'...' | translate"` or `I18nService.t(...)`. Never leave hardcoded literal strings in accessibility attributes, ensuring screen readers announce controls in the user's active language (`es`, `en`, `de`, `fr`).
 - Ensure all interactive elements have appropriate ARIA attributes, semantic tags, and keyboard navigation.
 
 ### D. Performance & Architecture

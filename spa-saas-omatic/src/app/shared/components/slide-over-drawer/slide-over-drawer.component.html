@@ -39,7 +39,7 @@
         mat-icon-button
         class="close-btn"
         (click)="close()"
-        aria-label="Cerrar panel"
+        [attr.aria-label]="closeAriaLabel() || ('drawer.close' | translate)"
       >
         <mat-icon aria-hidden="true">close</mat-icon>
       </button>

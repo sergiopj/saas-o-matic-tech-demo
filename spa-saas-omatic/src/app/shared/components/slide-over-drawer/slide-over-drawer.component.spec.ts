@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SlideOverDrawerComponent } from './slide-over-drawer.component';
+import { I18nService } from '../../../core/services/i18n.service';
 
 describe('SlideOverDrawerComponent', () => {
   let component: SlideOverDrawerComponent;
@@ -84,5 +85,22 @@ describe('SlideOverDrawerComponent', () => {
 
     component.onBackdropClick();
     expect(component.isOpen()).toBe(true);
+  });
+
+  it('should render translated aria-label on close button and respect custom override', () => {
+    const i18n = TestBed.inject(I18nService);
+    i18n.setLanguage('es');
+    fixture.detectChanges();
+
+    const closeBtn = fixture.nativeElement.querySelector('.close-btn');
+    expect(closeBtn.getAttribute('aria-label')).toBe('Cerrar panel');
+
+    i18n.setLanguage('en');
+    fixture.detectChanges();
+    expect(closeBtn.getAttribute('aria-label')).toBe('Close panel');
+
+    fixture.componentRef.setInput('closeAriaLabel', 'Custom close label');
+    fixture.detectChanges();
+    expect(closeBtn.getAttribute('aria-label')).toBe('Custom close label');
   });
 });

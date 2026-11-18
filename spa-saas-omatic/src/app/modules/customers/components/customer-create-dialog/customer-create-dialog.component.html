@@ -16,7 +16,13 @@
         {{ (isEditMode() ? 'customers.edit.dialogSubtitle' : 'customers.create.dialogSubtitle') | translate }}
       </p>
     </div>
-    <button mat-icon-button type="button" class="close-btn" (click)="onCancel()" aria-label="Close dialog">
+    <button
+      mat-icon-button
+      type="button"
+      class="close-btn"
+      (click)="onCancel()"
+      [attr.aria-label]="'customers.create.closeAria' | translate"
+    >
       <mat-icon>close</mat-icon>
     </button>
   </header>

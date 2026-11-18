@@ -168,6 +168,19 @@ describe('CustomerCreateDialogComponent', () => {
     expect(mockDialogRef.close).toHaveBeenCalled();
   });
 
+  it('should render translated aria-label on close button', () => {
+    const i18n = TestBed.inject(I18nService);
+    i18n.setLanguage('es');
+    fixture.detectChanges();
+
+    const closeBtn = fixture.nativeElement.querySelector('.close-btn');
+    expect(closeBtn.getAttribute('aria-label')).toBe('Cerrar diálogo de alta');
+
+    i18n.setLanguage('en');
+    fixture.detectChanges();
+    expect(closeBtn.getAttribute('aria-label')).toBe('Close dialog');
+  });
+
   describe('Edit Mode', () => {
     let editComponent: CustomerCreateDialogComponent;
     let editFixture: ComponentFixture<CustomerCreateDialogComponent>;

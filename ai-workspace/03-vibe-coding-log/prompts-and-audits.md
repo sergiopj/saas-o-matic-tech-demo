@@ -5223,3 +5223,50 @@ Syntax: <single-animation>#
   - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
   - **Total Ecosistema:** **418 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Cero advertencias en SonarQube/SonarLint, máximo rendimiento de renderizado en el navegador (evitando repaints masivos) y alineación técnica total entre herramientas de análisis estático y el IDE.
+
+
+### 6.183. Internacionalización Estricta de Accesibilidad: Eliminación de Cadenas Literales en Atributos ARIA (i18n + A11y)
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario detectó una etiqueta `aria-label` en castellano hardcodeada en el componente de panel lateral deslizable y consultó si debía internacionalizarse:
+  > *"este tipo de labels no deberia usar las traducciones? aria-label="Cerrar panel""*
+- **Análisis de Accesibilidad e Internacionalización (A11y + i18n):**
+  1. *El Defecto de Accesibilidad Multi-idioma:*
+     - Los lectores de pantalla (como NVDA, VoiceOver o JAWS) leen el atributo `aria-label` para describir botones de icono interactivos sin texto visible.
+     - Si un usuario selecciona la interfaz en inglés, alemán o francés, escuchar `"Cerrar panel"` en español destruye la coherencia de la experiencia asistida y viola los criterios de éxito WCAG 2.1 (Principio de Comprensibilidad).
+  2. *Auditoría Exhaustiva de Plantillas:*
+     - Se realizó un barrido por todas las plantillas `.html` del monorepo buscando cadenas literales en `aria-label`.
+     - Se descubrieron únicamente 2 puntos hardcodeados:
+       - [slide-over-drawer.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/slide-over-drawer/slide-over-drawer.component.html#L42): `aria-label="Cerrar panel"`.
+       - [customer-create-dialog.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.html#L19): `aria-label="Close dialog"`.
+- **Acciones Ejecutadas:**
+  1. *Ampliación del Catálogo de Traducciones en [translations.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/core/i18n/translations.ts):*
+     - Añadida clave `'drawer.close'` en los 4 idiomas oficiales:
+       - `es`: `'Cerrar panel'`
+       - `en`: `'Close panel'`
+       - `de`: `'Bereich schließen'`
+       - `fr`: `'Fermer le panneau'`
+     - Añadida clave `'customers.create.closeAria'` en los 4 idiomas oficiales:
+       - `es`: `'Cerrar diálogo de alta'`
+       - `en`: `'Close dialog'`
+       - `de`: `'Dialog schließen'`
+       - `fr`: `'Fermer la boîte de dialogue'`
+  2. *Refactorización en [slide-over-drawer.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/slide-over-drawer/slide-over-drawer.component.ts) y [slide-over-drawer.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/slide-over-drawer/slide-over-drawer.component.html):*
+     - Incorporado `TranslatePipe` en los imports del componente standalone.
+     - Añadido input configurable `closeAriaLabel = input<string | null>(null);`.
+     - Vinculado dinámicamente en el template: `[attr.aria-label]="closeAriaLabel() || ('drawer.close' | translate)"`.
+  3. *Refactorización en [customer-create-dialog.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.html):*
+     - Sustituido por `[attr.aria-label]="'customers.create.closeAria' | translate"`.
+  4. *Ampliación de Cobertura de Tests:*
+     - En [slide-over-drawer.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/slide-over-drawer/slide-over-drawer.component.spec.ts): Añadida prueba verificando la traducción reactiva en español e inglés y el soporte para overrides personalizados.
+     - En [customer-create-dialog.component.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.spec.ts): Añadida prueba verificando la internacionalización reactiva del botón de cierre.
+  5. *Actualización de Directrices de Agentes en [AGENTS.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/AGENTS.md#L41-L43):*
+     - Incorporada la directriz obligatoria *Full i18n on ARIA Attributes* prescribiendo el uso exclusivo de `[attr.aria-label]="'...' | translate"` o `I18nService.t(...)`.
+- **Resultados de Verificación:**
+  - **Ocurrencias de `aria-label` literales restantes:** **0 en todo el proyecto**.
+  - **Frontend Oxlint:** **0 errores y 0 advertencias**.
+  - **Frontend Vitest Tests:** **261 pruebas pasando al 100%** (+2 nuevas pruebas añadidas).
+  - **Backend Jest Tests:** **159 pruebas pasando al 100%**.
+  - **Total Ecosistema:** **420 pruebas unitarias automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Coherencia de accesibilidad universal W3C (WCAG 2.1) en todos los idiomas del sistema, garantizando que los usuarios de tecnologías de asistencia reciben información en su idioma activo.

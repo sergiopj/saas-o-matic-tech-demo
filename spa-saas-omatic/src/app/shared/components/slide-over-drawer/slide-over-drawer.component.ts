@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
  * Generic reusable slide-over drawer (offcanvas modal) component.
@@ -18,43 +19,34 @@ import { MatTooltipModule } from '@angular/material/tooltip';
  */
 @Component({
   selector: 'app-slide-over-drawer',
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatTooltipModule, TranslatePipe],
   templateUrl: './slide-over-drawer.component.html',
   styleUrl: './slide-over-drawer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SlideOverDrawerComponent {
-  /** Two-way bindable open/closed state */
   readonly isOpen = model<boolean>(false);
 
-  /** Drawer header title */
-  readonly title = input<string>('Filtros');
+  readonly title = input<string>('');
 
-  /** Drawer header optional descriptive subtitle */
   readonly subtitle = input<string | null>(null);
 
-  /** Material icon identifier in header */
+  readonly closeAriaLabel = input<string | null>(null);
+
   readonly icon = input<string>('tune');
 
-  /** Drawer position: right (default) or left */
   readonly position = input<'right' | 'left'>('right');
 
-  /** Desktop drawer width (e.g. 440px) */
   readonly width = input<string>('440px');
 
-  /** Whether to render an overlay backdrop */
   readonly hasBackdrop = input<boolean>(true);
 
-  /** Whether clicking the backdrop closes the drawer */
   readonly closeOnBackdrop = input<boolean>(true);
 
-  /** Whether pressing Escape closes the drawer */
   readonly closeOnEscape = input<boolean>(true);
 
-  /** Emitted when the drawer closes */
   readonly closed = output<void>();
 
-  /** Emitted when the drawer opens */
   readonly opened = output<void>();
 
   @HostListener('keydown.escape', ['$event'])
