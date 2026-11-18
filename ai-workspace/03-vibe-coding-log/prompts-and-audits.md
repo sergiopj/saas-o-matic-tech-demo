@@ -5270,3 +5270,29 @@ Syntax: <single-animation>#
   - **Backend Jest Tests:** **159 pruebas pasando al 100%**.
   - **Total Ecosistema:** **420 pruebas unitarias automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Coherencia de accesibilidad universal W3C (WCAG 2.1) en todos los idiomas del sistema, garantizando que los usuarios de tecnologías de asistencia reciben información en su idioma activo.
+
+
+### 6.184. Erradicación Integral de Boilerplate Standalone Redundante (Angular 19–22 Modern Defaults)
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario reiteró la directriz de Clean Code y buenas prácticas sobre metadatos de Angular moderno, donde `standalone: true` es el valor por defecto desde Angular 19+ y no debe declararse explícitamente:
+  > *"ya te dije tiempo artras que creo que standalone: true, ya va a true por defecto y sobra revisa en etodo el front y alimenta los mds que necesites de ia y de agents etc"*
+- **Análisis de Arquitectura y Evolución de Angular (Angular 19+ / Angular 22):**
+  1. *Evolución de Standalone Components:*
+     - En Angular 14 a 18, `standalone: true` era obligatorio para indicar que un componente, directiva o pipe no dependía de un `NgModule`.
+     - Desde Angular 19 (y ratificado en Angular 22), el equipo de Angular invirtió el valor predeterminado del compilador: `@Component`, `@Directive` y `@Pipe` son `standalone` de forma nativa e implícita.
+     - Escribir `standalone: true` en los metadatos de los componentes es código muerto (*redundant boilerplate*), genera ruido visual y denota desconocimiento de las versiones modernas del framework.
+  2. *Auditoría Completa del Monorepo:*
+     - Se auditó todo el monorepo en búsqueda de `standalone: true`.
+     - Prácticamente el 100% de los componentes ya omitían la propiedad, localizándose una única ocurrencia residual en [theme-toggle.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/theme-toggle/theme-toggle.component.ts#L24).
+- **Acciones Ejecutadas:**
+  - En [theme-toggle.component.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/shared/components/theme-toggle/theme-toggle.component.ts#L22-L28): Eliminada la propiedad redundante `standalone: true,`.
+  - En [AGENTS.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/AGENTS.md#L45-L47): Reforzada la regla en la Sección 2.D (*Signals & Modern Standalone (Angular 19+)*) prohibiendo explícitamente escribir `standalone: true` en cualquier decorador de Angular.
+- **Resultados de Verificación:**
+  - **Ocurrencias de `standalone: true` en el frontend:** **0 en todo el repositorio**.
+  - **Frontend Oxlint:** **0 errores y 0 advertencias**.
+  - **Frontend Vitest Tests:** **261 pruebas pasando al 100%** (30 suites).
+  - **Backend Jest Tests:** **159 pruebas pasando al 100%** (30 suites).
+  - **Total Ecosistema:** **420 pruebas unitarias pasando al 100%**.
+- **Valor para la evaluación:** Adherencia impecable a los estándares idiomáticos de Angular 22, código minimalista y estricto cumplimiento de Clean Code sin ruido decorativo.

@@ -21,7 +21,6 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
  */
 @Component({
   selector: 'app-theme-toggle',
-  standalone: true,
   imports: [MatIconModule, MatTooltipModule, TranslatePipe],
   templateUrl: './theme-toggle.component.html',
   styleUrl: './theme-toggle.component.scss',
