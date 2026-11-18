@@ -1,13 +1,13 @@
 import {
-  Body,
   Controller,
   Get,
-  HttpCode,
-  HttpStatus,
-  Param,
   Post,
+  Body,
+  Param,
   Query,
   Res,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { CreateCustomerUseCase } from '../../../../application/use-cases/create-customer.use-case';
@@ -15,11 +15,13 @@ import { ListCustomersUseCase } from '../../../../application/use-cases/list-cus
 import { GetCustomerDetailUseCase } from '../../../../application/use-cases/get-customer-detail.use-case';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
+import { CustomerDetailResponseDto } from './dto/customer-detail-response.dto';
 import { CustomerLiteResponseDto } from './dto/customer-lite-response.dto';
-import type {
-  CustomerSortField,
-  SortOrderDirection,
-} from '../../../../application/ports/out/customer-repository.port';
+import {
+  isCustomerSortField,
+  isSortOrderDirection,
+} from '../../../../domain/models/customer-search-criteria.model';
+import type { SortOrderDirection } from '../../../../domain/models/customer-search-criteria.model';
 
 /**
  * Primary inbound REST controller exposing Customer management endpoints.
@@ -62,31 +64,22 @@ export class CustomerController {
     const pageNum = page ? Number.parseInt(page, 10) : undefined;
     const limitNum = limit ? Number.parseInt(limit, 10) : undefined;
 
-    const validSortFields: CustomerSortField[] = [
-      'companyName',
-      'createdAt',
-      'country',
-      'taxId',
-    ];
-    const cleanSortBy = validSortFields.includes(sortBy as any)
-      ? (sortBy as CustomerSortField)
-      : undefined;
+    const cleanSortBy = isCustomerSortField(sortBy) ? sortBy : undefined;
 
     const rawOrder = sortOrder || order;
     const cleanOrder: SortOrderDirection | undefined =
-      rawOrder &&
-      (rawOrder.toUpperCase() === 'ASC' || rawOrder.toUpperCase() === 'DESC')
+      rawOrder && isSortOrderDirection(rawOrder)
         ? (rawOrder.toUpperCase() as SortOrderDirection)
         : undefined;
 
-    const { items, total } = await this.listCustomersUseCase.execute(
-      search,
+    const { items, total } = await this.listCustomersUseCase.execute({
+      term: search,
       country,
-      pageNum,
-      limitNum,
-      cleanSortBy,
-      cleanOrder,
-    );
+      page: pageNum,
+      limit: limitNum,
+      sortBy: cleanSortBy,
+      sortOrder: cleanOrder,
+    });
 
     if (res) {
       res.setHeader('X-Total-Count', total.toString());

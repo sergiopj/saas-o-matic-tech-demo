@@ -142,4 +142,29 @@ describe('CustomerPersistenceAdapter (Secondary Adapter)', () => {
       take: 10,
     });
   });
+
+  it('should accept CustomerSearchCriteria object parameter with sorting and pagination', async () => {
+    (mockTypeOrmRepo.findAndCount as jest.Mock).mockResolvedValue([[], 50]);
+
+    const result = await adapter.search({
+      term: 'Acme',
+      country: 'ES',
+      page: 2,
+      limit: 10,
+      sortBy: 'companyName',
+      sortOrder: 'ASC',
+    });
+
+    expect(result.total).toBe(50);
+    expect(mockTypeOrmRepo.findAndCount).toHaveBeenCalledWith({
+      where: [
+        { companyName: expect.anything(), country: 'ES' },
+        { taxId: expect.anything(), country: 'ES' },
+        { email: expect.anything(), country: 'ES' },
+      ],
+      order: { companyName: 'ASC' },
+      skip: 10,
+      take: 10,
+    });
+  });
 });

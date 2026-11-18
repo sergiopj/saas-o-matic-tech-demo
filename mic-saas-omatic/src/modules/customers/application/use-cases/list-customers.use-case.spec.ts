@@ -33,28 +33,45 @@ describe('ListCustomersUseCase', () => {
     expect(result.items).toHaveLength(1);
     expect(result.total).toBe(1);
     expect(result.items[0].getCompanyName()).toBe('Roams Corp');
-    expect(mockRepository.search).toHaveBeenCalledWith(
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-    );
+    expect(mockRepository.search).toHaveBeenCalledWith({
+      term: undefined,
+      country: undefined,
+      page: undefined,
+      limit: undefined,
+      sortBy: undefined,
+      sortOrder: undefined,
+    });
   });
 
-  it('should pass search filter, country filter, pagination and sorting options to the repository', async () => {
+  it('should pass search filter, country filter, pagination and sorting options via positional arguments', async () => {
     mockRepository.search.mockResolvedValue({ items: [], total: 0 });
 
     await useCase.execute('telecom', 'ES', 2, 10, 'companyName', 'ASC');
 
-    expect(mockRepository.search).toHaveBeenCalledWith(
-      'telecom',
-      'ES',
-      2,
-      10,
-      'companyName',
-      'ASC',
-    );
+    expect(mockRepository.search).toHaveBeenCalledWith({
+      term: 'telecom',
+      country: 'ES',
+      page: 2,
+      limit: 10,
+      sortBy: 'companyName',
+      sortOrder: 'ASC',
+    });
+  });
+
+  it('should accept CustomerSearchCriteria parameter object directly', async () => {
+    mockRepository.search.mockResolvedValue({ items: [], total: 0 });
+
+    const criteria = {
+      term: 'cloud',
+      country: 'DE',
+      page: 1,
+      limit: 8,
+      sortBy: 'createdAt' as const,
+      sortOrder: 'DESC' as const,
+    };
+
+    await useCase.execute(criteria);
+
+    expect(mockRepository.search).toHaveBeenCalledWith(criteria);
   });
 });

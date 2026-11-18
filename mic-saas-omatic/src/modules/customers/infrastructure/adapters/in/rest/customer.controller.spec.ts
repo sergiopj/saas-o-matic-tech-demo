@@ -57,14 +57,14 @@ describe('CustomerController (Primary Adapter)', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('uuid-100');
-    expect(mockListCustomersUseCase.execute).toHaveBeenCalledWith(
-      'roams',
-      'ES',
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-    );
+    expect(mockListCustomersUseCase.execute).toHaveBeenCalledWith({
+      term: 'roams',
+      country: 'ES',
+      page: undefined,
+      limit: undefined,
+      sortBy: undefined,
+      sortOrder: undefined,
+    });
   });
 
   it('should support pagination and set response headers when res is provided', async () => {
@@ -92,14 +92,14 @@ describe('CustomerController (Primary Adapter)', () => {
       order: 'ASC',
     });
 
-    expect(mockListCustomersUseCase.execute).toHaveBeenCalledWith(
-      undefined,
-      undefined,
-      1,
-      10,
-      'companyName',
-      'ASC',
-    );
+    expect(mockListCustomersUseCase.execute).toHaveBeenCalledWith({
+      term: undefined,
+      country: undefined,
+      page: 1,
+      limit: 10,
+      sortBy: 'companyName',
+      sortOrder: 'ASC',
+    });
   });
 
   it('should return lightweight CustomerLiteResponseDto array when fields=lite is requested', async () => {

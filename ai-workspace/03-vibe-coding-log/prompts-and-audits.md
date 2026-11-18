@@ -3924,3 +3924,46 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
   - Backend Jest: **128 pruebas unitarias pasando al 100%** (26 suites).
 - **Valor para la evaluación:** Garantiza coherencia matemática y visual de extremo a extremo en escenarios de tarificación internacional multi-divisa.
+
+
+### 6.152. Auditoría y Corrección Humana: Refactor a Modelo de Criterios SSOT (`CustomerSearchCriteria`), Parameter Object y Erradicación de `any`
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  Al auditar el archivo de puerto secundario [customer-repository.port.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/application/ports/out/customer-repository.port.ts), el usuario (asumiendo el rol de evaluador y arquitecto de software) detectó que la definición `export type CustomerSortField = 'companyName' | 'createdAt' | 'country' | 'taxId';` figuraba como un tipo primitivo suelto dentro del puerto de salida. Esto acarreaba varios *code smells* de diseño:
+  1. *Fuga de tipado y cast inseguro:* En [customer.controller.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/in/rest/customer.controller.ts), al ser un tipo de compilación sin presencia en runtime, se duplicaba un array manual `validSortFields` y se utilizaba `validSortFields.includes(sortBy as any)` para validar, violando la regla de tipado estricto (*Zero `any`*).
+  2. *Code Smell de Lista Larga de Parámetros:* El método `search(term?, country?, page?, limit?, sortBy?, sortOrder?)` utilizaba 6 argumentos posicionales opcionales, violando el principio de diseño limpio de Martin Fowler (*Long Parameter List*).
+  3. *Mezcla de responsabilidades en la arquitectura hexagonal:* El puerto de salida de infraestructura mezclaba el contrato de operaciones con tipos auxiliares de ordenación y paginación.
+- **Feedback Humano (Tu criterio de arquitectura y corrección a la IA):**
+  > *"esto va tal cual? noseria mas top crear un modelo o interfaz que contenga esto? 
+  > 
+  > export type CustomerSortField = 'companyName' | 'createdAt' | 'country' | 'taxId';"*
+  > 
+  > Y ante la propuesta de refactorización arquitectónica:
+  > *"si hazlo, actualiza los mds que toquen sobre todo el de promts de la ia para qu evean qiue te corregi y que no se rompa nada de funcionalidad"*
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Nuevo Modelo Inmaculado de Dominio ([customer-search-criteria.model.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/domain/models/customer-search-criteria.model.ts)):*
+     - SSOT inmutable `CUSTOMER_SORTABLE_FIELDS = ['companyName', 'createdAt', 'country', 'taxId'] as const`.
+     - Derivación estricta de tipos: `CustomerSortField = (typeof CUSTOMER_SORTABLE_FIELDS)[number]`.
+     - SSOT para direcciones de orden: `SORT_ORDER_DIRECTIONS = ['ASC', 'DESC'] as const` y `SortOrderDirection`.
+     - Type Guards canónicos: `isCustomerSortField(value: unknown): value is CustomerSortField` e `isSortOrderDirection(value: unknown): value is SortOrderDirection`.
+     - Estructuras Parameter Object: `CustomerSortOptions`, `CustomerSearchCriteria` y `PaginatedResult<T>`.
+  2. *Refactor del Puerto de Salida ([customer-repository.port.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/application/ports/out/customer-repository.port.ts)):*
+     - Limpieza de tipos delegando a `customer-search-criteria.model.ts` con re-exportación `export type { ... }` para cumplimiento estricto con Node ESM (`--experimental-vm-modules`).
+     - Contrato `search(criteriaOrTerm?: CustomerSearchCriteria | string, ...)` con soporte dual (Parameter Object y posicional) para máxima robustez y cero breaking changes.
+  3. *Refactor del Caso de Uso ([list-customers.use-case.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/application/use-cases/list-customers.use-case.ts)):*
+     - Adopta el Parameter Object `CustomerSearchCriteria` mapeando los criterios de forma limpia al repositorio.
+  4. *Refactor del Adaptador de Persistencia ([customer-persistence.adapter.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/out/persistence/customer-persistence.adapter.ts)):*
+     - Normalización transparente de criterios y soporte nativo de `CustomerSearchCriteria`.
+  5. *Erradicación de `any` en el Controlador Primario ([customer.controller.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/in/rest/customer.controller.ts)):*
+     - Supresión del array duplicado `validSortFields`.
+     - Uso directo del type guard `isCustomerSortField(sortBy)` e `isSortOrderDirection(rawOrder)`: 100% type-safe sin un solo `as any`.
+     - Invocación al caso de uso mediante el objeto limpio `CustomerSearchCriteria`.
+  6. *Cobertura de Pruebas Unitarias:*
+     - Creada suite unitaria [customer-search-criteria.model.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/domain/models/customer-search-criteria.model.spec.ts) con 8 pruebas verificando SSOT, validación de campos, valores inválidos, null, undefined y direcciones ASC/DESC.
+     - Actualizados [customer.controller.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/in/rest/customer.controller.spec.ts), [list-customers.use-case.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/application/use-cases/list-customers.use-case.spec.ts) y [customer-persistence.adapter.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/infrastructure/adapters/out/persistence/customer-persistence.adapter.spec.ts).
+- **Resultados de Verificación:**
+  - Backend Jest: **136 pruebas unitarias pasando al 100%** (27 suites, +8 tests nuevos).
+  - Frontend Vitest: **250 pruebas unitarias pasando al 100%** (29 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
+- **Valor para la evaluación:** Demuestra la supervisión humana experta (auditoría en tiempo real del evaluador/arquitecto) corrigiendo la tendencia de la IA a conformarse con tipos primitivos sueltos, elevando el diseño a estándares arquitectónicos de primer nivel (SSOT, Parameter Object, Type Guards, Hexagonal Domain isolation y Zero `any`).

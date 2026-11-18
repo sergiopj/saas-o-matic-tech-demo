@@ -6,6 +6,7 @@ import type {
   PaginatedResult,
   CustomerSortField,
   SortOrderDirection,
+  CustomerSearchCriteria,
 } from '../../../../application/ports/out/customer-repository.port';
 import { Customer } from '../../../../domain/entities/customer.entity';
 import { normalizeTaxId } from '../../../../domain/value-objects/tax-id.vo';
@@ -41,17 +42,31 @@ export class CustomerPersistenceAdapter implements CustomerRepositoryPort {
   }
 
   async search(
-    term?: string,
+    criteriaOrTerm?: CustomerSearchCriteria | string,
     country?: string,
     page?: number,
     limit?: number,
     sortBy?: CustomerSortField,
     sortOrder?: SortOrderDirection,
   ): Promise<PaginatedResult<Customer>> {
-    const hasTerm = Boolean(term && term.trim());
+    const criteria: CustomerSearchCriteria =
+      typeof criteriaOrTerm === 'object' && criteriaOrTerm !== null
+        ? criteriaOrTerm
+        : {
+            term: criteriaOrTerm,
+            country,
+            page,
+            limit,
+            sortBy,
+            sortOrder,
+          };
+
+    const hasTerm = Boolean(criteria.term && criteria.term.trim());
     const normalizedCountry =
-      country && country.trim() && country.trim().toUpperCase() !== 'ALL'
-        ? country.trim().toUpperCase()
+      criteria.country &&
+      criteria.country.trim() &&
+      criteria.country.trim().toUpperCase() !== 'ALL'
+        ? criteria.country.trim().toUpperCase()
         : undefined;
 
     let where:
@@ -64,8 +79,8 @@ export class CustomerPersistenceAdapter implements CustomerRepositoryPort {
     } else if (!hasTerm && normalizedCountry) {
       where = { country: normalizedCountry };
     } else {
-      const cleanTerm = `%${term!.trim()}%`;
-      const normalizedTaxTerm = `%${normalizeTaxId(term!)}%`;
+      const cleanTerm = `%${criteria.term!.trim()}%`;
+      const normalizedTaxTerm = `%${normalizeTaxId(criteria.term!)}%`;
       where = normalizedCountry
         ? [
             { companyName: Like(cleanTerm), country: normalizedCountry },
@@ -86,11 +101,14 @@ export class CustomerPersistenceAdapter implements CustomerRepositoryPort {
       taxId: 'taxId',
     };
     const activeSortField =
-      sortBy && fieldMap[sortBy] ? fieldMap[sortBy] : 'createdAt';
+      criteria.sortBy && fieldMap[criteria.sortBy]
+        ? fieldMap[criteria.sortBy]
+        : 'createdAt';
     const activeOrder: 'ASC' | 'DESC' =
-      sortOrder &&
-      (sortOrder.toUpperCase() === 'ASC' || sortOrder.toUpperCase() === 'DESC')
-        ? (sortOrder.toUpperCase() as 'ASC' | 'DESC')
+      criteria.sortOrder &&
+      (criteria.sortOrder.toUpperCase() === 'ASC' ||
+        criteria.sortOrder.toUpperCase() === 'DESC')
+        ? (criteria.sortOrder.toUpperCase() as 'ASC' | 'DESC')
         : activeSortField === 'companyName'
           ? 'ASC'
           : 'DESC';
@@ -103,15 +121,22 @@ export class CustomerPersistenceAdapter implements CustomerRepositoryPort {
       options.where = where;
     }
 
-    if (page && limit && page > 0 && limit > 0) {
-      options.skip = (page - 1) * limit;
-      options.take = limit;
+    if (
+      criteria.page &&
+      criteria.limit &&
+      criteria.page > 0 &&
+      criteria.limit > 0
+    ) {
+      options.skip = (criteria.page - 1) * criteria.limit;
+      options.take = criteria.limit;
     }
 
     const [entities, total] = await this.repository.findAndCount(options);
 
     return {
-      items: entities.map((entity) => CustomerPersistenceMapper.toDomain(entity)),
+      items: entities.map((entity) =>
+        CustomerPersistenceMapper.toDomain(entity),
+      ),
       total,
     };
   }

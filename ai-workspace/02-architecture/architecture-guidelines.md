@@ -686,8 +686,11 @@ Para garantizar que fallos en elementos cosméticos o de micro-interacción (spi
      res.setHeader('X-Total-Pages', Math.max(1, Math.ceil(total / limitNum)).toString());
    }
    ```
-2. **Dominio y Casos de Uso Desacoplados:**
-   El caso de uso `ListCustomersUseCase` y el puerto de repositorio `CustomerRepositoryPort` manejan `page?: number` y `limit?: number` puramente como parámetros numéricos de dominio, devolviendo `PaginatedResult<Customer>` (`{ items: Customer[]; total: number }`), completamente agnósticos del framework NestJS o de la interfaz `Response` de Express.
+2. **Dominio y Casos de Uso Desacoplados con Parameter Object (`CustomerSearchCriteria`):**
+   El caso de uso `ListCustomersUseCase` y el puerto de repositorio `CustomerRepositoryPort` reemplazan la lista larga de argumentos posicionales por el patrón *Parameter Object* (`CustomerSearchCriteria`), encapsulando `term`, `country`, `page`, `limit`, `sortBy` y `sortOrder`.
+   - **SSOT en Runtime y Compile-Time:** La tupla inmutable `CUSTOMER_SORTABLE_FIELDS = ['companyName', 'createdAt', 'country', 'taxId'] as const` dota a la capa de dominio de una única fuente de verdad compartida para runtime y compile-time.
+   - **Type Guards Canónicos:** Las funciones `isCustomerSortField` e `isSortOrderDirection` garantizan un filtrado 100% type-safe en el controlador HTTP, erradicando por completo el uso de `any` (`sortBy as any`).
+   - Devuelven `PaginatedResult<Customer>` (`{ items: Customer[]; total: number }`), completamente agnósticos del framework NestJS o de la interfaz `Response` de Express.
 3. **Persistencia SQL Eficiente (`findAndCount`):**
    El adaptador de persistencia `CustomerPersistenceAdapter` delega la paginación a la base de datos SQLite ejecutando `skip: (page - 1) * limit` y `take: limit`, garantizando que únicamente los registros solicitados sean transferidos desde disco a memoria.
 4. **Retrocompatibilidad del Contrato REST (Cero Breaking Changes):**

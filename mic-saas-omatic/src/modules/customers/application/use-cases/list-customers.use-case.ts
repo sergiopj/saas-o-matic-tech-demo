@@ -5,6 +5,7 @@ import type {
   PaginatedResult,
   CustomerSortField,
   SortOrderDirection,
+  CustomerSearchCriteria,
 } from '../ports/out/customer-repository.port';
 import type { Customer } from '../../domain/entities/customer.entity';
 
@@ -15,21 +16,30 @@ export class ListCustomersUseCase {
     private readonly customerRepository: CustomerRepositoryPort,
   ) {}
 
+  /**
+   * Dispatches customer search queries.
+   * Supports both parameter object (CustomerSearchCriteria) and positional arguments.
+   */
   async execute(
-    searchTerm?: string,
+    criteriaOrTerm?: CustomerSearchCriteria | string,
     country?: string,
     page?: number,
     limit?: number,
     sortBy?: CustomerSortField,
     sortOrder?: SortOrderDirection,
   ): Promise<PaginatedResult<Customer>> {
-    return this.customerRepository.search(
-      searchTerm,
-      country,
-      page,
-      limit,
-      sortBy,
-      sortOrder,
-    );
+    const criteria: CustomerSearchCriteria =
+      typeof criteriaOrTerm === 'object' && criteriaOrTerm !== null
+        ? criteriaOrTerm
+        : {
+            term: criteriaOrTerm,
+            country,
+            page,
+            limit,
+            sortBy,
+            sortOrder,
+          };
+
+    return this.customerRepository.search(criteria);
   }
 }
