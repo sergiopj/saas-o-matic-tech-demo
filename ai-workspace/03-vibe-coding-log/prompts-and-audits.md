@@ -4299,3 +4299,34 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
   - Total Ecosistema: **405 pruebas pasando al 100%**.
 - **Valor para la evaluación:** Ilustra cómo la supervisión experta del evaluador identifica duplicidades sutiles en la capa de dominio puro, guiando el código hacia un diseño DDD intachable donde cada invariante tiene un único punto de verdad inmutable (Single Source of Truth).
+
+
+### 6.159. Auditoría y Refactorización Clean Code: Descomposición Funcional Cohesiva y Optimización del Validador Fiscal (`spanish-fiscal.validator.ts`)
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario analizó el validador fiscal del dominio [spanish-fiscal.validator.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/domain/services/spanish-fiscal.validator.ts) y propuso modularizarlo descomponiendo las validaciones en funciones especializadas dentro del mismo fichero con comentarios técnicos naturales en inglés:
+  > *"creo que en este validador lo mismo quizas si lo ves bien se puedan sacar distintas fiunciones que validen en el mismo fichero o no lo ve snecesario?
+  > ...
+  > si aplicalo y ademas pon pequeños comentarios en ingles de que hace cada validacion pero que no se note que se hacen tan ia roboticos"*
+- **Análisis de Diseño y Principios Clean Code:**
+  1. *Acoplamiento Algorítmico en `isValidCif`:* La función original concentraba la validación por expresión regular, el cálculo aritmético de ponderación de la AEAT (suma de pares e impares reducidos mod 10) y la lógica de clasificación de tipo de sociedad (tipos K, P, Q, S con letra; A, B, E, H con número; resto mixto).
+  2. *Duplicación entre DNI y NIE:* Ambos formatos compartían la lógica de módulo 23 para obtener la letra de control a partir de una secuencia numérica.
+  3. *Optimización de Memoria y Runtimes:* Las expresiones regulares y arrays de tipos se creaban dinámicamente en el heap en cada invocación; se requería elevarlos a constantes inmutables precompiladas y usar `Set.prototype.has` para búsquedas en tiempo constante $O(1)$.
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Descomposición en Funciones de Responsabilidad Única ([spanish-fiscal.validator.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/customers/domain/services/spanish-fiscal.validator.ts)):*
+     - `getDniControlLetter(numericPart: number): string`: Función pura que computa la letra oficial del DNI/NIE por módulo 23 (reutilizada por DNI y NIE sin duplicidad).
+     - `calculateCifChecksum(digits: string): CifChecksum`: Encapsula exclusivamente el algoritmo matemático oficial de la AEAT, retornando `{ controlDigit, controlLetter }`.
+     - `matchesCifControl(firstLetter, controlChar, checksum): boolean`: Aplica las reglas de correspondencia según la forma jurídica de la entidad.
+     - `isValidSpanishTaxId(normalizedTaxId: string): boolean`: Agrupador limpio para documentos españoles (DNI, NIE o CIF).
+     - `isValidInternationalTaxId(normalizedTaxId: string): boolean`: Validador para identificadores fiscales internacionales genéricos (5-20 caracteres alfanuméricos).
+     - `isValidTaxId(rawTaxId: string, country: string): boolean`: Despachador de nivel superior conciso y auto-documentado.
+  2. *Comentarios Técnicos Naturales:*
+     - Comentarios concisos y directos de ingeniería de software en inglés explicando cada regla de negocio fiscal sin artificios robóticos.
+- **Resultados de Verificación:**
+  - Compilación NestJS (`nest build`): **0 errores**.
+  - Backend Jest: **151 pruebas unitarias pasando al 100%** (29 suites).
+  - Frontend Vitest: **254 pruebas unitarias pasando al 100%** (29 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Total Ecosistema: **405 pruebas pasando al 100%**.
+- **Valor para la evaluación:** Refleja la colaboración evaluador-arquitecto para transformar un validador funcional pero monolítico en un módulo funcional limpio, declarativo, testeable por piezas y altamente performante.

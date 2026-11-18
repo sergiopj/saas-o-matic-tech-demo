@@ -110,8 +110,6 @@ export class Customer {
     });
   }
 
-  // --- Domain Invariant Validators (SSOT) ---
-
   private static validateCompanyName(companyName?: string): string {
     const trimmed = (companyName || '').trim();
     if (!trimmed || trimmed.length < 2) {

@@ -1,62 +1,123 @@
 import { normalizeTaxId } from '../value-objects/tax-id.vo';
 
+// Modulo 23 control letter sequence for Spanish DNI/NIE
 const DNI_LETTERS = 'TRWAGMYFPDXBNJZSQVHLCKE';
-const CIF_CONTROL_LETTERS = 'JABCDEFGHI'; // 0=J, 1=A, 2=B, 3=C, 4=D, 5=E, 6=F, 7=G, 8=H, 9=I
+
+// CIF control letters corresponding to control digits 0-9 (0=J, 1=A, ..., 9=I)
+const CIF_CONTROL_LETTERS = 'JABCDEFGHI';
+
+const DNI_REGEX = /^\d{8}[A-Z]$/;
+const NIE_REGEX = /^[XYZ]\d{7}[A-Z]$/;
+const CIF_REGEX = /^[ABCDEFGHJKLMNPQRSUVW]\d{7}[0-9A-J]$/;
+const INTERNATIONAL_TAX_ID_REGEX = /^[A-Z0-9]{5,20}$/;
+
+// Entities requiring an alphabetical control character (e.g. public bodies, religious orders)
+const CIF_STRICTLY_LETTER_TYPES = new Set(['K', 'P', 'Q', 'S']);
+
+// Entities requiring a numeric digit control character (e.g. corporations, partnerships)
+const CIF_STRICTLY_DIGIT_TYPES = new Set(['A', 'B', 'E', 'H']);
+
+// Maps the initial foreign letter to its numeric equivalent
+const NIE_PREFIX_MAP: Record<string, string> = {
+  X: '0',
+  Y: '1',
+  Z: '2',
+};
 
 /**
- * Validates Spanish DNI (8 digits + 1 control letter with modulo 23).
+ * Computes the official DNI/NIE control letter via modulo 23.
+ */
+export function getDniControlLetter(numericPart: number): string {
+  return DNI_LETTERS[numericPart % 23] ?? '';
+}
+
+/**
+ * Validates a Spanish personal national identity document (8 digits + 1 control letter).
  */
 export function isValidDni(normalizedId: string): boolean {
-  const dniRegex = /^\d{8}[A-Z]$/;
-  if (!dniRegex.test(normalizedId)) {
+  if (!DNI_REGEX.test(normalizedId)) {
     return false;
   }
 
-  const numericPart = parseInt(normalizedId.substring(0, 8), 10);
-  const expectedLetter = DNI_LETTERS[numericPart % 23];
+  const numericPart = Number.parseInt(normalizedId.substring(0, 8), 10);
   const actualLetter = normalizedId.charAt(8);
 
-  return expectedLetter === actualLetter;
+  return getDniControlLetter(numericPart) === actualLetter;
 }
 
 /**
- * Validates Spanish NIE (X/Y/Z + 7 digits + 1 control letter with modulo 23).
- * X maps to 0, Y maps to 1, Z maps to 2.
+ * Validates a Spanish foreigner identity number (X, Y, or Z followed by 7 digits and a control letter).
  */
 export function isValidNie(normalizedId: string): boolean {
-  const nieRegex = /^[XYZ]\d{7}[A-Z]$/;
-  if (!nieRegex.test(normalizedId)) {
+  if (!NIE_REGEX.test(normalizedId)) {
     return false;
   }
 
-  const prefix = normalizedId.charAt(0);
-  const prefixDigit = prefix === 'X' ? '0' : prefix === 'Y' ? '1' : '2';
+  // Swap leading letter with its designated digit before running mod 23
+  const prefixDigit = NIE_PREFIX_MAP[normalizedId.charAt(0)] ?? '2';
   const numericString = prefixDigit + normalizedId.substring(1, 8);
-  const numericPart = parseInt(numericString, 10);
-
-  const expectedLetter = DNI_LETTERS[numericPart % 23];
+  const numericPart = Number.parseInt(numericString, 10);
   const actualLetter = normalizedId.charAt(8);
 
-  return expectedLetter === actualLetter;
+  return getDniControlLetter(numericPart) === actualLetter;
+}
+
+export interface CifChecksum {
+  controlDigit: number;
+  controlLetter: string;
 }
 
 /**
- * Validates Spanish CIF (1 entity letter + 7 digits + 1 control digit or letter).
- * Follows the official AEAT algorithmic check:
- * - A: Sum of even positions (d2 + d4 + d6)
- * - B: Sum of digits of (odd positions * 2) (d1, d3, d5, d7)
- * - S = A + B
- * - C = (10 - (S % 10)) % 10
- *
- * Rules:
- * - Types [K, P, Q, S]: strictly letter control.
- * - Types [A, B, E, H]: strictly numerical digit control.
- * - Types [C, D, F, G, J, L, M, N, R, U, V, W]: allows either letter or digit.
+ * Calculates AEAT control values from the 7-digit body of a CIF.
+ */
+export function calculateCifChecksum(digits: string): CifChecksum {
+  // Sum even-indexed positions (1-based positions 2, 4, 6)
+  const evenSum =
+    Number.parseInt(digits.charAt(1), 10) +
+    Number.parseInt(digits.charAt(3), 10) +
+    Number.parseInt(digits.charAt(5), 10);
+
+  // Sum odd positions doubled, reducing two-digit products (Luhn-style: 7*2=14 -> 1+4=5)
+  let oddSum = 0;
+  for (const idx of [0, 2, 4, 6]) {
+    const multiplied = Number.parseInt(digits.charAt(idx), 10) * 2;
+    oddSum += multiplied > 9 ? multiplied - 9 : multiplied;
+  }
+
+  const totalSum = evenSum + oddSum;
+  const controlDigit = (10 - (totalSum % 10)) % 10;
+  const controlLetter = CIF_CONTROL_LETTERS[controlDigit] ?? '';
+
+  return { controlDigit, controlLetter };
+}
+
+/**
+ * Verifies whether the control character matches the expected type for the entity letter.
+ */
+export function matchesCifControl(
+  firstLetter: string,
+  controlChar: string,
+  checksum: CifChecksum,
+): boolean {
+  const { controlDigit, controlLetter } = checksum;
+
+  if (CIF_STRICTLY_LETTER_TYPES.has(firstLetter)) {
+    return controlChar === controlLetter;
+  }
+
+  if (CIF_STRICTLY_DIGIT_TYPES.has(firstLetter)) {
+    return controlChar === controlDigit.toString();
+  }
+
+  // Other legal forms (e.g. Cooperatives, LLCs) accept either digit or letter
+  return controlChar === controlDigit.toString() || controlChar === controlLetter;
+}
+
+/**
+ * Validates a Spanish corporate tax identification code (1 entity letter + 7 digits + control).
  */
 export function isValidCif(normalizedId: string): boolean {
-  // Types: all letters except I, Ñ, O, T, X, Y, Z
-  const cifRegex = /^[ABCDEFGHJKLMNPQRSUVW]\d{7}[0-9A-J]$/;
-  if (!cifRegex.test(normalizedId)) {
+  if (!CIF_REGEX.test(normalizedId)) {
     return false;
   }
 
@@ -64,45 +125,30 @@ export function isValidCif(normalizedId: string): boolean {
   const digits = normalizedId.substring(1, 8);
   const controlChar = normalizedId.charAt(8);
 
-  // 1. Sum of even positions (indices 1, 3, 5 corresponding to d2, d4, d6)
-  const evenSum =
-    parseInt(digits.charAt(1), 10) +
-    parseInt(digits.charAt(3), 10) +
-    parseInt(digits.charAt(5), 10);
-
-  // 2. Sum of digits of odd positions multiplied by 2 (indices 0, 2, 4, 6 corresponding to d1, d3, d5, d7)
-  const oddIndices = [0, 2, 4, 6];
-  let oddSum = 0;
-  for (const idx of oddIndices) {
-    const multiplied = parseInt(digits.charAt(idx), 10) * 2;
-    // Sum of digits: for values < 10 it's the value itself; for >= 10 (e.g. 14 -> 1+4 = 5 or multiplied - 9)
-    oddSum += multiplied > 9 ? multiplied - 9 : multiplied;
-  }
-
-  const totalSum = evenSum + oddSum;
-  const controlDigit = (10 - (totalSum % 10)) % 10;
-  const controlLetter = CIF_CONTROL_LETTERS[controlDigit];
-
-  // Control letter strictly required
-  const strictlyLetterTypes = ['K', 'P', 'Q', 'S'];
-  if (strictlyLetterTypes.includes(firstLetter)) {
-    return controlChar === controlLetter;
-  }
-
-  // Numerical digit strictly required
-  const strictlyDigitTypes = ['A', 'B', 'E', 'H'];
-  if (strictlyDigitTypes.includes(firstLetter)) {
-    return controlChar === controlDigit.toString();
-  }
-
-  // Mixed types: allow either corresponding digit or letter
-  return controlChar === controlDigit.toString() || controlChar === controlLetter;
+  const checksum = calculateCifChecksum(digits);
+  return matchesCifControl(firstLetter, controlChar, checksum);
 }
 
 /**
- * Universal fiscal identifier validator.
- * If country is 'ES', applies strict mathematical check (DNI, NIE, or CIF).
- * If country is foreign, requires clean alphanumeric string between 5 and 20 chars.
+ * Checks if the identifier matches any valid Spanish tax format (DNI, NIE, or CIF).
+ */
+export function isValidSpanishTaxId(normalizedTaxId: string): boolean {
+  return (
+    isValidDni(normalizedTaxId) ||
+    isValidNie(normalizedTaxId) ||
+    isValidCif(normalizedTaxId)
+  );
+}
+
+/**
+ * Checks generic international tax format (5-20 alphanumeric characters).
+ */
+export function isValidInternationalTaxId(normalizedTaxId: string): boolean {
+  return INTERNATIONAL_TAX_ID_REGEX.test(normalizedTaxId);
+}
+
+/**
+ * Main dispatch validator supporting Spanish AEAT algorithms and international IDs.
  */
 export function isValidTaxId(rawTaxId: string, country: string): boolean {
   const normalized = normalizeTaxId(rawTaxId);
@@ -113,10 +159,8 @@ export function isValidTaxId(rawTaxId: string, country: string): boolean {
   }
 
   if (normalizedCountry === 'ES') {
-    return isValidDni(normalized) || isValidNie(normalized) || isValidCif(normalized);
+    return isValidSpanishTaxId(normalized);
   }
 
-  // Non-Spanish entities: alphanumeric, min 5, max 20 chars
-  const internationalRegex = /^[A-Z0-9]{5,20}$/;
-  return internationalRegex.test(normalized);
+  return isValidInternationalTaxId(normalized);
 }
