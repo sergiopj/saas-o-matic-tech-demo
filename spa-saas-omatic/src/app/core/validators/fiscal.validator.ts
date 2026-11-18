@@ -110,7 +110,14 @@ export function fiscalTaxIdValidator(getCountry: () => string): ValidatorFn {
 
     const country = getCountry();
     const valid = isValidTaxId(value, country);
-    return valid ? null : { invalidTaxId: true };
+    if (valid) {
+      return null;
+    }
+
+    const normalizedCountry = (country || '').trim().toUpperCase();
+    return normalizedCountry === 'ES'
+      ? { invalidTaxId: true, invalidSpanishTaxId: true }
+      : { invalidTaxId: true, invalidInternationalTaxId: true };
   };
 }
 

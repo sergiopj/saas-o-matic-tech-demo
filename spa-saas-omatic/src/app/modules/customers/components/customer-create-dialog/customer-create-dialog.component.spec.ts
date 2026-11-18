@@ -67,20 +67,31 @@ describe('CustomerCreateDialogComponent', () => {
     const taxControl = component.form.get('taxId');
     taxControl?.setValue('B12345678'); // Invalid control
     expect(taxControl?.hasError('invalidTaxId')).toBe(true);
+    expect(taxControl?.hasError('invalidSpanishTaxId')).toBe(true);
 
     taxControl?.setValue('B12345674'); // Valid AEAT CIF
     expect(taxControl?.hasError('invalidTaxId')).toBe(false);
+    expect(taxControl?.hasError('invalidSpanishTaxId')).toBe(false);
   });
 
-  it('should adapt taxId validation when country changes to international jurisdiction', () => {
+  it('should adapt taxId validation and placeholder when country changes to international jurisdiction', () => {
     const countryControl = component.form.get('country');
     const taxControl = component.form.get('taxId');
 
+    expect(component.taxIdPlaceholder()).toContain('B12345674');
+
     taxControl?.setValue('DE999888777');
     expect(taxControl?.hasError('invalidTaxId')).toBe(true); // invalid under ES
+    expect(taxControl?.hasError('invalidSpanishTaxId')).toBe(true);
 
     countryControl?.setValue('DE');
+    expect(component.taxIdPlaceholder()).toBe('Ej. DE999888777');
     expect(taxControl?.hasError('invalidTaxId')).toBe(false); // valid under DE
+
+    // Short ID under DE gives invalidInternationalTaxId
+    taxControl?.setValue('B1');
+    expect(taxControl?.hasError('invalidTaxId')).toBe(true);
+    expect(taxControl?.hasError('invalidInternationalTaxId')).toBe(true);
   });
 
   it('should reject invalid RFC 5322 emails and accept valid ones', () => {

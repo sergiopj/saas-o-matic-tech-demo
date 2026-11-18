@@ -79,6 +79,11 @@ Se verifica contra los algoritmos oficiales del Ministerio del Interior y la Age
 #### B. Otros Países (`country !== 'ES'`)
 - Formato: Cadena alfanumérica limpia con longitud mínima de 5 caracteres y máxima de 20 caracteres.
 
+#### C. Dinamismo de Formulario y Adaptación Contextual en Frontend (`CustomerCreateDialogComponent`)
+- El campo `taxId` adapta en tiempo real su validador reactivo (`fiscalTaxIdValidator`), su placeholder descriptivo (`taxIdPlaceholder()`) y su mensaje de error (`<mat-error>`) en función de la jurisdicción fiscal activa en el formulario:
+  - **Si `country === 'ES'`:** Placeholder `Ej. B12345674 o 12345678Z`, con error contextual español: *"El DNI, NIE o CIF no es válido según el algoritmo de control de la AEAT (ej. B12345674)."*
+  - **Si `country !== 'ES'`:** Placeholder adaptado al país seleccionado (ej. `Ej. DE999888777` en Alemania, `Ej. FR45801234567` en Francia, `Ej. US123456789` en EE. UU.), con error contextual internacional: *"El identificador fiscal internacional debe tener entre 5 y 20 caracteres alfanuméricos (ej. DE999888777)."*
+
 ---
 
 ### 2.3 Simulación y Motor de Precios (`Simulation`)

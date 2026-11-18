@@ -82,13 +82,17 @@
             type="text"
             formControlName="taxId"
             [errorStateMatcher]="matcher"
-            [placeholder]="'customers.create.taxIdPlaceholder' | translate"
+            [placeholder]="taxIdPlaceholder()"
             autocomplete="off"
             required
           />
           <mat-icon matPrefix class="field-icon">badge</mat-icon>
           @if (form.get('taxId')?.hasError('required')) {
             <mat-error>{{ 'customers.create.errRequired' | translate }}</mat-error>
+          } @else if (form.get('taxId')?.hasError('invalidSpanishTaxId')) {
+            <mat-error>{{ 'customers.create.errTaxIdEs' | translate }}</mat-error>
+          } @else if (form.get('taxId')?.hasError('invalidInternationalTaxId')) {
+            <mat-error>{{ 'customers.create.errTaxIdIntl' | translate }}</mat-error>
           } @else if (form.get('taxId')?.hasError('invalidTaxId')) {
             <mat-error>{{ 'customers.create.errTaxId' | translate }}</mat-error>
           }

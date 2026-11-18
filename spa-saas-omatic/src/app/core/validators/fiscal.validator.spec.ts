@@ -85,20 +85,32 @@ describe('Fiscal Validator (AEAT Algorithm)', () => {
         expect(validator(new FormControl('B12345674'))).toBeNull();
       });
 
-      it('should return invalidTaxId error for invalid Spanish CIF', () => {
+      it('should return invalidSpanishTaxId error for invalid Spanish CIF', () => {
         const validator = fiscalTaxIdValidator(() => 'ES');
-        expect(validator(new FormControl('B12345678'))).toEqual({ invalidTaxId: true });
+        expect(validator(new FormControl('B12345678'))).toEqual({
+          invalidTaxId: true,
+          invalidSpanishTaxId: true,
+        });
       });
 
-      it('should adapt validation based on dynamic country getter', () => {
+      it('should adapt validation based on dynamic country getter and return invalidInternationalTaxId', () => {
         let country = 'ES';
         const validator = fiscalTaxIdValidator(() => country);
 
-        // International ID fails under ES
-        expect(validator(new FormControl('DE999888777'))).toEqual({ invalidTaxId: true });
+        // International ID fails under ES with invalidSpanishTaxId
+        expect(validator(new FormControl('DE999888777'))).toEqual({
+          invalidTaxId: true,
+          invalidSpanishTaxId: true,
+        });
 
-        // International ID passes under DE
+        // Too short international ID fails under DE with invalidInternationalTaxId
         country = 'DE';
+        expect(validator(new FormControl('B1'))).toEqual({
+          invalidTaxId: true,
+          invalidInternationalTaxId: true,
+        });
+
+        // Valid international ID passes under DE
         expect(validator(new FormControl('DE999888777'))).toBeNull();
       });
     });

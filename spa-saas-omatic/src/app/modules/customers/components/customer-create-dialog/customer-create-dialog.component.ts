@@ -32,17 +32,18 @@ export interface CountryOption {
   code: string;
   nameKey: string;
   flag: string;
+  placeholder: string;
 }
 
 export const COUNTRY_OPTIONS: CountryOption[] = [
-  { code: 'ES', nameKey: 'España', flag: '🇪🇸' },
-  { code: 'DE', nameKey: 'Deutschland', flag: '🇩🇪' },
-  { code: 'FR', nameKey: 'France', flag: '🇫🇷' },
-  { code: 'GB', nameKey: 'United Kingdom', flag: '🇬🇧' },
-  { code: 'US', nameKey: 'United States', flag: '🇺🇸' },
-  { code: 'IT', nameKey: 'Italia', flag: '🇮🇹' },
-  { code: 'CH', nameKey: 'Schweiz', flag: '🇨🇭' },
-  { code: 'SE', nameKey: 'Sverige', flag: '🇸🇪' },
+  { code: 'ES', nameKey: 'España', flag: '🇪🇸', placeholder: 'Ej. B12345674 o 12345678Z' },
+  { code: 'DE', nameKey: 'Deutschland', flag: '🇩🇪', placeholder: 'Ej. DE999888777' },
+  { code: 'FR', nameKey: 'France', flag: '🇫🇷', placeholder: 'Ej. FR45801234567' },
+  { code: 'GB', nameKey: 'United Kingdom', flag: '🇬🇧', placeholder: 'Ej. GB123456789' },
+  { code: 'US', nameKey: 'United States', flag: '🇺🇸', placeholder: 'Ej. US123456789' },
+  { code: 'IT', nameKey: 'Italia', flag: '🇮🇹', placeholder: 'Ej. IT12345678901' },
+  { code: 'CH', nameKey: 'Schweiz', flag: '🇨🇭', placeholder: 'Ej. CHE123456789' },
+  { code: 'SE', nameKey: 'Sverige', flag: '🇸🇪', placeholder: 'Ej. SE123456789001' },
 ];
 
 export const PLAN_OPTIONS: string[] = [
@@ -88,6 +89,12 @@ export class CustomerCreateDialogComponent implements OnInit, OnDestroy {
   readonly countries = COUNTRY_OPTIONS;
   readonly plans = PLAN_OPTIONS;
 
+  readonly selectedCountryCode = signal<string>('ES');
+  readonly taxIdPlaceholder = computed<string>(() => {
+    const selected = this.countries.find((c) => c.code === this.selectedCountryCode());
+    return selected ? selected.placeholder : 'Ej. B12345674';
+  });
+
   readonly submitting = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
   readonly success = signal<boolean>(false);
@@ -128,6 +135,9 @@ export class CustomerCreateDialogComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.customerData) {
+      if (this.customerData.country) {
+        this.selectedCountryCode.set(this.customerData.country);
+      }
       this.form.patchValue({
         companyName: this.customerData.companyName,
         country: this.customerData.country,
@@ -137,7 +147,8 @@ export class CustomerCreateDialogComponent implements OnInit, OnDestroy {
       });
     }
 
-    this.countrySub = this.form.get('country')?.valueChanges.subscribe(() => {
+    this.countrySub = this.form.get('country')?.valueChanges.subscribe((code) => {
+      this.selectedCountryCode.set(code ?? 'ES');
       this.form.get('taxId')?.updateValueAndValidity();
     });
   }
