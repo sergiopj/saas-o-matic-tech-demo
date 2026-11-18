@@ -157,10 +157,7 @@
         <mat-spinner diameter="18" class="spinner-inline" />
         <span>{{ (isEditMode() ? 'customers.edit.submitting' : 'customers.create.submitting') | translate }}</span>
       } @else {
-        <span class="btn-content">
-          <mat-icon>save</mat-icon>
-          <span>{{ (isEditMode() ? 'customers.edit.submit' : 'customers.create.submit') | translate }}</span>
-        </span>
+        <span>{{ (isEditMode() ? 'customers.edit.submit' : 'customers.create.submit') | translate }}</span>
       }
     </button>
   </mat-dialog-actions>

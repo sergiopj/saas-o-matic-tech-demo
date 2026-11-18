@@ -4048,3 +4048,27 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Backend Jest: **151 pruebas unitarias pasando al 100%** (29 suites).
   - Total Ecosistema: **405 pruebas pasando al 100%**.
 - **Valor para la evaluación:** Refuerza la claridad ergonómica de la interfaz de usuario con microcopia directa (*API Online* / *API Offline*), respaldada por una arquitectura eficiente de consumo de APIs externas mediante Angular Signals y ciclo de vida Singleton.
+
+
+### 6.155. Eliminación de Iconografía Redundante (Disquete) en Botones de Guardar de Formularios
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario solicitó retirar el icono analógico de disquete (`<mat-icon>save</mat-icon>`) de todos los botones de guardado en formularios a lo largo de la aplicación, argumentando que el propio texto del botón ya explica con total claridad su función y que la iconografía física añade ruido visual innecesario:
+  > *"quita el icono de guardar de un disquete en los botones que sean de guardar en todos los forms, el name del boton ya indica lo que hace, pon este cambio o cambios tambien en los mds que toquen"*
+- **Decisión de Arquitectura y Ergonomía Visual (UI/UX):**
+  1. *Eliminación de Redundancia Cognitiva:*
+     - Los botones de envío en SaaS-O-Matic cuentan con internacionalización completa en 4 idiomas (`Guardar Simulación`, `Crear Cliente`, `Guardar Cambios`, etc.). Acompañar el texto de un icono de disquete (metáfora obsoleta de almacenamiento físico de los 90s) no aporta valor informativo y sobrecarga el foco visual.
+     - Se mantiene el soporte dinámico para estados de envío (`mat-spinner` mientras la petición está en vuelo) garantizando feedback de carga sin perder la claridad tipográfica.
+  2. *Plantillas Modificadas:*
+     - [customer-create-dialog.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/components/customer-create-dialog/customer-create-dialog.component.html): Retirado `<mat-icon>save</mat-icon>` del botón primario `.submit-btn` en el modal de alta/edición de clientes corporativos.
+     - [customer-detail.component.html](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/spa-saas-omatic/src/app/modules/customers/pages/customer-detail/customer-detail.component.html): Retirado `<mat-icon aria-hidden="true">save</mat-icon>` del botón primario `.save-simulation-btn` en el formulario del estudio interactivo de simulación.
+  3. *Actualización de Documentación:*
+     - [functional-specs.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/01-specs/functional-specs.md): Sección 3.1 actualizada documentando la tipografía limpia sin iconografía redundante.
+     - [architecture-guidelines.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/ai-workspace/02-architecture/architecture-guidelines.md): Sección de ergonomía de formularios actualizada con la política de eliminación de iconos redundantes en botones de acción.
+- **Resultados de Verificación:**
+  - Frontend Vitest: **254 pruebas unitarias pasando al 100%** (29 suites).
+  - Oxlint Frontend: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Backend Jest: **151 pruebas unitarias pasando al 100%** (29 suites).
+  - Total Ecosistema: **405 pruebas pasando al 100%**.
+- **Valor para la evaluación:** Refleja refinamiento y criterio moderno de diseño UI/UX, erradicando elementos esqueléticos u obsoletos (disquetes) para privilegiar una jerarquía visual limpia, moderna y profesional.

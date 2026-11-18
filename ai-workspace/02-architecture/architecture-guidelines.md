@@ -940,6 +940,7 @@ Para resolver la ausencia de base de datos inicial (debido a que los archivos `*
    - Cero códigos hexadecimales ni fallbacks en SCSS; uso exclusivo de tokens `--roams-*`.
 4. **Ergonomía de Formularios y Accesibilidad del Botón de Envío:**
    - Botón de envío permanentemente visible en el DOM para evitar desorientación del usuario, pero protegido en estado `disabled` (`[disabled]="submitting() || form.invalid || success()"`) con `[attr.aria-disabled]` y tooltip accesible `[attr.title]` con feedback explicativo sobre los requisitos pendientes.
+   - **Tipografía Directa sin Iconografía Redundante:** Supresión deliberada del icono analógico de disquete (`save`), eliminando el ruido visual redundante ya que el texto localizado del botón comunica inequívocamente la acción tanto en alta como en edición y persistencia de simulaciones.
 5. **Dimensionamiento Dinámico y Prevención de Solapamiento Visual:**
    - Atributo `subscriptSizing="dynamic"` en todos los `<mat-form-field>` y alineación `align-items: flex-start` en `.form-row`.
    - El `.mat-mdc-form-field-subscript-wrapper` se redimensiona reactivamente en el flujo del documento (`height: auto !important; position: relative !important; gap: 1.25rem`), garantizando que los mensajes de error multilínea empujen la interfaz hacia abajo con holgura y sin deformar a los campos contiguos.
