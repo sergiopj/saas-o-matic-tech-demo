@@ -263,4 +263,25 @@ describe('EmailComposerDialogComponent', () => {
     component.sendEmail();
     expect(component.errorMessage()).toBe('Could not dispatch email. Please try again.');
   });
+
+  it('should copy rendered plain text template to clipboard and set copied flag', async () => {
+    vi.useFakeTimers();
+    const writeTextMock = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText: writeTextMock },
+      configurable: true,
+    });
+
+    component.subject.set('Test Subject');
+    component.htmlBody.set('<p>Hello <strong>World</strong></p>');
+
+    await component.copyTemplate();
+
+    expect(writeTextMock).toHaveBeenCalledWith('Subject: Test Subject\n\nHello World');
+    expect(component.copied()).toBe(true);
+
+    vi.advanceTimersByTime(2500);
+    expect(component.copied()).toBe(false);
+    vi.useRealTimers();
+  });
 });

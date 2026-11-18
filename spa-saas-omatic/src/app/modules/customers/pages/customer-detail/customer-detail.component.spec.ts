@@ -636,5 +636,48 @@ describe('CustomerDetailComponent', () => {
       req.error(new ProgressEvent('error'));
       expect(component.customerLoading()).toBe(false);
     });
+
+    it('should open edit dialog and update customer signal when dialog returns updated customer', () => {
+      const dialog = TestBed.inject(MatDialog);
+      const dialogSpy = vi.spyOn(dialog, 'open').mockReturnValue({
+        afterClosed: () => of({ ...mockCustomer, companyName: 'Updated Roams' }),
+      } as any);
+
+      component.customer.set(mockCustomer);
+      component.openEditCustomerDialog();
+      expect(dialogSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ data: mockCustomer })
+      );
+      expect(component.customer()?.companyName).toBe('Updated Roams');
+    });
+
+    it('should not open edit dialog if customer is null', () => {
+      const dialog = TestBed.inject(MatDialog);
+      const dialogSpy = vi.spyOn(dialog, 'open');
+      component.customer.set(null);
+      component.openEditCustomerDialog();
+      expect(dialogSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not save simulation if customer is null or already saving', () => {
+      const simSpy = vi.spyOn((component as any).simulationApi, 'create');
+      component.customer.set(null);
+      component.saveSimulation();
+      expect(simSpy).not.toHaveBeenCalled();
+
+      component.customer.set(mockCustomer);
+      component.isSaving.set(true);
+      component.saveSimulation();
+      expect(simSpy).not.toHaveBeenCalled();
+    });
+
+    it('should update storage and apiCalls on change', () => {
+      component.onStorageChange(120);
+      expect(component.storageGb()).toBe(120);
+
+      component.onApiCallsChange(25000);
+      expect(component.apiCalls()).toBe(25000);
+    });
   });
 });

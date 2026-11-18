@@ -55,6 +55,15 @@ describe('PaginatorComponent', () => {
     expect(component.currentPage()).toBe(1);
   });
 
+  it('should ignore invalid or unchanged page sizes in onPageSizeChange', () => {
+    component.pageSize.set(10);
+    component.onPageSizeChange(0);
+    expect(component.pageSize()).toBe(10);
+
+    component.onPageSizeChange(10);
+    expect(component.pageSize()).toBe(10);
+  });
+
   it('should navigate via template buttons (next, prev, first, last, number buttons)', () => {
     fixture.componentRef.setInput('totalItems', 25);
     component.currentPage.set(2);

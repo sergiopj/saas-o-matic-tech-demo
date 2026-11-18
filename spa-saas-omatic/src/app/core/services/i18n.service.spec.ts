@@ -65,4 +65,16 @@ describe('I18nService', () => {
       Object.defineProperty(navigator, 'language', { value: originalLanguage, configurable: true });
     }
   });
+
+  it('should detect browser language when it matches supported catalog', () => {
+    localStorage.removeItem('saas_omatic_lang');
+    const originalLanguage = navigator.language;
+    try {
+      Object.defineProperty(navigator, 'language', { value: 'fr-FR', configurable: true });
+      const detected = (service as any).detectLanguage();
+      expect(detected).toBe('fr');
+    } finally {
+      Object.defineProperty(navigator, 'language', { value: originalLanguage, configurable: true });
+    }
+  });
 });

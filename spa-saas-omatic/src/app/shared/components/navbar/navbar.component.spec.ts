@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router, provideRouter } from '@angular/router';
+import { NavigationEnd, Router, provideRouter } from '@angular/router';
+import { Subject } from 'rxjs';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { NavbarComponent } from './navbar.component';
@@ -15,7 +16,7 @@ describe('NavbarComponent', () => {
     await TestBed.configureTestingModule({
       imports: [NavbarComponent],
       providers: [
-        provideRouter([]),
+        provideRouter([{ path: '**', component: NavbarComponent }]),
         provideHttpClient(),
         provideHttpClientTesting(),
         I18nService,
@@ -118,7 +119,7 @@ describe('NavbarComponent', () => {
     fixture.detectChanges();
     expect(component.isMobileMenuOpen()).toBe(true);
 
-    await router.navigate([]);
+    await router.navigateByUrl('/some-page');
     fixture.detectChanges();
     expect(component.isMobileMenuOpen()).toBe(false);
   });

@@ -74,6 +74,10 @@ describe('CustomerListComponent', () => {
   it('should create the component and populate customers on init', () => {
     expect(component).toBeTruthy();
     expect(component.customers().length).toBe(2);
+    expect(component.totalCount()).toBe(2);
+    expect(component.totalFiltered()).toBe(2);
+    expect(component.filteredCustomers().length).toBe(2);
+    expect(component.paginatedCustomers().length).toBe(2);
 
     const cards = fixture.nativeElement.querySelectorAll('app-customer-card');
     expect(cards.length).toBe(2);
@@ -472,5 +476,14 @@ describe('CustomerListComponent', () => {
         verticalPosition: 'bottom',
       }),
     );
+  });
+
+  it('should handle error gracefully and stop initialLoading when API fails', () => {
+    component.loadCustomers();
+    const req = httpTesting.expectOne(
+      `${environment.apiBaseUrl}/customers?page=1&limit=8&sortBy=createdAt&order=DESC`
+    );
+    req.flush('Error loading customers', { status: 500, statusText: 'Server Error' });
+    expect(component.initialLoading()).toBe(false);
   });
 });

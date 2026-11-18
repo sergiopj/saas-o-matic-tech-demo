@@ -213,6 +213,35 @@ describe('CustomerApiService', () => {
       expect(result).toEqual(updatedMock);
       expect(service.loading()).toBe(false);
     });
+
+    it('should capture backend ProblemDetail error on update failure', () => {
+      const backendError: ProblemDetail = {
+        type: 'https://errors.saas-o-matic.com/404',
+        title: 'Not Found',
+        status: 404,
+        detail: 'Customer not found',
+        instance: '/customers/cust-123',
+        timestamp: '2026-11-13T10:00:00.000Z',
+      };
+
+      let capturedError: ProblemDetail | undefined;
+
+      service.update('cust-123', { companyName: 'New' }).subscribe({
+        next: () => {
+          throw new Error('should have failed with 404');
+        },
+        error: (err: ProblemDetail) => {
+          capturedError = err;
+        },
+      });
+
+      const req = httpTesting.expectOne(`${baseUrl}/cust-123`);
+      req.flush(backendError, { status: 404, statusText: 'Not Found' });
+
+      expect(capturedError).toEqual(backendError);
+      expect(service.error()).toEqual(backendError);
+      expect(service.loading()).toBe(false);
+    });
   });
 
   describe('error handling (RFC 7807 via errorInterceptor)', () => {

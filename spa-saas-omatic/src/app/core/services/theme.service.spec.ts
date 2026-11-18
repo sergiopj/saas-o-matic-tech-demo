@@ -77,4 +77,63 @@ describe('ThemeService', () => {
     expect(newService.currentTheme()).toBe('dark');
     expect(newService.isDark()).toBe(true);
   });
+
+  it('should react to system color scheme changes when no theme is persisted', () => {
+    let changeHandler: ((e: MediaQueryListEvent) => void) | undefined;
+    const matchMediaMock = vi.fn().mockReturnValue({
+      matches: true,
+      addEventListener: vi.fn((event: string, handler: (e: MediaQueryListEvent) => void) => {
+        if (event === 'change') {
+          changeHandler = handler;
+        }
+      }),
+      removeEventListener: vi.fn(),
+    });
+    vi.stubGlobal('matchMedia', matchMediaMock);
+
+    localStorage.removeItem(THEME_STORAGE_KEY);
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [ThemeService],
+    });
+    const localService = TestBed.inject(ThemeService);
+
+    expect(changeHandler).toBeDefined();
+    // Trigger system dark mode change
+    changeHandler?.({ matches: true } as MediaQueryListEvent);
+    expect(localService.currentTheme()).toBe('dark');
+
+    // Trigger system light mode change
+    changeHandler?.({ matches: false } as MediaQueryListEvent);
+    expect(localService.currentTheme()).toBe('light');
+
+    vi.unstubAllGlobals();
+  });
+
+  it('should ignore system color scheme changes when a theme is already stored', () => {
+    let changeHandler: ((e: MediaQueryListEvent) => void) | undefined;
+    const matchMediaMock = vi.fn().mockReturnValue({
+      matches: true,
+      addEventListener: vi.fn((event: string, handler: (e: MediaQueryListEvent) => void) => {
+        if (event === 'change') {
+          changeHandler = handler;
+        }
+      }),
+      removeEventListener: vi.fn(),
+    });
+    vi.stubGlobal('matchMedia', matchMediaMock);
+
+    localStorage.setItem(THEME_STORAGE_KEY, 'light');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [ThemeService],
+    });
+    const localService = TestBed.inject(ThemeService);
+
+    expect(changeHandler).toBeDefined();
+    changeHandler?.({ matches: true } as MediaQueryListEvent);
+    expect(localService.currentTheme()).toBe('light');
+
+    vi.unstubAllGlobals();
+  });
 });

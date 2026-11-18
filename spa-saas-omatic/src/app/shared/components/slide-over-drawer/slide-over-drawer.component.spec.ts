@@ -103,4 +103,30 @@ describe('SlideOverDrawerComponent', () => {
     fixture.detectChanges();
     expect(closeBtn.getAttribute('aria-label')).toBe('Custom close label');
   });
+
+  it('should close when close button in template is clicked', () => {
+    component.open();
+    fixture.detectChanges();
+    expect(component.isOpen()).toBe(true);
+
+    const closeBtn: HTMLButtonElement | null = fixture.nativeElement.querySelector('.close-btn');
+    expect(closeBtn).toBeTruthy();
+    closeBtn?.click();
+    fixture.detectChanges();
+
+    expect(component.isOpen()).toBe(false);
+  });
+
+  it('should close when backdrop element in template is clicked', () => {
+    component.open();
+    fixture.detectChanges();
+    expect(component.isOpen()).toBe(true);
+
+    const backdrop: HTMLElement | null = fixture.nativeElement.querySelector('.drawer-backdrop');
+    expect(backdrop).toBeTruthy();
+    backdrop?.click();
+    fixture.detectChanges();
+
+    expect(component.isOpen()).toBe(false);
+  });
 });

@@ -76,6 +76,13 @@ describe('SimulationHubComponent', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/customers', 'cust-1']);
   });
 
+  it('should not navigate when goToSimulation is called without selected customer', () => {
+    const navigateSpy = vi.spyOn(router, 'navigate');
+    component.selectedCustomerId.set('');
+    component.goToSimulation();
+    expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
   it('should render 3D badge image in header and no calculator icon circle', () => {
     const badgeImg: HTMLImageElement | null = fixture.nativeElement.querySelector('.simulations-badge-img');
     const iconCircle = fixture.nativeElement.querySelector('.header-icon-circle');

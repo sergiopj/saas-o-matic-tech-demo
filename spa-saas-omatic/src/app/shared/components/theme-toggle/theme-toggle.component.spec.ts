@@ -70,9 +70,11 @@ describe('ThemeToggleComponent', () => {
     const i18n = TestBed.inject(I18nService);
     i18n.setLanguage('es');
     expect(component.tooltipText()).toBe('Cambiar a modo oscuro');
+    expect(component.ariaLabel()).toBe('Alternar modo oscuro o claro');
     themeService.setTheme('dark');
     fixture.detectChanges();
     expect(component.tooltipText()).toBe('Cambiar a modo claro');
+    expect(component.ariaLabel()).toBe('Alternar modo oscuro o claro');
   });
 
   it('should render comic speech bubble on init and auto-dismiss after 5 seconds', () => {

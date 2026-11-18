@@ -142,4 +142,25 @@ describe('HomeComponent', () => {
     const cards = fixture.nativeElement.querySelectorAll('.customer-lite-card');
     expect(cards.length).toBe(2);
   });
+
+  it('should immediately set target value and 360deg when durationMs <= 0', () => {
+    let capturedVal = 0;
+    let capturedAngle = 0;
+    component.animateKpi(50, (val) => { capturedVal = val; }, (deg) => { capturedAngle = deg; }, 0);
+    expect(capturedVal).toBe(50);
+    expect(capturedAngle).toBe(360);
+  });
+
+  it('should immediately set target value and 360deg when prefers-reduced-motion matches', () => {
+    const originalMatchMedia = window.matchMedia;
+    window.matchMedia = vi.fn().mockReturnValue({
+      matches: true,
+    } as any);
+    let capturedVal = 0;
+    let capturedAngle = 0;
+    component.animateKpi(80, (val) => { capturedVal = val; }, (deg) => { capturedAngle = deg; }, 1000);
+    expect(capturedVal).toBe(80);
+    expect(capturedAngle).toBe(360);
+    window.matchMedia = originalMatchMedia;
+  });
 });

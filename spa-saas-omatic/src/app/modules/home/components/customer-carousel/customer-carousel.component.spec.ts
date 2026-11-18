@@ -122,4 +122,28 @@ describe('CustomerCarouselComponent', () => {
     expect(prevBtn).toBeTruthy();
     expect(nextBtn).toBeTruthy();
   });
+
+  it('should adjust visibleCardsCount based on window resize breakpoints', () => {
+    // Breakpoint < 640
+    Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 500 });
+    window.dispatchEvent(new Event('resize'));
+    expect(component.visibleCardsCount()).toBe(1);
+
+    // Breakpoint < 1024
+    Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 800 });
+    window.dispatchEvent(new Event('resize'));
+    expect(component.visibleCardsCount()).toBe(2);
+
+    // Breakpoint >= 1024
+    Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 1200 });
+    window.dispatchEvent(new Event('resize'));
+    expect(component.visibleCardsCount()).toBe(3);
+  });
+
+  it('should clamp currentSlideIndex when it exceeds maxSlideIndex on resize', () => {
+    component.currentSlideIndex.set(5);
+    Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 1200 });
+    window.dispatchEvent(new Event('resize'));
+    expect(component.currentSlideIndex()).toBe(component.maxSlideIndex());
+  });
 });
