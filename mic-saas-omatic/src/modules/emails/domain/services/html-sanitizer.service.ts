@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-/**
- * Domain service protecting outbound transactional email streams against
- * Cross-Site Scripting (XSS) and malicious payload injection in rich HTML bodies.
- */
 @Injectable()
 export class HtmlSanitizerService {
   /**
@@ -19,7 +15,7 @@ export class HtmlSanitizerService {
       .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
       .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
       .replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '')
-      .replace(/\s*on\w+\s*=\s*(?:'[^']*'|"[^"]*"|[^\s>]+)/gi, '')
+      .replace(/\bon[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
       .replace(/javascript:[^"']*/gi, '');
   }
 }

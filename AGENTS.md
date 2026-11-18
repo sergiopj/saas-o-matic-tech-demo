@@ -55,7 +55,7 @@ Whenever you operate in this repository, you MUST strictly adhere to the followi
   - `infrastructure/adapters/out/persistence/`: TypeORM entities, repositories, and persistence mappers.
 
 ### B. Security & Safe Dispatching
-- **Anti-XSS Sanitization**: Sanitize all incoming rich HTML payloads using an OWASP-compliant sanitizer (`HtmlSanitizerService`) before processing or persistence.
+- **Anti-XSS & ReDoS Prevention**: Sanitize all incoming rich HTML payloads using an OWASP-compliant sanitizer (`HtmlSanitizerService`) before processing or persistence. Regular expressions used in sanitizers MUST be strictly linear ($\mathcal{O}(N)$) and free from super-linear backtracking (SonarQube `typescript:S8786`). Never start unanchored attribute-stripping patterns with greedy quantifiers like `\s*` or `.*`; use zero-width word boundaries (`\bon[a-z]+`) to prevent Regular Expression Denial of Service.
 - **Safe Transactional Mocking**: For external service dispatching (e.g., email sending, payment gateways), use decoupled transactional domain stubs with structured logging. Never hardcode live third-party credentials or API keys into git repositories.
 
 ### C. Database & Fiscal Precision

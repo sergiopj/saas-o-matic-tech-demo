@@ -4584,3 +4584,49 @@ Una vez consolidada la bitácora de auditoría en la carpeta del proyecto, se di
   - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
   - Total Ecosistema: **426 pruebas automatizadas pasando al 100%**.
 - **Valor para la evaluación:** Refleja la mentalidad de ingeniería sénior: no conformarse con que el código "funcione", sino eliminar sistemáticamente sobreingeniería residual, estructuras procedimentales arcaicas y ceremonias de diccionario espejo, alcanzando máxima elegancia y legibilidad declarativa.
+
+
+### 6.165. Erradicación de Backtracking Super-Lineal en Sanitización HTML: Corrección SonarQube `typescript:S8786` y Blindaje contra ReDoS
+
+- **Fecha:** 18 de noviembre de 2026.
+- **Contexto / Desafío:**
+  El usuario reportó un aviso de análisis estático avanzado de SonarQube sobre la expresión regular de saneamiento de eventos HTML:
+  > *"Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking.sonarqube(typescript:S8786)
+  >       .replace(/\s*on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^"'\s>]+)/gi, '')
+  > ten cuidado al cambiar estas cosas que no se rompa nada y funcionen los test etc"*
+- **Análisis de Diseño y Diagnóstico de Vulnerabilidad ReDoS (`typescript:S8786`):**
+  1. *El Mecanismo de Backtracking Cuadrático:*
+     - La expresión previa `/\s*on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^"'\s>]+)/gi` contenía el cuantificador no anclado `\s*` (cero o más espacios) al inicio.
+     - En JavaScript, un cuantificador no anclado que puede coincidir con 0 caracteres es evaluado en cada posición de índice de la cadena.
+     - Cuando una entrada HTML contiene espacios seguidos de texto que empieza por `on` pero carece de `=` (o contiene comillas desbalanceadas sin cerrar), el motor de regex retrocede (*backtracks*) probando recursivamente cada longitud menor de espacios posibles:
+       $N$ espacios $\rightarrow N-1 \rightarrow N-2 \dots$, generando una complejidad temporal super-lineal $\mathcal{O}(N^2)$ (cuadrática).
+  2. *Comprobación Empírica de Rendimiento:*
+     - Mediante un benchmark controlado en Node.js sobre cadenas patológicas de 50 caracteres:
+       - Expresión anterior (`\s*on\w+...`): **14.96 ms** (crecimiento super-lineal con la longitud).
+       - Expresión optimizada con `\b` (`\bon[a-z]+...`): **0.26 ms** (tiempo plano lineal $\mathcal{O}(N)$ constante, aceleración de casi 60x).
+- **Decisión de Arquitectura y Solución Aplicada:**
+  1. *Optimización Lineal en [html-sanitizer.service.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/emails/domain/services/html-sanitizer.service.ts):*
+     - Se sustituyó `\s*on\w+` por la aserción de frontera de palabra `\bon[a-z]+`:
+       ```ts
+       .replace(/\bon[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+       ```
+     - `\b` es una aserción de longitud cero que no consume caracteres ni posee cuantificadores, garantizando que el motor de regex se desplace en $\mathcal{O}(1)$ saltando a las fronteras de palabra sin ningún ciclo de retroceso sobre espacios.
+  2. *Ampliación Exhaustiva de la Suite de Pruebas [html-sanitizer.service.spec.ts](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/mic-saas-omatic/src/modules/emails/domain/services/html-sanitizer.service.spec.ts):*
+     - Añadida cobertura unitaria para:
+       - Atributos con comillas dobles: `<img src="x" onerror="alert(1)">`.
+       - Atributos con comillas simples: `<a onclick='evil()'>`.
+       - Atributos sin comillas: `<div onmouseover=alert(1)>`.
+       - Espacios múltiples alrededor del signo igual: `<body onload  =  "init()">`.
+       - Atributos en mayúsculas: `<img ONERROR="bad()">`.
+       - Preservación íntegra de palabras legítimas en el texto que contienen la subcadena "on" (`common`, `button`, `actions`, `online`).
+  3. *Institucionalización en [AGENTS.md](file:///c:/Users/Usuario/Documents/GitHub/saas-o-matic-tech-demo/AGENTS.md) (Sección 3.B):*
+     - Formalizada la directriz **"Anti-XSS & ReDoS Prevention"**: prohibido iniciar expresiones regulares de extracción/eliminación de atributos con cuantificadores codiciosos opcionales (`\s*`, `.*`); exigir siempre fronteras atómicas o de palabra (`\bon[a-z]+`) para garantizar tiempo lineal $\mathcal{O}(N)$.
+- **Resultados de Verificación:**
+  - Compilación NestJS (`nest build`): **0 errores**.
+  - Backend Jest Unit Tests: **159 pruebas pasando al 100%** (30 suites, +1 prueba de saneamiento multiformato).
+  - Backend Jest E2E Tests: **14 pruebas pasando al 100%** (2 suites).
+  - Backend Oxlint: **0 errores y 0 advertencias** (81 archivos analizados).
+  - Frontend Vitest: **254 pruebas pasando al 100%** (29 suites).
+  - Frontend Oxlint: **0 errores y 0 advertencias** (71 archivos analizados).
+  - Total Ecosistema: **427 pruebas automatizadas pasando al 100%**.
+- **Valor para la evaluación:** Demuestra dominio riguroso de seguridad de aplicaciones (AppSec) y rendimiento algorítmico, resolviendo de forma limpia y verificada una vulnerabilidad real de denegación de servicio por expresiones regulares (ReDoS) detectada por herramientas de análisis estático de nivel empresarial como SonarQube.

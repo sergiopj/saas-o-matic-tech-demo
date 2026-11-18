@@ -138,7 +138,7 @@ describe('CustomerController (Primary Adapter)', () => {
       selectedPlan: 'Enterprise Unlimited',
       createdAt: new Date('2026-05-10T10:00:00.000Z'),
     });
-    mockUpdateCustomerUseCase.execute?.mockResolvedValue(updatedCustomer);
+    mockUpdateCustomerUseCase.execute = jest.fn().mockResolvedValue(updatedCustomer);
 
     const result = await controller.update('uuid-100', {
       companyName: 'Roams Updated Corp',
